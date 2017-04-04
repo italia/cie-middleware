@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4ED5BF6B-CF39-4390-A6E4-0647D4C5B584}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>CSP</RootNamespace>
+    <ProjectName>CIEPKI</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>c:\OpenSSL1.0.0\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Comctl32.lib;Crypt32.lib;shlwapi.lib;libeay32MTd.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>c:\OpenSSL1.0.0\lib\VC\static</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>c:\OpenSSL64\include</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Comctl32.lib;Crypt32.lib;shlwapi.lib;libeay32MTd.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>c:\OpenSSL64\lib\VC\static</AdditionalLibraryDirectories>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>c:\OpenSSL1.0.0\include</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>Crypt32.lib;shlwapi.lib;libeay32MT.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>c:\OpenSSL1.0.0\lib\VC\static</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>c:\OpenSSL64\include</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>Crypt32.lib;shlwapi.lib;libeay32MT.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>c:\OpenSSL64\lib\VC\static</AdditionalLibraryDirectories>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="abilitaCIE.cpp" />
+    <ClCompile Include="AES.cpp" />
+    <ClCompile Include="APDU.cpp" />
+    <ClCompile Include="Message.cpp" />
+    <ClCompile Include="ASNParser.cpp" />
+    <ClCompile Include="Base64.cpp" />
+    <ClCompile Include="Bitmap.cpp" />
+    <ClCompile Include="CardLocker.cpp" />
+    <ClCompile Include="CBase64.cpp" />
+    <ClCompile Include="CSP.cpp" />
+    <ClCompile Include="DES3.cpp" />
+    <ClCompile Include="funccallinfo.cpp" />
+    <ClCompile Include="IAS.cpp" />
+    <ClCompile Include="IniSettings.cpp" />
+    <ClCompile Include="log.cpp" />
+    <ClCompile Include="MAC.cpp" />
+    <ClCompile Include="ModuleInfo.cpp" />
+    <ClCompile Include="NotImpl.cpp" />
+    <ClCompile Include="PIN.cpp" />
+    <ClCompile Include="PKCS11\CardContext.cpp" />
+    <ClCompile Include="PKCS11\CardTemplate.cpp" />
+    <ClCompile Include="PKCS11\CIEP11Template.cpp" />
+    <ClCompile Include="PKCS11\initP11.cpp" />
+    <ClCompile Include="PKCS11\Mechanism.cpp" />
+    <ClCompile Include="PKCS11\P11Object.cpp" />
+    <ClCompile Include="PKCS11\PKCS11Functions.cpp" />
+    <ClCompile Include="PKCS11\session.cpp" />
+    <ClCompile Include="PKCS11\Slot.cpp" />
+    <ClCompile Include="RSA.cpp" />
+    <ClCompile Include="safeDesktop.cpp" />
+    <ClCompile Include="sbloccoPIN.cpp" />
+    <ClCompile Include="SHA1.cpp" />
+    <ClCompile Include="SHA256.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="StoreProvider.cpp" />
+    <ClCompile Include="SyncroEvent.cpp" />
+    <ClCompile Include="SyncroMutex.cpp" />
+    <ClCompile Include="SystemTraySDK.cpp" />
+    <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="TLV.cpp" />
+    <ClCompile Include="Token.cpp" />
+    <ClCompile Include="util.cpp" />
+    <ClCompile Include="UtilException.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AES.h" />
+    <ClInclude Include="APDU.h" />
+    <ClInclude Include="Array.h" />
+    <ClInclude Include="ASNParser.h" />
+    <ClInclude Include="Base64.h" />
+    <ClInclude Include="CardLocker.h" />
+    <ClInclude Include="CBase64.h" />
+    <ClInclude Include="defines.h" />
+    <ClInclude Include="defines_err.h" />
+    <ClInclude Include="DES3.h" />
+    <ClInclude Include="funccallinfo.h" />
+    <ClInclude Include="IniSettings.h" />
+    <ClInclude Include="log.h" />
+    <ClInclude Include="MAC.h" />
+    <ClInclude Include="Message.h" />
+    <ClInclude Include="AtlBitmapSkinButton.h" />
+    <ClInclude Include="atlcontrols.h" />
+    <ClInclude Include="Bitmap.h" />
+    <ClInclude Include="CardMod.h" />
+    <ClInclude Include="IAS.h" />
+    <ClInclude Include="ModuleInfo.h" />
+    <ClInclude Include="PIN.h" />
+    <ClInclude Include="PKCS11\CardContext.h" />
+    <ClInclude Include="PKCS11\CardTemplate.h" />
+    <ClInclude Include="PKCS11\CIEP11Template.h" />
+    <ClInclude Include="PKCS11\InitP11.h" />
+    <ClInclude Include="PKCS11\Mechanism.h" />
+    <ClInclude Include="PKCS11\P11Object.h" />
+    <ClInclude Include="PKCS11\PKCS11Functions.h" />
+    <ClInclude Include="PKCS11\session.h" />
+    <ClInclude Include="PKCS11\Slot.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="RSA.h" />
+    <ClInclude Include="safeDesktop.h" />
+    <ClInclude Include="SHA1.h" />
+    <ClInclude Include="sha256.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="SyncroEvent.h" />
+    <ClInclude Include="SyncroMutex.h" />
+    <ClInclude Include="SystemTraySDK.h" />
+    <ClInclude Include="Thread.h" />
+    <ClInclude Include="TLV.h" />
+    <ClInclude Include="Token.h" />
+    <ClInclude Include="util.h" />
+    <ClInclude Include="UtilException.h" />
+    <ClInclude Include="VCEdit.h" />
+    <ClInclude Include="Verifica.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CIEPKI.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="custom.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\Cancel.bmp" />
+    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\Cancel2.bmp" />
+    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\OK.bmp" />
+    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\OK2.bmp" />
+    <Image Include="..\CIE.ico" />
+    <Image Include="res\Background.bmp" />
+    <Image Include="res\bitmap1.bmp" />
+    <Image Include="res\Cancel.bmp" />
+    <Image Include="res\Cancel2.bmp" />
+    <Image Include="res\OK.bmp" />
+    <Image Include="res\OK2.bmp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
