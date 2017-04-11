@@ -2252,6 +2252,14 @@ public:
     return (BOOL)::SendMessage(m_hWnd, TVM_GETITEMRECT, (WPARAM)bTextOnly, (LPARAM)lpRect);
   }
 
+#define myT2OLE(lpa,maxSize) myA2W(lpa,maxSize)
+
+#define myA2W(lpa,maxSize) (\
+	((_lpa = lpa) == NULL) ? NULL : (\
+		_convert = (static_cast<int>(strnlen(_lpa,maxSize))+1),\
+		(INT_MAX/2<_convert)? NULL :  \
+		ATLA2WHELPER((LPWSTR) _malloca(_convert*sizeof(WCHAR)), _lpa, _convert, _acp)))
+
 #ifndef _ATL_NO_COM
   BOOL GetItemText(HTREEITEM hItem, BSTR& bstrText) const
   {
@@ -2280,7 +2288,7 @@ public:
     }
     while (lstrlen(item.pszText) == (nLen-1));
 
-    bstrText = ::SysAllocString(T2OLE(lpstrText));
+	bstrText = ::SysAllocString(myT2OLE(lpstrText,128));
     free(lpstrText);
 
     return (bstrText != NULL) ? TRUE : FALSE;
@@ -3735,7 +3743,7 @@ public:
     if(bRet)
     {
       *puFlags = ti.uFlags;
-      memcpy(lpRect, &(ti.rect), sizeof(RECT));
+      memcpy_s(lpRect,sizeof(RECT), &(ti.rect), sizeof(RECT));
     }
     return bRet;
   }
@@ -3757,7 +3765,7 @@ public:
 
     TOOLINFO ti;
     FillInToolInfo(ti, hWnd, nIDTool);
-    memcpy(&ti.rect, lpRect, sizeof(RECT));
+	memcpy_s(&ti.rect, sizeof(RECT), lpRect, sizeof(RECT));
     ::SendMessage(m_hWnd, TTM_NEWTOOLRECT, 0, (LPARAM)&ti);
   }
   int GetToolCount() const
@@ -3788,7 +3796,7 @@ public:
     TOOLINFO ti;
     FillInToolInfo(ti, hWnd, nIDTool);
     if(lpRectTool != NULL)
-      memcpy(&ti.rect, lpRectTool, sizeof(RECT));
+		memcpy_s(&ti.rect, sizeof(RECT), lpRectTool, sizeof(RECT));
     ti.hinst = _AtlModule.GetResourceInstance();   // needed only if lpszText is from MAKEINTRESOURCE
     ti.lpszText = (LPTSTR)lpszText;
     return (BOOL)::SendMessage(m_hWnd, TTM_ADDTOOL, 0, (LPARAM)&ti);
@@ -3831,7 +3839,7 @@ public:
     hti.pt.y = pt.y;
     if((BOOL)::SendMessage(m_hWnd, TTM_HITTEST, 0, (LPARAM)&hti))
     {
-      memcpy(lpToolInfo, &hti.ti, sizeof(TOOLINFO));
+		memcpy_s(lpToolInfo, sizeof(TOOLINFO), &hti.ti, sizeof(TOOLINFO));
       return TRUE;
     }
     return FALSE;
@@ -4930,22 +4938,22 @@ public:
   }
 
 // Operations
-  BOOL MakeDragList()
-  {
-    ATLASSERT(::IsWindow(m_hWnd));
-    ATLASSERT(!(GetStyle() & LBS_MULTIPLESEL));
-    BOOL bRet = ::MakeDragList(m_hWnd);
-    UINT& uMsg = GetDragListMessage();
-    if(uMsg == 0)
-    {
-/*?*/           ::EnterCriticalSection(&_AtlModule.m_csWindowCreate);
-      if(uMsg == 0)
-        uMsg = ::RegisterWindowMessage(DRAGLISTMSGSTRING);
-/*?*/           ::LeaveCriticalSection(&_AtlModule.m_csWindowCreate);
-    }
-    ATLASSERT(uMsg != 0);
-    return bRet;
-  }
+//  BOOL MakeDragList()
+//  {
+//    ATLASSERT(::IsWindow(m_hWnd));
+//    ATLASSERT(!(GetStyle() & LBS_MULTIPLESEL));
+//    BOOL bRet = ::MakeDragList(m_hWnd);
+//    UINT& uMsg = GetDragListMessage();
+//    if(uMsg == 0)
+//    {
+///*?*/           ::EnterCriticalSection(&_AtlModule.m_csWindowCreate);
+//      if(uMsg == 0)
+//        uMsg = ::RegisterWindowMessage(DRAGLISTMSGSTRING);
+///*?*/           ::LeaveCriticalSection(&_AtlModule.m_csWindowCreate);
+//    }
+//    ATLASSERT(uMsg != 0);
+//    return bRet;
+//  }
 
   int LBItemFromPt(POINT pt, BOOL bAutoScroll = TRUE)
   {

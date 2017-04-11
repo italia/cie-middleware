@@ -200,6 +200,9 @@ extern DWORD ERR_OBJECT_HASNT_ATTRIBUTE;
 #define ERR_GET_CHALLENGE "Errore in GetChallenge"
 #define ERR_CANT_FIND_EF_SIZE "Impossibile trovare la dimensione di un EF"
 
+#define ZeroMem(var) memset(&var,0,sizeof(var))
+
+
 #define checkOutPtr(ptr) \
 	if (IsBadWritePtr((ptr),sizeof(*(ptr)))) { \
 		_return(CKR_ARGUMENTS_BAD) \

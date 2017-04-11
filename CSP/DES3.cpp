@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include ".\des3.h"
+#include <openssl/rand.h>
 
 static char *szCompiledFile=__FILE__;
 
@@ -36,7 +37,7 @@ void CDES3::Init(const ByteArray &key)
 			keyVal3=(des_cblock *)key.lock(8,16);
 			break;
 		case 32:
-			memcpy(initVec,key.lock(8,24),8);
+			memcpy_s(initVec, sizeof(des_cblock), key.lock(8, 24), 8);
 			keyVal1=(des_cblock *)key.lock(8);
 			keyVal2=(des_cblock *)key.lock(8,8);
 			keyVal3=(des_cblock *)key.lock(8,16);
@@ -94,7 +95,7 @@ DWORD CDES3::Des3(const ByteArray &data,ByteDynArray &resp,int encOp)
 	init_func
 
 	des_cblock iv;
-	memcpy(iv,initVec,sizeof(initVec));
+	memcpy_s(iv, sizeof(des_cblock), initVec, sizeof(initVec));
 	DWORD dwAppSize=data.size()-1;
 	resp.resize(dwAppSize-(dwAppSize % 8)+8);
 	des_ede3_cbc_encrypt(data.lock(),resp.lock(),data.size(),k1,k2,k3,&iv,encOp);

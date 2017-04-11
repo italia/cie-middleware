@@ -119,6 +119,7 @@ END_MSG_MAP()
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 	{
 		RECT rect;
+		ZeroMem(rect);
 		GetUpdateRect(&rect);
 		PAINTSTRUCT ps;
 		BeginPaint(&ps);

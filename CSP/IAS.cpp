@@ -227,7 +227,7 @@ void IAS::readfile(WORD id, ByteDynArray &content){
 			if (sw == 0x6282)
 				content.append(chn);
 			else if (sw != 0x6b00)
-				throw CSCardException(sw);
+				throw CSCardException((WORD)sw);
 			break;
 		}
 	}
@@ -263,7 +263,7 @@ void IAS::readfile_SM(WORD id, ByteDynArray &content) {
 			if (sw == 0x6282) 
 				content.append(chn);
 			else if (sw != 0x6b00)
-				throw CSCardException(sw);
+				throw CSCardException((WORD)sw);
 			break;
 		}
 	}
@@ -478,7 +478,7 @@ void IAS::DHKeyExchange() {
 }
 
 void IAS::increment(ByteArray &seq) {
-	for (DWORD i = seq.size() - 1; i >= 0; i--) {
+	for (int i = seq.size() - 1; i >= 0; i--) {
 		if (seq[i] < 255) {
 			seq[i]++;
 			for (DWORD j = i + 1; j < seq.size(); j++)
@@ -559,7 +559,9 @@ DWORD IAS::respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &resp, ByteArr
 			if (resp[index + 1] > 0x80) {
 				llen = resp[index + 1] - 0x80;
 				if (llen == 1) lgn = resp[index + 2];
-				if (llen == 2) lgn = (resp[index + 2] << 8) | resp[index + 3];
+				else if (llen == 2) lgn = (resp[index + 2] << 8) | resp[index + 3];
+				else 
+					throw CStringException("Lumeghezza ASN1 non valida: %i", llen);
 				encData = resp.mid(index + llen + 2, lgn);
 				calcMac.append(resp.mid(index, lgn + llen + 2));
 				index += llen + lgn + 2;
@@ -573,8 +575,10 @@ DWORD IAS::respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &resp, ByteArr
 		else if (resp[index] == 0x87) {
 			if (resp[index + 1] > 0x80) {
 				llen = resp[index + 1] - 0x80;
-				if (llen == 1)lgn = resp[index + 2];
+				if (llen == 1) lgn = resp[index + 2];
 				if (llen == 2) lgn = (resp[index + 2] << 8) | resp[index + 3];
+				else
+					throw CStringException("Lumeghezza ASN1 non valida: %i", llen);
 				encData = resp.mid(index + llen + 3, lgn - 1);
 				calcMac.append(resp.mid(index, lgn + llen + 2));
 				index += llen + lgn + 2;
@@ -816,13 +820,16 @@ BYTE encPub[] = { 0x01, 0x00, 0x01 };
 
 void IAS::SetCertificate(char *PAN,ByteArray &certificate) {
 	char szPath[MAX_PATH];
-	SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath);
+	if (SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath) != S_OK)
+		throw CStringException("Errore in GetFolderPath per COMMONDATA");
 	PathAppend(szPath, "\\CIEPKI");
 	if (!PathFileExists(szPath))
 		CreateDirectory(szPath, nullptr);
 	PathAppend(szPath, String().printf("\\%s.cer", PAN).lock());
 	FILE *f = nullptr;
 	fopen_s(&f, szPath, "wb");
+	if (f==nullptr)
+		throw CStringException("Errore in scrittura file cache del certificato");
 
 	ByteArray baEncMod = VarToByteArray(encMod);
 	ByteArray baEncPub = VarToByteArray(encPub);
@@ -862,26 +869,33 @@ void IAS::IconaSbloccoPIN() {
 	if (IsUserInteractive()) {
 		PROCESS_INFORMATION pi;
 		STARTUPINFO si;
-		ZeroMemory(&si, sizeof(STARTUPINFO));
+		ZeroMem(si);
 		si.cb = sizeof(STARTUPINFO);
 
 		WORD getHandle = 0xfffd;
 		ByteDynArray resp;
 		token.Transmit(VarToByteArray(getHandle), &resp);
 		SCARDHANDLE hCard = *(SCARDHANDLE*)resp.lock();
-		CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",SbloccoPIN ICON", moduleInfo.szModuleFullPath.lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);
+		if (!CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",SbloccoPIN ICON", moduleInfo.szModuleFullPath.lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) 
+			throw new CStringException("Errore in creazione processo SbloccoPIN");
+		else {
+			CloseHandle(pi.hThread);
+			CloseHandle(pi.hProcess);
+		}
+		
 	}
 }
 
 void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 	char szPath[MAX_PATH];
-	SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath);
+	if (SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath)!=S_OK)
+		throw CStringException("Errore in GetFolderPath per COMMONDATA");
 	PathAppend(szPath, String().printf("\\CIEPKI\\%s.cer", dumpHexData(PAN.mid(5, 6), String(), false).lock()).lock());
 	if (!PathFileExists(szPath)) {
 		if (askEnable && IsUserInteractive()) {
 			PROCESS_INFORMATION pi;
 			STARTUPINFO si;
-			ZeroMemory(&si, sizeof(STARTUPINFO));
+			ZeroMem(si);
 			si.cb = sizeof(STARTUPINFO);
 
 			WORD getHandle = 0xfffd;
@@ -890,8 +904,12 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			SCARDHANDLE hCard = *(SCARDHANDLE*)resp.lock();
 
 			SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
-			CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",AbilitaCIE %s", moduleInfo.szModuleFullPath.lock(), dumpHexData(PAN.mid(5, 6), String(), false).lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);
+			if (!CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",AbilitaCIE %s", moduleInfo.szModuleFullPath.lock(), dumpHexData(PAN.mid(5, 6), String(), false).lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
+				throw new CStringException("Errore in creazione processo SbloccoPIN");
+			else
+				CloseHandle(pi.hThread);
 			WaitForSingleObject(pi.hProcess, INFINITE);
+			CloseHandle(pi.hProcess);
 			SCardBeginTransaction(hCard);
 		}
 		else {
@@ -1067,9 +1085,9 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 BOOL CheckOneInstance(char *nome)
 {
 	auto m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, nome);
-	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+	if (GetLastError() == ERROR_ALREADY_EXISTS && m_hStartEvent != nullptr) {
 		CloseHandle(m_hStartEvent);
-		m_hStartEvent = NULL;
+		m_hStartEvent = nullptr;
 		return FALSE;
 	}
 	return TRUE;

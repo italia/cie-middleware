@@ -38,7 +38,7 @@ void CMAC::Init(ByteArray &key)
 			keyVal3=(des_cblock *)key.lock(8,16);
 			break;
 		case 32:
-			memcpy(initVec,key.lock(8,24),8);
+			memcpy_s(initVec, sizeof(des_cblock), key.lock(8, 24), 8);
 			keyVal1=(des_cblock *)key.lock(8);
 			keyVal2=(des_cblock *)key.lock(8,8);
 			keyVal3=(des_cblock *)key.lock(8,16);
@@ -67,7 +67,7 @@ DWORD CMAC::_Mac(const ByteArray &data,ByteDynArray &resp)
 	init_func
 
 	des_cblock iv;
-	memcpy(iv,initVec,sizeof(initVec));
+	memcpy_s(iv, sizeof(des_cblock), initVec, sizeof(initVec));
 
 	DWORD dwANSILen=ANSIPadLen(data.size());
 	if (data.size()>8) {

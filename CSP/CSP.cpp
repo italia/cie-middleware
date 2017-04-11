@@ -27,32 +27,6 @@ typedef struct {
 } PUBKEYSTRUCT_BASE;
 
 int TokenTransmitCallback(PCARD_DATA data, BYTE *apdu, DWORD apduSize, BYTE *resp, DWORD *respSize) {
-	if (apduSize == 2) {
-		WORD code = *(WORD*)apdu;
-		if (code == 0xfffd) {
-			*respSize = sizeof(data->hScard)+2;
-			memcpy(resp, &data->hScard, sizeof(data->hScard));
-			resp[sizeof(data->hScard)] = 0;
-			resp[sizeof(data->hScard)+1] = 0;
-			return SCARD_S_SUCCESS;
-		}
-		if (code == 0xfffe) {
-			DWORD protocol=0;
-			ODS(String().printf("UNPOWER CARD").lock());
-			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
-			if (sw == SCARD_S_SUCCESS)
-				SCardBeginTransaction(data->hScard);
-			return sw;
-		}
-		else if (code == 0xffff) {
-			DWORD protocol = 0;
-			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
-			if (sw == SCARD_S_SUCCESS)
-				SCardBeginTransaction(data->hScard);
-			ODS(String().printf("RESET CARD").lock());
-			return sw;
-		}
-	}
 	ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
 	auto sw=SCardTransmit(data->hScard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
 	ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
@@ -74,6 +48,8 @@ DWORD WINAPI CardAuthenticatePin(
 	__in_bcount(cbPin)     PBYTE        pbPin,
 	__in                   DWORD        cbPin,
 	__out_opt              PDWORD       pcAttemptsRemaining) {
+	if (pcAttemptsRemaining!=nullptr)
+		*pcAttemptsRemaining = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
@@ -85,6 +61,8 @@ DWORD WINAPI CardReadFile(
 	__deref_out_bcount_opt(*pcbData)    PBYTE       *ppbData,
 	__out                           PDWORD      pcbData) {
 	init_main_func
+	*pcbData = 0;
+	*ppbData = nullptr;
 	if (dwFlags != 0)
 		return SCARD_E_INVALID_PARAMETER;
 	ByteDynArray response;
@@ -141,7 +119,7 @@ DWORD WINAPI CardReadFile(
 			CONTAINER_MAP_RECORD value;
 			
 			swprintf_s(value.wszGuid, L"%s-%S", CIE_CONTAINER_NAME, dumpHexData(ias->PAN.mid(5, 6), String(), false).lock());
-			value.wSigKeySizeBits = keylen;
+			value.wSigKeySizeBits = (WORD)keylen;
 			value.wKeyExchangeKeySizeBits = 0;
 			value.bReserved = 0;
 			value.bFlags = CONTAINER_MAP_VALID_CONTAINER | CONTAINER_MAP_DEFAULT_CONTAINER;
@@ -235,6 +213,8 @@ DWORD WINAPI CardSignData(
 }
 
 bool abilitaSbloccoPIN = true;
+
+#pragma warning(suppress: 6101)
 DWORD WINAPI CardAuthenticateEx(
 	__in                                    PCARD_DATA  pCardData,
 	__in                                    PIN_ID      PinId,
@@ -245,6 +225,12 @@ DWORD WINAPI CardAuthenticateEx(
 	__out_opt                               PDWORD      pcbSessionPin,
 	__out_opt                               PDWORD      pcAttemptsRemaining) {
 	init_main_func
+	if (pcbSessionPin != nullptr)
+		pcbSessionPin = nullptr;
+	if (pcAttemptsRemaining!=nullptr)
+		*pcAttemptsRemaining = 0;
+	if (pcAttemptsRemaining != nullptr)
+		*pcAttemptsRemaining = 0;
 	if (pbPinData == nullptr)
 		return SCARD_E_INVALID_PARAMETER;
 	if (cbPinData != 8)
@@ -289,7 +275,8 @@ DWORD WINAPI CardAuthenticateEx(
 		return SCARD_W_CHV_BLOCKED;
 	}
 	if (sw >= 0x63C0 && sw <= 0x63CF) {
-		*pcAttemptsRemaining = sw - 0x63C0;
+		if (pcAttemptsRemaining!=nullptr)
+			*pcAttemptsRemaining = sw - 0x63C0;
 		return SCARD_W_WRONG_CHV;
 	}
 	if (sw == 0x6700) {
@@ -298,7 +285,7 @@ DWORD WINAPI CardAuthenticateEx(
 	if (sw == 0x6300)
 		return SCARD_W_WRONG_CHV;
 	if (sw != 0x9000) {
-		throw CSCardException(sw);
+		throw CSCardException((WORD)sw);
 	}
 
 	return 0;
@@ -347,6 +334,7 @@ DWORD WINAPI CardGetContainerProperty(
 	__in                                        DWORD       dwFlags){
 	init_main_func
 	ByteDynArray response;
+	*pdwDataLen = 0;
 	if (bContainerIndex != 0)
 		return SCARD_E_NO_KEY_CONTAINER;
 	if (dwFlags != 0)
@@ -381,6 +369,7 @@ __out                                       PDWORD      pdwDataLen,
 __in                                        DWORD       dwFlags)
 {
 	init_main_func
+	*pdwDataLen = 0;
 	ByteDynArray response;
 	if (lstrcmpW(wszProperty, CP_CARD_GUID) == 0) {
 		if (dwFlags != 0)
@@ -578,7 +567,7 @@ __in                               DWORD       dwFlags) {
 	if (sw == 0x6300)
 		return SCARD_W_WRONG_CHV;
 	if (sw != 0x9000)
-		throw CSCardException(sw);
+		throw CSCardException((WORD)sw);
 
 	CARD_R_CALL(ias->UnblockPIN())
 	return 0;

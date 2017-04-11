@@ -28,7 +28,6 @@ DWORD WINAPI _abilitaCIE(
 	LPVOID lpThreadParameter) {
 	init_main_func
 		char *PAN = (char *)lpThreadParameter;
-	BOOL ris;
 
 	String container;
 	container.printf("CIE-%s", PAN);
@@ -50,12 +49,18 @@ DWORD WINAPI _abilitaCIE(
 		SCardEstablishContext(SCARD_SCOPE_SYSTEM, nullptr, nullptr, &hSC);
 		char *readers = nullptr;
 		len = SCARD_AUTOALLOCATE;
-		SCardListReaders(hSC, nullptr, (char*)&readers, &len);
+		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS) {
+			CMessage aa(IDB_BACKGROUND, MB_OK,
+				"Nessun lettore di smartcard installato");
+			aa.DoModal();
+			return 0;
+		}
+
 		char *curreader = readers;
 		bool foundCIE = false;
-		for (; curreader[0] != 0; curreader += strlen(curreader) + 1) {
+		for (; curreader[0] != 0; curreader += strnlen(curreader, len) + 1) {
 			CARD_DATA cData;
-			ZeroMemory(&cData, sizeof(cData));
+			ZeroMem(cData);
 			cData.dwVersion = 7;
 			cData.hSCardCtx = hSC;
 			{
@@ -127,7 +132,7 @@ DWORD WINAPI _abilitaCIE(
 
 							sha256.Digest(DH.left(GetASN1DataLenght(DH)), hashSet[0x1b]);
 							auto ias = ((IAS*)cData.pvVendorSpecific);
-							if (IdServizi != ByteArray((BYTE*)PAN, strlen(PAN)))
+							if (IdServizi != ByteArray((BYTE*)PAN, (DWORD)strnlen(PAN,20)))
 								continue;
 
 							DWORD id;
@@ -152,8 +157,8 @@ DWORD WINAPI _abilitaCIE(
 
 							DWORD attempts = -1;
 
-							ris = CardAuthenticateEx(&cData, ROLE_USER, 0, (BYTE*)pin.PIN, strlen(pin.PIN), nullptr, 0, &attempts);
-							if (ris == SCARD_W_WRONG_CHV) {
+							DWORD rs = CardAuthenticateEx(&cData, ROLE_USER, 0, (BYTE*)pin.PIN, (DWORD)strnlen(pin.PIN, sizeof(pin.PIN)), nullptr, 0, &attempts);
+							if (rs == SCARD_W_WRONG_CHV) {
 								if (progWin != nullptr)
 									SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
 								String num;
@@ -167,7 +172,7 @@ DWORD WINAPI _abilitaCIE(
 								aa.DoModal();
 								break;
 							}
-							else if (ris == SCARD_W_CHV_BLOCKED) {
+							else if (rs == SCARD_W_CHV_BLOCKED) {
 								if (progWin != nullptr)
 									SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
 								CMessage aa(IDB_BACKGROUND, MB_OK,
@@ -176,7 +181,7 @@ DWORD WINAPI _abilitaCIE(
 								aa.DoModal();
 								break;
 							}
-							else if (ris != 0)
+							else if (rs != SCARD_S_SUCCESS)
 								throw CStringException("Autenticazione fallita");
 
 							if (progWin != nullptr)
@@ -272,6 +277,11 @@ extern "C" int CALLBACK AbilitaCIE(
 	}
 	DWORD id;
 	HANDLE thread = CreateThread(nullptr, 0, _abilitaCIE, lpCmdLine, 0, &id);
+	if (thread == NULL) {
+		ODS("Errore in creazione thread su AbilitaCIE");
+		return 0;
+	}
+
 	WaitForSingleObject(thread, INFINITE);
 	ODS("End AbilitaCIE");
 	return 0;

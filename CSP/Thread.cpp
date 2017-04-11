@@ -43,6 +43,7 @@ RESULT CThread::joinThread(DWORD timeout)
 			return OK;
 		return FAIL;
 	}
+	return FAIL;
 #endif
 	exit_func
 }
@@ -67,7 +68,7 @@ void CThread::terminateThread()
 	init_func
 #ifdef WIN32
 	dwThreadID=0;
-	BOOL ris=TerminateThread(hThread,0);
+	BOOL ris = TerminateThread(hThread, 0);
 	if (!ris)
 		throw CWinException();
 #endif

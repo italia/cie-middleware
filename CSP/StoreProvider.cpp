@@ -56,7 +56,7 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 			swprintf_s(containerW, L"%S", containerName);
 			PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert, certSize);
 			CRYPT_KEY_PROV_INFO KeyProvInfo;
-			ZeroMemory(&KeyProvInfo, sizeof(KeyProvInfo));
+			ZeroMem(KeyProvInfo);
 			KeyProvInfo.pwszProvName = MS_SCARD_PROV_W;
 			KeyProvInfo.pwszContainerName = containerW;
 			KeyProvInfo.dwKeySpec = keySpecs[i];
@@ -115,7 +115,7 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 	swprintf_s(modName, moduleInfo.szModuleFullPath.size(), L"%S", moduleInfo.szModuleFullPath.lock());
 	if (!CryptRegisterOIDFunction(0, CRYPT_OID_OPEN_STORE_PROV_FUNC, "CIECertProvider", modName, CRYPT_OID_OPEN_STORE_PROV_FUNC))
 		return E_UNEXPECTED;
-	delete modName;
+	delete[] modName;
 
 	CERT_PHYSICAL_STORE_INFO PhysicalStoreInfo;
 	PhysicalStoreInfo.cbSize = sizeof(CERT_PHYSICAL_STORE_INFO);

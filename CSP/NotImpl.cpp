@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include <windows.h>
 #include "Cardmod.h"
 
@@ -24,12 +23,15 @@ __in    PBYTE       pbKeyData) {
 
 DWORD
 WINAPI
+#pragma warning(suppress: 6101)
 CardGetChallengeEx(
 __in                                    PCARD_DATA  pCardData,
 __in                                    PIN_ID      PinId,
 __deref_out_bcount(*pcbChallengeData)   PBYTE       *ppbChallengeData,
 __out                                   PDWORD      pcbChallengeData,
 __in                                    DWORD       dwFlags) {
+	if (pcbChallengeData != nullptr)
+		*pcbChallengeData = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
@@ -46,6 +48,8 @@ __in_bcount(cbTargetData)               PBYTE       pbTargetData,
 __in                                    DWORD       cbTargetData,
 __in                                    DWORD       cRetryCount,
 __out_opt                               PDWORD      pcAttemptsRemaining) {
+	if (pcAttemptsRemaining != nullptr)
+		*pcAttemptsRemaining = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
@@ -72,10 +76,13 @@ __in    PIN_ID      PinId) {
 
 DWORD
 WINAPI
+#pragma warning(suppress: 6101)
 CardGetChallenge(
 __in                                    PCARD_DATA  pCardData,
 __deref_out_bcount(*pcbChallengeData)   PBYTE       *ppbChallengeData,
 __out                                   PDWORD      pcbChallengeData) {
+	if (pcbChallengeData != nullptr)
+		*pcbChallengeData = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 //
@@ -89,6 +96,8 @@ __in                             PCARD_DATA pCardData,
 __in_bcount(cbResponseData)      PBYTE      pbResponseData,
 __in                             DWORD      cbResponseData,
 __out_opt                        PDWORD     pcAttemptsRemaining) {
+	if (pcAttemptsRemaining != nullptr)
+		*pcAttemptsRemaining = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 //
@@ -107,6 +116,8 @@ __in                                 DWORD       cbNewAuthenticator,
 __in                                 DWORD       cRetryCount,
 __in                                 DWORD       dwFlags,
 __out_opt                            PDWORD      pcAttemptsRemaining) {
+	if (pcAttemptsRemaining != nullptr)
+		*pcAttemptsRemaining = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 //
@@ -300,6 +311,7 @@ __in    PCARD_DATA  pCardData,
 __in    PVOID       hSecretAgreement,
 __out   BYTE*       pbSecretAgreementIndex,
 __in    DWORD       dwFlags) {
+	*pbSecretAgreementIndex = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 //
@@ -382,11 +394,13 @@ __in                    LPCWSTR             pwszAlgId,
 __out                   PCARD_KEY_HANDLE    phKey,
 __in_bcount(cbInput)    PBYTE               pbInput,
 __in                    DWORD               cbInput) {
+	*phKey = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
 DWORD
 WINAPI
+#pragma warning(suppress: 6101)
 MDEncryptData(
 __in                                    PCARD_DATA              pCardData,
 __in                                    CARD_KEY_HANDLE         hKey,
@@ -396,11 +410,14 @@ __in                                    DWORD                   cbInput,
 __in                                    DWORD                   dwFlags,
 __deref_out_ecount(*pcEncryptedData)    PCARD_ENCRYPTED_DATA    *ppEncryptedData,
 __out                                   PDWORD                  pcEncryptedData) {
+	if (pcEncryptedData != nullptr)
+		*pcEncryptedData = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
 DWORD
 WINAPI
+#pragma warning(suppress: 6101)
 CardGetSharedKeyHandle(
 __in                                PCARD_DATA          pCardData,
 __in_bcount(cbInput)                PBYTE               pbInput,
@@ -408,6 +425,10 @@ __in                                DWORD               cbInput,
 __deref_opt_out_bcount(*pcbOutput)  PBYTE               *ppbOutput,
 __out_opt                           PDWORD              pcbOutput,
 __out                               PCARD_KEY_HANDLE    phKey) {
+	if (phKey != nullptr)
+		*phKey = 0;
+	if (pcbOutput != nullptr)
+		*pcbOutput = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
@@ -429,6 +450,7 @@ __out_bcount_part_opt(cbData, *pdwDataLen)  PBYTE       pbData,
 __in                                        DWORD       cbData,
 __out                                       PDWORD      pdwDataLen,
 __in                                        DWORD       dwFlags) {
+	*pdwDataLen = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
@@ -442,6 +464,7 @@ __out_bcount_part_opt(cbData, *pdwDataLen)  PBYTE           pbData,
 __in                                        DWORD           cbData,
 __out                                       PDWORD          pdwDataLen,
 __in                                        DWORD           dwFlags) {
+	*pdwDataLen = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
@@ -469,6 +492,7 @@ __out                   PCARD_KEY_HANDLE    phKey,
 __in_bcount(cbInput)    PBYTE               pbInput,
 __in                    DWORD               cbInput,
 __in                    DWORD               dwFlags) {
+	*phKey = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
@@ -484,6 +508,8 @@ __out_bcount_part_opt(cbOutput, *pdwOutputLen)  PBYTE                   pbOutput
 __in                                            DWORD                   cbOutput,
 __out_opt                                       PDWORD                  pdwOutputLen,
 __in                                            DWORD                   dwFlags) {
+	if (pdwOutputLen != nullptr)
+		*pdwOutputLen = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
@@ -496,12 +522,16 @@ DWORD WINAPI CardGetFileInfo(
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
+#pragma warning(suppress: 6101)
+#pragma warning(suppress: 6054)
 DWORD WINAPI CardEnumFiles(
 	__in                                PCARD_DATA  pCardData,
 	__in_opt                            LPSTR       pszDirectoryName,
 	__deref_out_ecount(*pdwcbFileName)  LPSTR       *pmszFileNames,
 	__out                               LPDWORD     pdwcbFileName,
 	__in                                DWORD       dwFlags){
+	if (pdwcbFileName != nullptr)
+		*pdwcbFileName = 0;
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
