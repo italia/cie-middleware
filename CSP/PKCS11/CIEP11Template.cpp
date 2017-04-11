@@ -7,6 +7,33 @@
 #include "..\AES.h"
 
 int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, DWORD *respSize) {
+	if (apduSize == 2) {
+		WORD code = *(WORD*)apdu;
+		if (code == 0xfffd) {
+			*respSize = sizeof(data->hCard)+2;
+			memcpy(resp, &data->hCard, sizeof(data->hCard));
+			resp[sizeof(data->hCard)] = 0;
+			resp[sizeof(data->hCard) + 1] = 0;
+
+			return SCARD_S_SUCCESS;
+		}
+		else if (code == 0xfffe) {
+			DWORD protocol = 0;
+			ODS(String().printf("UNPOWER CARD").lock());
+			auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
+			if (sw == SCARD_S_SUCCESS)
+				SCardBeginTransaction(data->hCard);
+			return sw;
+		}
+		else if (code == 0xffff) {
+			DWORD protocol = 0;
+			auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
+			if (sw == SCARD_S_SUCCESS)
+				SCardBeginTransaction(data->hCard);
+			ODS(String().printf("RESET CARD").lock());
+			return sw;
+		}
+	}
 	ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
 	auto sw = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
 	ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
