@@ -482,12 +482,12 @@ CK_RV CK_ENTRY C_GetInfo(CK_INFO_PTR pInfo /* location that receives information
 
 	pInfo->cryptokiVersion.major = 2; /* Cryptoki interface ver */
 	pInfo->cryptokiVersion.minor = 10;   //12345678901234567890123456789012
-	memcpy((char*)pInfo->manufacturerID,"IPZS                            ", 32);
+	memcpy_s((char*)pInfo->manufacturerID,32,"IPZS                            ", 32);
 
 	pInfo->flags = 0; /* must be zero */
 
 	/* libraryDescription and libraryVersion are new for v2.0 */
-	memcpy((char*)pInfo->libraryDescription,"CIE PKCS11                      ", 32);
+	memcpy_s((char*)pInfo->libraryDescription,32,"CIE PKCS11                      ", 32);
 
 	pInfo->libraryVersion.major = 1; /* version of library */
 	pInfo->libraryVersion.minor = 0; /* version of library */
@@ -970,7 +970,7 @@ CK_RV CK_ENTRY C_GetMechanismList(CK_SLOT_ID slotID, CK_MECHANISM_TYPE_PTR pMech
 	}
 
 	if (*pulCount>=dwNumMechansms) {
-		memcpy(pMechanismList,P11mechanisms,dwNumMechansms*sizeof(CK_MECHANISM_TYPE));
+		memcpy_s(pMechanismList, dwNumMechansms*sizeof(CK_MECHANISM_TYPE),P11mechanisms, dwNumMechansms*sizeof(CK_MECHANISM_TYPE));
 		_return(CKR_OK)
 	}
 	else 

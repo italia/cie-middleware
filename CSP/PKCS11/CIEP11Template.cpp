@@ -7,33 +7,6 @@
 #include "..\AES.h"
 
 int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, DWORD *respSize) {
-	if (apduSize == 2) {
-		WORD code = *(WORD*)apdu;
-		if (code == 0xfffd) {
-			*respSize = sizeof(data->hCard)+2;
-			memcpy(resp, &data->hCard, sizeof(data->hCard));
-			resp[sizeof(data->hCard)] = 0;
-			resp[sizeof(data->hCard) + 1] = 0;
-
-			return SCARD_S_SUCCESS;
-		}
-		else if (code == 0xfffe) {
-			DWORD protocol = 0;
-			ODS(String().printf("UNPOWER CARD").lock());
-			auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
-			if (sw == SCARD_S_SUCCESS)
-				SCardBeginTransaction(data->hCard);
-			return sw;
-		}
-		else if (code == 0xffff) {
-			DWORD protocol = 0;
-			auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
-			if (sw == SCARD_S_SUCCESS)
-				SCardBeginTransaction(data->hCard);
-			ODS(String().printf("RESET CARD").lock());
-			return sw;
-		}
-	}
 	ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
 	auto sw = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
 	ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
@@ -77,7 +50,7 @@ void CIEtemplateFinalCard(void *pTemplateData){
 }
 
 ByteArray SkipZero(ByteArray &ba) {
-	for (int i = 0; i < ba.size(); i++) {
+	for (DWORD i = 0; i < ba.size(); i++) {
 		if (ba[i] != 0)
 			return ba.mid(i);
 	}
@@ -148,8 +121,10 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 			CK_DATE start, end;
 			SYSTEMTIME sFrom, sTo;
 			String temp;
-			FileTimeToSystemTime(&certDS->pCertInfo->NotBefore, &sFrom);
-			FileTimeToSystemTime(&certDS->pCertInfo->NotAfter, &sTo);
+			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotBefore, &sFrom))
+				return FAIL;
+			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotAfter, &sTo))
+				return FAIL;
 			temp.printf("%04i", sFrom.wYear); VarToByteArray(start.year).copy(temp.toByteArray());
 			temp.printf("%02i", sFrom.wMonth); VarToByteArray(start.month).copy(temp.toByteArray());
 			temp.printf("%02i", sFrom.wDay); VarToByteArray(start.day).copy(temp.toByteArray());
@@ -277,7 +252,7 @@ RESULT CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &P
 		if (sw == 0x6300)
 			return CKR_PIN_INCORRECT;
 		if (sw != 0x9000) {
-			throw CSCardException(sw);
+			throw CSCardException((WORD)sw);
 		}
 
 		cie->aesKey.Encode(Pin, cie->SessionPIN);

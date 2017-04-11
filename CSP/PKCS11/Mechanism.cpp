@@ -139,7 +139,7 @@ RESULT CSHA::DigestSetOperationState(ByteArray &OperationState)
 	init_func
 	if (OperationState.size()!=sizeof(Sha1Context))
 		_return(CKR_SAVED_STATE_INVALID)
-	memcpy(&Sha1Context,OperationState.lock(),sizeof(Sha1Context));
+		memcpy_s(&Sha1Context, sizeof(SHA_CTX), OperationState.lock(), sizeof(Sha1Context));
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -206,7 +206,7 @@ RESULT CMD5::DigestSetOperationState(ByteArray &OperationState)
 	init_func
 	if (OperationState.size()!=sizeof(MD5Context))
 		_return(CKR_SAVED_STATE_INVALID)
-	memcpy(&MD5Context,OperationState.lock(),sizeof(MD5Context));
+	memcpy_s(&MD5Context,sizeof(MD5_CTX),OperationState.lock(),sizeof(MD5Context));
 	_return(OK)
 	exit_func
 	_return(FAIL)

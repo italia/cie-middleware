@@ -23,7 +23,7 @@ bool CSlot::bMonitorUpdate=false;
 static char szMutexName[200]="p11mutex_";
 
 char *CSlot::mutexName(const char *szName) {
-	int dwNameSize=strlen(szName);
+	int dwNameSize=(int)strnlen(szName,181);
 	if (dwNameSize>180) dwNameSize=180;
 	strncpy_s(szMutexName+9,190,szName,dwNameSize);
 	szMutexName[dwNameSize+9]=0;
@@ -61,7 +61,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 	while (true) {
 		CCardContext Context;
 		CSlot::ThreadContext=&Context;
-		DWORD dwSlotNum=pSlotMap->size();
+		DWORD dwSlotNum = (DWORD)pSlotMap->size();
 		DynArray<SCARD_READERSTATE> state(dwSlotNum);
 		DynArray<CSlot*> slot(dwSlotNum);
 		ZeroMemory(state.lock(),sizeof(SCARD_READERSTATE)*dwSlotNum);
@@ -273,7 +273,7 @@ RESULT CSlot::InitSlotList()
 			bMapChanged=true;
 			pSlot.detach();
 		}
-		szReaderName=szReaderName+strlen(szReaderName)+1;
+		szReaderName = szReaderName + strnlen(szReaderName, readersLen) + 1;
 	}
 	// adesso vedo se tutti gli slot nella mappa ci sono ancora
 	for (SlotMap::iterator it=g_mSlots.begin();it!=g_mSlots.end();it++) {
@@ -288,7 +288,7 @@ RESULT CSlot::InitSlotList()
 				bFound=true;
 				break;
 			}
-			szReaderName=szReaderName+strlen(szReaderName)+1;
+			szReaderName = szReaderName + strnlen(szReaderName, readersLen) + 1;
 		}
 		if (!bFound) {
 			CK_SLOT_ID ID=it->second->hSlot;
@@ -362,12 +362,12 @@ CK_RV CSlot::GetInfo(CK_SLOT_INFO_PTR pInfo)
 
 	memset(pInfo->slotDescription,' ',64);
 	int iSDLen=min(64,szName.size()-1);
-	memcpy(pInfo->slotDescription,szName.lock(iSDLen),iSDLen);
+	memcpy_s(pInfo->slotDescription,64,szName.lock(iSDLen),iSDLen);
 
 	memset(pInfo->manufacturerID,' ',32);
 	// non so esattamente perchè, ma nella R1 il manufacturerID sono i primi 32 dello slotDescription
 	int iMIDLen=min(32,szName.size());
-	memcpy(pInfo->manufacturerID,szName.lock(iMIDLen),iMIDLen);
+	memcpy_s(pInfo->manufacturerID,32,szName.lock(iMIDLen),iMIDLen);
 
 	pInfo->hardwareVersion.major = 0;
 	pInfo->hardwareVersion.minor = 0;
@@ -395,9 +395,9 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 		_return(CKR_TOKEN_NOT_RECOGNIZED)
 	
 	memset(pInfo->label,' ', sizeof(pInfo->label));
-	memcpy((char*)pInfo->label, pTemplate->szName.lock(),min(pTemplate->szName.strlen(),sizeof(pInfo->label)));
+	memcpy_s((char*)pInfo->label, 32, pTemplate->szName.lock(),min(pTemplate->szName.strlen(),sizeof(pInfo->label)));
 	memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
-	memcpy((char*)pInfo->manufacturerID, pTemplate->szManifacturer.lock(), min(pTemplate->szManifacturer.strlen(), sizeof(pInfo->manufacturerID)));
+	memcpy_s((char*)pInfo->manufacturerID, 32, pTemplate->szManifacturer.lock(), min(pTemplate->szManifacturer.strlen(), sizeof(pInfo->manufacturerID)));
 	
 	if (baSerial.isEmpty() || pSerialTemplate!=pTemplate) {
 		pSerialTemplate=pTemplate;
@@ -411,10 +411,10 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 
 	memset(pInfo->serialNumber,' ',sizeof(pInfo->serialNumber));
 	int UIDsize=min(sizeof(pInfo->serialNumber),baSerial.size());
-	memcpy(pInfo->serialNumber,baSerial.lock(UIDsize),UIDsize);
+	memcpy_s(pInfo->serialNumber,16,baSerial.lock(UIDsize),UIDsize);
 
 	memset(pInfo->model,' ',sizeof(pInfo->model));
-	memcpy(pInfo->model,model.lock(),min(model.strlen(),sizeof(pInfo->model)));	
+	memcpy_s(pInfo->model,16,model.lock(),min(model.strlen(),sizeof(pInfo->model)));	
 
 	DWORD dwFlags;
 	ER_CALL(pTemplate->FunctionList.templateGetTokenFlags(*this,dwFlags),
@@ -445,7 +445,7 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 	pInfo->firmwareVersion.major=0;
 	pInfo->firmwareVersion.minor=0;
 
-	memcpy((char*)pInfo->utcTime,"1234567890123456",16);  // OK
+	memcpy_s((char*)pInfo->utcTime,16,"1234567890123456",16);  // OK
 
 	_return(OK)
 	exit_func

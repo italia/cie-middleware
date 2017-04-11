@@ -79,7 +79,7 @@ RESULT APDU::CypherTextObject(ByteDynArray &CypherTextObject) {
 
 	CypherTextObject.resize(EncData.size()+3);
 	CypherTextObject[0]=0x87;
-	CypherTextObject[1]=CypherTextObject.size()-2;
+	CypherTextObject[1]=(BYTE)CypherTextObject.size()-2;
 	CypherTextObject[2]=1;
 	CypherTextObject.copy(EncData,3);
 
@@ -271,7 +271,7 @@ RESULT APDU::EncodeSM(CToken &Token,ByteDynArray &SMDataBuffer,APDU *&apdu)
 		SMDataBuffer.copy(baNetLEMACObject,baCypherTextObject.size());
 		SMDataBuffer.copy(baMacObject,baCypherTextObject.size()+baNetLEMACObject.size());
 
-		SMapdu->btLC=SMDataBuffer.size();
+		SMapdu->btLC = (BYTE)SMDataBuffer.size();
 		SMapdu->pbtData=SMDataBuffer.lock();
 		
 		apdu=SMapdu.detach();

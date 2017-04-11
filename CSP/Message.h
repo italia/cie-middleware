@@ -90,6 +90,8 @@ END_MSG_MAP()
 			cancelButton.ShowWindow(SW_HIDE);
 			WINDOWPLACEMENT bp;
 			RECT wp;
+			ZeroMem(bp);
+			ZeroMem(wp);
 			okButton.GetWindowPlacement(&bp);
 			GetClientRect(&wp);
 			okButton.SetWindowPos(NULL, (wp.right - (bp.rcNormalPosition.right - bp.rcNormalPosition.left)) / 2, bp.rcNormalPosition.top, 0, 0, SWP_NOSIZE);
@@ -122,6 +124,7 @@ END_MSG_MAP()
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 	{
 		RECT rect;
+		ZeroMem(rect);
 		GetUpdateRect(&rect);
 		PAINTSTRUCT ps;
 		BeginPaint(&ps);

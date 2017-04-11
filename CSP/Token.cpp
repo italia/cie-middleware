@@ -193,7 +193,7 @@ RESULT CToken::UnblockChange(bool bBacktrack,BYTE pinID,ByteArray &Puk,ByteArray
 	ByteDynArray PukPin(Puk.size()+Pin.size());
 	PukPin.copy(Puk);
 	PukPin.rightcopy(Pin);
-	APDU apdu(0x00,0x2C,0x00,pinID & 0x7F | (bBacktrack ? 0x80 : 0),PukPin.size(),PukPin.lock());
+	APDU apdu(0x00, 0x2C, 0x00, pinID & 0x7F | (bBacktrack ? 0x80 : 0), (BYTE)PukPin.size(), PukPin.lock());
 	apdu.setSM(sigIn,encIn,sigOut,encOut);
 	CARD_R_CALL(Transmit(apdu,NULL))
 
@@ -207,7 +207,7 @@ RESULT CToken::Change(bool bBacktrack,BYTE pinID,ByteArray &Pin,ByteArray *sigIn
 	init_func
 	ER_ASSERT(transmitCallback,"Carta non Connessa")
 
-	APDU apdu(0x00,0x24,0x01,pinID & 0x7F | (bBacktrack ? 0x80 : 0),Pin.size(),Pin.lock());
+	APDU apdu(0x00,0x24,0x01,pinID & 0x7F | (bBacktrack ? 0x80 : 0),(BYTE)Pin.size(),Pin.lock());
 	apdu.setSM(sigIn,encIn,sigOut,encOut);
 	CARD_R_CALL(Transmit(apdu,NULL))
 
@@ -222,11 +222,11 @@ RESULT CToken::ChangeKeyData(BYTE keyType,bool bBacktrack,BYTE keyID,ByteArray &
 
 	ER_ASSERT(transmitCallback,"Carta non Connessa")
 	ByteDynArray TLVData(Data.size()+2);
-	TLVData[0]=Data.size()+1;
+	TLVData[0] = (BYTE)Data.size() + 1;
 	TLVData[1]=0;
 	TLVData.copy(Data,2);
 
-	APDU apdu(0x90,0x24,keyType,keyID & 0x7F | (bBacktrack ? 0x80 : 0),TLVData.size(),TLVData.lock());
+	APDU apdu(0x90, 0x24, keyType, keyID & 0x7F | (bBacktrack ? 0x80 : 0), (BYTE)TLVData.size(), TLVData.lock());
 	apdu.setSM(sigIn,encIn,sigOut,encOut);
 	CARD_R_CALL(Transmit(apdu,NULL))
 
@@ -241,13 +241,13 @@ RESULT CToken::AddTLVRecord(BYTE tag,ByteArray &Data,ByteArray *sigIn,ByteArray 
 
 	ER_ASSERT(transmitCallback,"Carta non Connessa")
 	ByteDynArray TLVData(Data.size()+4);
-	TLVData[0]=tag;
-	TLVData[1]=Data.size()+2;
-	TLVData[2]=Data.size()+1;
-	TLVData[3]=0;
+	TLVData[0] = tag;
+	TLVData[1] = (BYTE)Data.size() + 2;
+	TLVData[2] = (BYTE)Data.size() + 1;
+	TLVData[3] = 0;
 	TLVData.copy(Data,4);
 
-	APDU apdu(0x00,0xe2,0x00,0x00,TLVData.size(),TLVData.lock());
+	APDU apdu(0x00, 0xe2, 0x00, 0x00, (BYTE)TLVData.size(), TLVData.lock());
 	apdu.setSM(sigIn,encIn,sigOut,encOut);
 	CARD_R_CALL(Transmit(apdu,NULL))
 
@@ -423,7 +423,7 @@ RESULT CToken::SelectPath(ByteArray &path,DWORD *size)
 	ER_ASSERT(transmitCallback,"Carta non Connessa")
 
 	BYTE *pbtPath=path.lock();
-	BYTE btPathSize=path.size();
+	BYTE btPathSize = (BYTE)path.size();
 	if (path.size()>=2) {
 		if (path[0]==0x3f && path[1]==0x00) {
 			pbtPath+=2;
@@ -504,9 +504,9 @@ RESULT CToken::ChangeBSOAC(BYTE keyClass,BYTE keyID,ByteArray &AC,ByteArray *sig
 	Data[2]=keyClass;
 	Data[3]=keyID;
 	Data[4]=0x86;
-	Data[5]=AC.size();
+	Data[5] = (BYTE)AC.size();
 	Data.copy(AC,6);
-	APDU apdu(0x00,0xDA,0x01,0x6E,Data.size(),Data.lock());
+	APDU apdu(0x00, 0xDA, 0x01, 0x6E, (BYTE)Data.size(), Data.lock());
 	apdu.setSM(sigIn,encIn,sigOut,encOut);
 	CARD_R_CALL(Transmit(apdu,NULL))
 	
@@ -523,9 +523,9 @@ RESULT CToken::ChangeEFAC(ByteArray &AC,ByteArray *sigIn,ByteArray *encIn,ByteAr
 
 	ByteDynArray Data(2+AC.size());
 	Data[0]=0x86;
-	Data[1]=AC.size();
+	Data[1] = (BYTE)AC.size();
 	Data.copy(AC,2);
-	APDU apdu(0x00,0xDA,0x01,0x6F,Data.size(),Data.lock());
+	APDU apdu(0x00, 0xDA, 0x01, 0x6F, (BYTE)Data.size(), Data.lock());
 	apdu.setSM(sigIn,encIn,sigOut,encOut);
 	CARD_R_CALL(Transmit(apdu,NULL))
 	
@@ -543,7 +543,7 @@ RESULT CToken::PSO_DEC(ByteArray& baInput,ByteDynArray& baOutput,ByteArray *sigI
 	ByteDynArray baAPDUInput(baInput.size()+1);
 	baAPDUInput[0]=0x00;
 	baAPDUInput.rightcopy(baInput);
-	APDU apdu(0x00,0x2A,0x80,0x86,baAPDUInput.size(),baAPDUInput.lock(),0);
+	APDU apdu(0x00, 0x2A, 0x80, 0x86, (BYTE)baAPDUInput.size(), baAPDUInput.lock(), 0);
 	apdu.setSM(sigIn,encIn,sigOut,encOut);
 	CARD_R_CALL(Transmit(apdu,&baOutput))
 	_return(OK)
@@ -556,7 +556,7 @@ RESULT CToken::PSO_CDS(ByteArray& baInput,ByteDynArray& baOutput,ByteArray *sigI
 	init_func
 	ER_ASSERT(transmitCallback,"Carta non Connessa")
 
-	APDU apdu(0x00,0x2A,0x9E,0x9A,baInput.size(),baInput.lock(),0);
+	APDU apdu(0x00, 0x2A, 0x9E, 0x9A, (BYTE)baInput.size(), baInput.lock(), 0);
 	apdu.setSM(sigIn,encIn,sigOut,encOut);
 	CARD_R_CALL(Transmit(apdu,&baOutput))
 
@@ -570,7 +570,7 @@ RESULT CToken::GetChallenge(ByteArray& baRandomData)
 	init_func
 	ER_ASSERT(transmitCallback,"Carta non Connessa")
 
-	APDU apdu(0x00,0x84,0x00,0x00,baRandomData.size());
+	APDU apdu(0x00, 0x84, 0x00, 0x00, (BYTE)baRandomData.size());
 
 	ByteDynArray resp(baRandomData.size());
 	CARD_R_CALL(Transmit(apdu,&resp))
@@ -587,7 +587,7 @@ RESULT CToken::GiveRandom(ByteArray& baRandomData)
 	ER_ASSERT(transmitCallback,"Carta non Connessa")
 
 
-	APDU apdu(0x80,0x86,0x00,0x00,baRandomData.size(),baRandomData.lock());
+	APDU apdu(0x80, 0x86, 0x00, 0x00, (BYTE)baRandomData.size(), baRandomData.lock());
 
 	CARD_R_CALL(Transmit(apdu,NULL))
 	_return(OK)
@@ -702,7 +702,7 @@ RESULT CToken::Transmit(ByteArray &apdu, ByteDynArray *resp)
 	_return(FAIL)
 }
 
-RESULT CToken::Transmit(APDU &apdu,ByteDynArray *resp)
+RESULT CToken::Transmit(APDU &apdu, ByteDynArray *resp)
 {
 	init_func
 
@@ -710,52 +710,52 @@ RESULT CToken::Transmit(APDU &apdu,ByteDynArray *resp)
 	BYTE pbtResp[3000];
 
 	ByteDynArray baSMData;
-	APDU *SMApdu=&apdu;
-	ER_CALL(apdu.EncodeSM(*this,baSMData,SMApdu),
+	APDU *SMApdu = &apdu;
+	ER_CALL(apdu.EncodeSM(*this, baSMData, SMApdu),
 		"Errore nella codifica dell'APDU")
 
-	Allocator<APDU> sendApdu(SMApdu);
+		Allocator<APDU> sendApdu(SMApdu);
 
-	int iAPDUSize=0;
-	pbtAPDU[0]=sendApdu->btCLA;
-	pbtAPDU[1]=sendApdu->btINS;
-	pbtAPDU[2]=sendApdu->btP1;
-	pbtAPDU[3]=sendApdu->btP2;
+	int iAPDUSize = 0;
+	pbtAPDU[0] = sendApdu->btCLA;
+	pbtAPDU[1] = sendApdu->btINS;
+	pbtAPDU[2] = sendApdu->btP1;
+	pbtAPDU[3] = sendApdu->btP2;
 	if (sendApdu->bLC && sendApdu->bLE) {
-		iAPDUSize=sendApdu->btLC+6;
-		pbtAPDU[4]=sendApdu->btLC;
-		memcpy(pbtAPDU+5,sendApdu->pbtData,sendApdu->btLC);
-		pbtAPDU[5+sendApdu->btLC]=sendApdu->btLE;
+		iAPDUSize = sendApdu->btLC + 6;
+		pbtAPDU[4] = sendApdu->btLC;
+		memcpy_s(pbtAPDU + 5, 2995, sendApdu->pbtData, sendApdu->btLC);
+		pbtAPDU[5 + sendApdu->btLC] = sendApdu->btLE;
 	}
 	else if (sendApdu->bLC && !sendApdu->bLE) {
-		iAPDUSize=sendApdu->btLC+5;
-		pbtAPDU[4]=sendApdu->btLC;
-		memcpy(pbtAPDU+5,sendApdu->pbtData,sendApdu->btLC);
+		iAPDUSize = sendApdu->btLC + 5;
+		pbtAPDU[4] = sendApdu->btLC;
+		memcpy_s(pbtAPDU + 5, 2995, sendApdu->pbtData, sendApdu->btLC);
 	}
 	else if (!sendApdu->bLC && sendApdu->bLE) {
-		iAPDUSize=5;
-		pbtAPDU[4]=sendApdu->btLE;
+		iAPDUSize = 5;
+		pbtAPDU[4] = sendApdu->btLE;
 	}
 	else  { // (!bLC && !bLE)
-		iAPDUSize=4;
+		iAPDUSize = 4;
 	}
 
 	DWORD dwResp = 3000;
 
-	if (sendApdu==&apdu)
+	if (sendApdu == &apdu)
 		sendApdu.detach();
 
-	HRESULT res=transmitCallback(transmitCallbackData,pbtAPDU,iAPDUSize,pbtResp,&dwResp);
+	HRESULT res = transmitCallback(transmitCallbackData, pbtAPDU, iAPDUSize, pbtResp, &dwResp);
 	//HRESULT res=SCardTransmit(hCard,SCARD_PCI_T1,pbtAPDU,iAPDUSize,NULL,pbtResp,&dwResp);
-	if (res!=SCARD_S_SUCCESS) // la smart card è stata estratta durante l'operazione
+	if (res != SCARD_S_SUCCESS) // la smart card è stata estratta durante l'operazione
 		_return(FAIL)
 
-	if (resp) {
-		ER_CALL(apdu.DecodeSM(ByteArray(pbtResp,dwResp),*resp),
-			"Errore nella decodifica dell'APDU")
-	}
-	
-	_return(pbtResp[dwResp-2]<<8 | pbtResp[dwResp-1])
+		if (resp) {
+			ER_CALL(apdu.DecodeSM(ByteArray(pbtResp, dwResp), *resp),
+				"Errore nella decodifica dell'APDU")
+		}
+
+	_return(pbtResp[dwResp - 2] << 8 | pbtResp[dwResp - 1])
 	exit_func
 	_return(FAIL)
 }

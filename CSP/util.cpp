@@ -13,7 +13,16 @@ DWORD ERR_OBJECT_HASNT_ATTRIBUTE = 0x40000009;
 DWORD term___set=0xffff;
 DWORD *endSet=&term___set;
 
-StringCopier::StringCopier(String *str,BYTE **copyBuf,int *copyBufLen) {
+class initRand {
+public:
+	initRand() {
+		SYSTEMTIME tm;
+		GetSystemTime(&tm);
+		RAND_seed(&tm, sizeof(SYSTEMTIME));
+	}
+} _initRand;
+
+StringCopier::StringCopier(String *str, BYTE **copyBuf, int *copyBufLen) {
 	this->str=str;
 	this->copyBuf=copyBuf;
 	this->copyBufLen=copyBufLen;
@@ -155,7 +164,7 @@ void readHexData(const char *data,ByteDynArray &ba)
 	}
 
 	if (dt.size())
-		ba.alloc_copy(&dt[0],dt.size());
+		ba.alloc_copy(&dt[0],(DWORD)dt.size());
 	else 
 		ba.clear();
 }
@@ -290,7 +299,7 @@ DWORD RemovePaddingBT2(ByteArray &paddedData)
 DWORD RemoveISOPad(ByteArray &paddedData)
 {
 	init_func
-	for (DWORD i=paddedData.size()-1;i>=0;i--) {
+	for (int i=paddedData.size()-1;i>=0;i--) {
 		if (paddedData[i]!=0) {
 			if (paddedData[i]!=0x80) {
 				throw CStringException("Errore nel padding");

@@ -34,7 +34,7 @@ CSyncroEvent::CSyncroEvent(const char *szName)
 			SID_IDENTIFIER_AUTHORITY worldSidAuth=SECURITY_WORLD_SID_AUTHORITY;
 			AllocateAndInitializeSid(&worldSidAuth,1,SECURITY_WORLD_RID,0,0,0,0,0,0,0,&pSid);
 
-			AddAccessAllowedAce(pACL,ACL_REVISION,SYNCHRONIZE,pSid);
+			AddAccessAllowedAceEx(pACL, ACL_REVISION, INHERITED_ACE,SYNCHRONIZE, pSid);
 
 			InitializeSecurityDescriptor(&secDesc,SECURITY_DESCRIPTOR_REVISION);
 			SetSecurityDescriptorDacl(&secDesc,TRUE,pACL,FALSE);
@@ -70,7 +70,7 @@ void CSyncroEvent::Wait()
 	init_func_internal
 #ifdef WIN32
 	HRESULT hr;
-	if (hr=WaitForSingleObject(hEvent,INFINITE)!=S_OK) {
+	if ((hr=WaitForSingleObject(hEvent,INFINITE))!=S_OK) {
 		throw CWinException(hr);
 	}
 #endif

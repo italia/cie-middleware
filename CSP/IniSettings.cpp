@@ -7,7 +7,7 @@ std::vector<IniSettings*> _iniSettings;
 void GetIniString(char *fileName,char* section,char* name,String &buf) {
 	buf.resize(100);
 	while (true) {
-		int size=GetPrivateProfileStringA(section,name,"",buf.lock(),buf.size(),fileName);
+		DWORD size=GetPrivateProfileStringA(section,name,"",buf.lock(),buf.size(),fileName);
 		if (size<(buf.size()-2)) {
 			buf.resize(size+1,true);
 			return;
@@ -107,7 +107,7 @@ IniSettingsB64::~IniSettingsB64() {}
 
 extern "C" {
 	int	GetNumIniSettings() {
-		return _iniSettings.size();
+		return (int)_iniSettings.size();
 	}
 
 	int GetIniSettings(int i, void* data) {
@@ -132,7 +132,7 @@ extern "C" {
 		String res;
 		res.printf("%s%s",out.lock(),out2.lock());
 		if (data!=NULL) 
-			memcpy(data,res.lock(),res.size());
+			memcpy_s(data,res.size(),res.lock(),res.size());
 		return res.size();
 	}
 }
