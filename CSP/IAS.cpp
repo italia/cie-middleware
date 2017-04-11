@@ -558,10 +558,13 @@ DWORD IAS::respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &resp, ByteArr
 		else if (resp[index] == 0x85) {
 			if (resp[index + 1] > 0x80) {
 				llen = resp[index + 1] - 0x80;
-				if (llen == 1) lgn = resp[index + 2];
-				else if (llen == 2) lgn = (resp[index + 2] << 8) | resp[index + 3];
+				if (llen == 1) 
+					lgn = resp[index + 2];
 				else 
-					throw CStringException("Lumeghezza ASN1 non valida: %i", llen);
+					if (llen == 2) 
+						lgn = (resp[index + 2] << 8) | resp[index + 3];
+					else 
+						throw CStringException("Lunghezza ASN1 non valida: %i", llen);
 				encData = resp.mid(index + llen + 2, lgn);
 				calcMac.append(resp.mid(index, lgn + llen + 2));
 				index += llen + lgn + 2;
@@ -575,10 +578,13 @@ DWORD IAS::respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &resp, ByteArr
 		else if (resp[index] == 0x87) {
 			if (resp[index + 1] > 0x80) {
 				llen = resp[index + 1] - 0x80;
-				if (llen == 1) lgn = resp[index + 2];
-				if (llen == 2) lgn = (resp[index + 2] << 8) | resp[index + 3];
-				else
-					throw CStringException("Lumeghezza ASN1 non valida: %i", llen);
+				if (llen == 1) 
+					lgn = resp[index + 2];
+				else 
+					if (llen == 2) 
+						lgn = (resp[index + 2] << 8) | resp[index + 3];
+					else
+						throw CStringException("Lunghezza ASN1 non valida: %i", llen);
 				encData = resp.mid(index + llen + 3, lgn - 1);
 				calcMac.append(resp.mid(index, lgn + llen + 2));
 				index += llen + lgn + 2;
@@ -980,7 +986,16 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 
 	byte OID_RSAwithSHA256[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0b };
 	byte OID_RSAwithSHA1[] = { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x05 };
-	temp3.Child(4, 0x30).Child(0, 06).Verify(VarToByteArray(OID_RSAwithSHA1));
+	auto &digestAlgo = temp3.Child(4, 0x30).Child(0, 06).content;
+	bool isSHA1 = false;
+	bool isSHA256 = false;
+	if (digestAlgo == VarToByteArray(OID_RSAwithSHA1))
+		isSHA1 = true;
+	else 
+		if (digestAlgo == VarToByteArray(OID_RSAwithSHA256))
+			isSHA256 = true;
+		else
+			throw CStringException("Algoritmo del digest della firma non valido");
 
 	CASNTag &signature = temp3.Child(5, 04);
 	// ok,ho tutto... adesso devo verificare che la firma corrisponda e il certificato vada bene
@@ -1017,11 +1032,18 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	ByteDynArray decryptedSignature;
 	rsa.RSA_PURE(signatureData, decryptedSignature);
 	decryptedSignature = decryptedSignature.mid(RemovePaddingBT1(decryptedSignature));
-	decryptedSignature = decryptedSignature.mid(RemoveSha1(decryptedSignature));
 	ByteArray toSign = SOD.mid((int)signerInfo.tags[0]->startPos, (int)(signerInfo.tags[signerInfo.tags.size()- 1]->endPos - signerInfo.tags[0]->startPos));
 	ByteDynArray digestSignature;
-	CSHA1 sha1;
-	sha1.Digest(toSign.setASN1Tag(0x31, ByteDynArray()), digestSignature);
+	if (isSHA1) {
+		CSHA1 sha1;
+		decryptedSignature = decryptedSignature.mid(RemoveSha1(decryptedSignature));
+		sha1.Digest(toSign.setASN1Tag(0x31, ByteDynArray()), digestSignature);
+	}
+	if (isSHA256) {
+		CSHA256 sha256;
+		decryptedSignature = decryptedSignature.mid(RemoveSha256(decryptedSignature));
+		sha256.Digest(toSign.setASN1Tag(0x31, ByteDynArray()), digestSignature);
+	}
 	if (digestSignature!=decryptedSignature)
 		throw CStringException("Firma del SOD non valida");
 
