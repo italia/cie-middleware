@@ -131,7 +131,7 @@ BOOL CSystemTray::Create(HINSTANCE hInst, HWND hParent, UINT uCallbackMessage,
     ASSERT(uCallbackMessage >= WM_APP);
 
     // Tray only supports tooltip text up to m_nMaxTooltipLength) characters
-    ASSERT(_tcslen(szToolTip) <= m_nMaxTooltipLength);
+	ASSERT(_tcsnlen(szToolTip, m_nMaxTooltipLength+1) <= m_nMaxTooltipLength);
 
     m_hInstance = hInst;
 
@@ -470,7 +470,7 @@ BOOL CSystemTray::StopAnimation()
 
 BOOL CSystemTray::SetTooltipText(LPCTSTR pszTip)
 {
-    ASSERT(_tcslen(pszTip) < m_nMaxTooltipLength);
+	ASSERT(_tcsnlen(pszTip, m_nMaxTooltipLength+1) < m_nMaxTooltipLength);
 
     if (!m_bEnabled)
         return FALSE;
@@ -822,11 +822,11 @@ LRESULT PASCAL CSystemTray::WindowProc(HWND hWnd, UINT message, WPARAM wParam, L
 
           // Animation timer
           if (message == WM_TIMER && wParam == pTrayIcon->GetTimerID())
-              return pTrayIcon->OnTimer(wParam);
+              return pTrayIcon->OnTimer((UINT)wParam);
 
           // Settings changed
           if (message == WM_SETTINGCHANGE && wParam == pTrayIcon->GetTimerID())
-              return pTrayIcon->OnSettingChange(wParam, (LPCTSTR) lParam);
+			  return pTrayIcon->OnSettingChange((UINT)wParam, (LPCTSTR)lParam);
 
           // Is the message from the icon for this TrayIcon?
           if (message == pTrayIcon->GetCallbackMessage())
@@ -940,9 +940,10 @@ void CSystemTray::GetTrayWndRect(LPRECT lprect)
     
     // OK. Haven't found a thing. Provide a default rect based on the current work
     // area
-    SystemParametersInfo(SPI_GETWORKAREA,0,lprect, 0);
-    lprect->left = lprect->right - DEFAULT_RECT_WIDTH;
-    lprect->top  = lprect->bottom - DEFAULT_RECT_HEIGHT;
+	if (SystemParametersInfo(SPI_GETWORKAREA, 0, lprect, 0)) {
+		lprect->left = lprect->right - DEFAULT_RECT_WIDTH;
+		lprect->top = lprect->bottom - DEFAULT_RECT_HEIGHT;
+	}
 }
 
 BOOL CSystemTray::GetDoWndAnimation()
@@ -950,9 +951,9 @@ BOOL CSystemTray::GetDoWndAnimation()
   ANIMATIONINFO ai;
 
   ai.cbSize=sizeof(ai);
-  SystemParametersInfo(SPI_GETANIMATION,sizeof(ai),&ai,0);
-
-  return ai.iMinAnimate?TRUE:FALSE;
+  if (SystemParametersInfo(SPI_GETANIMATION,sizeof(ai),&ai,0))
+	return ai.iMinAnimate?TRUE:FALSE;
+  return FALSE;
 }
 #endif
 

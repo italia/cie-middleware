@@ -77,7 +77,7 @@ void CIEtemplateFinalCard(void *pTemplateData){
 }
 
 ByteArray SkipZero(ByteArray &ba) {
-	for (int i = 0; i < ba.size(); i++) {
+	for (DWORD i = 0; i < ba.size(); i++) {
 		if (ba[i] != 0)
 			return ba.mid(i);
 	}
@@ -148,8 +148,10 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 			CK_DATE start, end;
 			SYSTEMTIME sFrom, sTo;
 			String temp;
-			FileTimeToSystemTime(&certDS->pCertInfo->NotBefore, &sFrom);
-			FileTimeToSystemTime(&certDS->pCertInfo->NotAfter, &sTo);
+			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotBefore, &sFrom))
+				return FAIL;
+			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotAfter, &sTo))
+				return FAIL;
 			temp.printf("%04i", sFrom.wYear); VarToByteArray(start.year).copy(temp.toByteArray());
 			temp.printf("%02i", sFrom.wMonth); VarToByteArray(start.month).copy(temp.toByteArray());
 			temp.printf("%02i", sFrom.wDay); VarToByteArray(start.day).copy(temp.toByteArray());
@@ -277,7 +279,7 @@ RESULT CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &P
 		if (sw == 0x6300)
 			return CKR_PIN_INCORRECT;
 		if (sw != 0x9000) {
-			throw CSCardException(sw);
+			throw CSCardException((WORD)sw);
 		}
 
 		cie->aesKey.Encode(Pin, cie->SessionPIN);

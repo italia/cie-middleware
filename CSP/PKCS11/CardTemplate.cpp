@@ -111,31 +111,31 @@ RESULT CCardTemplate::GetTemplate(CSlot &pSlot,CCardTemplate *&pTemplate)
 	_return(FAIL)
 }
 
-RESULT CCardTemplate::InitLibrary(const char *szPath,void *templateData)
-{
-	init_func
-	hLibrary=LoadLibrary(szPath);
-	if (hLibrary==NULL) {
-		throw CStringException(CWinException(), ERR_CANT_LOAD_LIBRARY);
-	}
-
-	templateFuncListFunc funcList;
-	funcList=(templateFuncListFunc)GetProcAddress(hLibrary,szTemplateFuncListName);
-	if (!funcList) {
-		throw CStringException(ERR_GET_LIBRARY_FUNCTION_LIST);
-	}
-	
-	if (funcList(&FunctionList)) {
-		throw CStringException(ERR_CALL_LIBRARY_FUNCTION_LIST);
-	}
-	
-	if (FunctionList.templateInitLibrary(*this,templateData)) {
-		throw CStringException(ERR_INIT_LIBRARY);
-	}
-
-	_return(OK)
-	exit_func
-	_return(FAIL)
-}
+//RESULT CCardTemplate::InitLibrary(const char *szPath,void *templateData)
+//{
+//	init_func
+//	hLibrary=LoadLibrary(szPath);
+//	if (hLibrary==NULL) {
+//		throw CStringException(CWinException(), ERR_CANT_LOAD_LIBRARY);
+//	}
+//
+//	templateFuncListFunc funcList;
+//	funcList=(templateFuncListFunc)GetProcAddress(hLibrary,szTemplateFuncListName);
+//	if (!funcList) {
+//		throw CStringException(ERR_GET_LIBRARY_FUNCTION_LIST);
+//	}
+//	
+//	if (funcList(&FunctionList)) {
+//		throw CStringException(ERR_CALL_LIBRARY_FUNCTION_LIST);
+//	}
+//	
+//	if (FunctionList.templateInitLibrary(*this,templateData)) {
+//		throw CStringException(ERR_INIT_LIBRARY);
+//	}
+//
+//	_return(OK)
+//	exit_func
+//	_return(FAIL)
+//}
 
 };

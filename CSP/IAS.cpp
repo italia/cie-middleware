@@ -227,7 +227,7 @@ void IAS::readfile(WORD id, ByteDynArray &content){
 			if (sw == 0x6282)
 				content.append(chn);
 			else if (sw != 0x6b00)
-				throw CSCardException(sw);
+				throw CSCardException((WORD)sw);
 			break;
 		}
 	}
@@ -263,7 +263,7 @@ void IAS::readfile_SM(WORD id, ByteDynArray &content) {
 			if (sw == 0x6282) 
 				content.append(chn);
 			else if (sw != 0x6b00)
-				throw CSCardException(sw);
+				throw CSCardException((WORD)sw);
 			break;
 		}
 	}
@@ -478,7 +478,7 @@ void IAS::DHKeyExchange() {
 }
 
 void IAS::increment(ByteArray &seq) {
-	for (DWORD i = seq.size() - 1; i >= 0; i--) {
+	for (int i = seq.size() - 1; i >= 0; i--) {
 		if (seq[i] < 255) {
 			seq[i]++;
 			for (DWORD j = i + 1; j < seq.size(); j++)
@@ -558,8 +558,13 @@ DWORD IAS::respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &resp, ByteArr
 		else if (resp[index] == 0x85) {
 			if (resp[index + 1] > 0x80) {
 				llen = resp[index + 1] - 0x80;
-				if (llen == 1) lgn = resp[index + 2];
-				if (llen == 2) lgn = (resp[index + 2] << 8) | resp[index + 3];
+				if (llen == 1) 
+					lgn = resp[index + 2];
+				else 
+					if (llen == 2) 
+						lgn = (resp[index + 2] << 8) | resp[index + 3];
+					else 
+						throw CStringException("Lunghezza ASN1 non valida: %i", llen);
 				encData = resp.mid(index + llen + 2, lgn);
 				calcMac.append(resp.mid(index, lgn + llen + 2));
 				index += llen + lgn + 2;
@@ -573,8 +578,13 @@ DWORD IAS::respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &resp, ByteArr
 		else if (resp[index] == 0x87) {
 			if (resp[index + 1] > 0x80) {
 				llen = resp[index + 1] - 0x80;
-				if (llen == 1)lgn = resp[index + 2];
-				if (llen == 2) lgn = (resp[index + 2] << 8) | resp[index + 3];
+				if (llen == 1) 
+					lgn = resp[index + 2];
+				else 
+					if (llen == 2) 
+						lgn = (resp[index + 2] << 8) | resp[index + 3];
+					else
+						throw CStringException("Lunghezza ASN1 non valida: %i", llen);
 				encData = resp.mid(index + llen + 3, lgn - 1);
 				calcMac.append(resp.mid(index, lgn + llen + 2));
 				index += llen + lgn + 2;
@@ -816,13 +826,16 @@ BYTE encPub[] = { 0x01, 0x00, 0x01 };
 
 void IAS::SetCertificate(char *PAN,ByteArray &certificate) {
 	char szPath[MAX_PATH];
-	SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath);
+	if (SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath) != S_OK)
+		throw CStringException("Errore in GetFolderPath per COMMONDATA");
 	PathAppend(szPath, "\\CIEPKI");
 	if (!PathFileExists(szPath))
 		CreateDirectory(szPath, nullptr);
 	PathAppend(szPath, String().printf("\\%s.cer", PAN).lock());
 	FILE *f = nullptr;
 	fopen_s(&f, szPath, "wb");
+	if (f==nullptr)
+		throw CStringException("Errore in scrittura file cache del certificato");
 
 	ByteArray baEncMod = VarToByteArray(encMod);
 	ByteArray baEncPub = VarToByteArray(encPub);
@@ -862,26 +875,33 @@ void IAS::IconaSbloccoPIN() {
 	if (IsUserInteractive()) {
 		PROCESS_INFORMATION pi;
 		STARTUPINFO si;
-		ZeroMemory(&si, sizeof(STARTUPINFO));
+		ZeroMem(si);
 		si.cb = sizeof(STARTUPINFO);
 
 		WORD getHandle = 0xfffd;
 		ByteDynArray resp;
 		token.Transmit(VarToByteArray(getHandle), &resp);
 		SCARDHANDLE hCard = *(SCARDHANDLE*)resp.lock();
-		CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",SbloccoPIN ICON", moduleInfo.szModuleFullPath.lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);
+		if (!CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",SbloccoPIN ICON", moduleInfo.szModuleFullPath.lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) 
+			throw new CStringException("Errore in creazione processo SbloccoPIN");
+		else {
+			CloseHandle(pi.hThread);
+			CloseHandle(pi.hProcess);
+		}
+		
 	}
 }
 
 void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 	char szPath[MAX_PATH];
-	SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath);
+	if (SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath)!=S_OK)
+		throw CStringException("Errore in GetFolderPath per COMMONDATA");
 	PathAppend(szPath, String().printf("\\CIEPKI\\%s.cer", dumpHexData(PAN.mid(5, 6), String(), false).lock()).lock());
 	if (!PathFileExists(szPath)) {
 		if (askEnable && IsUserInteractive()) {
 			PROCESS_INFORMATION pi;
 			STARTUPINFO si;
-			ZeroMemory(&si, sizeof(STARTUPINFO));
+			ZeroMem(si);
 			si.cb = sizeof(STARTUPINFO);
 
 			WORD getHandle = 0xfffd;
@@ -890,8 +910,12 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			SCARDHANDLE hCard = *(SCARDHANDLE*)resp.lock();
 
 			SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
-			CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",AbilitaCIE %s", moduleInfo.szModuleFullPath.lock(), dumpHexData(PAN.mid(5, 6), String(), false).lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);
+			if (!CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",AbilitaCIE %s", moduleInfo.szModuleFullPath.lock(), dumpHexData(PAN.mid(5, 6), String(), false).lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
+				throw new CStringException("Errore in creazione processo SbloccoPIN");
+			else
+				CloseHandle(pi.hThread);
 			WaitForSingleObject(pi.hProcess, INFINITE);
+			CloseHandle(pi.hProcess);
 			SCardBeginTransaction(hCard);
 		}
 		else {
@@ -962,7 +986,16 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 
 	byte OID_RSAwithSHA256[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0b };
 	byte OID_RSAwithSHA1[] = { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x05 };
-	temp3.Child(4, 0x30).Child(0, 06).Verify(VarToByteArray(OID_RSAwithSHA1));
+	auto &digestAlgo = temp3.Child(4, 0x30).Child(0, 06).content;
+	bool isSHA1 = false;
+	bool isSHA256 = false;
+	if (digestAlgo == VarToByteArray(OID_RSAwithSHA1))
+		isSHA1 = true;
+	else 
+		if (digestAlgo == VarToByteArray(OID_RSAwithSHA256))
+			isSHA256 = true;
+		else
+			throw CStringException("Algoritmo del digest della firma non valido");
 
 	CASNTag &signature = temp3.Child(5, 04);
 	// ok,ho tutto... adesso devo verificare che la firma corrisponda e il certificato vada bene
@@ -999,11 +1032,18 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	ByteDynArray decryptedSignature;
 	rsa.RSA_PURE(signatureData, decryptedSignature);
 	decryptedSignature = decryptedSignature.mid(RemovePaddingBT1(decryptedSignature));
-	decryptedSignature = decryptedSignature.mid(RemoveSha1(decryptedSignature));
 	ByteArray toSign = SOD.mid((int)signerInfo.tags[0]->startPos, (int)(signerInfo.tags[signerInfo.tags.size()- 1]->endPos - signerInfo.tags[0]->startPos));
 	ByteDynArray digestSignature;
-	CSHA1 sha1;
-	sha1.Digest(toSign.setASN1Tag(0x31, ByteDynArray()), digestSignature);
+	if (isSHA1) {
+		CSHA1 sha1;
+		decryptedSignature = decryptedSignature.mid(RemoveSha1(decryptedSignature));
+		sha1.Digest(toSign.setASN1Tag(0x31, ByteDynArray()), digestSignature);
+	}
+	if (isSHA256) {
+		CSHA256 sha256;
+		decryptedSignature = decryptedSignature.mid(RemoveSha256(decryptedSignature));
+		sha256.Digest(toSign.setASN1Tag(0x31, ByteDynArray()), digestSignature);
+	}
 	if (digestSignature!=decryptedSignature)
 		throw CStringException("Firma del SOD non valida");
 
@@ -1067,9 +1107,9 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 BOOL CheckOneInstance(char *nome)
 {
 	auto m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, nome);
-	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+	if (GetLastError() == ERROR_ALREADY_EXISTS && m_hStartEvent != nullptr) {
 		CloseHandle(m_hStartEvent);
-		m_hStartEvent = NULL;
+		m_hStartEvent = nullptr;
 		return FALSE;
 	}
 	return TRUE;

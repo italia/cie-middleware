@@ -4,7 +4,7 @@
 #define BitValue(a,b) ((a>>b) & 1)
 
 DWORD GetASN1DataLenght(ByteArray &data) {
-	int l = 1;
+	DWORD l = 1;
 	BYTE *cur = data.lock();
 
 	int len = 0;
@@ -86,14 +86,14 @@ DWORD CASNTag::Reparse() {
 }
 
 DWORD CASNTag::EncodeLen() {
-	int tlen = tag.size();
+	int tlen = (int)tag.size();
 	DWORD clen = ContentLen();
 	int llen = ASN1LLength(clen);
 	return tlen + llen + clen;
 }
 
 RESULT CASNTag::Encode(ByteArray &data,DWORD &len) {
-	int tlen = tag.size();
+	int tlen = (int)tag.size();
 	if (tlen==1 && tag[0]==3 && forcedSequence)
 		throw CStringException("Bit string reparsed non gestite in encode!");
 	data.copy(&tag[0], tlen);
@@ -199,7 +199,7 @@ RESULT CASNParser::Parse(ByteArray &data) {
 RESULT CASNParser::Parse(ByteArray &data, CASNTagArray &tags, int startseq)
 {
 	init_func
-	int l=0;
+	DWORD l=0;
 	BYTE *cur=data.pbtData;
 	while (l<data.size()) {
 		int len=0;
