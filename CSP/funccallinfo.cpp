@@ -4,7 +4,7 @@
 
 static char *szCompiledFile=__FILE__;
 
-int tlsCallDepth;
+DWORD tlsCallDepth;
 //extern CThreadLocalStorage tlsCallDepth;
 extern bool bFunctionLog;
 extern DWORD dwGlobalDepth;

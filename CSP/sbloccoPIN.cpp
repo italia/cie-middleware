@@ -34,12 +34,17 @@ DWORD WINAPI _sbloccoPIN(
 		SCardEstablishContext(SCARD_SCOPE_SYSTEM, nullptr, nullptr, &hSC);
 		char *readers = nullptr;
 		len = SCARD_AUTOALLOCATE;
-		SCardListReaders(hSC, nullptr, (char*)&readers, &len);
+		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS) {
+			CMessage aa(IDB_BACKGROUND, MB_OK,
+				"Nessun lettore di smartcard installato");
+			aa.DoModal();
+			return 0;
+		}
 		char *curreader = readers;
 		bool foundCIE = false;
-		for (; curreader[0] != 0; curreader += strlen(curreader) + 1) {
+		for (; curreader[0] != 0; curreader += strnlen(curreader, len) + 1) {
 			CARD_DATA cData;
-			ZeroMemory(&cData, sizeof(cData));
+			ZeroMem(cData);
 			cData.dwVersion = 7;
 			cData.hSCardCtx = hSC;
 			{
@@ -79,7 +84,7 @@ DWORD WINAPI _sbloccoPIN(
 						len = 0;
 						auto ias = ((IAS*)cData.pvVendorSpecific);
 
-						auto ris = CardUnblockPin(&cData, wszCARD_USER_USER, (BYTE*)pin.PIN, strlen(pin.PIN), nullptr, 0, -1, CARD_AUTHENTICATE_PIN_PIN);
+						auto ris = CardUnblockPin(&cData, wszCARD_USER_USER, (BYTE*)pin.PIN, (DWORD)strnlen(pin.PIN, sizeof(pin.PIN)), nullptr, 0, -1, CARD_AUTHENTICATE_PIN_PIN);
 						if (ris == SCARD_W_WRONG_CHV) {
 							String num;
 							if (ias->attemptsRemaining >= 0)
@@ -208,8 +213,13 @@ extern "C" int CALLBACK SbloccoPIN(
 	else {
 		DWORD id;
 		HANDLE thread = CreateThread(nullptr, 0, _sbloccoPIN, lpCmdLine, 0, &id);
+		if (thread == nullptr) {
+			ODS("Errore in CreateThread");
+			return 0;
+		}
 		WaitForSingleObject(thread, INFINITE);
 		ODS("End SbloccoPIN");
 		return 0;
 	}
+	return 0;
 }

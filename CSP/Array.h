@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <openssl/rand.h>
 
 #ifndef min
 #define min(a,b) ((a)<(b)) ? (a) : (b)
@@ -63,6 +64,8 @@ public:
   		init_func_internal
 		int val=0;
 		for (DWORD i=0;i<dwSize;i++) {
+			if (val>(INT_MAX / 10))
+				throw err_string("owerflow");
 			val=(val*10)+pbtData[i]-'0';
 		}
 		return val;
@@ -136,7 +139,8 @@ public:
 		if (src.dwSize+start>dwSize)
 			throw err_string("Dimensione array da copiare %i troppo grande; dimensione massima %i",src.dwSize+start,dwSize);
 	#endif
-		return ::memcpy(pbtData+start,src.pbtData,src.dwSize*sizeof(T));
+		::memcpy_s(pbtData + start, dwSize - (start*sizeof(T)), src.pbtData, src.dwSize*sizeof(T));
+		return pbtData + start;
 		exit_func_internal
 	}
 
@@ -146,7 +150,8 @@ public:
 		if (src.dwSize+end>dwSize)
 			throw err_string("Dimensione array da copiare %i troppo grande; dimensione massima %i",src.dwSize+end,dwSize);
 	#endif
-		return ::memcpy(pbtData+dwSize-end-src.dwSize*sizeof(T),src.pbtData,src.dwSize*sizeof(T));
+		::memcpy_s(pbtData + dwSize - end - src.dwSize, (end + src.dwSize)*sizeof(T), src.pbtData, src.dwSize*sizeof(T));
+		return pbtData + dwSize - end - src.dwSize;
 		exit_func_internal
 	}
 
@@ -156,7 +161,8 @@ public:
 		if (size+start>dwSize) 
 			throw err_string("Dimensione array da copiare %i troppo grande; dimensione massima %i",size+start,dwSize);
 	#endif
-		return ::memcpy(pbtData+start,src,size*sizeof(T));
+		::memcpy_s(pbtData + start, (dwSize - start) *sizeof(T), src, size*sizeof(T));
+		return pbtData + start;
 		exit_func_internal
 	}
 
@@ -166,7 +172,8 @@ public:
 		if (size+end>dwSize) 
 			throw err_string("Dimensione array da copiare %i troppo grande; dimensione massima %i",size+end,dwSize);
 	#endif
-		return ::memcpy(pbtData+dwSize-end-size*sizeof(T),src,size*sizeof(T));
+		::memcpy_s(pbtData + dwSize - end - size, (end + size)*sizeof(T),src, size*sizeof(T));
+		return pbtData + dwSize - end - size;
 		exit_func_internal
 	}
 
@@ -178,8 +185,9 @@ public:
 	}
 
 	Array<T> &random() {
-		for (DWORD i = 0; i<dwSize; i++)
-			pbtData[i] = rand() % 256;
+		RAND_bytes(pbtData, dwSize);
+		//for (DWORD i = 0; i<dwSize; i++)
+		//	pbtData[i] = rand() % 256;
 		return *this;
 	}
 
@@ -304,7 +312,7 @@ public:
 			T* pbtNewData=(T*)malloc(sizeof(T)*size);
 			DWORD dwMinSize=min(size,dwSize);
 			if (dwMinSize>0)
-				memcpy(pbtNewData,pbtData,sizeof(T)*dwMinSize);
+				memcpy_s(pbtNewData, sizeof(T)*size, pbtData, sizeof(T)*dwMinSize);
 			clear();
 			pbtData=pbtNewData;
 			dwSize=size;
@@ -346,8 +354,9 @@ public:
 	}
 	DynArray<T> & random(int size) {
 		resize(size,false);
-		for (int i=0;i<size;i++)
-			pbtData[i]=rand()%256;
+		RAND_bytes(pbtData, size);
+		//for (int i=0;i<size;i++)
+		//	pbtData[i]=rand()%256;
 		return *this;
 	}
 
@@ -413,23 +422,35 @@ public:
 			void* cur=va_arg(params,void*);
 			if ((DWORD)cur<256)
 				totSize++;
-			else if (*(void**)cur==bdaVf){
-				ByteDynArray *bda=(ByteDynArray *)cur;
-				totSize+=bda->size();
-			}
-			else if (*(void**)cur==baVf){
-				ByteArray *ba=(ByteArray *)cur;
-				totSize+=ba->size();
-			}
-			else if (cur==bdaVf){
-				throw err_string("I dati di tipo ByteDynArray nel metodo set vanno passati per riferimento!");
-			}
-			else if (cur==baVf){
-				throw err_string("I dati di tipo ByteArray nel metodo set vanno passati per riferimento!");
-			}
 			else {
-				// suppongo sia una stringa
-				totSize+=countHexData((const char*)cur);
+				void *derCur = nullptr;
+				if (cur != nullptr)
+					derCur = *(void**)cur;
+
+				if (derCur == bdaVf){
+					ByteDynArray *bda = (ByteDynArray *)cur;
+					if (bda != nullptr)
+						totSize += bda->size();
+					else
+						err_string("Parametro NULL");
+				}
+				else if (derCur == baVf){
+					ByteArray *ba = (ByteArray *)cur;
+					if (ba!=nullptr)
+						totSize += ba->size();
+					else
+						err_string("Parametro NULL");
+				}
+				else if (cur == bdaVf){
+					throw err_string("I dati di tipo ByteDynArray nel metodo set vanno passati per riferimento!");
+				}
+				else if (cur == baVf){
+					throw err_string("I dati di tipo ByteArray nel metodo set vanno passati per riferimento!");
+				}
+				else {
+					// suppongo sia una stringa
+					totSize += countHexData((const char*)cur);
+				}
 			}
 		}
 		va_end (params);
@@ -519,13 +540,13 @@ public:
 	}
 
 	inline bool operator==(const char *op) const  {
-		DWORD dwOpSize = (DWORD)::strlen(op) + 1;
+		DWORD dwOpSize = (DWORD)::strnlen(op, dwSize + 1) + 1;
 		if (dwSize != dwOpSize) return(false);
 		return(memcmp(pbtData, op, dwSize) == 0);
 	}
 
 	inline bool operator!=(const char *op) const  {
-		DWORD dwOpSize = (DWORD)::strlen(op) + 1;
+		DWORD dwOpSize = (DWORD)::strnlen(op, dwSize + 1) + 1;
 		if (dwSize != dwOpSize) return(false);
 		return(memcmp(pbtData, op, dwSize) != 0);
 	}
@@ -549,6 +570,8 @@ public:
 	DWORD readFile(char * path) {
 		FILE *f = nullptr;
 		fopen_s(&f, path, "rb");
+		if (f == nullptr)
+			throw err_string("Errore in lettura file %s", path);
 		fseek(f, 0, SEEK_END);
 		int len = ftell(f);
 		fseek(f, 0, SEEK_SET);
@@ -561,10 +584,10 @@ public:
 
 	DWORD strlen() const {
 		init_func_internal
-		for (DWORD i=0;i<dwSize;i++) {
-			if (pbtData[i]==0) return i;
-		}
-		throw err_string("Stringa non valida, fine stringa non trovato");
+		auto len = ::strnlen(pbtData, dwSize + 1);
+		if (len == (dwSize + 1))
+			throw err_string("Stringa non valida, fine stringa non trovato");
+		return (DWORD)len;
 		exit_func_internal
 	}
 

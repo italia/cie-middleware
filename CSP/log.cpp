@@ -246,9 +246,9 @@ DWORD CLog::write(const char *format,...) {
 #ifdef _DEBUG
 #ifdef WIN32
 	vsprintf_s(pbtDate, format, params);
-	int dtLen = strlen(pbtDate);
+	int dtLen = (int)strnlen(pbtDate, sizeof(pbtDate));
 	sprintf_s(pbtDate + dtLen, 2048 - dtLen, "|thread:%08x|%s|", GetCurrentThreadId(), logName.lock());
-	dtLen = strlen(pbtDate);
+	dtLen = (int)strnlen(pbtDate, sizeof(pbtDate));
 	sprintf_s(pbtDate+ dtLen, 2048 - dtLen , "\n");
 	OutputDebugString(pbtDate);
 #else
@@ -296,9 +296,9 @@ void CLog::writePure(const char *format,...) {
 	}
 #ifdef _DEBUG
 #ifdef WIN32
-	int dtLen=strlen(pbtDate);
+	int dtLen = (int)strnlen(pbtDate, sizeof(pbtDate));
 	vsprintf_s(pbtDate+dtLen,2048-dtLen, format, params);
-	dtLen = strlen(pbtDate);
+	dtLen = (int)strnlen(pbtDate, sizeof(pbtDate));
 	sprintf_s(pbtDate + dtLen, 2048 - dtLen , "\n");
 	OutputDebugString(pbtDate);
 #else

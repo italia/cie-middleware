@@ -70,7 +70,7 @@ CK_RV CP11Object::GetAttributeValue(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount
 			else {
 				if (attr->size()>ulValLen)
 					_return(CKR_BUFFER_TOO_SMALL)
-				memcpy(pTemplate[i].pValue,attr->lock(),attr->size());
+					memcpy_s(pTemplate[i].pValue, attr->size(), attr->lock(), attr->size());
 				pTemplate[i].ulValueLen=attr->size();
 			}
 		}

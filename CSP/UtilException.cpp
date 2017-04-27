@@ -76,8 +76,7 @@ void CBaseException::DumpTree(String &dump)
 			pos.printf("%s(%i)",exc->fileName.stringlock(),exc->line);
 		char *exName=exc->ExceptionName();
 		int sz=dump.size()-1;
-		dump.resize(sz+pos.size()+desc.size()+strlen(exName)+4,true);
-		sprintf_s((char*)dump.pbtData+sz,dump.size()-sz,"%s : %s:%s\n",pos.lock(),exName,desc.lock());
+		dump.printf("%s : %s:%s\n", pos.lock(), exName, desc.lock());
 		exc=exc->innerException;
 	}
 }

@@ -117,7 +117,7 @@ RESULT CTLVCreate::getBuffer(ByteDynArray &Value)
 		Value[dwPtr]=it->first;
 		dwPtr++;
 		if (it->second.size()<0xff) {
-			Value[dwPtr]=it->second.size();
+			Value[dwPtr]=(BYTE)it->second.size();
 			dwPtr++;
 		}
 		else {
