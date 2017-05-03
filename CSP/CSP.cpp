@@ -253,14 +253,15 @@ DWORD WINAPI CardAuthenticateEx(
 	init_main_func
 	if (pcbSessionPin != nullptr)
 		pcbSessionPin = nullptr;
-	if (pcAttemptsRemaining!=nullptr)
-		*pcAttemptsRemaining = 0;
 	if (pcAttemptsRemaining != nullptr)
 		*pcAttemptsRemaining = 0;
 	if (pbPinData == nullptr)
 		return SCARD_E_INVALID_PARAMETER;
-	if (cbPinData != 8)
+	if (cbPinData != 8) {
+		if (pcAttemptsRemaining != nullptr)
+			*pcAttemptsRemaining = -1;
 		return SCARD_W_WRONG_CHV;
+	}
 	if ((dwFlags & CARD_AUTHENTICATE_GENERATE_SESSION_PIN) == CARD_AUTHENTICATE_GENERATE_SESSION_PIN)
 		return SCARD_E_INVALID_PARAMETER;
 
@@ -527,6 +528,90 @@ __in                                        DWORD       dwFlags)
 	return E_UNEXPECTED;
 }
 
+DWORD
+WINAPI
+CardChangeAuthenticatorEx(
+__in                                    PCARD_DATA  pCardData,
+__in                                    DWORD       dwFlags,
+__in                                    PIN_ID      dwAuthenticatingPinId,
+__in_bcount(cbAuthenticatingPinData)    PBYTE       pbAuthenticatingPinData,
+__in                                    DWORD       cbAuthenticatingPinData,
+__in                                    PIN_ID      dwTargetPinId,
+__in_bcount(cbTargetData)               PBYTE       pbTargetData,
+__in                                    DWORD       cbTargetData,
+__in                                    DWORD       cRetryCount,
+__out_opt                               PDWORD      pcAttemptsRemaining) {
+	init_main_func
+	if (pcAttemptsRemaining != nullptr)
+		*pcAttemptsRemaining = 0;
+
+	if (dwTargetPinId != ROLE_USER)
+		return SCARD_E_INVALID_PARAMETER;
+
+	if (dwFlags == PIN_CHANGE_FLAG_UNBLOCK) {
+		if (dwAuthenticatingPinId != ROLE_ADMIN)
+			return SCARD_E_INVALID_PARAMETER;
+		return CardUnblockPin(pCardData, wszCARD_USER_USER, pbAuthenticatingPinData, cbAuthenticatingPinData, pbTargetData, cbTargetData, 0, CARD_AUTHENTICATE_PIN_PIN);
+	}
+	if (dwFlags == PIN_CHANGE_FLAG_CHANGEPIN) {
+		if (dwAuthenticatingPinId != ROLE_USER)
+			return SCARD_E_INVALID_PARAMETER;
+		auto ias = (IAS*)pCardData->pvVendorSpecific;
+		if (ias == nullptr)
+			throw CStringException("IAS non inizializzato");
+		ias->SetCardContext(pCardData);
+		ias->attemptsRemaining = -1;
+
+		// leggo i parametri di dominio DH e della chiave di extauth
+		if (ias->Callback != nullptr)
+			ias->Callback(0, "Init", ias->CallbackData);
+		ias->InitDHParam();
+		ias->InitExtAuthKeyParam();
+		// faccio lo scambio di chiavi DH	
+		if (ias->Callback != nullptr)
+			ias->Callback(1, "DiffieHellman", ias->CallbackData);
+		ias->DHKeyExchange();
+		// DAPP
+		if (ias->Callback != nullptr)
+			ias->Callback(2, "DAPP", ias->CallbackData);
+		ias->DAPP();
+		// verifica PIN
+		DWORD sw;
+		if (ias->Callback != nullptr)
+			ias->Callback(3, "Verify PIN", ias->CallbackData);
+
+		sw = ias->VerifyPIN(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
+
+		if (sw >= 0x63C0 && sw <= 0x63CF) {
+			ias->attemptsRemaining = sw - 0x63C0;
+
+			if (pcAttemptsRemaining != nullptr)
+				*pcAttemptsRemaining = ias->attemptsRemaining;
+
+			return SCARD_W_WRONG_CHV;
+		}
+		if (sw == 0x6700) {
+			return SCARD_W_WRONG_CHV;
+		}
+		if (sw == 0x6983) {
+			return SCARD_W_CHV_BLOCKED;
+		}
+		if (sw == 0x6300)
+			return SCARD_W_WRONG_CHV;
+		if (sw != 0x9000)
+			throw CSCardException((WORD)sw);
+
+		sw = ias->ChangePIN(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData), ByteArray(pbTargetData, cbTargetData));
+		if (sw != 0x9000)
+			throw CSCardException((WORD)sw);
+		return 0;
+	}
+	else
+		return SCARD_E_INVALID_PARAMETER;
+	exit_main_func
+	return E_UNEXPECTED;
+}
+
 //
 // Function: CardUnblockPin
 //
@@ -545,7 +630,7 @@ __in                               DWORD       dwFlags) {
 	init_main_func
 	if (dwFlags != CARD_AUTHENTICATE_PIN_PIN)
 		return SCARD_E_INVALID_PARAMETER;
-	if (cRetryCount != -1)
+	if (cRetryCount != 0)
 		return SCARD_E_INVALID_PARAMETER;
 	if (cbAuthenticationData != 8)
 		return SCARD_W_WRONG_CHV;

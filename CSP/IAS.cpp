@@ -24,84 +24,6 @@
 
 extern CModuleInfo moduleInfo;
 
-struct transData {
-	SCARDCONTEXT context;
-	bool started;
-	HANDLE thread;
-};
-bool safeTransaction::isLocked() {
-	return locked;
-}
-safeTransaction::safeTransaction(safeConnection &conn, DWORD dwDisposition) {
-	this->hCard = conn.hCard;
-	this->dwDisposition = dwDisposition;
-	locked = false;
-
-	struct transData *td = new struct transData;
-	td->context = conn.hContext;
-	td->started = false;
-	DWORD id = 0;
-	td->thread=CreateThread(nullptr, 0, [](LPVOID lpThreadParameter) -> DWORD {
-		struct transData *td = (struct transData*)lpThreadParameter;
-		for (int i = 0; i < 10; i++) {
-			Sleep(500);
-			if (td->started) {
-				CloseHandle(td->thread);
-				delete td;
-				return 0;
-			}
-		}
-		SCardCancel(td->context);
-		CloseHandle(td->thread);
-		delete td;
-		return 0;
-	}, td, 0, &id);
-
-
-	if (SCardBeginTransaction(hCard) != SCARD_S_SUCCESS) {
-		this->hCard = NULL;
-		this->dwDisposition = 0;
-		return;
-	}
-	else {
-		td->started = true;
-		locked = true;
-	}
-}
-
-void safeTransaction::unlock() {
-	if (hCard != NULL && locked) {
-		SCardEndTransaction(hCard, dwDisposition);
-		locked = false;
-	}
-}
-
-safeTransaction::~safeTransaction() {
-	if (hCard != NULL && locked) {
-		SCardEndTransaction(hCard, dwDisposition);
-	}
-}
-
-safeConnection::safeConnection(SCARDHANDLE hCard) {
-	this->hCard = hCard;
-}
-
-safeConnection::safeConnection(SCARDCONTEXT hContext, LPCSTR szReader, DWORD dwShareMode) {
-	DWORD dwProtocol;
-	this->hContext = hContext;
-	if (SCardConnect(hContext, szReader, dwShareMode, SCARD_PROTOCOL_T1, &hCard, &dwProtocol) != SCARD_S_SUCCESS)
-		hCard = NULL;
-}
-
-safeConnection::~safeConnection() {
-	if (hCard) {
-		SCardDisconnect(hCard, SCARD_RESET_CARD);
-	}
-}
-safeConnection::operator SCARDHANDLE() {
-	return hCard;
-}
-
 IAS::IAS(CToken::TokenTransmitCallback transmit)
 {
 	Callback = nullptr;
@@ -195,6 +117,24 @@ DWORD IAS::UnblockPIN() {
 	ByteDynArray resp;
 	BYTE UnblockPIN[] = { 0x00, 0x2C, 0x03, CIE_PIN_ID };
 	return SendAPDU_SM(VarToByteArray(UnblockPIN), ByteArray(), resp);
+	exit_func
+}
+
+DWORD IAS::ChangePIN(ByteArray &oldPIN,ByteArray &newPIN) {
+	init_func
+	ByteDynArray resp;
+	ByteDynArray data=oldPIN;
+	data.append(newPIN);
+	BYTE ChangePIN[] = { 0x00, 0x24, 0x00, CIE_PIN_ID };
+	return SendAPDU_SM(VarToByteArray(ChangePIN), data, resp);
+	exit_func
+}
+
+DWORD IAS::ChangePIN(ByteArray &newPIN) {
+	init_func
+	ByteDynArray resp;
+	BYTE ChangePIN[] = { 0x00, 0x2C, 0x02, CIE_PIN_ID };
+	return SendAPDU_SM(VarToByteArray(ChangePIN), newPIN, resp);
 	exit_func
 }
 

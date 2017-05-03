@@ -73,19 +73,23 @@
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
+    <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)</TargetName>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)</TargetName>
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -96,13 +100,13 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>c:\OpenSSL1.0.0\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Comctl32.lib;Crypt32.lib;shlwapi.lib;libeay32MTd.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>c:\OpenSSL1.0.0\lib\VC\static</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)OpenSSL1.0.2k\lib\$(PlatformName)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -128,14 +132,14 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>c:\OpenSSL64\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include</AdditionalIncludeDirectories>
       <BufferSecurityCheck>true</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Comctl32.lib;Crypt32.lib;shlwapi.lib;libeay32MTd.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>c:\OpenSSL64\lib\VC\static</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)OpenSSL1.0.2k\lib\$(PlatformName)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
@@ -156,7 +160,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>c:\OpenSSL1.0.0\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
@@ -165,7 +169,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Crypt32.lib;shlwapi.lib;libeay32MT.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>c:\OpenSSL1.0.0\lib\VC\static</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)OpenSSL1.0.2k\lib\$(PlatformName)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
@@ -182,7 +186,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>c:\OpenSSL64\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
@@ -191,7 +195,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Crypt32.lib;shlwapi.lib;libeay32MT.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>c:\OpenSSL64\lib\VC\static</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)OpenSSL1.0.2k\lib\$(PlatformName)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
@@ -204,12 +208,12 @@
     <ClCompile Include="abilitaCIE.cpp" />
     <ClCompile Include="AES.cpp" />
     <ClCompile Include="APDU.cpp" />
+    <ClCompile Include="cambioPIN.cpp" />
     <ClCompile Include="Message.cpp" />
     <ClCompile Include="ASNParser.cpp" />
     <ClCompile Include="Base64.cpp" />
     <ClCompile Include="Bitmap.cpp" />
     <ClCompile Include="CardLocker.cpp" />
-    <ClCompile Include="CBase64.cpp" />
     <ClCompile Include="CSP.cpp" />
     <ClCompile Include="DES3.cpp" />
     <ClCompile Include="funccallinfo.cpp" />
@@ -219,6 +223,7 @@
     <ClCompile Include="MAC.cpp" />
     <ClCompile Include="ModuleInfo.cpp" />
     <ClCompile Include="NotImpl.cpp" />
+    <ClCompile Include="PCSC.cpp" />
     <ClCompile Include="PIN.cpp" />
     <ClCompile Include="PKCS11\CardContext.cpp" />
     <ClCompile Include="PKCS11\CardTemplate.cpp" />
@@ -244,6 +249,7 @@
     <ClCompile Include="Token.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="UtilException.cpp" />
+    <ClCompile Include="Verifica.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AES.h" />
@@ -252,7 +258,6 @@
     <ClInclude Include="ASNParser.h" />
     <ClInclude Include="Base64.h" />
     <ClInclude Include="CardLocker.h" />
-    <ClInclude Include="CBase64.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="defines_err.h" />
     <ClInclude Include="DES3.h" />
@@ -267,6 +272,7 @@
     <ClInclude Include="CardMod.h" />
     <ClInclude Include="IAS.h" />
     <ClInclude Include="ModuleInfo.h" />
+    <ClInclude Include="PCSC.h" />
     <ClInclude Include="PIN.h" />
     <ClInclude Include="PKCS11\CardContext.h" />
     <ClInclude Include="PKCS11\CardTemplate.h" />

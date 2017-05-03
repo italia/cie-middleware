@@ -12,6 +12,7 @@ static char *szCompiledFile=__FILE__;
 extern CSyncroMutex p11Mutex;
 extern CSyncroEvent p11slotEvent;
 extern bool bP11Terminate;
+extern bool bP11Initialized;
 
 namespace p11 {
 
@@ -70,6 +71,11 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 		{
 			CSyncroLocker lock(p11Mutex);
 			for (SlotMap::const_iterator it=pSlotMap->begin();it!=pSlotMap->end();it++,i++) {
+				if (!bP11Initialized) {
+					CSlot::ThreadContext = NULL;
+					return 0;
+				}
+
 				state[i].szReader=it->second->szName.stringlock();
 				slot[i]=it->second;
 				if (ris=SCardGetStatusChange(Context,0,&state[i],1)!=S_OK) {
@@ -78,6 +84,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 						// non uso la ExitThread!!!
 						// altrimenti non chiamo i distruttori, e mi rimane tutto appeso
 						// SOPRATTUTTO il p11Mutex
+						CSlot::ThreadContext = NULL;
 						return 1;
 					}
 				}
@@ -93,13 +100,17 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 					Log.write("Monitor Update");
 					break;
 				}
-				if (ris==SCARD_E_CANCELLED || bP11Terminate) {
-					Log.write("Terminate");
+				if (ris==SCARD_E_CANCELLED || bP11Terminate || !bP11Initialized) {
+					Log.write("Terminate");					
+					p11slotEvent.Signal();
+					CSlot::ThreadContext = NULL;
 					// no exitThread, vedi sopra;
 					return 0;
 				}
 				if (ris!=SCARD_E_TIMEOUT && ris!=SCARD_E_NO_READERS_AVAILABLE) {
 					Log.write("Errore nella SCardGetStatusChange - %08X",ris);
+					p11slotEvent.Signal();
+					CSlot::ThreadContext = NULL;
 					// no exitThread, vedi sopra;
 					return 1;
 				}
@@ -137,6 +148,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 			}
 			if (ris==SCARD_E_NO_READERS_AVAILABLE) {
 				Log.write("Nessun lettore connesso - %08X",ris);
+				CSlot::ThreadContext = NULL;
 				// no exitThread, vedi sopra;
 				return 1;
 			}
@@ -250,6 +262,9 @@ RESULT CSlot::InitSlotList()
 
 	CCardContext Context;
 
+	if (!bP11Initialized)
+		return 0;
+
 	DWORD ris=SCardListReaders(Context,NULL,NULL,&readersLen);
 	if (ris!=S_OK) {
 		if (ris==SCARD_E_NO_READERS_AVAILABLE)
@@ -258,10 +273,13 @@ RESULT CSlot::InitSlotList()
 	}
 	String readers(readersLen+1);
 	WIN_R_CALL(SCardListReaders(Context,NULL,readers.lock(readersLen+1),&readersLen),SCARD_S_SUCCESS)
-	
+
 	char *szReaderName=readers.stringlock();
 
 	while (*szReaderName!=0) {
+		if (!bP11Initialized)
+			return 0;
+
 		// vediamo questo slot c'era già prima
 		Log.write("reader:%s",szReaderName);
 		CSlot *pSlot=NULL;
@@ -277,7 +295,10 @@ RESULT CSlot::InitSlotList()
 	}
 	// adesso vedo se tutti gli slot nella mappa ci sono ancora
 	for (SlotMap::iterator it=g_mSlots.begin();it!=g_mSlots.end();it++) {
-		Log.write("%s",it->second->szName.pbtData);
+		if (!bP11Initialized)
+			return 0;
+
+		Log.write("%s", it->second->szName.pbtData);
 		const char *name=it->second->szName.stringlock();
 
 		char *szReaderName=readers.stringlock();
@@ -298,6 +319,9 @@ RESULT CSlot::InitSlotList()
 		}
 	}
 	bMonitorUpdate=bMapChanged;
+
+	if (!bP11Initialized)
+		return 0;
 
 	if (Thread.dwThreadID==0) {
 		Thread.createThread(slotMonitor, &g_mSlots);
@@ -412,6 +436,8 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 	memset(pInfo->serialNumber,' ',sizeof(pInfo->serialNumber));
 	int UIDsize=min(sizeof(pInfo->serialNumber),baSerial.size());
 	memcpy_s(pInfo->serialNumber,16,baSerial.lock(UIDsize),UIDsize);
+
+	memcpy_s((char*)pInfo->label + pTemplate->szName.strlen() + 1, sizeof(pInfo->label) - pTemplate->szName.strlen() - 1, baSerial.lock(), baSerial.size());
 
 	memset(pInfo->model,' ',sizeof(pInfo->model));
 	memcpy_s(pInfo->model,16,model.lock(),min(model.strlen(),sizeof(pInfo->model)));	
