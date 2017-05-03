@@ -51,10 +51,10 @@ DWORD WINAPI _abilitaCIE(
 		char *readers = nullptr;
 		len = SCARD_AUTOALLOCATE;
 		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS) {
-			CMessage aa(MB_OK,
+			CMessage msg(MB_OK,
 				"Abilitazione CIE",
 				"Nessun lettore di smartcard installato");
-			aa.DoModal();
+			msg.DoModal();
 			return 0;
 		}
 
@@ -93,11 +93,11 @@ DWORD WINAPI _abilitaCIE(
 				if (desk == nullptr)
 					desk = new safeDesktop("AbilitaCIE");
 
-				CMessage aa(MB_OKCANCEL, "Abilitazione CIE",
+				CMessage msg(MB_OKCANCEL, "Abilitazione CIE",
 					"Premere OK per effettuare la verifica di autenticità",
 					"e abilitare l'uso della CIE su questo PC");
 
-				if (aa.DoModal() == IDOK) {
+				if (msg.DoModal() == IDOK) {
 					
 					CPin pin("Inserire il PIN della CIE", "Abilitazione CIE");
 					if (pin.DoModal() == IDOK) {
@@ -171,20 +171,20 @@ DWORD WINAPI _abilitaCIE(
 									num.printf("Sono rimasti %i tentativi prima del blocco", attempts);
 								else
 									num = "";
-								CMessage aa(MB_OK,
+								CMessage msg(MB_OK,
 									"Abilitazione CIE",
 									"PIN Errato",
 									num.lock());
-								aa.DoModal();
+								msg.DoModal();
 								break;
 							}
 							else if (rs == SCARD_W_CHV_BLOCKED) {
 								if (progWin != nullptr)
 									SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
-								CMessage aa(MB_OK,
+								CMessage msg(MB_OK,
 									"Abilitazione CIE",
 									"Il PIN è bloccato. Può esere sbloccato verificando il PUK");
-								aa.DoModal();
+								msg.DoModal();
 								break;
 							}
 							else if (rs != SCARD_S_SUCCESS)
@@ -216,20 +216,20 @@ DWORD WINAPI _abilitaCIE(
 
 							Tran.unlock();
 
-							CMessage aa(MB_OK,
+							CMessage msg(MB_OK,
 								"Abilitazione CIE",
 								"La CIE è abilitata all'uso");
-							aa.DoModal();
+							msg.DoModal();
 						}
 						catch (CBaseException &ex) {
 							String dump;
 							ex.DumpTree(dump);
-							CMessage aa(MB_OK,
+							CMessage msg(MB_OK,
 								"Abilitazione CIE",
 								"Si è verificato un errore nella verifica di",
 								"autenticità del documento");
 
-							aa.DoModal();
+							msg.DoModal();
 							break;
 						}
 					}
@@ -242,11 +242,11 @@ DWORD WINAPI _abilitaCIE(
 				desk = new safeDesktop("AbilitaCIE");
 			String num;
 			num.printf("%s nei lettori di smart card", PAN);
-			CMessage aa(MB_OK,
+			CMessage msg(MB_OK,
 				"Abilitazione CIE",
 				"Impossibile trovare la CIE con Numero Identificativo",
 				num.lock());
-			aa.DoModal();
+			msg.DoModal();
 		}
 	}
 	catch (CBaseException &ex) {

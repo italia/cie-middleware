@@ -36,10 +36,10 @@ DWORD WINAPI _sbloccoPIN(
 		char *readers = nullptr;
 		len = SCARD_AUTOALLOCATE;
 		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS) {
-			CMessage aa(MB_OK,
+			CMessage msg(MB_OK,
 				"Sblocco PIN",
 				"Nessun lettore di smartcard installato");
-			aa.DoModal();
+			msg.DoModal();
 			return 0;
 		}
 		char *curreader = readers;
@@ -97,20 +97,20 @@ DWORD WINAPI _sbloccoPIN(
 									num.printf("Sono rimasti %i tentativi prima del blocco del PUK", ias->attemptsRemaining);
 								else
 									num = "";
-								CMessage aa(MB_OK, "Sblocco PIN",
+								CMessage msg(MB_OK, "Sblocco PIN",
 									"PUK Errato",
 									num.lock());
-								aa.DoModal();
+								msg.DoModal();
 								if (lpThreadParameter != nullptr)
 									PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 1, 0);
 
 								break;
 							}
 							else if (ris == SCARD_W_CHV_BLOCKED) {
-								CMessage aa(MB_OK,
+								CMessage msg(MB_OK,
 									"Sblocco PIN",
 									"Il PUK è bloccato. La CIE non può più essere sbloccata");
-								aa.DoModal();
+								msg.DoModal();
 								if (lpThreadParameter != nullptr)
 									PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
 								break;
@@ -118,9 +118,9 @@ DWORD WINAPI _sbloccoPIN(
 							else if (ris != 0)
 								throw CStringException("Autenticazione fallita");
 
-							CMessage aa(MB_OK, "Sblocco PIN",
+							CMessage msg(MB_OK, "Sblocco PIN",
 								"Il PIN è sbloccato");
-							aa.DoModal();
+							msg.DoModal();
 							if (lpThreadParameter != nullptr)
 								PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
 
@@ -128,9 +128,9 @@ DWORD WINAPI _sbloccoPIN(
 						catch (CBaseException &ex) {
 							String dump;
 							ex.DumpTree(dump);
-							CMessage aa(MB_OK, "Sblocco PIN",
+							CMessage msg(MB_OK, "Sblocco PIN",
 								"Si è verificato un errore nella verifica del PUK");
-							aa.DoModal();
+							msg.DoModal();
 							break;
 						}
 					}
@@ -147,10 +147,10 @@ DWORD WINAPI _sbloccoPIN(
 		if (!foundCIE) {
 			if (desk == nullptr)
 				desk = new safeDesktop("AbilitaCIE");
-			CMessage aa(MB_OK, "Sblocco PIN",
+			CMessage msg(MB_OK, "Sblocco PIN",
 				"Impossibile trovare una CIE",
 				"nei lettori di smart card");
-			aa.DoModal();
+			msg.DoModal();
 			if (lpThreadParameter != nullptr)
 				PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
 		}
