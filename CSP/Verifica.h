@@ -7,6 +7,7 @@
 #include "atlcontrols.h"
 #include <windows.h>       // simboli principali
 #include "ModuleInfo.h"
+#include "VCEdit.h"
 
 
 // CCodiceBusta
@@ -17,19 +18,11 @@ class CVerifica:
 {
 public:
 CAtlBitmapButton okButton,cancelButton;
-	int BackBmpID;
+CStatic tit;
 	HWND *wnd;
-	CVerifica(int BackGroundID,HWND *wnd)
-	{
-		BackBmpID = BackGroundID;
-		txtFont = CreateFont(20, 0, 0, 0, 800, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, DEFAULT_PITCH, "Arial");
-		this->wnd = wnd;
-	}
+	CVerifica(HWND *wnd);
 
-	~CVerifica()
-	{
-		DeleteObject(txtFont);
-	}
+	~CVerifica();
 
 	enum { IDD = IDD_VERIFY };
 
@@ -47,69 +40,20 @@ END_MSG_MAP()
 //  LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 //  LRESULT CommandHandler(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 //  LRESULT NotifyHandler(int idCtrl, LPNMHDR pnmh, BOOL& bHandled);
-	LRESULT OnCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-		bHandled = FALSE;
-		if (wParam >= 100) {
-			bHandled = TRUE;
-			progress.SetPos((int)wParam-100);
-			GetDlgItem(IDC_MSG2).SetWindowTextA((char*)lParam);
-			Invalidate();
-			if (wParam == 107)
-				EndDialog(IDOK);
-		}
-		return 0;
-	}
+LRESULT OnCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 
-	LRESULT OnBGnBrush(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-		bHandled = TRUE;
-		SetBkMode((HDC)wParam, TRANSPARENT);
-		return (INT_PTR)::GetStockObject(NULL_PEN);
-	}
+LRESULT OnBGnBrush(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
-	LRESULT OnHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-		bHandled = TRUE;
-		return (LRESULT)HTCAPTION;
-	}
+LRESULT OnHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
-	LRESULT OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)  {
-		bHandled = TRUE;
-		SetBkMode((HDC)wParam, TRANSPARENT);
-		return (INT_PTR)::GetStockObject(NULL_PEN);
-	}
+LRESULT OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	CBitmap backGround;
 	HFONT txtFont;
 	CProgressBarCtrl progress;
-	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
-	{
-		CenterWindow();
-		SetIcon(LoadIcon((HINSTANCE)moduleInfo.getModule(), MAKEINTRESOURCE(IDI_CIE)));
-		backGround.LoadImageResource(BackBmpID);
-		progress.Attach(GetDlgItem(IDC_PROGRESS));
-		progress.SetRange(0, 7);
+	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
-		GetDlgItem(IDC_MSG1).SetFont(txtFont, FALSE);
-		*wnd = m_hWnd;
-
-		return 0;  // Lo stato attivo verrà impostato da me
-	}
-
-	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
-	{
-		RECT rect;
-		ZeroMem(rect);
-		GetUpdateRect(&rect);
-		PAINTSTRUCT ps;
-		BeginPaint(&ps);
-		backGround.Attach(ps.hdc);
-		backGround.DrawBitmap(0,0);
-		backGround.Detach();
-		
-		EndPaint(&ps);
-
-		bHandled=TRUE;
-		return 1;
-	}
+	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 };
 
 

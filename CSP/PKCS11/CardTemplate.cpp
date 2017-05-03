@@ -53,7 +53,7 @@ RESULT CCardTemplate::InitTemplateList()
 	init_func
 
 		Allocator<CCardTemplate> pTemplate;
-	pTemplate->szName = "Carta d'Identità Elettronica";
+	pTemplate->szName = "CIE";// "Carta d'Identità Elettronica";
 	pTemplate->szManifacturer = "Gemalto";
 	pTemplate->FunctionList.templateInitLibrary = CIEtemplateInitLibrary;
 	pTemplate->FunctionList.templateInitCard = CIEtemplateInitCard;

@@ -8,6 +8,7 @@
 #include <functional>
 #include "ASNParser.h"
 #include "safeDesktop.h"
+#include "PCSC.h"
 #include <atlbase.h>
 
 extern CModuleInfo moduleInfo;
@@ -50,7 +51,8 @@ DWORD WINAPI _abilitaCIE(
 		char *readers = nullptr;
 		len = SCARD_AUTOALLOCATE;
 		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS) {
-			CMessage aa(IDB_BACKGROUND, MB_OK,
+			CMessage aa(MB_OK,
+				"Abilitazione CIE",
 				"Nessun lettore di smartcard installato");
 			aa.DoModal();
 			return 0;
@@ -81,20 +83,23 @@ DWORD WINAPI _abilitaCIE(
 					cData.pfnCspFree = (PFN_CSP_FREE)CryptMemFree;
 					cData.cbAtr = len;
 					cData.pwszCardName = L"CIE";
-					if (CardAcquireContext(&cData, 0) != 0)
-						continue;
+					auto isCIE = CardAcquireContext(&cData, 0);
+					SCardFreeMemory(cData.hScard, cData.pbAtr);
+					if (isCIE != 0)
+						continue;					
 				}
+
 				foundCIE = true;
 				if (desk == nullptr)
 					desk = new safeDesktop("AbilitaCIE");
 
-				CMessage aa(IDB_BACKGROUND, MB_OKCANCEL,
+				CMessage aa(MB_OKCANCEL, "Abilitazione CIE",
 					"Premere OK per effettuare la verifica di autenticità",
 					"e abilitare l'uso della CIE su questo PC");
 
 				if (aa.DoModal() == IDOK) {
-
-					CPin pin(IDB_BACKGROUND, "Inserire il PIN della CIE");
+					
+					CPin pin("Inserire il PIN della CIE", "Abilitazione CIE");
 					if (pin.DoModal() == IDOK) {
 						try {
 
@@ -143,7 +148,7 @@ DWORD WINAPI _abilitaCIE(
 							CreateThread(nullptr, 0, [](LPVOID lpThreadParameter) -> DWORD {
 								struct threadData *th = (struct threadData*)lpThreadParameter;
 								SetThreadDesktop(th->hDesk);
-								CVerifica ver(IDB_BACKGROUND, th->progWin);
+								CVerifica ver(th->progWin);
 								ver.DoModal();
 								return 0;
 							}, &th, 0, &id);
@@ -166,7 +171,8 @@ DWORD WINAPI _abilitaCIE(
 									num.printf("Sono rimasti %i tentativi prima del blocco", attempts);
 								else
 									num = "";
-								CMessage aa(IDB_BACKGROUND, MB_OK,
+								CMessage aa(MB_OK,
+									"Abilitazione CIE",
 									"PIN Errato",
 									num.lock());
 								aa.DoModal();
@@ -175,8 +181,8 @@ DWORD WINAPI _abilitaCIE(
 							else if (rs == SCARD_W_CHV_BLOCKED) {
 								if (progWin != nullptr)
 									SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
-								CMessage aa(IDB_BACKGROUND, MB_OK,
-									"",
+								CMessage aa(MB_OK,
+									"Abilitazione CIE",
 									"Il PIN è bloccato. Può esere sbloccato verificando il PUK");
 								aa.DoModal();
 								break;
@@ -210,14 +216,16 @@ DWORD WINAPI _abilitaCIE(
 
 							Tran.unlock();
 
-							CMessage aa(IDB_BACKGROUND, MB_OK, "",
+							CMessage aa(MB_OK,
+								"Abilitazione CIE",
 								"La CIE è abilitata all'uso");
 							aa.DoModal();
 						}
 						catch (CBaseException &ex) {
 							String dump;
 							ex.DumpTree(dump);
-							CMessage aa(IDB_BACKGROUND, MB_OK,
+							CMessage aa(MB_OK,
+								"Abilitazione CIE",
 								"Si è verificato un errore nella verifica di",
 								"autenticità del documento");
 
@@ -234,7 +242,8 @@ DWORD WINAPI _abilitaCIE(
 				desk = new safeDesktop("AbilitaCIE");
 			String num;
 			num.printf("%s nei lettori di smart card", PAN);
-			CMessage aa(IDB_BACKGROUND, MB_OK,
+			CMessage aa(MB_OK,
+				"Abilitazione CIE",
 				"Impossibile trovare la CIE con Numero Identificativo",
 				num.lock());
 			aa.DoModal();
@@ -283,6 +292,7 @@ extern "C" int CALLBACK AbilitaCIE(
 	}
 
 	WaitForSingleObject(thread, INFINITE);
+	CloseHandle(thread);
 	ODS("End AbilitaCIE");
 	return 0;
 }
