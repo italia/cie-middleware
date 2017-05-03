@@ -315,9 +315,6 @@
     <Manifest Include="custom.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\CIE.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\Cancel.bmp">
       <Filter>Resource Files</Filter>
     </Image>
@@ -346,6 +343,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Background.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\CIE.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

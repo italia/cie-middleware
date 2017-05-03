@@ -149,11 +149,11 @@ DWORD WINAPI _cambioPIN(
 			DWORD(*changePIN)(CARD_DATA &cData,DWORD &attempts);
 			void(*showMessage)(DWORD ris, int attempts);
 		} data;
-		CMessage aa(MB_CANCEL,
+		CMessage msg(MB_CANCEL,
 			"Cambio PIN",
 			"Appoggiare la CIE sul lettore",
 			"per effettuare il cambio PIN");
-		data.win = &aa;
+		data.win = &msg;
 		data.hSC = hSC;
 		data.checkCIE = checkCIE;
 		data.changePIN = changePIN;
@@ -180,7 +180,7 @@ DWORD WINAPI _cambioPIN(
 				}
 			}
 		},&data);
-		auto ris = aa.DoModal();
+		auto ris = msg.DoModal();
 	}
 
 	return 0;
