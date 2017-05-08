@@ -18,9 +18,20 @@ CThread::~CThread(void)
 		CloseHandle(hThread);
 }
 
+void CThread::close()
+{
+	dwThreadID = 0;
+	if (hThread)
+		CloseHandle(hThread);
+	hThread = nullptr;
+}
+
 void CThread::createThread(void *threadFunc,void *threadData)
 {
 	init_func
+	if (dwThreadID != 0 || hThread!=nullptr)
+		throw CStringException("Thread non ancora chiuso");
+
 #ifdef WIN32
 	hThread=CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)threadFunc,threadData,0,&dwThreadID);
 	if (!hThread) {
@@ -68,6 +79,7 @@ void CThread::terminateThread()
 	init_func
 #ifdef WIN32
 	dwThreadID=0;
+#pragma warning(suppress: 6258)
 	BOOL ris = TerminateThread(hThread, 0);
 	if (!ris)
 		throw CWinException();

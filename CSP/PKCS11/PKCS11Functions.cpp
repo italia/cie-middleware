@@ -74,6 +74,7 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 		bModuleInit=false;
 
 		bP11Terminate=true;
+
 		if (CSlot::DeleteSlotList()==FAIL) 
 			return FALSE;
 
@@ -229,10 +230,11 @@ CK_RV CK_ENTRY C_Initialize(CK_VOID_PTR pReserved)
 		EDF_CALL(CCardTemplate::InitTemplateList(),
 			ERR_CANT_INIT_TEMPLATES)
 	}
+	bP11Initialized = true;
+
 	EDF_CALL(CSlot::InitSlotList()
 		,ERR_CANT_INIT_SLOTLIST)
 
-	bP11Initialized=true;
 	_return(CKR_OK)
 
 	exit_main_func
@@ -252,13 +254,26 @@ CK_RV CK_ENTRY C_Finalize(CK_VOID_PTR pReserved)
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
+	bP11Initialized = false;
+
+	if (CSlot::Thread.dwThreadID != 0) {
+		CCardContext *tc = CSlot::ThreadContext;
+		if (tc != nullptr) {
+			SCARDCONTEXT hC = tc->hContext;
+			if (hC != NULL)
+				SCardCancel(hC);
+		}
+		p11Mutex.Unlock();
+		CSlot::Thread.joinThread(INFINITE);
+		p11Mutex.Lock();
+	}
+
+	CSlot::Thread.close();
+
 	for(SlotMap::const_iterator it=CSlot::g_mSlots.begin();it!=CSlot::g_mSlots.end();it++) {
 		CSlot *pSlot=it->second;
 		pSlot->CloseAllSessions();
 	}
-
-
-	bP11Initialized=false;
 
 	_return(CKR_OK)
 	exit_main_func
@@ -1799,10 +1814,10 @@ CK_RV CK_ENTRY C_WaitForSlotEvent(CK_FLAGS flags, CK_SLOT_ID_PTR pSlot, CK_VOID_
 	logParam(pSlot)
 	logParam(pReserved)
 
-	if (pReserved!=NULL)
+	if (pReserved != NULL)
 		_return(CKR_ARGUMENTS_BAD)
 
-	if (flags !=0 && flags!=CKF_DONT_BLOCK)
+	if (flags != 0 && flags != CKF_DONT_BLOCK)
 		_return(CKR_ARGUMENTS_BAD)
 
 	if (!bP11Initialized)

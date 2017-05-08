@@ -16,29 +16,6 @@
 extern bool switchDesktop;
 extern BOOL CheckOneInstance(char *nome);
 
-
-class safeConnection {
-public:
-	SCARDCONTEXT hContext;
-	SCARDHANDLE hCard;
-	safeConnection(SCARDCONTEXT hContext, LPCSTR szReader, DWORD dwShareMode);
-	safeConnection(SCARDHANDLE hCard);
-	~safeConnection();
-	operator SCARDHANDLE();
-};
-
-class safeTransaction{
-	SCARDHANDLE hCard;
-	bool locked;
-	DWORD dwDisposition;
-public:
-	safeTransaction(safeConnection &conn, DWORD dwDisposition);
-	void unlock();
-	bool isLocked();
-	~safeTransaction();
-};
-
-
 class IAS
 {
 	ByteDynArray dh_g,dh_p,dh_q;
@@ -90,6 +67,8 @@ public:
 	DWORD VerifyPIN(ByteArray &PIN);
 	DWORD VerifyPUK(ByteArray &PUK);
 	DWORD UnblockPIN();
+	DWORD ChangePIN(ByteArray &oldPIN, ByteArray &newPIN);
+	DWORD ChangePIN(ByteArray &newPIN);
 	void Sign(ByteArray &data, ByteDynArray &signedData);
 	void Deauthenticate();
 	void GetCertificate(ByteDynArray &certificate, bool askEnable=true);

@@ -153,6 +153,15 @@
     <ClCompile Include="PKCS11\CIEP11Template.cpp">
       <Filter>PKCS11\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cambioPIN.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PCSC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Verifica.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
@@ -293,6 +302,9 @@
     <ClInclude Include="PKCS11\CIEP11Template.h">
       <Filter>PKCS11\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PCSC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CIEPKI.rc">
@@ -303,9 +315,6 @@
     <Manifest Include="custom.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\CIE.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\Cancel.bmp">
       <Filter>Resource Files</Filter>
     </Image>
@@ -334,6 +343,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Background.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\CIE.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

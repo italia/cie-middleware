@@ -8,6 +8,7 @@
 #include "Cardmod.h"
 #include "SystemTraySDK.h"
 #include "safeDesktop.h"
+#include "PCSC.h"
 #include <atlbase.h>
 
 extern CModuleInfo moduleInfo;
@@ -35,9 +36,10 @@ DWORD WINAPI _sbloccoPIN(
 		char *readers = nullptr;
 		len = SCARD_AUTOALLOCATE;
 		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS) {
-			CMessage aa(IDB_BACKGROUND, MB_OK,
+			CMessage msg(MB_OK,
+				"Sblocco PIN",
 				"Nessun lettore di smartcard installato");
-			aa.DoModal();
+			msg.DoModal();
 			return 0;
 		}
 		char *curreader = readers;
@@ -66,67 +68,75 @@ DWORD WINAPI _sbloccoPIN(
 					cData.pfnCspFree = (PFN_CSP_FREE)CryptMemFree;
 					cData.cbAtr = len;
 					cData.pwszCardName = L"CIE";
-					if (CardAcquireContext(&cData, 0) != 0)
+					auto isCIE = CardAcquireContext(&cData, 0);
+					SCardFreeMemory(cData.hScard, cData.pbAtr);
+					if (isCIE != 0)
 						continue;
 				}
 				foundCIE = true;
 				if (desk == nullptr)
 					desk = new safeDesktop("AbilitaCIE");
 
-				CPin pin(IDB_BACKGROUND, "Inserire il PUK della CIE");
-				if (pin.DoModal() == IDOK) {
-					try {
+				CPin puk("Inserire il PUK", "Sblocco PIN");
+				if (puk.DoModal() == IDOK) {
+					CPin newPin("Inserire il nuovo PIN", "Sblocco PIN", true);
+					if (newPin.DoModal() == IDOK) {
+						try {
 
-						safeTransaction Tran(conn, SCARD_LEAVE_CARD);
-						if (!Tran.isLocked())
-							continue;
+							safeTransaction Tran(conn, SCARD_LEAVE_CARD);
+							if (!Tran.isLocked())
+								continue;
 
-						len = 0;
-						auto ias = ((IAS*)cData.pvVendorSpecific);
+							len = 0;
+							auto ias = ((IAS*)cData.pvVendorSpecific);
 
-						auto ris = CardUnblockPin(&cData, wszCARD_USER_USER, (BYTE*)pin.PIN, (DWORD)strnlen(pin.PIN, sizeof(pin.PIN)), nullptr, 0, -1, CARD_AUTHENTICATE_PIN_PIN);
-						if (ris == SCARD_W_WRONG_CHV) {
-							String num;
-							if (ias->attemptsRemaining >= 0)
-								num.printf("Sono rimasti %i tentativi prima del blocco del PUK", ias->attemptsRemaining);
-							else
-								num = "";
-							CMessage aa(IDB_BACKGROUND, MB_OK,
-								"PUK Errato",
-								num.lock());
-							aa.DoModal();
-							if (lpThreadParameter != nullptr)
-								PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 1, 0);
+							auto ris = CardUnblockPin(&cData, wszCARD_USER_USER, (BYTE*)puk.PIN, (DWORD)strnlen(puk.PIN, sizeof(puk.PIN)), (BYTE*)newPin.PIN, (DWORD)strnlen(newPin.PIN, sizeof(newPin.PIN)), 0, CARD_AUTHENTICATE_PIN_PIN);
+							if (ris == SCARD_W_WRONG_CHV) {
+								String num;
+								if (ias->attemptsRemaining >= 0)
+									num.printf("Sono rimasti %i tentativi prima del blocco del PUK", ias->attemptsRemaining);
+								else
+									num = "";
+								CMessage msg(MB_OK, "Sblocco PIN",
+									"PUK Errato",
+									num.lock());
+								msg.DoModal();
+								if (lpThreadParameter != nullptr)
+									PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 1, 0);
 
-							break;
-						}
-						else if (ris == SCARD_W_CHV_BLOCKED) {
-							CMessage aa(IDB_BACKGROUND, MB_OK,
-								"",
-								"Il PUK è bloccato. La CIE non può più essere sbloccata");
-							aa.DoModal();
+								break;
+							}
+							else if (ris == SCARD_W_CHV_BLOCKED) {
+								CMessage msg(MB_OK,
+									"Sblocco PIN",
+									"Il PUK è bloccato. La CIE non può più essere sbloccata");
+								msg.DoModal();
+								if (lpThreadParameter != nullptr)
+									PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
+								break;
+							}
+							else if (ris != 0)
+								throw CStringException("Autenticazione fallita");
+
+							CMessage msg(MB_OK, "Sblocco PIN",
+								"Il PIN è sbloccato");
+							msg.DoModal();
 							if (lpThreadParameter != nullptr)
 								PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
+
+						}
+						catch (CBaseException &ex) {
+							String dump;
+							ex.DumpTree(dump);
+							CMessage msg(MB_OK, "Sblocco PIN",
+								"Si è verificato un errore nella verifica del PUK");
+							msg.DoModal();
 							break;
 						}
-						else if (ris != 0)
-							throw CStringException("Autenticazione fallita");
-
-						CMessage aa(IDB_BACKGROUND, MB_OK, "",
-							"Il PIN è sbloccato");
-						aa.DoModal();
+					}
+					else
 						if (lpThreadParameter != nullptr)
-							PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
-
-					}
-					catch (CBaseException &ex) {
-						String dump;
-						ex.DumpTree(dump);
-						CMessage aa(IDB_BACKGROUND, MB_OK,
-							"Si è verificato un errore nella verifica del PUK");
-						aa.DoModal();
-						break;
-					}
+							PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 1, 0);
 				}
 				else
 					if (lpThreadParameter != nullptr)
@@ -137,10 +147,10 @@ DWORD WINAPI _sbloccoPIN(
 		if (!foundCIE) {
 			if (desk == nullptr)
 				desk = new safeDesktop("AbilitaCIE");
-			CMessage aa(IDB_BACKGROUND, MB_OK,
+			CMessage msg(MB_OK, "Sblocco PIN",
 				"Impossibile trovare una CIE",
 				"nei lettori di smart card");
-			aa.DoModal();
+			msg.DoModal();
 			if (lpThreadParameter != nullptr)
 				PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
 		}

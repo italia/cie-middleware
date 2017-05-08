@@ -16,5 +16,6 @@ public:
 	RESULT joinThread(DWORD timeout);
 	void terminateThread();
 	void exitThread(DWORD dwCode);
+	void close();
 	inline static DWORD getID() {return GetCurrentThreadId();}
 };
