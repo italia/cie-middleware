@@ -76,10 +76,12 @@ public:
 		m_rectNCTop = rectWnd;
 
 		m_rectNCTop.DeflateRect(uiCX, uiCY, uiCX, uiCenterOffset + uiVClientHeight + uiCY);
+		m_rectNCTop.top -= 4;
 
 		m_rectNCBottom = rectWnd;
 
 		m_rectNCBottom.DeflateRect(uiCX, uiCenterOffset + uiVClientHeight + uiCY, uiCX, uiCY);
+		m_rectNCBottom.bottom += 4;
 
 		lpncsp->rgrc[0].top += uiCenterOffset;
 		lpncsp->rgrc[0].bottom -= uiCenterOffset;
@@ -94,11 +96,18 @@ public:
 		bHandled = false;
 		//Default();
 
-		//CWindowDC dc(this);
-		//CBrush Brush(GetSysColor(COLOR_WINDOW));
 
-		//dc.FillRect(m_rectNCBottom, &Brush);
-		//dc.FillRect(m_rectNCTop, &Brush);
+		//HDC dc = GetDC();
+		//RECT rcWin;
+		//GetWindowRect(&rcWin);
+		//OffsetRect(&rcWin,-rcWin.left, -rcWin.top);
+		//rcWin.top -= 3;
+		//FillRect(dc, &rcWin, (HBRUSH)(COLOR_WINDOW + 1));
+
+		//FillRect(dc, m_rectNCBottom, (HBRUSH)(COLOR_WINDOW + 1));
+		//FillRect(dc, m_rectNCTop, (HBRUSH)(COLOR_WINDOW + 1));
+		//ReleaseDC(dc);
+
 		return 0;
 	}
 

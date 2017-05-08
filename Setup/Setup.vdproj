@@ -15,6 +15,12 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_12D79025E3C84B3D93360B0C8B75A529"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_30005CA5808F41689E2C0B67C21B4260"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -22,6 +28,12 @@
         "Entry"
         {
         "MsmKey" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D4788F7ECCD9498491BF8E1C36E951FF"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -97,6 +109,34 @@
     {
         "CustomAction"
         {
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_19D5D4E48AAB40F8A36B319971A8E2BE"
+            {
+            "Name" = "8:Install.js"
+            "Condition" = "8:"
+            "Object" = "8:_D4788F7ECCD9498491BF8E1C36E951FF"
+            "FileType" = "3:3"
+            "InstallAction" = "3:2"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_A6E213FF_F559_4A18_8650_12B107D4A4E8"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:[ProgramMenuFolder]"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_5A4F60CA660042C98B9C7B80B6EBD40F"
+            {
+            "Name" = "8:Remove.js"
+            "Condition" = "8:"
+            "Object" = "8:_12D79025E3C84B3D93360B0C8B75A529"
+            "FileType" = "3:3"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_3A5DE8FB_3635_4693_9476_EB2CFC680A63"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:[ProgramMenuFolder]"
+            }
         }
         "DefaultFeature"
         {
@@ -112,6 +152,26 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_12D79025E3C84B3D93360B0C8B75A529"
+            {
+            "SourcePath" = "8:Remove.js"
+            "TargetName" = "8:Remove.js"
+            "Tag" = "8:"
+            "Folder" = "8:_F80CED8C410D4A6FAB2766B992D84BB9"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_30005CA5808F41689E2C0B67C21B4260"
             {
             "SourcePath" = "8:..\\Win32\\Release\\CIEPKI.dll"
@@ -128,6 +188,26 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:4"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D4788F7ECCD9498491BF8E1C36E951FF"
+            {
+            "SourcePath" = "8:Install.js"
+            "TargetName" = "8:Install.js"
+            "Tag" = "8:"
+            "Folder" = "8:_F80CED8C410D4A6FAB2766B992D84BB9"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
@@ -158,6 +238,17 @@
             "Property" = "8:ProgramMenuFolder"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_5F4F9FF2533E4184BE428A4482B2B620"
+                    {
+                    "Name" = "8:Middleware CIE"
+                    "AlwaysCreate" = "11:TRUE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_507CBA20D0544E11B2626F504414072E"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
             "{1525181F-901A-416C-8A58-119130FE478E}:_654D2C9A44AB428AB425EB6EEF023A20"
@@ -173,7 +264,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_F80CED8C410D4A6FAB2766B992D84BB9"
             {
-            "DefaultLocation" = "8:[ProgramFiles64Folder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFiles64Folder][ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -200,7 +291,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CIEPKI"
         "ProductCode" = "8:{E77573CB-DE26-4539-93A1-E682D01ED8EF}"
-        "PackageCode" = "8:{92112112-B1F8-4D52-AA47-5FC6F1FAB8E0}"
+        "PackageCode" = "8:{C09BF0CB-9768-458E-9B33-858583C8F88A}"
         "UpgradeCode" = "8:{078EA248-505B-480C-86DF-55836B31DE8C}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -232,68 +323,12 @@
             {
                 "Keys"
                 {
-                    "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_E76D3426660B4BBF814875F68D76EF56"
-                    {
-                    "Name" = "8:Software"
-                    "Condition" = "8:"
-                    "AlwaysCreate" = "11:FALSE"
-                    "DeleteAtUninstall" = "11:FALSE"
-                    "Transitive" = "11:FALSE"
-                        "Keys"
-                        {
-                            "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_A97A481424114CFD94836C50AD62AEA9"
-                            {
-                            "Name" = "8:[Manufacturer]"
-                            "Condition" = "8:"
-                            "AlwaysCreate" = "11:FALSE"
-                            "DeleteAtUninstall" = "11:FALSE"
-                            "Transitive" = "11:FALSE"
-                                "Keys"
-                                {
-                                }
-                                "Values"
-                                {
-                                }
-                            }
-                        }
-                        "Values"
-                        {
-                        }
-                    }
                 }
             }
             "HKCU"
             {
                 "Keys"
                 {
-                    "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_2F5530BC12EE4E2EA204CE589AF0A171"
-                    {
-                    "Name" = "8:Software"
-                    "Condition" = "8:"
-                    "AlwaysCreate" = "11:FALSE"
-                    "DeleteAtUninstall" = "11:FALSE"
-                    "Transitive" = "11:FALSE"
-                        "Keys"
-                        {
-                            "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_E84EA2BC2B2442B8B9BCE689C7D75993"
-                            {
-                            "Name" = "8:[Manufacturer]"
-                            "Condition" = "8:"
-                            "AlwaysCreate" = "11:FALSE"
-                            "DeleteAtUninstall" = "11:FALSE"
-                            "Transitive" = "11:FALSE"
-                                "Keys"
-                                {
-                                }
-                                "Values"
-                                {
-                                }
-                            }
-                        }
-                        "Values"
-                        {
-                        }
-                    }
                 }
             }
             "HKCR"

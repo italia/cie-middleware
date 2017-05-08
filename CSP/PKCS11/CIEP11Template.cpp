@@ -5,6 +5,7 @@
 #include "..\ASNParser.h"
 #include <stdio.h>
 #include "..\AES.h"
+#include "..\PCSC.h"
 
 int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, DWORD *respSize) {
 	if (apduSize == 2) {

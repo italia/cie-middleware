@@ -25,6 +25,7 @@ CBitmap::~CBitmap()
 { 
 if (m_hMemDC) 
 Detach(); 
+DeleteObject();
 } 
 
 BOOL CBitmap::Attach(HDC hDC) 
