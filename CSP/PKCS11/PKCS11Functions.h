@@ -20,7 +20,7 @@
 if ((_call_ris=(call))!=OK) { \
 	_return(_call_ris) \
 }
-#define DF_CALL(call) call;
+
 #define EDF_CALL(call,err) \
 if ((_call_ris=(call))!=OK) { \
 	if (_call_ris==FAIL) { \
@@ -28,6 +28,15 @@ if ((_call_ris=(call))!=OK) { \
 		} \
 	_return(_call_ris) \
 }
+
+#define DF_CALL(call) \
+if ((_call_ris=(call))!=OK) { \
+	if (_call_ris==FAIL) { \
+		_return(CKR_GENERAL_ERROR) \
+		} \
+	_return(_call_ris) \
+}
+
 
 extern "C" {
 	CK_RV CK_ENTRY C_UpdateSlotList();

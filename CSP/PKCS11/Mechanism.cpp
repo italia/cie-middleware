@@ -232,14 +232,14 @@ RESULT CVerifyRSA::VerifyLength(CK_ULONG_PTR pulVerifyLength)
 	init_func
 
 	CP11Object *pObject=NULL;
-	ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyKey,pObject),
+	P11ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
 	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
 
 	ByteArray *baKeyModule;
-	ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
+	P11ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
 		ERR_CANT_GET_PUBKEY_MODULUS)
 	ER_ASSERT(baKeyModule!=NULL,ERR_CANT_GET_PUBKEY_MODULUS)
 	*pulVerifyLength=baKeyModule->size();
@@ -254,17 +254,17 @@ RESULT CVerifyRSA::VerifyDecryptSignature(ByteArray &Signature,ByteDynArray &baP
 	ByteArray *baKeyExponent=NULL,*baKeyModule=NULL;
 
 	CP11Object *pObject=NULL;
-	ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyKey,pObject),
+	P11ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
 	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
 
-	ER_CALL(pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT,baKeyExponent),
+	P11ER_CALL(pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT,baKeyExponent),
 		ERR_CANT_GET_PUBKEY_EXPONENT)
 	ER_ASSERT(baKeyExponent!=NULL,ERR_CANT_GET_PUBKEY_EXPONENT)
 
-	ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
+	P11ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
 		ERR_CANT_GET_PUBKEY_MODULUS)
 	ER_ASSERT(baKeyModule!=NULL,ERR_CANT_GET_PUBKEY_MODULUS)
 
@@ -275,7 +275,7 @@ RESULT CVerifyRSA::VerifyDecryptSignature(ByteArray &Signature,ByteDynArray &baP
 
 	CRSA rsa(*baKeyModule,*baKeyExponent);
 	baPlainSignature.resize(Signature.size());
-	ER_CALL(rsa.RSA_PURE(Signature,baPlainSignature),
+	P11ER_CALL(rsa.RSA_PURE(Signature,baPlainSignature),
 		ERR_CRYPTO_ERROR)
 	_return(OK)
 	exit_func
@@ -313,14 +313,14 @@ RESULT CVerifyRecoverRSA::VerifyRecoverLength(CK_ULONG_PTR pulVerifyRecoverLengt
 	init_func
 
 	CP11Object *pObject=NULL;
-	ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyRecoverKey,pObject),
+	P11ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyRecoverKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
 	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
 
 	ByteArray *baKeyModule;
-	ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
+	P11ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
 		ERR_CANT_GET_PUBKEY_MODULUS)
 	ER_ASSERT(baKeyModule!=NULL,ERR_CANT_GET_PUBKEY_MODULUS)
 	*pulVerifyRecoverLength=baKeyModule->size();
@@ -335,17 +335,17 @@ RESULT CVerifyRecoverRSA::VerifyRecoverDecryptSignature(ByteArray &Signature,Byt
 	ByteArray *baKeyExponent=NULL,*baKeyModule=NULL;
 
 	CP11Object *pObject=NULL;
-	ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyRecoverKey,pObject),
+	P11ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyRecoverKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
 	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
 
-	ER_CALL(pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT,baKeyExponent),
+	P11ER_CALL(pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT,baKeyExponent),
 		ERR_CANT_GET_PUBKEY_EXPONENT)
 	ER_ASSERT(baKeyExponent!=NULL,ERR_CANT_GET_PUBKEY_EXPONENT)
 
-	ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
+	P11ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
 		ERR_CANT_GET_PUBKEY_MODULUS)
 	ER_ASSERT(baKeyModule!=NULL,ERR_CANT_GET_PUBKEY_MODULUS)
 
@@ -356,7 +356,7 @@ RESULT CVerifyRecoverRSA::VerifyRecoverDecryptSignature(ByteArray &Signature,Byt
 
 	CRSA rsa(*baKeyModule,*baKeyExponent);
 	baPlainSignature.resize(Signature.size());
-	ER_CALL(rsa.RSA_PURE(Signature,baPlainSignature),
+	P11ER_CALL(rsa.RSA_PURE(Signature,baPlainSignature),
 		ERR_CRYPTO_ERROR)
 	_return(OK)
 	exit_func
@@ -400,14 +400,14 @@ RESULT CSignRSA::SignSupportMultipart(bool &Support) {
 RESULT CSignRSA::SignLength(CK_ULONG_PTR pulSignatureLen) {
 	init_func
 	CP11Object *pObject=NULL;
-	ER_CALL(pSession->pSlot->GetObjectFromID(hSignKey,pObject),
+	P11ER_CALL(pSession->pSlot->GetObjectFromID(hSignKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PRIVATE_KEY,ERR_WRONG_OBJECT_TYPE)
 	CP11PrivateKey *pPrivateKey=(CP11PrivateKey *)pObject;
 
 	ByteArray *baKeyModule;
-	ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
+	P11ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
 		ERR_CANT_GET_PUBKEY_MODULUS)
 	ER_ASSERT(baKeyModule!=NULL,ERR_CANT_GET_PUBKEY_MODULUS)
 	*pulSignatureLen=baKeyModule->size();
@@ -445,14 +445,14 @@ CSignRecoverRSA::~CSignRecoverRSA() {}
 RESULT CSignRecoverRSA::SignRecoverLength(CK_ULONG_PTR pulSignRecoveratureLen) {
 	init_func
 	CP11Object *pObject=NULL;
-	ER_CALL(pSession->pSlot->GetObjectFromID(hSignRecoverKey,pObject),
+	P11ER_CALL(pSession->pSlot->GetObjectFromID(hSignRecoverKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PRIVATE_KEY,ERR_WRONG_OBJECT_TYPE)
 	CP11PrivateKey *pPrivateKey=(CP11PrivateKey *)pObject;
 
 	ByteArray *baKeyModule;
-	ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
+	P11ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
 		ERR_CANT_GET_PUBKEY_MODULUS)
 	ER_ASSERT(baKeyModule!=NULL,ERR_CANT_GET_PUBKEY_MODULUS)
 	*pulSignRecoveratureLen=baKeyModule->size();
@@ -514,7 +514,7 @@ RESULT CRSA_X509::VerifyFinal(ByteArray &Signature)
 	init_func
 	ByteDynArray baPlainSignature;
 	CK_ULONG ulVerifyLength=0;
-	ER_CALL(VerifyLength(&ulVerifyLength),
+	P11ER_CALL(VerifyLength(&ulVerifyLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	if (Signature.size()!=ulVerifyLength)
@@ -526,7 +526,7 @@ RESULT CRSA_X509::VerifyFinal(ByteArray &Signature)
 	if (baVerifyBuffer.size()>ulVerifyLength) 
 		_return(CKR_DATA_LEN_RANGE)
 
-	ER_CALL(VerifyDecryptSignature(Signature,baPlainSignature),
+	P11ER_CALL(VerifyDecryptSignature(Signature,baPlainSignature),
 		ERR_CANT_DECRYPT_SIGNATURE)
 
 	ByteDynArray baExpectedResult(ulVerifyLength);
@@ -554,13 +554,13 @@ RESULT CRSA_X509::VerifyRecover(ByteArray &Signature,ByteDynArray &Data)
 {
 	init_func
 	CK_ULONG ulVerifyRecoverLength=0;
-	ER_CALL(VerifyRecoverLength(&ulVerifyRecoverLength),
+	P11ER_CALL(VerifyRecoverLength(&ulVerifyRecoverLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	if (Signature.size()!=ulVerifyRecoverLength)
 		_return(CKR_SIGNATURE_LEN_RANGE)
 
-	ER_CALL(VerifyRecoverDecryptSignature(Signature,Data),
+	P11ER_CALL(VerifyRecoverDecryptSignature(Signature,Data),
 		ERR_CANT_DECRYPT_SIGNATURE)
 
 	_return(OK)
@@ -600,7 +600,7 @@ RESULT CRSA_X509::SignFinal(ByteDynArray &SignBuffer)
 {
 	init_func
 	CK_ULONG ulSignatureLength=0;
-	ER_CALL(SignLength(&ulSignatureLength),
+	P11ER_CALL(SignLength(&ulSignatureLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	if (baSignBuffer.size()>ulSignatureLength)
@@ -625,7 +625,7 @@ RESULT CRSA_X509::SignRecover(ByteArray &Data,ByteDynArray &SignBuffer) {
 	init_func
 
 	CK_ULONG ulSignatureLength=0;
-	ER_CALL(SignRecoverLength(&ulSignatureLength),
+	P11ER_CALL(SignRecoverLength(&ulSignatureLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	if (Data.size()>ulSignatureLength)
@@ -660,7 +660,7 @@ RESULT CRSA_X509::EncryptFinal(ByteDynArray &baEncryptedData)
 {
 	init_func
 	CK_ULONG ulEncryptLength=0;
-	ER_CALL(EncryptLength(&ulEncryptLength),
+	P11ER_CALL(EncryptLength(&ulEncryptLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	if (baEncryptBuffer.size()>ulEncryptLength) 
@@ -670,7 +670,7 @@ RESULT CRSA_X509::EncryptFinal(ByteDynArray &baEncryptedData)
 	baPlainData.rightcopy(baEncryptBuffer);
 	PutPaddingBT0(baPlainData, baEncryptBuffer.size());
 	
-	ER_CALL(EncryptCompute(baPlainData,baEncryptedData),
+	P11ER_CALL(EncryptCompute(baPlainData,baEncryptedData),
 		ERR_CANT_ENCRYPT_DATA)
 
 	_return(OK)
@@ -701,7 +701,7 @@ RESULT CRSA_X509::DecryptFinal(ByteDynArray &DecryptBuffer)
 {
 	init_func
 	CK_ULONG ulDecryptLength=0;
-	ER_CALL(DecryptLength(&ulDecryptLength),
+	P11ER_CALL(DecryptLength(&ulDecryptLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	// nella decrypt il buffer deve essere lungo esasttamente k
@@ -759,7 +759,7 @@ RESULT CRSA_PKCS1::VerifyFinal(ByteArray &Signature)
 	init_func
 	ByteDynArray baPlainSignature;
 	CK_ULONG ulVerifyLength=0;
-	ER_CALL(VerifyLength(&ulVerifyLength),
+	P11ER_CALL(VerifyLength(&ulVerifyLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	if (Signature.size()!=ulVerifyLength)
@@ -769,7 +769,7 @@ RESULT CRSA_PKCS1::VerifyFinal(ByteArray &Signature)
 	if (baVerifyBuffer.size()>ulVerifyLength-11) 
 		_return(CKR_DATA_LEN_RANGE)
 
-	ER_CALL(VerifyDecryptSignature(Signature,baPlainSignature),
+	P11ER_CALL(VerifyDecryptSignature(Signature,baPlainSignature),
 		ERR_CANT_DECRYPT_SIGNATURE)
 
 	ByteDynArray baExpectedResult(ulVerifyLength);
@@ -797,14 +797,14 @@ RESULT CRSA_PKCS1::VerifyRecover(ByteArray &Signature,ByteDynArray &Data)
 {
 	init_func
 	CK_ULONG ulVerifyRecoverLength=0;
-	ER_CALL(VerifyRecoverLength(&ulVerifyRecoverLength),
+	P11ER_CALL(VerifyRecoverLength(&ulVerifyRecoverLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	if (Signature.size()!=ulVerifyRecoverLength)
 		_return(CKR_SIGNATURE_LEN_RANGE)
 
 	ByteDynArray baPlainSignature;
-	ER_CALL(VerifyRecoverDecryptSignature(Signature, baPlainSignature),
+	P11ER_CALL(VerifyRecoverDecryptSignature(Signature, baPlainSignature),
 		ERR_CANT_DECRYPT_SIGNATURE);
 
 	// se non posso levare il padding, la firma ha
@@ -860,7 +860,7 @@ RESULT CRSA_PKCS1::SignFinal(ByteDynArray &SignBuffer)
 {
 	init_func
 	CK_ULONG ulSignatureLength=0;
-	ER_CALL(SignLength(&ulSignatureLength),
+	P11ER_CALL(SignLength(&ulSignatureLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	// al massimo k-11 bytes (specifiche p11)
@@ -887,7 +887,7 @@ RESULT CRSA_PKCS1::SignRecover(ByteArray &Data,ByteDynArray &SignBuffer) {
 	init_func
 
 	CK_ULONG ulSignatureLength=0;
-	ER_CALL(SignRecoverLength(&ulSignatureLength),
+	P11ER_CALL(SignRecoverLength(&ulSignatureLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	// al massimo k-11 bytes (specifiche p11)
@@ -922,7 +922,7 @@ RESULT CRSA_PKCS1::EncryptFinal(ByteDynArray &baEncryptedData)
 {
 	init_func
 	CK_ULONG ulEncryptLength=0;
-	ER_CALL(EncryptLength(&ulEncryptLength),
+	P11ER_CALL(EncryptLength(&ulEncryptLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	// al massimo k-11 bytes (specifiche p11)
@@ -933,7 +933,7 @@ RESULT CRSA_PKCS1::EncryptFinal(ByteDynArray &baEncryptedData)
 	baPlainData.rightcopy(baEncryptBuffer);
 	PutPaddingBT2(baPlainData, baEncryptBuffer.size());
 	
-	ER_CALL(EncryptCompute(baPlainData,baEncryptedData),
+	P11ER_CALL(EncryptCompute(baPlainData,baEncryptedData),
 		ERR_CANT_ENCRYPT_DATA)
 
 	_return(OK)
@@ -964,7 +964,7 @@ RESULT CRSA_PKCS1::DecryptFinal(ByteDynArray &DecryptBuffer)
 {
 	init_func
 	CK_ULONG ulDecryptLength=0;
-	ER_CALL(DecryptLength(&ulDecryptLength),
+	P11ER_CALL(DecryptLength(&ulDecryptLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	// esattamente k bytes (specifiche p11, ma mi sembra ovvio!)
@@ -1048,7 +1048,7 @@ RESULT CSignRSAwithDigest::SignUpdate(ByteArray &Part) {
 RESULT CSignRSAwithDigest::SignFinal(ByteDynArray &SignBuffer) {
 	init_func
 	CK_ULONG ulDigestLength=0;
-	ER_CALL(pDigest->DigestLength(&ulDigestLength),
+	P11ER_CALL(pDigest->DigestLength(&ulDigestLength),
 		ERR_CANT_GET_DIGEST_LENGTH)
 
 	SignBuffer.resize(ulDigestLength);
@@ -1114,22 +1114,22 @@ RESULT CVerifyRSAwithDigest::VerifyFinal(ByteArray &Signature)
 	init_func
 	ByteDynArray baPlainSignature;
 	CK_ULONG ulVerifyLength=0;
-	ER_CALL(VerifyLength(&ulVerifyLength),
+	P11ER_CALL(VerifyLength(&ulVerifyLength),
 		ERR_CANT_GET_KEY_LENGTH)
 
 	if (Signature.size()!=ulVerifyLength)
 		_return(CKR_SIGNATURE_LEN_RANGE)
 
-	ER_CALL(VerifyDecryptSignature(Signature,baPlainSignature),
+	P11ER_CALL(VerifyDecryptSignature(Signature,baPlainSignature),
 		ERR_CANT_DECRYPT_SIGNATURE)
 
 	ByteDynArray baExpectedResult(ulVerifyLength);
 	CK_ULONG ulDigestLen=0;
-	ER_CALL(pDigest->DigestLength(&ulDigestLen),
+	P11ER_CALL(pDigest->DigestLength(&ulDigestLen),
 		ERR_CANT_GET_DIGEST_LENGTH)
 
 	ByteArray *baDigestInfo=NULL;
-	ER_CALL(pDigest->DigestInfo(baDigestInfo),
+	P11ER_CALL(pDigest->DigestInfo(baDigestInfo),
 		ERR_CANT_GET_DIGEST_INFO)
 
 	ER_ASSERT(baDigestInfo!=NULL,ERR_CANT_GET_DIGEST_INFO)
@@ -1193,14 +1193,14 @@ RESULT CEncryptRSA::EncryptSupportMultipart(bool &Support) {
 RESULT CEncryptRSA::EncryptLength(CK_ULONG_PTR pulEncryptLen) {
 	init_func
 	CP11Object *pObject=NULL;
-	ER_CALL(pSession->pSlot->GetObjectFromID(hEncryptKey,pObject),
+	P11ER_CALL(pSession->pSlot->GetObjectFromID(hEncryptKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
 	CP11PrivateKey *pPrivateKey=(CP11PrivateKey *)pObject;
 
 	ByteArray *baKeyModule;
-	ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
+	P11ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
 		ERR_CANT_GET_PUBKEY_MODULUS)
 	ER_ASSERT(baKeyModule!=NULL,ERR_CANT_GET_PUBKEY_MODULUS)
 	*pulEncryptLen=baKeyModule->size();
@@ -1215,17 +1215,17 @@ RESULT CEncryptRSA::EncryptCompute(ByteArray &baPlainData,ByteDynArray &baEncryp
 	ByteArray *baKeyExponent=NULL,*baKeyModule=NULL;
 
 	CP11Object *pObject=NULL;
-	ER_CALL(pSession->pSlot->GetObjectFromID(hEncryptKey,pObject),
+	P11ER_CALL(pSession->pSlot->GetObjectFromID(hEncryptKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
 	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
 
-	ER_CALL(pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT,baKeyExponent),
+	P11ER_CALL(pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT,baKeyExponent),
 		ERR_CANT_GET_PUBKEY_EXPONENT)
 	ER_ASSERT(baKeyExponent!=NULL,ERR_CANT_GET_PUBKEY_EXPONENT)
 
-	ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
+	P11ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
 		ERR_CANT_GET_PUBKEY_MODULUS)
 	ER_ASSERT(baKeyModule!=NULL,ERR_CANT_GET_PUBKEY_MODULUS)
 
@@ -1239,7 +1239,7 @@ RESULT CEncryptRSA::EncryptCompute(ByteArray &baPlainData,ByteDynArray &baEncryp
 
 	CRSA rsa(*baKeyModule,*baKeyExponent);
 	baEncryptedData.resize(dwKeyLenBytes);
-	ER_CALL(rsa.RSA_PURE(baPlainData,baEncryptedData),
+	P11ER_CALL(rsa.RSA_PURE(baPlainData,baEncryptedData),
 		ERR_CRYPTO_ERROR)
 
 	_return(OK)
@@ -1284,14 +1284,14 @@ RESULT CDecryptRSA::DecryptSupportMultipart(bool &Support) {
 RESULT CDecryptRSA::DecryptLength(CK_ULONG_PTR pulDecryptLen) {
 	init_func
 	CP11Object *pObject=NULL;
-	ER_CALL(pSession->pSlot->GetObjectFromID(hDecryptKey,pObject),
+	P11ER_CALL(pSession->pSlot->GetObjectFromID(hDecryptKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PRIVATE_KEY,ERR_WRONG_OBJECT_TYPE)
 	CP11PrivateKey *pPrivateKey=(CP11PrivateKey *)pObject;
 
 	ByteArray *baKeyModule;
-	ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
+	P11ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
 		ERR_CANT_GET_PUBKEY_MODULUS)
 	ER_ASSERT(baKeyModule!=NULL,ERR_CANT_GET_PUBKEY_MODULUS)
 	*pulDecryptLen=baKeyModule->size();

@@ -35,7 +35,7 @@ DWORD WINAPI _sbloccoPIN(
 		SCardEstablishContext(SCARD_SCOPE_SYSTEM, nullptr, nullptr, &hSC);
 		char *readers = nullptr;
 		len = SCARD_AUTOALLOCATE;
-		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS) {
+		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS || readers == nullptr) {
 			CMessage msg(MB_OK,
 				"Sblocco PIN",
 				"Nessun lettore di smartcard installato");
@@ -77,7 +77,7 @@ DWORD WINAPI _sbloccoPIN(
 				if (desk == nullptr)
 					desk = new safeDesktop("AbilitaCIE");
 
-				CPin puk("Inserire il PUK", "Sblocco PIN");
+				CPin puk("Inserire il PUK della CIE", "Sblocco PIN");
 				if (puk.DoModal() == IDOK) {
 					CPin newPin("Inserire il nuovo PIN", "Sblocco PIN", true);
 					if (newPin.DoModal() == IDOK) {
@@ -94,12 +94,12 @@ DWORD WINAPI _sbloccoPIN(
 							if (ris == SCARD_W_WRONG_CHV) {
 								String num;
 								if (ias->attemptsRemaining >= 0)
-									num.printf("Sono rimasti %i tentativi prima del blocco del PUK", ias->attemptsRemaining);
+									num.printf("PUK errato. Sono rimasti %i tentativi", ias->attemptsRemaining);
 								else
 									num = "";
-								CMessage msg(MB_OK, "Sblocco PIN",
-									"PUK Errato",
-									num.lock());
+								CMessage msg(MB_OK, "Sblocco PIN",									
+									num.lock(),
+									"prima di bloccare il PUK");
 								msg.DoModal();
 								if (lpThreadParameter != nullptr)
 									PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 1, 0);
@@ -119,7 +119,7 @@ DWORD WINAPI _sbloccoPIN(
 								throw CStringException("Autenticazione fallita");
 
 							CMessage msg(MB_OK, "Sblocco PIN",
-								"Il PIN è sbloccato");
+								"Il PIN è stato sbloccato correttamente");
 							msg.DoModal();
 							if (lpThreadParameter != nullptr)
 								PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
@@ -154,6 +154,7 @@ DWORD WINAPI _sbloccoPIN(
 			if (lpThreadParameter != nullptr)
 				PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
 		}
+		SCardFreeMemory(hSC, readers);
 	}
 	catch (CBaseException &ex) {
 		String dump;

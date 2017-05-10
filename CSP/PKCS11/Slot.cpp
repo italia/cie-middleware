@@ -162,7 +162,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 RESULT CSlot::AddSlot(CSlot* pSlot,CK_SLOT_ID *pSlotID)
 {
 	init_func
-	ER_CALL(GetNewSlotID(&pSlot->hSlot),
+	P11ER_CALL(GetNewSlotID(&pSlot->hSlot),
 		ERR_GET_NEW_SLOT)
 
 	*pSlotID=pSlot->hSlot;
@@ -177,7 +177,7 @@ RESULT CSlot::DeleteSlot(CK_SLOT_ID hSlotId)
 {
 	init_func
 	CSlot *pSlot=NULL;
-	ER_CALL(GetSlotFromID(hSlotId, &pSlot),
+	P11ER_CALL(GetSlotFromID(hSlotId, &pSlot),
 		ERR_CANT_GET_SLOT);
 
 	if (pSlot == NULL) _return(CKR_SLOT_ID_INVALID);
@@ -359,7 +359,7 @@ RESULT CSlot::IsTokenPresent(bool *bPresent)
 					retry=true;
 				else
 					_return(FAIL)
-				ER_CALL(Context.renew(), ERR_CANT_ESTABLISH_CONTEXT)
+				P11ER_CALL(Context.renew(), ERR_CANT_ESTABLISH_CONTEXT)
 				continue;
 			}
 			if (ris==SCARD_E_NO_READERS_AVAILABLE)
@@ -378,7 +378,7 @@ CK_RV CSlot::GetInfo(CK_SLOT_INFO_PTR pInfo)
 	pInfo->flags=CKF_REMOVABLE_DEVICE|CKF_HW_SLOT;
 	// verifico che ci sia una carta inserita
 	bool bPresent=false;
-	ER_CALL(IsTokenPresent(&bPresent),
+	P11ER_CALL(IsTokenPresent(&bPresent),
 		ERR_TOKEN_PRESENT)
 
 	if (bPresent)
@@ -411,7 +411,7 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 	//CToken token;
 	//if (token.Connect(szName.stringlock())) _return(CKR_TOKEN_NOT_PRESENT)
 	if (!pTemplate) {
-		ER_CALL(CCardTemplate::GetTemplate(*this,pTemplate),
+		P11ER_CALL(CCardTemplate::GetTemplate(*this,pTemplate),
 			ERR_GET_TEMPLATE)
 	}
 
@@ -425,12 +425,12 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 	
 	if (baSerial.isEmpty() || pSerialTemplate!=pTemplate) {
 		pSerialTemplate=pTemplate;
-		ER_CALL(pTemplate->FunctionList.templateGetSerial(*this,baSerial),
+		P11ER_CALL(pTemplate->FunctionList.templateGetSerial(*this,baSerial),
 			ERR_READ_SERIAL)
 	}
 
 	String model;
-	ER_CALL(pTemplate->FunctionList.templateGetModel(*this,model),
+	P11ER_CALL(pTemplate->FunctionList.templateGetModel(*this,model),
 		ERR_READ_MODEL)
 
 	memset(pInfo->serialNumber,' ',sizeof(pInfo->serialNumber));
@@ -443,7 +443,7 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 	memcpy_s(pInfo->model,16,model.lock(),min(model.strlen(),sizeof(pInfo->model)));	
 
 	DWORD dwFlags;
-	ER_CALL(pTemplate->FunctionList.templateGetTokenFlags(*this,dwFlags),
+	P11ER_CALL(pTemplate->FunctionList.templateGetTokenFlags(*this,dwFlags),
 		ERR_READ_SERIAL)
 	pInfo->flags=dwFlags;
 
@@ -505,14 +505,14 @@ RESULT CSlot::Init()
 	if (!bUpdated) {
 
 		if (!pTemplate) {
-			ER_CALL(CCardTemplate::GetTemplate(*this,pTemplate),
+			P11ER_CALL(CCardTemplate::GetTemplate(*this,pTemplate),
 				ERR_GET_TEMPLATE)
 		}
 
 		if (!pTemplate)
 			_return(CKR_TOKEN_NOT_RECOGNIZED)
 
-		ER_CALL(pTemplate->FunctionList.templateInitCard(pTemplateData,*this),
+		P11ER_CALL(pTemplate->FunctionList.templateInitCard(pTemplateData,*this),
 			ERR_CANT_INITIALIZE_CARD_STRUCTURES)
 		bUpdated=true;
 	}
@@ -661,7 +661,7 @@ RESULT CSlot::GetIDFromObject(CP11Object *pObject,CK_OBJECT_HANDLE &hObject)
 
 	// controllo se l'oggetto è privato
 	bool bPrivate=false;
-	ER_CALL(pObject->IsPrivate(bPrivate),
+	P11ER_CALL(pObject->IsPrivate(bPrivate),
 		ERR_GET_PRIVATE)
 
 	if (bPrivate && User!=CKU_USER)
@@ -673,7 +673,7 @@ RESULT CSlot::GetIDFromObject(CP11Object *pObject,CK_OBJECT_HANDLE &hObject)
 		// non ho trovato l'oggetto nella mappa degli oggetti;
 		// devo aggiungerlo
 
-		ER_CALL(GetNewObjectID(hObject),
+		P11ER_CALL(GetNewObjectID(hObject),
 			ERR_GET_NEW_OBJECT)
 
 		ObjP11Map[pObject]=hObject;
@@ -748,7 +748,7 @@ RESULT CSlot::Connect() {
 				else {
 					throw CStringException(ERR_CANT_ESTABLISH_CONTEXT);
 				}
-				ER_CALL(Context.renew(),
+				P11ER_CALL(Context.renew(),
 					ERR_CANT_ESTABLISH_CONTEXT)
 			}
 			else {
@@ -787,7 +787,7 @@ RESULT CSlot::GetATR(ByteArray &ATR) {
 		ATR=baATR;
 		_return(OK)
 	}
-	ER_CALL(Connect(),"Errore nella connessione al token");
+	P11ER_CALL(Connect(),"Errore nella connessione al token");
 	GetATR(baATR);
 	ATR=baATR;
 

@@ -53,6 +53,14 @@ if ((_call_ris=(call))!=(expected)) { \
 	throw CWinException(__LINE__,__FILE__,_call_ris); \
 }
 
+#define P11ER_CALL(call,err) \
+if ((_call_ris=(call))!=OK) { \
+	if (_call_ris==FAIL) { \
+		_return(FAIL) \
+		} \
+	_return(_call_ris) \
+}
+
 #define ER_CALL(call,err) \
 if ((_call_ris=(call))==FAIL) { \
 	throw CStringException(__LINE__,__FILE__,err); \

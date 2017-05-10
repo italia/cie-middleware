@@ -111,8 +111,8 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 	}
 	SCardReleaseContext(hSC);
 
-	WCHAR *modName = new WCHAR[moduleInfo.szModuleFullPath.size()];
-	swprintf_s(modName, moduleInfo.szModuleFullPath.size(), L"%S", moduleInfo.szModuleFullPath.lock());
+	WCHAR *modName = new WCHAR[moduleInfo.szModuleName.size() + 10];
+	swprintf_s(modName, moduleInfo.szModuleName.size() + 10, L"%S.dll", moduleInfo.szModuleName.lock());
 	if (!CryptRegisterOIDFunction(0, CRYPT_OID_OPEN_STORE_PROV_FUNC, "CIECertProvider", modName, CRYPT_OID_OPEN_STORE_PROV_FUNC))
 		return E_UNEXPECTED;
 	delete[] modName;
