@@ -87,7 +87,7 @@ RESULT CP11Object::GetObjectSize(CK_ULONG_PTR pulSize)
 	init_func
 	// devo almeno leggerlo dalla carta per sapere che dimensioni ha
 	if (!bReadValue) {
-		ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
+		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
 			ERR_CANT_READ_FROM_CARD)
 	}
 	DWORD ret=pSlot->pTemplate->FunctionList.templateGetObjectSize(pSlot->pTemplateData,this,pulSize);
@@ -127,7 +127,7 @@ RESULT CP11Certificate::getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue) 
 
 	AttributeMap::iterator it=attributes.find(type);
 	if (it==attributes.end() && !bReadValue) {
-		ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
+		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
 			ERR_CANT_READ_FROM_CARD)
 	}
 
@@ -146,7 +146,7 @@ RESULT CP11Data::getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue) {
 	init_func
 	AttributeMap::iterator it=attributes.find(type);
 	if (it==attributes.end() && !bReadValue) {
-		ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
+		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
 			ERR_CANT_READ_FROM_CARD)
 	}
 
@@ -172,7 +172,7 @@ RESULT CP11Object::IsPrivate(bool &bPrivate)
 	init_func	
 	bPrivate=false;
 	ByteArray *baVal=NULL;
-	ER_CALL(getAttribute(CKA_PRIVATE,baVal),
+	P11ER_CALL(getAttribute(CKA_PRIVATE,baVal),
 		ERR_GET_ATTRIBUTE)
 
 	if (baVal==NULL)
@@ -207,7 +207,7 @@ RESULT CP11PrivateKey::getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue) {
 
 	AttributeMap::iterator it=attributes.find(type);
 	if (it==attributes.end() && !bReadValue) {
-		ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
+		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
 			ERR_CANT_READ_FROM_CARD)
 	}
 
@@ -227,7 +227,7 @@ RESULT CP11PublicKey::getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue) {
 
 	AttributeMap::iterator it=attributes.find(type);
 	if (it==attributes.end() && !bReadValue) {
-		ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
+		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
 			ERR_CANT_READ_FROM_CARD)
 	}
 

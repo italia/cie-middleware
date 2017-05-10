@@ -64,7 +64,7 @@ RESULT CCardContext::renew() {
 		WIN_R_CALL(SCardReleaseContext(hContext), SCARD_S_SUCCESS);
 	hContext=NULL;
 
-	ER_CALL(getContext(),
+	P11ER_CALL(getContext(),
 		ERR_CANT_ESTABLISH_CONTEXT)
 
 	_return(OK)

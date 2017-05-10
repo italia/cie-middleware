@@ -50,7 +50,7 @@ DWORD WINAPI _abilitaCIE(
 		SCardEstablishContext(SCARD_SCOPE_SYSTEM, nullptr, nullptr, &hSC);
 		char *readers = nullptr;
 		len = SCARD_AUTOALLOCATE;
-		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS) {
+		if (SCardListReaders(hSC, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS || readers==nullptr) {
 			CMessage msg(MB_OK,
 				"Abilitazione CIE",
 				"Nessun lettore di smartcard installato");
@@ -248,6 +248,7 @@ DWORD WINAPI _abilitaCIE(
 				num.lock());
 			msg.DoModal();
 		}
+		SCardFreeMemory(hSC, readers);
 	}
 	catch (CBaseException &ex) {
 		String dump;
