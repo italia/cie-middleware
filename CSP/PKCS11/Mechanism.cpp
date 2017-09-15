@@ -1,8 +1,8 @@
-#include "..\StdAfx.h"
+#include "../StdAfx.h"
 #include ".\mechanism.h"
-#include "..\rsa.h"
+#include "..\crypto\rsa.h"
 #include "p11object.h"
-#include "..\util.h"
+#include "../util/util.h"
 
 static char *szCompiledFile=__FILE__;
 

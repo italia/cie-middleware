@@ -1,8 +1,8 @@
-#include "..\StdAfx.h"
-#include ".\cardtemplate.h"
-#include "..\util.h"
-#include "..\moduleinfo.h"
-#include ".\CIEP11Template.h"
+#include "../StdAfx.h"
+#include "cardtemplate.h"
+#include "../util/util.h"
+#include "../util/moduleinfo.h"
+#include "CIEP11Template.h"
 
 static char *szCompiledFile=__FILE__;
 
@@ -54,7 +54,7 @@ RESULT CCardTemplate::InitTemplateList()
 
 		Allocator<CCardTemplate> pTemplate;
 	pTemplate->szName = "CIE";// "Carta d'Identità Elettronica";
-	pTemplate->szManifacturer = "Gemalto";
+	pTemplate->szManifacturer = "";
 	pTemplate->FunctionList.templateInitLibrary = CIEtemplateInitLibrary;
 	pTemplate->FunctionList.templateInitCard = CIEtemplateInitCard;
 	pTemplate->FunctionList.templateFinalCard = CIEtemplateFinalCard;
@@ -73,8 +73,6 @@ RESULT CCardTemplate::InitTemplateList()
 	pTemplate->FunctionList.templateInitPIN = CIEtemplateInitPIN;
 	pTemplate->FunctionList.templateSetPIN = CIEtemplateSetPIN;
 	pTemplate->FunctionList.templateGetObjectSize = CIEtemplateGetObjectSize;
-	pTemplate->FunctionList.templateChangeSecAuthPIN = CIEtemplateChangeSecAuthPIN;
-	pTemplate->FunctionList.templateUnblockSecAuthPIN = CIEtemplateUnblockSecAuthPIN;
 	pTemplate->FunctionList.templateSetKeyPIN = CIEtemplateSetKeyPIN;
 	pTemplate->FunctionList.templateSetAttribute = CIEtemplateSetAttribute;
 	pTemplate->FunctionList.templateCreateObject = CIEtemplateCreateObject;

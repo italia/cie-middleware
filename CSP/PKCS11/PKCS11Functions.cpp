@@ -4,13 +4,13 @@
 #include "..\StdAfx.h"
 #include "PKCS11Functions.h"
 #include "InitP11.h"
-#include "winscard.h"
+#include <winscard.h>
 #include "session.h"
 #include "cardtemplate.h"
 #include <malloc.h>
-#include "..\ModuleInfo.h"
-#include "..\util.h"
-#include "..\syncroevent.h"
+#include "../util/ModuleInfo.h"
+#include "../util/util.h"
+#include "../util/syncroevent.h"
 
 static char *szCompiledFile=__FILE__;
 
@@ -1922,57 +1922,6 @@ CK_RV CK_ENTRY C_InitPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pPin,CK_ULONG ul
 	_return(CKR_GENERAL_ERROR)	
 }
 
-CK_RV CK_ENTRY C_InitPIN_EX(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pPuk,CK_ULONG ulPukLen,CK_CHAR_PTR pPin,CK_ULONG ulPinLen)
-{
-	init_main_func
-	CSyncroLocker lock(p11Mutex);
-
-	checkInBuffer(pPuk,ulPukLen);
-	checkInBuffer(pPin,ulPinLen);
-
-	logParam(hSession)
-	logParamBufHide(pPin,ulPinLen)
-	logParamBufHide(pPuk,ulPukLen)
-
-	if (!bP11Initialized)
-		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
-
-	CSession *pSession=NULL;
-	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
-		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
-
-	CK_SESSION_INFO Info;
-	DF_CALL(C_GetSessionInfo(hSession, &Info))
-
-	if (Info.flags==CKS_RO_USER_FUNCTIONS || Info.flags==CKS_RW_USER_FUNCTIONS || Info.flags==CKS_RW_SO_FUNCTIONS) {
-		DF_CALL(C_Logout(hSession))
-	}
-
-	
-	CK_RV r=C_Login(hSession,CKU_SO,pPuk,ulPukLen);
-
-	if (r==CKR_OK)
-		DF_CALL(C_InitPIN(hSession,pPin,ulPinLen))
-
-	DF_CALL(C_Logout(hSession))
-
-	if (Info.flags==CKS_RO_USER_FUNCTIONS || Info.flags==CKS_RW_USER_FUNCTIONS) {
-		DF_CALL(C_Login(hSession,CKU_USER,pPin,ulPinLen))
-	}
-		
-	if (Info.flags==CKS_RW_SO_FUNCTIONS) {
-		DF_CALL(C_Login(hSession,CKU_SO,pPuk,ulPukLen))
-	}
-
-	if (r!=CKR_OK)
-		return r;
-	
-	_return(CKR_OK)	
-	exit_main_func
-	_return(CKR_GENERAL_ERROR)	
-}
-
 CK_RV CK_ENTRY C_SetPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pOldPin,CK_ULONG ulOldLen,CK_CHAR_PTR pNewPin,CK_ULONG ulNewLen)
 {
 	init_main_func
@@ -2080,35 +2029,6 @@ CK_RV CK_ENTRY C_SetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOpera
 
 	DF_CALL(pSession->SetOperationState(ByteArray(pOperationState,ulOperationStateLen)))
 	
-	_return(CKR_OK)
-	exit_main_func
-	_return(CKR_GENERAL_ERROR)	
-}
-
-extern "C" CK_RV CK_ENTRY C_UnblockSecAuthPIN(CK_SESSION_HANDLE hSession, CK_CHAR_PTR pKeyLabel, CK_ULONG ulKeyLabelLen, CK_CHAR_PTR pPuk, CK_ULONG ulPukLen, CK_CHAR_PTR pNewPin, CK_ULONG ulNewPinLen)
-{
-	init_main_func
-	CSyncroLocker lock(p11Mutex);
-
-	checkInBuffer(pPuk, ulPukLen)
-	checkInBuffer(pNewPin, ulNewPinLen)
-	checkInBuffer(pKeyLabel, ulKeyLabelLen)
-
-	logParam(hSession)
-	logParamBuf(pKeyLabel,ulKeyLabelLen)
-	logParamBufHide(pPuk,ulPukLen)
-	logParamBufHide(pNewPin,ulNewPinLen)
-
-	if (!bP11Initialized)
-		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
-
-	CSession *pSession=NULL;
-	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
-		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
-
-	DF_CALL(pSession->UnblockSecAuthPIN(ByteArray(pKeyLabel,ulKeyLabelLen), ByteArray(pPuk,ulPukLen),ByteArray(pNewPin,ulNewPinLen)))
-
 	_return(CKR_OK)
 	exit_main_func
 	_return(CKR_GENERAL_ERROR)	

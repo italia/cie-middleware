@@ -1,11 +1,11 @@
-#include "..\StdAfx.h"
-#include ".\slot.h"
+#include "../StdAfx.h"
+#include "slot.h"
 #include "PKCS11Functions.h"
-#include "..\token.h"
+#include "../PCSC/token.h"
 
 #include "CardTemplate.h"
-#include "..\util.h"
-#include "..\syncroevent.h"
+#include "../util/util.h"
+#include "../util/syncroevent.h"
 
 static char *szCompiledFile=__FILE__;
 //extern CSyncroMutex p11EventMutex;
@@ -421,7 +421,18 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 	memset(pInfo->label,' ', sizeof(pInfo->label));
 	memcpy_s((char*)pInfo->label, 32, pTemplate->szName.lock(),min(pTemplate->szName.strlen(),sizeof(pInfo->label)));
 	memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
-	memcpy_s((char*)pInfo->manufacturerID, 32, pTemplate->szManifacturer.lock(), min(pTemplate->szManifacturer.strlen(), sizeof(pInfo->manufacturerID)));
+
+	char *manifacturer;
+
+	if (baATR.IndexOf(baNXP_ATR) >= 0)
+		manifacturer = "NXP";
+	else if ((baATR.IndexOf(baGemalto_ATR) >= 0) ||
+		(baATR.IndexOf(baGemalto2_ATR) >= 0))
+		manifacturer = "Gemalto";
+	else
+		throw CStringException("CIE non riconosciuta");
+
+	memcpy_s((char*)pInfo->manufacturerID, 32, manifacturer, strlen(manifacturer));
 	
 	if (baSerial.isEmpty() || pSerialTemplate!=pTemplate) {
 		pSerialTemplate=pTemplate;
@@ -787,13 +798,16 @@ RESULT CSlot::GetATR(ByteArray &ATR) {
 		ATR=baATR;
 		_return(OK)
 	}
-	P11ER_CALL(Connect(),"Errore nella connessione al token");
+	auto appo = hCard;
+	if (hCard == NULL)
+		P11ER_CALL(Connect(), "Errore nella connessione al token");
 	GetATR(baATR);
 	ATR=baATR;
 
-	if (hCard)
+	if (appo == NULL) {
 		SCardDisconnect(hCard, SCARD_LEAVE_CARD);
-	hCard = NULL;
+		hCard = NULL;
+	}
 
 
 	_return(OK)
