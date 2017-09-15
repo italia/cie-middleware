@@ -1,5 +1,5 @@
-#include "..\util.h"
-#include ".\cardcontext.h"
+#include "../util/util.h"
+#include "cardcontext.h"
 
 static char *szCompiledFile=__FILE__;
 

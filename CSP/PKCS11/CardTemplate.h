@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\token.h"
+#include "../PCSC/token.h"
 #include "session.h"
 
 
@@ -25,8 +25,6 @@ typedef RESULT (*templateGenerateRandomFunc)(void *pCardTemplateData,ByteArray &
 typedef RESULT (*templateInitPINFunc)(void *pCardTemplateData,ByteArray &baPin);
 typedef RESULT (*templateSetPINFunc)(void *pCardTemplateData,ByteArray &baOldPin,ByteArray &baNewPin,CK_USER_TYPE User);
 typedef RESULT (*templateGetObjectSizeFunc)(void *pCardTemplateData,CP11Object *pObject,CK_ULONG_PTR pulSize);
-typedef RESULT (*templateChangeSecAuthPINFunc)(void *pTemplateData,CP11Object *pObject,ByteArray &oldPin,ByteArray &newPin);
-typedef RESULT (*templateUnblockSecAuthPINFunc)(void *pTemplateData,CP11Object *pObject,ByteArray &Puk,ByteArray &newPin);
 typedef RESULT (*templateSetKeyPINFunc)(void *pTemplateData,CP11Object *pObject,ByteArray &Pin);
 typedef RESULT (*templateSetAttributeFunc)(void *pTemplateData,CP11Object *pObject,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount);
 typedef RESULT (*templateCreateObjectFunc)(void *pTemplateData,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount,CP11Object *&pObject);
@@ -54,8 +52,6 @@ public:
 	templateInitPINFunc					templateInitPIN;
 	templateSetPINFunc					templateSetPIN;
 	templateGetObjectSizeFunc			templateGetObjectSize;
-	templateChangeSecAuthPINFunc		templateChangeSecAuthPIN;
-	templateUnblockSecAuthPINFunc		templateUnblockSecAuthPIN;
 	templateSetKeyPINFunc				templateSetKeyPIN;
 	templateSetAttributeFunc			templateSetAttribute;
 	templateCreateObjectFunc			templateCreateObject;

@@ -1,9 +1,9 @@
-#include "..\StdAfx.h"
+#include "../StdAfx.h"
 #include "session.h"
 #include "cardtemplate.h"
-#include "..\util.h"
-#include "..\rsa.h"
-#include "..\tlv.h"
+#include "../util/util.h"
+#include "../crypto\rsa.h"
+#include "../util/tlv.h"
 
 static char *szCompiledFile=__FILE__;
 
@@ -1405,7 +1405,7 @@ CK_RV CSession::InitPIN(ByteArray &Pin)
 {
 	init_func
 
-	if (pSlot->User!=CKU_SO || (flags & CKF_RW_SESSION)==0)
+	if (pSlot->User!=CKU_SO)
 		_return(CKR_USER_NOT_LOGGED_IN)
 
 	P11ER_CALL(pSlot->pTemplate->FunctionList.templateInitPIN(pSlot->pTemplateData,Pin),
@@ -1418,9 +1418,6 @@ CK_RV CSession::InitPIN(ByteArray &Pin)
 CK_RV CSession::SetPIN(ByteArray &OldPin,ByteArray &NewPin)
 {
 	init_func
-
-	if ((flags & CKF_RW_SESSION)==0)
-		_return(CKR_SESSION_READ_ONLY)
 
 	P11ER_CALL(pSlot->pTemplate->FunctionList.templateSetPIN(pSlot->pTemplateData,OldPin,NewPin,pSlot->User),
 		ERR_SET_PIN)
@@ -1829,34 +1826,6 @@ CK_RV CSession::GetOperationState(ByteArray &OperationState)
 		_return(CKR_BUFFER_TOO_SMALL)
 
 	OperationState.copy(newOperationState);
-	_return(OK)
-	exit_func
-	_return(FAIL)
-}
-
-CK_RV CSession::UnblockSecAuthPIN(ByteArray &KeyLabel, ByteArray &Puk,ByteArray &NewPin)
-{
-	init_func
-	CP11Object *pObject=NULL;
-	P11ER_CALL(pSlot->FindP11Object(CKO_PRIVATE_KEY,CKA_LABEL,KeyLabel.lock(),KeyLabel.size(),pObject),
-		ERR_FIND_OBJECT)
-	if (pObject==NULL)
-		_return(CKR_KEY_HANDLE_INVALID)
-	if (pObject->ObjClass!=CKO_PRIVATE_KEY)
-		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PrivateKey *pSignKey=(CP11PrivateKey*)pObject;
-
-	bool bPrivate=false;
-	P11ER_CALL(pSignKey->IsPrivate(bPrivate),
-		ERR_GET_PRIVATE)
-
-	if (bPrivate && pSlot->User!=CKU_USER)
-		_return(CKR_USER_NOT_LOGGED_IN)
-
-	P11ER_CALL(pSlot->pTemplate->FunctionList.templateUnblockSecAuthPIN(pSlot->pTemplateData,pSignKey,Puk,NewPin),
-		ERR_UNBLOCK_SECAUTH_PIN)
-	
-
 	_return(OK)
 	exit_func
 	_return(FAIL)

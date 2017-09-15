@@ -734,7 +734,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4D423194BB1E4D06B7D8A9781AE7A622"
             {
-            "SourcePath" = "8:..\\x64\\Release\\CIEPKI.dll"
+            "SourcePath" = "8:"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_654D2C9A44AB428AB425EB6EEF023A20"
