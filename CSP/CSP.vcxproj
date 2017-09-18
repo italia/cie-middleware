@@ -205,26 +205,27 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="abilitaCIE.cpp" />
-    <ClCompile Include="AES.cpp" />
-    <ClCompile Include="APDU.cpp" />
-    <ClCompile Include="cambioPIN.cpp" />
-    <ClCompile Include="Message.cpp" />
-    <ClCompile Include="ASNParser.cpp" />
-    <ClCompile Include="Base64.cpp" />
-    <ClCompile Include="Bitmap.cpp" />
-    <ClCompile Include="CardLocker.cpp" />
-    <ClCompile Include="CSP.cpp" />
-    <ClCompile Include="DES3.cpp" />
-    <ClCompile Include="funccallinfo.cpp" />
-    <ClCompile Include="IAS.cpp" />
-    <ClCompile Include="IniSettings.cpp" />
-    <ClCompile Include="log.cpp" />
-    <ClCompile Include="MAC.cpp" />
-    <ClCompile Include="ModuleInfo.cpp" />
-    <ClCompile Include="NotImpl.cpp" />
-    <ClCompile Include="PCSC.cpp" />
-    <ClCompile Include="PIN.cpp" />
+    <ClCompile Include="CSP\abilitaCIE.cpp" />
+    <ClCompile Include="crypto\AES.cpp" />
+    <ClCompile Include="CSP\ExtAuthKey.cpp" />
+    <ClCompile Include="PCSC\APDU.cpp" />
+    <ClCompile Include="CSP\cambioPIN.cpp" />
+    <ClCompile Include="UI\Message.cpp" />
+    <ClCompile Include="crypto\ASNParser.cpp" />
+    <ClCompile Include="crypto\Base64.cpp" />
+    <ClCompile Include="UI\Bitmap.cpp" />
+    <ClCompile Include="PCSC\CardLocker.cpp" />
+    <ClCompile Include="CSP\CSP.cpp" />
+    <ClCompile Include="crypto\DES3.cpp" />
+    <ClCompile Include="Util\funccallinfo.cpp" />
+    <ClCompile Include="CSP\IAS.cpp" />
+    <ClCompile Include="Util\IniSettings.cpp" />
+    <ClCompile Include="Util\log.cpp" />
+    <ClCompile Include="crypto\MAC.cpp" />
+    <ClCompile Include="Util\ModuleInfo.cpp" />
+    <ClCompile Include="CSP\NotImpl.cpp" />
+    <ClCompile Include="PCSC\PCSC.cpp" />
+    <ClCompile Include="UI\PIN.cpp" />
     <ClCompile Include="PKCS11\CardContext.cpp" />
     <ClCompile Include="PKCS11\CardTemplate.cpp" />
     <ClCompile Include="PKCS11\CIEP11Template.cpp" />
@@ -234,46 +235,51 @@
     <ClCompile Include="PKCS11\PKCS11Functions.cpp" />
     <ClCompile Include="PKCS11\session.cpp" />
     <ClCompile Include="PKCS11\Slot.cpp" />
-    <ClCompile Include="RSA.cpp" />
-    <ClCompile Include="safeDesktop.cpp" />
-    <ClCompile Include="sbloccoPIN.cpp" />
-    <ClCompile Include="SHA1.cpp" />
-    <ClCompile Include="SHA256.cpp" />
+    <ClCompile Include="crypto\RSA.cpp" />
+    <ClCompile Include="UI\safeDesktop.cpp" />
+    <ClCompile Include="CSP\sbloccoPIN.cpp" />
+    <ClCompile Include="crypto\SHA1.cpp" />
+    <ClCompile Include="crypto\SHA256.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="StoreProvider.cpp" />
-    <ClCompile Include="SyncroEvent.cpp" />
-    <ClCompile Include="SyncroMutex.cpp" />
-    <ClCompile Include="SystemTraySDK.cpp" />
-    <ClCompile Include="Thread.cpp" />
-    <ClCompile Include="TLV.cpp" />
-    <ClCompile Include="Token.cpp" />
-    <ClCompile Include="util.cpp" />
-    <ClCompile Include="UtilException.cpp" />
-    <ClCompile Include="Verifica.cpp" />
+    <ClCompile Include="CSP\StoreProvider.cpp" />
+    <ClCompile Include="Util\SyncroEvent.cpp" />
+    <ClCompile Include="Util\SyncroMutex.cpp" />
+    <ClCompile Include="UI\SystemTray.cpp" />
+    <ClCompile Include="Util\Thread.cpp" />
+    <ClCompile Include="Util\TLV.cpp" />
+    <ClCompile Include="PCSC\Token.cpp" />
+    <ClCompile Include="Util\util.cpp" />
+    <ClCompile Include="Util\UtilException.cpp" />
+    <ClCompile Include="UI\Verifica.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AES.h" />
-    <ClInclude Include="APDU.h" />
-    <ClInclude Include="Array.h" />
-    <ClInclude Include="ASNParser.h" />
-    <ClInclude Include="Base64.h" />
-    <ClInclude Include="CardLocker.h" />
-    <ClInclude Include="defines.h" />
-    <ClInclude Include="defines_err.h" />
-    <ClInclude Include="DES3.h" />
-    <ClInclude Include="funccallinfo.h" />
-    <ClInclude Include="IniSettings.h" />
-    <ClInclude Include="log.h" />
-    <ClInclude Include="MAC.h" />
-    <ClInclude Include="Message.h" />
-    <ClInclude Include="AtlBitmapSkinButton.h" />
-    <ClInclude Include="atlcontrols.h" />
-    <ClInclude Include="Bitmap.h" />
-    <ClInclude Include="CardMod.h" />
-    <ClInclude Include="IAS.h" />
-    <ClInclude Include="ModuleInfo.h" />
-    <ClInclude Include="PCSC.h" />
-    <ClInclude Include="PIN.h" />
+    <ClInclude Include="..\CacheLib\CacheLib.h" />
+    <ClInclude Include="Crypto\AES.h" />
+    <ClInclude Include="Crypto\ASNParser.h" />
+    <ClInclude Include="Crypto\Base64.h" />
+    <ClInclude Include="Crypto\DES3.h" />
+    <ClInclude Include="Crypto\MAC.h" />
+    <ClInclude Include="Crypto\RSA.h" />
+    <ClInclude Include="Crypto\SHA1.h" />
+    <ClInclude Include="Crypto\sha256.h" />
+    <ClInclude Include="Util\Allocator.h" />
+    <ClInclude Include="PCSC\APDU.h" />
+    <ClInclude Include="Util\Array.h" />
+    <ClInclude Include="PCSC\CardLocker.h" />
+    <ClInclude Include="Util\defines.h" />
+    <ClInclude Include="Util\defines_err.h" />
+    <ClInclude Include="Util\funccallinfo.h" />
+    <ClInclude Include="Util\IniSettings.h" />
+    <ClInclude Include="Util\log.h" />
+    <ClInclude Include="UI\Message.h" />
+    <ClInclude Include="UI\AtlBitmapSkinButton.h" />
+    <ClInclude Include="UI\atlcontrols.h" />
+    <ClInclude Include="UI\Bitmap.h" />
+    <ClInclude Include="CSP\CardMod.h" />
+    <ClInclude Include="CSP\IAS.h" />
+    <ClInclude Include="Util\ModuleInfo.h" />
+    <ClInclude Include="PCSC\PCSC.h" />
+    <ClInclude Include="UI\PIN.h" />
     <ClInclude Include="PKCS11\CardContext.h" />
     <ClInclude Include="PKCS11\CardTemplate.h" />
     <ClInclude Include="PKCS11\CIEP11Template.h" />
@@ -283,25 +289,22 @@
     <ClInclude Include="PKCS11\PKCS11Functions.h" />
     <ClInclude Include="PKCS11\session.h" />
     <ClInclude Include="PKCS11\Slot.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="RSA.h" />
-    <ClInclude Include="safeDesktop.h" />
-    <ClInclude Include="SHA1.h" />
-    <ClInclude Include="sha256.h" />
+    <ClInclude Include="res\resource.h" />
+    <ClInclude Include="UI/safeDesktop.h" />
     <ClInclude Include="StdAfx.h" />
-    <ClInclude Include="SyncroEvent.h" />
-    <ClInclude Include="SyncroMutex.h" />
-    <ClInclude Include="SystemTraySDK.h" />
-    <ClInclude Include="Thread.h" />
-    <ClInclude Include="TLV.h" />
-    <ClInclude Include="Token.h" />
-    <ClInclude Include="util.h" />
-    <ClInclude Include="UtilException.h" />
-    <ClInclude Include="VCEdit.h" />
-    <ClInclude Include="Verifica.h" />
+    <ClInclude Include="Util\SyncroEvent.h" />
+    <ClInclude Include="Util\SyncroMutex.h" />
+    <ClInclude Include="UI\SystemTray.h" />
+    <ClInclude Include="Util\Thread.h" />
+    <ClInclude Include="Util\TLV.h" />
+    <ClInclude Include="PCSC\Token.h" />
+    <ClInclude Include="Util\util.h" />
+    <ClInclude Include="Util\UtilException.h" />
+    <ClInclude Include="UI\VCEdit.h" />
+    <ClInclude Include="UI\Verifica.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="CIEPKI.rc" />
+    <ResourceCompile Include="res/CIEPKI.rc" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="custom.manifest" />
@@ -318,6 +321,11 @@
     <Image Include="res\CIE.ico" />
     <Image Include="res\OK.bmp" />
     <Image Include="res\OK2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CacheLib\CacheLib.vcxproj">
+      <Project>{0c7a5f08-dd6f-4a12-9c62-0e78394a3064}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

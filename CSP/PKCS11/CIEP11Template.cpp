@@ -1,11 +1,11 @@
 #include "..\StdAfx.h"
 #include "CIEP11Template.h"
-#include "..\IAS.h"
-#include "..\CardLocker.h"
-#include "..\ASNParser.h"
+#include "../CSP/IAS.h"
+#include "../PCSC/CardLocker.h"
+#include "../crypto/ASNParser.h"
 #include <stdio.h>
-#include "..\AES.h"
-#include "..\PCSC.h"
+#include "../crypto/AES.h"
+#include "../PCSC/PCSC.h"
 
 int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, DWORD *respSize) {
 	if (apduSize == 2) {
@@ -37,7 +37,11 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 	}
 	ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
 	auto sw = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
-	ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
+	if (sw==SCARD_S_SUCCESS)
+		ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
+	else {
+		ODS("Errore trasmissione APDU");
+	}
 	return sw;
 }
 
@@ -47,7 +51,7 @@ public:
 	CAES aesKey;
 	CToken token;
 	bool init;
-	CIEData(CSlot *slot) : ias((CToken::TokenTransmitCallback)TokenTransmitCallback), slot(*slot) {
+	CIEData(CSlot *slot,ByteArray atr) : ias((CToken::TokenTransmitCallback)TokenTransmitCallback,atr), slot(*slot) {
 		ByteDynArray key;
 		aesKey.Init(key.random(32));
 		token.setTransmitCallbackData(slot);
@@ -65,7 +69,9 @@ public:
 RESULT CIEtemplateInitLibrary(class CCardTemplate &Template, void *templateData){ return FAIL; }
 RESULT CIEtemplateInitCard(void *&pTemplateData, CSlot &pSlot){ 
 	init_func
-	Allocator<CIEData,CSlot*>data(&pSlot);
+	ByteArray ATR;
+	pSlot.GetATR(ATR);
+	Allocator<CIEData,CSlot*,ByteArray>data(&pSlot,ATR);
 
 	pTemplateData = data.detach();
 	_return(OK)
@@ -97,6 +103,9 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 			CCardLocker lockCard(cie->slot.hCard);
 			cie->ias.SetCardContext(&cie->slot);
 			cie->ias.ReadPAN();
+			ByteDynArray resp;
+			cie->ias.ReadDappPubKey(resp);
+			cie->ias.InitEncKey();
 			cie->ias.GetCertificate(certRaw, true);
 		}
 
@@ -180,11 +189,15 @@ RESULT CIEtemplateMatchCard(bool &bMatched, CSlot &pSlot){
 	pSlot.Connect();
 	{
 		safeConnection faseConn(pSlot.hCard);
-		CCardLocker lockCard(pSlot.hCard);
+		ByteArray ATR;
+		pSlot.GetATR(ATR);
 		token.setTransmitCallback((CToken::TokenTransmitCallback)TokenTransmitCallback, &pSlot);
-		IAS ias((CToken::TokenTransmitCallback)TokenTransmitCallback);
+		IAS ias((CToken::TokenTransmitCallback)TokenTransmitCallback, ATR);
 		ias.SetCardContext(&pSlot);
-		ias.ReadPAN();
+		{
+			safeTransaction trans(faseConn,SCARD_LEAVE_CARD);
+			ias.ReadPAN();
+		}
 		bMatched = true;
 		_return(OK);
 	}
@@ -200,7 +213,9 @@ RESULT CIEtemplateGetSerial(CSlot &pSlot, ByteDynArray &baSerial){
 	{
 		safeConnection faseConn(pSlot.hCard);
 		CCardLocker lockCard(pSlot.hCard);
-		IAS ias((CToken::TokenTransmitCallback)TokenTransmitCallback);
+		ByteArray ATR;
+		pSlot.GetATR(ATR);
+		IAS ias((CToken::TokenTransmitCallback)TokenTransmitCallback, ATR);
 		ias.SetCardContext(&pSlot);
 		ias.ReadPAN();
 		String numSerial;
@@ -257,7 +272,10 @@ RESULT CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &P
 		if (cie->ias.Callback != nullptr)
 			cie->ias.Callback(3, "Verify PIN", cie->ias.CallbackData);
 		if (userType == CKU_USER) {
-			sw = cie->ias.VerifyPIN(Pin);
+			ByteDynArray FullPIN;
+			cie->ias.GetFirstPIN(FullPIN);
+			FullPIN.append(Pin);
+			sw = cie->ias.VerifyPIN(FullPIN);
 		}
 		else if (userType == CKU_SO) {
 			sw = cie->ias.VerifyPUK(Pin);
@@ -316,7 +334,7 @@ RESULT CIEtemplateSign(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteAr
 			cie->ias.SelectAID_CIE();
 			cie->ias.DHKeyExchange();
 			cie->ias.DAPP();
-			cie->ias.VerifyPIN(Pin);
+			CARD_R_CALL(cie->ias.VerifyPIN(Pin))
 			cie->ias.Sign(baSignBuffer, baSignature);
 		}
 	}
@@ -324,14 +342,91 @@ RESULT CIEtemplateSign(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteAr
 	exit_func
 	_return(FAIL)
 }
+
+RESULT CIEtemplateInitPIN(void *pCardTemplateData, ByteArray &baPin){ 
+	init_func
+	CToken token;
+	CIEData* cie = (CIEData*)pCardTemplateData;
+	if (cie->userType == CKU_SO) {
+		// posso usarla solo se sono loggato come so
+		ByteDynArray Pin;
+		cie->slot.Connect();
+		cie->ias.SetCardContext(&cie->slot);
+		cie->ias.token.Reset();
+		{
+			safeConnection safeConn(cie->slot.hCard);
+			CCardLocker lockCard(cie->slot.hCard);
+			cie->aesKey.Decode(cie->SessionPIN, Pin);
+			cie->ias.SelectAID_IAS();
+			cie->ias.SelectAID_CIE();
+
+			cie->ias.DHKeyExchange();
+			cie->ias.DAPP();
+			CARD_R_CALL(cie->ias.VerifyPUK(Pin))
+			CARD_R_CALL(cie->ias.UnblockPIN())
+
+			ByteDynArray changePIN;
+			cie->ias.GetFirstPIN(changePIN);
+			changePIN.append(baPin);
+
+			CARD_R_CALL(cie->ias.ChangePIN(changePIN))
+		}
+	}
+	else
+		return CKR_FUNCTION_NOT_SUPPORTED;
+	_return(OK);
+	exit_func
+		_return(FAIL)
+}
+
+RESULT CIEtemplateSetPIN(void *pCardTemplateData, ByteArray &baOldPin, ByteArray &baNewPin, CK_USER_TYPE User)
+{
+	init_func
+	CToken token;
+	CIEData* cie = (CIEData*)pCardTemplateData;
+	if (cie->userType != CKU_SO) {
+		// posso usarla sia se sono loggato come user sia se non sono loggato
+		ByteDynArray Pin;
+		cie->slot.Connect();
+		cie->ias.SetCardContext(&cie->slot);
+		cie->ias.token.Reset();
+		{
+			safeConnection safeConn(cie->slot.hCard);
+			CCardLocker lockCard(cie->slot.hCard);
+			cie->ias.SelectAID_IAS();
+			if (cie->userType != CKU_USER)
+				cie->ias.InitDHParam();
+			cie->ias.SelectAID_CIE();
+
+			if (cie->userType != CKU_USER) {
+				cie->ias.ReadPAN();
+				ByteDynArray resp;
+				cie->ias.ReadDappPubKey(resp);
+			}
+
+			cie->ias.DHKeyExchange();
+			cie->ias.DAPP();
+			ByteDynArray oldPIN,newPIN;
+			cie->ias.GetFirstPIN(oldPIN);
+			newPIN = oldPIN;
+			oldPIN.append(baOldPin);
+			newPIN.append(baNewPin);
+
+			CARD_R_CALL(cie->ias.VerifyPIN(oldPIN))
+			CARD_R_CALL(cie->ias.ChangePIN(oldPIN,newPIN))
+		}
+	}
+	else
+		return CKR_FUNCTION_NOT_SUPPORTED;
+	_return(OK);
+	exit_func
+	_return(FAIL)
+}
+
 RESULT CIEtemplateSignRecover(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteArray &baSignBuffer, ByteDynArray &baSignature, CK_MECHANISM_TYPE mechanism, bool bSilent){ return FAIL; }
 RESULT CIEtemplateDecrypt(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteArray &baEncryptedData, ByteDynArray &baData, CK_MECHANISM_TYPE mechanism, bool bSilent){ return FAIL; }
 RESULT CIEtemplateGenerateRandom(void *pCardTemplateData, ByteArray &baRandomData){ return FAIL; }
-RESULT CIEtemplateInitPIN(void *pCardTemplateData, ByteArray &baPin){ return FAIL; }
-RESULT CIEtemplateSetPIN(void *pCardTemplateData, ByteArray &baOldPin, ByteArray &baNewPin, CK_USER_TYPE User){ return FAIL; }
 RESULT CIEtemplateGetObjectSize(void *pCardTemplateData, CP11Object *pObject, CK_ULONG_PTR pulSize){ return FAIL; }
-RESULT CIEtemplateChangeSecAuthPIN(void *pTemplateData, CP11Object *pObject, ByteArray &oldPin, ByteArray &newPin){ return FAIL; }
-RESULT CIEtemplateUnblockSecAuthPIN(void *pTemplateData, CP11Object *pObject, ByteArray &Puk, ByteArray &newPin){ return FAIL; }
 RESULT CIEtemplateSetKeyPIN(void *pTemplateData, CP11Object *pObject, ByteArray &Pin){ return FAIL; }
 RESULT CIEtemplateSetAttribute(void *pTemplateData, CP11Object *pObject, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount){ return FAIL; }
 RESULT CIEtemplateCreateObject(void *pTemplateData, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CP11Object *&pObject){ return FAIL; }
