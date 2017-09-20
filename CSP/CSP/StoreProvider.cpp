@@ -83,7 +83,6 @@ extern "C" HRESULT __stdcall DllUnregisterServer(void) {
 }
 
 LONG RegisterCard(SCARDCONTEXT hSC, char *name, BYTE* ATR, int ATRLen) {
-	MessageBox(NULL, "a", "a", MB_OK);
 	ByteDynArray ATRMask;
 	LONG ris;
 	SCardForgetCardType(hSC, name);
