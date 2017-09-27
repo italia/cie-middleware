@@ -181,6 +181,9 @@ DWORD WINAPI CardReadFile(
 
 BYTE sha1OID[] = { 0x2B, 0x0E, 0x03, 0x02, 0x1A };
 BYTE sha256OID[] = { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01 };
+BYTE sha384OID[] = { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02 };
+BYTE sha512OID[] = { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03 };
+
 DWORD WINAPI CardSignData(
 	__in    PCARD_DATA          pCardData,
 	__inout PCARD_SIGNING_INFO  pInfo) {
@@ -203,6 +206,10 @@ DWORD WINAPI CardSignData(
 				alg = 0;
 			else if (lstrcmpW(bPad->pszAlgId, L"SHA256") == 0)
 				alg = CALG_SHA_256;
+			else if (lstrcmpW(bPad->pszAlgId, L"SHA512") == 0)
+				alg = CALG_SHA_512;
+			else if (lstrcmpW(bPad->pszAlgId, L"SHA384") == 0)
+				alg = CALG_SHA_384;
 			else if (lstrcmpW(bPad->pszAlgId, L"SHA1") == 0)
 				alg = CALG_SHA1;
 		}
@@ -221,7 +228,13 @@ DWORD WINAPI CardSignData(
 		case CALG_SHA_256:
 			toSign = ASN1Tag(0x30, ASN1Tag(0x30, ASN1Tag(6, VarToByteArray(sha256OID)).append(ASN1Tag(5, ByteArray()))).append(ASN1Tag(4, toSign)));
 			break;
-			default:
+		case CALG_SHA_384:
+			toSign = ASN1Tag(0x30, ASN1Tag(0x30, ASN1Tag(6, VarToByteArray(sha384OID)).append(ASN1Tag(5, ByteArray()))).append(ASN1Tag(4, toSign)));
+			break;
+		case CALG_SHA_512:
+			toSign = ASN1Tag(0x30, ASN1Tag(0x30, ASN1Tag(6, VarToByteArray(sha512OID)).append(ASN1Tag(5, ByteArray()))).append(ASN1Tag(4, toSign)));
+			break;
+		default:
 		return SCARD_E_UNSUPPORTED_FEATURE;
 	}
 

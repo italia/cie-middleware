@@ -53,13 +53,13 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 		bModuleInit=true;
 		moduleInfo.init(hModule);
 		String mainMutexName;
-		mainMutexName.printf("CardOS_P11_Mutex_%s",moduleInfo.szModuleName.stringlock());
+		mainMutexName.printf("CIE_P11_Mutex_%s",moduleInfo.szModuleName.stringlock());
 		p11Mutex.Create(mainMutexName.stringlock());
 		//xmlInit();
-		Log.initModule("PKCS11",__DATE__" "__TIME__);
 		String configPath;
-		configPath.printf("%s%s.ini",moduleInfo.szModulePath.stringlock(),moduleInfo.szModuleName.stringlock());
-		initLog(configPath.stringlock(),__DATE__" "__TIME__);
+		configPath.printf("%s%s.ini", moduleInfo.szModulePath.stringlock(), moduleInfo.szModuleName.stringlock());
+		initLog(configPath.stringlock(), __DATE__" "__TIME__);
+		Log.initModule("PKCS11", __DATE__" "__TIME__);
 		p11::InitP11(configPath.stringlock());
 
 	}
