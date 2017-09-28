@@ -334,7 +334,11 @@ RESULT CIEtemplateSign(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteAr
 			cie->ias.SelectAID_CIE();
 			cie->ias.DHKeyExchange();
 			cie->ias.DAPP();
-			CARD_R_CALL(cie->ias.VerifyPIN(Pin))
+
+			ByteDynArray FullPIN;
+			cie->ias.GetFirstPIN(FullPIN);
+			FullPIN.append(Pin);
+			CARD_R_CALL(cie->ias.VerifyPIN(FullPIN));
 			cie->ias.Sign(baSignBuffer, baSignature);
 		}
 	}

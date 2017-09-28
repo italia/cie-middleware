@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include "../util/moduleinfo.h"
 
-//#define TEST_CERT "C:\\Progetti\\CIE\\Middleware\\test.crt"
-
 #ifdef _WIN64
 #pragma comment(linker, "/export:CertDllOpenStoreProv")
 #pragma comment(linker, "/export:DllRegisterServer,PRIVATE")
@@ -25,18 +23,15 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 	_In_          HCERTSTORE            hCertStore,
 	_Inout_       PCERT_STORE_PROV_INFO pStoreProvInfo
 	) {
-
+	init_main_func
 	HCRYPTPROV prov=0;
 	CryptAcquireContext(&prov, nullptr, MS_SCARD_PROV, PROV_RSA_FULL, CRYPT_SILENT);
 	if (prov == 0) {
-		CryptAcquireContext(&prov, nullptr, MS_SCARD_PROV, PROV_RSA_FULL, CRYPT_SILENT);
-		if (prov == 0) {
-			return TRUE;
-		}
+		return TRUE;
 	}
 
-	BYTE containerName[100];
-	DWORD containerNameSize = 100;
+	BYTE containerName[200];
+	DWORD containerNameSize = 200;
 	CryptGetProvParam(prov, PP_CONTAINER, containerName, &containerNameSize, 0);
 	DWORD keySpecs[] = { AT_SIGNATURE, AT_KEYEXCHANGE };
 	for (int i = 0; i < 2; i++) {
@@ -67,9 +62,12 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 	CryptReleaseContext(prov, 0);
 
 	return TRUE;
+	exit_main_func
+	return FALSE;
 }
 
 extern "C" HRESULT __stdcall DllUnregisterServer(void) {
+	init_main_func
 	SCARDCONTEXT hSC;
 	SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &hSC);
 	SCardForgetCardType(hSC, "CIE_1");
@@ -80,10 +78,11 @@ extern "C" HRESULT __stdcall DllUnregisterServer(void) {
 	CertUnregisterPhysicalStore(L"MY", CERT_SYSTEM_STORE_CURRENT_USER, L"CIEStore");
 	CryptUnregisterOIDFunction(0, CRYPT_OID_OPEN_STORE_PROV_FUNC, "CIECertProvider");
 	return S_OK;
+	exit_main_func
+	return E_UNEXPECTED;
 }
 
 LONG RegisterCard(SCARDCONTEXT hSC, char *name, BYTE* ATR, int ATRLen) {
-	MessageBox(NULL, "a", "a", MB_OK);
 	ByteDynArray ATRMask;
 	LONG ris;
 	SCardForgetCardType(hSC, name);
@@ -115,7 +114,7 @@ LONG RegisterCard(SCARDCONTEXT hSC, char *name, BYTE* ATR, int ATRLen) {
 }
 
 extern "C" HRESULT __stdcall DllRegisterServer(void) {
-	
+	init_main_func
 	SCARDCONTEXT hSC;
 	SCardEstablishContext(SCARD_SCOPE_SYSTEM,NULL,NULL,&hSC);
 	BYTE ATR[] = { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00, 0x73 };
@@ -159,4 +158,6 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 		return E_UNEXPECTED;
 	}
 	return S_OK;
+	exit_main_func
+	return E_UNEXPECTED;
 }
