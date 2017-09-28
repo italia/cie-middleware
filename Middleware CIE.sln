@@ -11,6 +11,8 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CacheLib", "CacheLib\CacheLib.vcxproj", "{0C7A5F08-DD6F-4A12-9C62-0E78394A3064}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EsempioPKCS11", "EsempioPKCS11\EsempioPKCS11.vcxproj", "{47261501-10EF-4F42-9E33-262B66AC89D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -47,6 +49,10 @@ Global
 		{0C7A5F08-DD6F-4A12-9C62-0E78394A3064}.Release|Win32.Build.0 = Release|Win32
 		{0C7A5F08-DD6F-4A12-9C62-0E78394A3064}.Release|x64.ActiveCfg = Release|x64
 		{0C7A5F08-DD6F-4A12-9C62-0E78394A3064}.Release|x64.Build.0 = Release|x64
+		{47261501-10EF-4F42-9E33-262B66AC89D2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{47261501-10EF-4F42-9E33-262B66AC89D2}.Debug|x64.ActiveCfg = Debug|x64
+		{47261501-10EF-4F42-9E33-262B66AC89D2}.Release|Win32.ActiveCfg = Release|Win32
+		{47261501-10EF-4F42-9E33-262B66AC89D2}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
