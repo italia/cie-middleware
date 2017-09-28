@@ -23,7 +23,6 @@ RESULT CIEtemplateGenerateRandom(void *pCardTemplateData, ByteArray &baRandomDat
 RESULT CIEtemplateInitPIN(void *pCardTemplateData, ByteArray &baPin);
 RESULT CIEtemplateSetPIN(void *pCardTemplateData, ByteArray &baOldPin, ByteArray &baNewPin, CK_USER_TYPE User);
 RESULT CIEtemplateGetObjectSize(void *pCardTemplateData, CP11Object *pObject, CK_ULONG_PTR pulSize);
-RESULT CIEtemplateChangeSecAuthPIN(void *pTemplateData, CP11Object *pObject, ByteArray &oldPin, ByteArray &newPin);
 RESULT CIEtemplateUnblockSecAuthPIN(void *pTemplateData, CP11Object *pObject, ByteArray &Puk, ByteArray &newPin);
 RESULT CIEtemplateSetKeyPIN(void *pTemplateData, CP11Object *pObject, ByteArray &Pin);
 RESULT CIEtemplateSetAttribute(void *pTemplateData, CP11Object *pObject, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount);
