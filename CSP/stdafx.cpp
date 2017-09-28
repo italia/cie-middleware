@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "moduleinfo.h"
+#include "util/moduleinfo.h"
 
 CModuleInfo moduleInfo;
 

@@ -4,9 +4,9 @@
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
 "ProjectName" = "8:Setup"
-"LanguageId" = "3:0"
+"LanguageId" = "3:1040"
 "CodePage" = "3:1252"
-"UILanguageId" = "3:0"
+"UILanguageId" = "3:1040"
 "SccProjectName" = "8:"
 "SccLocalPath" = "8:"
 "SccAuxPath" = "8:"
@@ -21,14 +21,38 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_170733A398D84E3AA2951C7C25F01F75"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_30005CA5808F41689E2C0B67C21B4260"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
+        "MsmKey" = "8:_443B1B15AC745C3F72E6EDD2A0DCC386"
+        "OwnerKey" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_91BF635AF27B257373BB8500BA3A452D"
+        "OwnerKey" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_AF0E2D35E69EE32D0DBB67E57916730B"
+        "OwnerKey" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -77,7 +101,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\Setup.msi"
+        "OutputFilename" = "8:Release\\MiddlewareCIE_v1.0.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -89,18 +113,13 @@
         "InstallerBootstrapper" = "3:2"
             "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
             {
-            "Enabled" = "11:TRUE"
+            "Enabled" = "11:FALSE"
             "PromptEnabled" = "11:TRUE"
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.5"
-                    {
-                    "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.5"
-                    }
                 }
             }
         }
@@ -172,6 +191,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_170733A398D84E3AA2951C7C25F01F75"
+            {
+            "SourcePath" = "8:Uninstall.js"
+            "TargetName" = "8:Uninstall.js"
+            "Tag" = "8:"
+            "Folder" = "8:_F80CED8C410D4A6FAB2766B992D84BB9"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_30005CA5808F41689E2C0B67C21B4260"
             {
             "SourcePath" = "8:..\\Win32\\Release\\CIEPKI.dll"
@@ -190,6 +229,66 @@
             "Register" = "3:4"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_443B1B15AC745C3F72E6EDD2A0DCC386"
+            {
+            "SourcePath" = "8:CRYPT32.dll"
+            "TargetName" = "8:CRYPT32.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_654D2C9A44AB428AB425EB6EEF023A20"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_91BF635AF27B257373BB8500BA3A452D"
+            {
+            "SourcePath" = "8:WinSCard.dll"
+            "TargetName" = "8:WinSCard.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_654D2C9A44AB428AB425EB6EEF023A20"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AF0E2D35E69EE32D0DBB67E57916730B"
+            {
+            "SourcePath" = "8:CacheLib.lib"
+            "TargetName" = "8:CacheLib.lib"
+            "Tag" = "8:"
+            "Folder" = "8:_654D2C9A44AB428AB425EB6EEF023A20"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D4788F7ECCD9498491BF8E1C36E951FF"
@@ -240,7 +339,7 @@
                 {
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_5F4F9FF2533E4184BE428A4482B2B620"
                     {
-                    "Name" = "8:Middleware CIE"
+                    "Name" = "8:CIE Middleware"
                     "AlwaysCreate" = "11:TRUE"
                     "Condition" = "8:"
                     "Transitive" = "11:FALSE"
@@ -264,7 +363,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_F80CED8C410D4A6FAB2766B992D84BB9"
             {
-            "DefaultLocation" = "8:[ProgramFiles64Folder][ProductName]"
+            "DefaultLocation" = "8:[ProgramFiles64Folder]CIEPKI"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -283,15 +382,15 @@
         }
         "MsiBootstrapper"
         {
-        "LangId" = "3:0"
+        "LangId" = "3:1040"
         "RequiresElevation" = "11:FALSE"
         }
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:CIEPKI"
+        "ProductName" = "8:Middleware CIE"
         "ProductCode" = "8:{E77573CB-DE26-4539-93A1-E682D01ED8EF}"
-        "PackageCode" = "8:{C09BF0CB-9768-458E-9B33-858583C8F88A}"
+        "PackageCode" = "8:{01989E94-BAD5-4604-9FB5-FB6C3484D274}"
         "UpgradeCode" = "8:{078EA248-505B-480C-86DF-55836B31DE8C}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -355,6 +454,20 @@
         }
         "Shortcut"
         {
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_DD7E97CEA7524713A337D35C5AD900BC"
+            {
+            "Name" = "8:Rimuovi"
+            "Arguments" = "8:[ProductCode]"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:102"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_170733A398D84E3AA2951C7C25F01F75"
+            "Folder" = "8:_5F4F9FF2533E4184BE428A4482B2B620"
+            "WorkingFolder" = "8:_F80CED8C410D4A6FAB2766B992D84BB9"
+            "Icon" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
+            "Feature" = "8:"
+            }
         }
         "UserInterface"
         {

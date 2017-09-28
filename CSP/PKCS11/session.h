@@ -6,7 +6,7 @@
 
 #include "mechanism.h"
 #include "slot.h"
-#include "..\token.h"
+#include "../PCSC/token.h"
 #include <winscard.h>
 #include "p11object.h"
 
