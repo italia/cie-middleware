@@ -49,25 +49,25 @@ void initLog(const char *iniFile,const char *version) {
 	OutputDebugString(iniFile);
 	OutputDebugString("\n");
 
-	LogMode=(logMode)(new IniSettingsInt("Log","LogMode",(int)LM_Single,"Modalità di Log. Valori possibili:\n"
+	LogMode = (logMode)(IniSettingsInt("Log", "LogMode", (int)LM_Single, "Modalità di Log. Valori possibili:\n"
 		"0 ;LM_Single,	// un solo file\n"
 		"1 ;LM_Module,	// un file per modulo\n"
 		"2 ;LM_Thread,	// un file per thread\n"
-		"3 ;LM_Module_Thread	// un file per modulo e per thread\n"))->GetValue((char*)iniFile);
+		"3 ;LM_Module_Thread	// un file per modulo e per thread\n")).GetValue((char*)iniFile);
 
 	if (LogMode==-1) {
 		LogMode=LM_Single;
 	}
 
-	bMainEnable=(new IniSettingsBool("Log","LogEnable",false,"Abilitazione log globale"))->GetValue((char*)iniFile);
+	bMainEnable=(IniSettingsBool("Log","LogEnable",false,"Abilitazione log globale")).GetValue((char*)iniFile);
 
-	bFunctionLog=(new IniSettingsBool("Log","FunctionLog",false,"Abilitazione log delle chiamate a funzione"))->GetValue((char*)iniFile);
+	bFunctionLog = (IniSettingsBool("Log", "FunctionLog", false, "Abilitazione log delle chiamate a funzione")).GetValue((char*)iniFile);
 
-	dwGlobalDepth=(new IniSettingsInt("Log","FunctionDepth",10,"Definisce la profondità massima di log delle funzioni\n"))->GetValue((char*)iniFile);
+	dwGlobalDepth = (IniSettingsInt("Log", "FunctionDepth", 10, "Definisce la profondità massima di log delle funzioni\n")).GetValue((char*)iniFile);
 
-	bGlobalParam=(new IniSettingsBool("Log","ParamLog",false,"Abilitazione log dei parametri di input delle funzioni"))->GetValue((char*)iniFile);
+	bGlobalParam = (IniSettingsBool("Log", "ParamLog", false, "Abilitazione log dei parametri di input delle funzioni")).GetValue((char*)iniFile);
 
-	(new IniSettingsString("Log","LogDir","c:\\","Definisce il path in cui salvare il file di log (con \\ finale)"))->GetValue((char*)iniFile,logDirGlobal);
+	(IniSettingsString("Log", "LogDir", "c:\\", "Definisce il path in cui salvare il file di log (con \\ finale)")).GetValue((char*)iniFile, logDirGlobal);
 
 	char SectionName[30];
 	int numMod=1;
@@ -75,7 +75,7 @@ void initLog(const char *iniFile,const char *version) {
 		sprintf_s(SectionName,30,"%s%i","LogModule",numMod);
 		String modName;
 
-		(new IniSettingsString(SectionName,"Name","","Nome della sezione log di log"))->GetValue((char*)iniFile,modName);
+		(IniSettingsString(SectionName, "Name", "", "Nome della sezione log di log")).GetValue((char*)iniFile, modName);
 
 		if (modName[0]==0)
 			break;
@@ -85,15 +85,15 @@ void initLog(const char *iniFile,const char *version) {
 		CLog &log=logInit[logInit.size()-1];
 		log.logName=modName;
 
-		log.bEnabled=(new IniSettingsBool(SectionName,"LogEnable",bMainEnable,"Abilitazione log della sezione"))->GetValue((char*)iniFile);
+		log.bEnabled = (IniSettingsBool(SectionName, "LogEnable", bMainEnable, "Abilitazione log della sezione")).GetValue((char*)iniFile);
 
-		(new IniSettingsString(SectionName,"LogDir",logDirGlobal.lock(),"Definisce il path in cui salvare il file di log di questa sezione (con \\ finale). Default: directory di log globale"))->GetValue((char*)iniFile,log.logDir);
+		(IniSettingsString(SectionName, "LogDir", logDirGlobal.lock(), "Definisce il path in cui salvare il file di log di questa sezione (con \\ finale). Default: directory di log globale")).GetValue((char*)iniFile, log.logDir);
 
-		(new IniSettingsString(SectionName,"LogFile",log.logName.lock(),"Definisce il nome del file in cui salvare il file di log di questa sezione (con \\ finale). Default: il nome della sezione di log"))->GetValue((char*)iniFile,log.logFileName);
+		(IniSettingsString(SectionName, "LogFile", log.logName.lock(), "Definisce il nome del file in cui salvare il file di log di questa sezione (con \\ finale). Default: il nome della sezione di log")).GetValue((char*)iniFile, log.logFileName);
 
-		log.bFunctionLog=(new IniSettingsBool(SectionName,"FunctionLog",bFunctionLog,"Abilitazione log delle chiamate a funzione per questa sezione"))->GetValue((char*)iniFile);
+		log.bFunctionLog = (IniSettingsBool(SectionName, "FunctionLog", bFunctionLog, "Abilitazione log delle chiamate a funzione per questa sezione")).GetValue((char*)iniFile);
 
-		log.bLogParam=(new IniSettingsBool(SectionName,"ParamLog",bGlobalParam,"Abilitazione log dei parametri di input delle funzioni per questa sezione"))->GetValue((char*)iniFile);
+		log.bLogParam = (IniSettingsBool(SectionName, "ParamLog", bGlobalParam, "Abilitazione log dei parametri di input delle funzioni per questa sezione")).GetValue((char*)iniFile);
 
 		log.bInitialized=true;
 		numMod++;

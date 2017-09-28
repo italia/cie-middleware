@@ -33,8 +33,26 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_443B1B15AC745C3F72E6EDD2A0DCC386"
+        "OwnerKey" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_91BF635AF27B257373BB8500BA3A452D"
+        "OwnerKey" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_AF0E2D35E69EE32D0DBB67E57916730B"
+        "OwnerKey" = "8:_4D423194BB1E4D06B7D8A9781AE7A622"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -213,6 +231,66 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_443B1B15AC745C3F72E6EDD2A0DCC386"
+            {
+            "SourcePath" = "8:CRYPT32.dll"
+            "TargetName" = "8:CRYPT32.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_654D2C9A44AB428AB425EB6EEF023A20"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_91BF635AF27B257373BB8500BA3A452D"
+            {
+            "SourcePath" = "8:WinSCard.dll"
+            "TargetName" = "8:WinSCard.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_654D2C9A44AB428AB425EB6EEF023A20"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AF0E2D35E69EE32D0DBB67E57916730B"
+            {
+            "SourcePath" = "8:CacheLib.lib"
+            "TargetName" = "8:CacheLib.lib"
+            "Tag" = "8:"
+            "Folder" = "8:_654D2C9A44AB428AB425EB6EEF023A20"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D4788F7ECCD9498491BF8E1C36E951FF"
             {
             "SourcePath" = "8:Install.js"
@@ -312,7 +390,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Middleware CIE"
         "ProductCode" = "8:{E77573CB-DE26-4539-93A1-E682D01ED8EF}"
-        "PackageCode" = "8:{E3546080-5AB0-4DC9-88C3-CC10AC6691B7}"
+        "PackageCode" = "8:{01989E94-BAD5-4604-9FB5-FB6C3484D274}"
         "UpgradeCode" = "8:{078EA248-505B-480C-86DF-55836B31DE8C}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -734,7 +812,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4D423194BB1E4D06B7D8A9781AE7A622"
             {
-            "SourcePath" = "8:"
+            "SourcePath" = "8:..\\x64\\Release\\CIEPKI.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_654D2C9A44AB428AB425EB6EEF023A20"
