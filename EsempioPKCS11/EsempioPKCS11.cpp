@@ -47,6 +47,7 @@ void _tmain(int argc, _TCHAR* argv[])
 	// se la CIE non è abilitata o viene allontanata durante la lettura si genera un errore
 	if (result != CKR_OK) {
 		std::cout << "Errore nella lettura della CIE\n";
+		system("pause");
 		return;
 	}
 
@@ -94,9 +95,7 @@ void _tmain(int argc, _TCHAR* argv[])
 	delete CertValue.pValue;
 	delete Name;
 	
-	std::cout << "Premere un tasto per terminare\n";
-	char c;
-	std::cin.get(c);
+	system("pause");
 	return;
 }
 
