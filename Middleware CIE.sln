@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CacheLib", "CacheLib\CacheL
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EsempioPKCS11", "EsempioPKCS11\EsempioPKCS11.vcxproj", "{47261501-10EF-4F42-9E33-262B66AC89D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EsempioCSP", "EsempioCSP\EsempioCSP.csproj", "{F303468D-7F29-4FA5-B97F-DED88DD9698A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -34,9 +36,7 @@ Global
 		{8C679C01-B115-4B6B-A430-FE0CC3A0D6BF}.Debug|x64.ActiveCfg = Debug|x64
 		{8C679C01-B115-4B6B-A430-FE0CC3A0D6BF}.Debug|x64.Build.0 = Debug|x64
 		{8C679C01-B115-4B6B-A430-FE0CC3A0D6BF}.Release|Win32.ActiveCfg = Release|Win32
-		{8C679C01-B115-4B6B-A430-FE0CC3A0D6BF}.Release|Win32.Build.0 = Release|Win32
 		{8C679C01-B115-4B6B-A430-FE0CC3A0D6BF}.Release|x64.ActiveCfg = Release|x64
-		{8C679C01-B115-4B6B-A430-FE0CC3A0D6BF}.Release|x64.Build.0 = Release|x64
 		{7EB2A4EB-0BB3-42AE-83D0-A931A8265764}.Debug|Win32.ActiveCfg = Debug
 		{7EB2A4EB-0BB3-42AE-83D0-A931A8265764}.Debug|x64.ActiveCfg = Debug
 		{7EB2A4EB-0BB3-42AE-83D0-A931A8265764}.Release|Win32.ActiveCfg = Release
@@ -53,6 +53,11 @@ Global
 		{47261501-10EF-4F42-9E33-262B66AC89D2}.Debug|x64.ActiveCfg = Debug|x64
 		{47261501-10EF-4F42-9E33-262B66AC89D2}.Release|Win32.ActiveCfg = Release|Win32
 		{47261501-10EF-4F42-9E33-262B66AC89D2}.Release|x64.ActiveCfg = Release|x64
+		{F303468D-7F29-4FA5-B97F-DED88DD9698A}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{F303468D-7F29-4FA5-B97F-DED88DD9698A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F303468D-7F29-4FA5-B97F-DED88DD9698A}.Debug|x64.Build.0 = Debug|Any CPU
+		{F303468D-7F29-4FA5-B97F-DED88DD9698A}.Release|Win32.ActiveCfg = Release|Any CPU
+		{F303468D-7F29-4FA5-B97F-DED88DD9698A}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
