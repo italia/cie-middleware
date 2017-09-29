@@ -9,7 +9,7 @@
 
 /// Questa implementazione della cache del PIN e del certificato è fornita solo a scopo dimostrativo. Questa versione
 /// NON protegge a sufficienza il PIN dell'utente, che potrebbe essere ricavato da un'applicazione malevola. Si raccomanda di
-/// utilizzare, in contesti di produzione, un'implementazione che fornisca una elevato livello di sicurezza
+/// utilizzare, in contesti di produzione, un'implementazione che fornisca un elevato livello di sicurezza
 
 
 char commonData[MAX_PATH] = "";
