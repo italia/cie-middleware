@@ -1,5 +1,9 @@
 # MIDDLEWARE CSP-PKCS11 PER LA CIE 3.0
 
+## VERSIONE BETA
+
+Il middleware qui presente è in fase di sviluppo, ed è da considerarsi in **versione beta**. È possibile effettuare tutti gli sviluppi e i test, ma è per ora questa base di codice **non è consigliabile per l'uso in produzione**. 
+
 ## CASO D’USO
 
 Il middleware CIE è una libreria software che implementa le interfacce crittografiche standard **PKCS#11** e **CSP**. Esso consente agli applicativi integranti di utilizzare il certificato di autenticazione e la relativa chiave privata memorizzati sul chip della CIE astraendo dalle modalità di comunicazione di basso livello. 
