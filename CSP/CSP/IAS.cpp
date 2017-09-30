@@ -12,6 +12,7 @@
 #include "../util/ModuleInfo.h"
 #include "../res/resource.h"
 #include "../../cacheLib/cacheLib.h"
+#include <intsafe.h>
 
 #define CIE_KEY_DH_ID 0x81
 #define CIE_KEY_ExtAuth_ID 0x84
@@ -163,7 +164,9 @@ void IAS::readfile(WORD id, ByteDynArray &content){
 		}
 		if (sw == 0x9000) {
 			content.append(chn);
-			cnt += chn.size();
+			WORD chnSize;
+			if (FAILED(SizeTToWord(chn.size(), &chnSize)) || FAILED(WordAdd(cnt, chnSize, &cnt)))
+				throw CStringException("File troppo grande");
 			chunk = 128;
 		}
 		else {
@@ -199,7 +202,9 @@ void IAS::readfile_SM(WORD id, ByteDynArray &content) {
 		}
 		if (sw == 0x9000) {
 			content.append(chn);
-			cnt += chn.size();
+			WORD chnSize;
+			if (FAILED(SizeTToWord(chn.size(), &chnSize)) || FAILED(WordAdd(cnt, chnSize, &cnt)))
+				throw CStringException("File troppo grande");
 			chunk = 128;
 		}
 		else {
