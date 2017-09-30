@@ -49,7 +49,7 @@ bool CASNTag::isSequence()
 }
 
 void CASNTag::Free() {
-	for(int i=0;i<tags.size();i++) {
+	for(std::size_t i=0;i<tags.size();i++) {
 		delete tags[i];
 	}
 	tags.clear();
@@ -68,7 +68,7 @@ DWORD CASNTag::ContentLen() {
 
 DWORD CASNTag::tagInt() {
 	DWORD intVal = 0;
-	for (int i = 0; i < tag.size(); i++) {
+	for (std::size_t i = 0; i < tag.size(); i++) {
 		intVal = (intVal << 8) | tag[i];
 	}
 	return intVal;
@@ -85,7 +85,7 @@ DWORD CASNTag::Reparse() {
 		parser.Parse(content);
 	if (parser.tags.size() > 0) {
 		forcedSequence = true;
-		for (int i = 0; i < parser.tags.size(); i++)
+		for (std::size_t i = 0; i < parser.tags.size(); i++)
 			tags.push_back(parser.tags[i]);
 		parser.tags.clear();
 		content.clear();
@@ -125,7 +125,7 @@ RESULT CASNTag::Encode(ByteArray &data,DWORD &len) {
 	return OK;
 }
 
-CASNTag &CASNTag::Child(int num, BYTE tag) {
+CASNTag &CASNTag::Child(std::size_t num, BYTE tag) {
 	if (num >= tags.size())
 		throw CStringException("Errore nella verifica della struttura ASN1");
 	if (tags[num]->tag.size() == 1 && tags[num]->tag[0]==tag)
@@ -164,7 +164,7 @@ CASNParser::~CASNParser(void)
 }
 
 void CASNParser::Free() {
-	for(int i=0;i<tags.size();i++) {
+	for(std::size_t i=0;i<tags.size();i++) {
 		delete tags[i];
 	}
 	tags.clear();

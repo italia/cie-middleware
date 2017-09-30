@@ -29,12 +29,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	// richiedo all'utente quale lettore utilizzare
-	for (int i = 0; i < Readers.size(); i++) {
+	for (std::size_t i = 0; i < Readers.size(); i++) {
 		std::cout << (i + 1) << ") " << Readers[i] << "\n";
 	}
 	std::cout << "Selezionare il lettore su cui è appoggiata la CIE\n";
 
-	int ReaderNum = -1;
+	std::size_t ReaderNum;
 	std::cin >> ReaderNum;
 	if (ReaderNum < 1 || ReaderNum>Readers.size()) {
 		std::cout << "Lettore inesistente\n";
