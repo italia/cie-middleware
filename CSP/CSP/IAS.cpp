@@ -146,7 +146,7 @@ void IAS::readfile(WORD id, ByteDynArray &content){
 
 	ByteDynArray resp;
 	BYTE selectFile[] = { 0x00, 0xa4, 0x02, 0x04 };
-	BYTE fileId[] = { id >> 8, id & 0xff };
+	BYTE fileId[] = { HIBYTE(id), LOBYTE(id) };
 	CARD_R_CALL(SendAPDU(VarToByteArray(selectFile), VarToByteArray(fileId), resp))
 
 
@@ -182,7 +182,7 @@ void IAS::readfile_SM(WORD id, ByteDynArray &content) {
 
 	ByteDynArray resp;
 	BYTE selectFile[] = { 0x00, 0xa4, 0x02, 0x04 };
-	BYTE fileId[] = { id >> 8, id & 0xff };
+	BYTE fileId[] = { HIBYTE(id), LOBYTE(id) };
 	CARD_R_CALL(SendAPDU_SM(VarToByteArray(selectFile), VarToByteArray(fileId), resp))
 
 
