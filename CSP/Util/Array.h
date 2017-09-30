@@ -425,7 +425,7 @@ public:
 			va_start (params, num);
 			while(true) {
 				int* cur=va_arg(params,int* );
-				if ((DWORD)cur>256) {
+				if ((DWORD_PTR)cur>256) {
 					if (*cur==term___set)
 						break;
 				}
@@ -439,7 +439,7 @@ public:
 		va_start (params, num);
 		for (int i=0;i<num;i++) {
 			void* cur=va_arg(params,void*);
-			if ((DWORD)cur<256)
+			if ((DWORD_PTR)cur<256)
 				totSize++;
 			else {
 				void *derCur = nullptr;
@@ -479,8 +479,8 @@ public:
 		va_start (params, num);
 		for (int i=0;i<num;i++) {
 			void* cur=va_arg(params,void*);
-			if ((DWORD)cur<256) {
-				pbtData[cntPos]=(BYTE)(DWORD)cur;
+			if ((DWORD_PTR)cur<256) {
+				pbtData[cntPos]=(BYTE)(DWORD_PTR)cur;
 				cntPos++;
 			}
 			else if (*(void**)cur==bdaVf) {
