@@ -788,7 +788,7 @@ void IAS::InitDHParam() {
 }
 
 CASNTag *GetTag(CASNTagArray &tags, DWORD id) {
-	for (int i = 0; i < tags.size(); i++) {
+	for (std::size_t i = 0; i < tags.size(); i++) {
 		if (tags[i]->tagInt() == id)
 			return tags[i];
 	}
@@ -1078,7 +1078,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	CASNTag &CertIssuer = *issuerParser.tags[0];
 	if (issuerName.tags.size() != CertIssuer.tags.size())
 		throw CStringException("Issuer name non corrispondente");
-	for (int i = 0; i < issuerName.tags.size(); i++) {
+	for (std::size_t i = 0; i < issuerName.tags.size(); i++) {
 		CASNTag &certElem = *CertIssuer.tags[i]->tags[0];
 		CASNTag &SODElem = *issuerName.tags[i]->tags[0];
 		certElem.tags[0]->Verify(SODElem.tags[0]->content);
@@ -1096,7 +1096,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	signedData.Child(1, 0x30).Child(0, 06).Verify(VarToByteArray(OID_SH256));
 	
 	CASNTag &hashTag = signedData.Child(2, 0x30);
-	for (int i = 0; i<hashTag.tags.size();i++) {
+	for (std::size_t i = 0; i<hashTag.tags.size();i++) {
 		CASNTag &hashDG = *(hashTag.tags[i]);
 		CASNTag &dgNum = hashDG.CheckTag(0x30).Child(0, 02);
 		CASNTag &dgHash = hashDG.Child(1, 04);
