@@ -34,7 +34,7 @@ if (m_hMemDC)
 Detach(); 
 m_hDC = hDC; 
 m_hMemDC = ::CreateCompatibleDC(hDC); 
-return (BOOL) m_hMemDC; 
+return m_hMemDC != nullptr; 
 } 
 
 void CBitmap::Detach() 
@@ -56,7 +56,7 @@ if (m_hBitmap)
 m_hBitmap = (HBITMAP)LoadImage((HINSTANCE)moduleInfo.getModule(), MAKEINTRESOURCE(nResourceId), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
 //( ::SHLoadImageResource(g_hInst, nResourceId); 
 ::GetObject(m_hBitmap, sizeof(BITMAP), &m_Bitmap); 
-return (BOOL) m_hBitmap; 
+return m_hBitmap != nullptr; 
 } 
 
 BOOL CBitmap::DrawBitmap(int x, int y) 
