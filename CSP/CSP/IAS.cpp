@@ -150,12 +150,12 @@ void IAS::readfile(WORD id, ByteDynArray &content){
 	CARD_R_CALL(SendAPDU(VarToByteArray(selectFile), VarToByteArray(fileId), resp))
 
 
-	int cnt = 0;
+	WORD cnt = 0;
 	BYTE chunk = 128;
 	DWORD sw;
 	while (true) {
 		ByteDynArray chn;
-		BYTE readFile[] = { 0x00, 0xb0, cnt >> 8, cnt & 0xff };
+		BYTE readFile[] = { 0x00, 0xb0, HIBYTE(cnt), LOBYTE(cnt) };
 		sw = SendAPDU(VarToByteArray(readFile), ByteArray(), chn, &chunk);
 		if ((sw >> 8) == 0x6c)  {
 			BYTE le = sw & 0xff;
@@ -186,12 +186,12 @@ void IAS::readfile_SM(WORD id, ByteDynArray &content) {
 	CARD_R_CALL(SendAPDU_SM(VarToByteArray(selectFile), VarToByteArray(fileId), resp))
 
 
-	int cnt = 0;
+	WORD cnt = 0;
 	BYTE chunk = 128;
 	DWORD sw;
 	while (true) {
 		ByteDynArray chn;
-		BYTE readFile[] = { 0x00, 0xb0, cnt >> 8, cnt & 0xff };
+		BYTE readFile[] = { 0x00, 0xb0, HIBYTE(cnt), LOBYTE(cnt) };
 		sw = SendAPDU_SM(VarToByteArray(readFile), ByteArray(), chn, &chunk);
 		if ((sw >> 8) == 0x6c)  {
 			BYTE le = sw & 0xff;
