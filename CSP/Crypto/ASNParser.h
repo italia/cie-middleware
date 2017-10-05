@@ -1,14 +1,14 @@
 #pragma once
 #include <vector>
+#include <memory>
 
 DWORD GetASN1DataLenght(ByteArray &data);
 
 class CASNTag ;
-typedef std::vector<CASNTag*> CASNTagArray;
+typedef std::vector<std::unique_ptr<CASNTag>> CASNTagArray;
 class CASNTag {
 public:
 	CASNTag(void);
-	~CASNTag(void);
 	std::vector<BYTE> tag;
 	ByteDynArray content;
 	CASNTagArray tags;
@@ -25,7 +25,6 @@ public:
 
 	int startPos, endPos;
 private:
-	void Free();
 	bool forcedSequence;
 };
 
@@ -33,12 +32,10 @@ class CASNParser
 {
 public:
 	CASNParser(void);
-	~CASNParser(void);
 	RESULT Encode(ByteArray &data, CASNTagArray &tags);
 	RESULT Encode(ByteDynArray &data);
 	RESULT Parse(ByteArray &data);
 	RESULT Parse(ByteArray &data, CASNTagArray &tags, int startseq);
-	void Free();
 	CASNTagArray tags;
 
 	DWORD CalcLen();

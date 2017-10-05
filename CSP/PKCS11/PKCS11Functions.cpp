@@ -145,7 +145,7 @@ CK_RV CK_ENTRY C_GetSlotList(CK_BBOOL tokenPresent, CK_SLOT_ID_PTR pSlotList, CK
 		SlotMap::const_iterator it=CSlot::g_mSlots.end();
 		do {
 			it--;
-			CSlot *pSlot=it->second;
+			std::shared_ptr<CSlot> pSlot=it->second;
 			bool bPresent=false;
 
 			pSlot->IsTokenPresent(&bPresent);
@@ -271,8 +271,7 @@ CK_RV CK_ENTRY C_Finalize(CK_VOID_PTR pReserved)
 	CSlot::Thread.close();
 
 	for(SlotMap::const_iterator it=CSlot::g_mSlots.begin();it!=CSlot::g_mSlots.end();it++) {
-		CSlot *pSlot=it->second;
-		pSlot->CloseAllSessions();
+		it->second->CloseAllSessions();
 	}
 
 	_return(CKR_OK)
@@ -302,13 +301,13 @@ CK_RV CK_ENTRY C_OpenSession(CK_SLOT_ID slotID, CK_FLAGS flags, CK_VOID_PTR pApp
 	if(!(flags & CKF_SERIAL_SESSION)) 
 		_return(CKR_SESSION_PARALLEL_NOT_SUPPORTED)
 
-	CSlot *pSlot=NULL;
-	EDF_CALL(CSlot::GetSlotFromID(slotID,&pSlot),
+	std::shared_ptr<CSlot> pSlot;
+	EDF_CALL(CSlot::GetSlotFromID(slotID,pSlot),
 		ERR_CANT_GET_SLOT);
 	if (!pSlot)
 		_return(CKR_SLOT_ID_INVALID)
 	
-	Allocator<CSession> pSession;
+	auto pSession = std::unique_ptr<CSession>(new CSession());
 	pSession->pSlot=pSlot;
 	pSession->flags=flags;
 	pSession->notify=notify;
@@ -329,7 +328,7 @@ CK_RV CK_ENTRY C_OpenSession(CK_SLOT_ID slotID, CK_FLAGS flags, CK_VOID_PTR pApp
 	pSession->slotID=slotID;
 
 // aggiungo la sessione all'elenco globale
-	EDF_CALL(CSession::AddSession(pSession.detach(),*phSession),
+	EDF_CALL(CSession::AddSession(std::move(pSession),*phSession),
 		ERR_CANT_ADD_SESSION)
 
 	if (Log.bEnabled) {
@@ -359,8 +358,8 @@ CK_RV CK_ENTRY C_GetTokenInfo(CK_SLOT_ID slotID, CK_TOKEN_INFO_PTR pInfo)
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSlot *pSlot=NULL;
-	EDF_CALL(CSlot::GetSlotFromID(slotID,&pSlot),
+	std::shared_ptr<CSlot> pSlot;
+	EDF_CALL(CSlot::GetSlotFromID(slotID,pSlot),
 		ERR_CANT_GET_SLOT);
 
 	if (!pSlot)
@@ -415,11 +414,11 @@ CK_RV CK_ENTRY C_CloseSession(CK_SESSION_HANDLE hSession)
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 
-	if (pSession == NULL)
+	if (!pSession)
 		_return(CKR_SESSION_HANDLE_INVALID);
 
 	CSession::DeleteSession(hSession);
@@ -439,8 +438,8 @@ CK_RV CK_ENTRY C_CloseAllSessions(CK_SLOT_ID slotID)
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSlot *pSlot=NULL;
-	EDF_CALL(CSlot::GetSlotFromID(slotID,&pSlot),
+	std::shared_ptr<CSlot> pSlot;
+	EDF_CALL(CSlot::GetSlotFromID(slotID,pSlot),
 		ERR_CANT_GET_SLOT);
 
 	if (!pSlot)
@@ -467,8 +466,8 @@ CK_RV CK_ENTRY C_GetSlotInfo(CK_SLOT_ID slotID, CK_SLOT_INFO_PTR pInfo)
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSlot *pSlot=NULL;
-	EDF_CALL(CSlot::GetSlotFromID(slotID,&pSlot),
+	std::shared_ptr<CSlot> pSlot;
+	EDF_CALL(CSlot::GetSlotFromID(slotID,pSlot),
 		ERR_CANT_GET_SLOT);
 	if (!pSlot)
 		_return(CKR_SLOT_ID_INVALID);
@@ -623,11 +622,11 @@ CK_RV CK_ENTRY C_CreateObject(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemp
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 
-	if (pSession == NULL) 
+	if (!pSession) 
 		_return(CKR_SESSION_HANDLE_INVALID);
 
 	pSession->CreateObject(pTemplate, ulCount, phObject);
@@ -655,11 +654,11 @@ CK_RV CK_ENTRY C_GenerateKey(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	DF_CALL(pSession->GenerateKey(pMechanism, pTemplate, ulCount, phKey))
 	_return(CKR_OK)
@@ -690,11 +689,11 @@ CK_RV CK_ENTRY C_GenerateKeyPair(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pM
 		if (!bP11Initialized)
 			_return(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 
-	if (pSession == NULL)
+	if (!pSession)
 		_return(CKR_SESSION_HANDLE_INVALID);
 
 	pSession->GenerateKeyPair(pMechanism, pPublicKeyTemplate, ulPublicKeyAttributeCount, pPrivateKeyTemplate, ulPrivateKeyAttributeCount, phPublicKey, phPrivateKey);
@@ -716,11 +715,11 @@ CK_RV CK_ENTRY C_DestroyObject(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE hObje
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	DF_CALL(pSession->DestroyObject(hObject))
 	_return(CKR_OK)
@@ -742,10 +741,10 @@ CK_RV CK_ENTRY C_DigestInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechan
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession == NULL)
+	if (!pSession)
 		_return(CKR_SESSION_HANDLE_INVALID);
 
 	bool bValid=false;
@@ -775,10 +774,10 @@ CK_RV CK_ENTRY C_Digest(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG 
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	ByteArray Digest(pDigest, *pulDigestLen);
 	DF_CALL(pSession->Digest(ByteArray(pData, ulDataLen), Digest))
@@ -802,11 +801,11 @@ CK_RV CK_ENTRY C_DigestFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pDigest, CK
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 
-	if (pSession == NULL)
+	if (!pSession)
 		_return(CKR_SESSION_HANDLE_INVALID);
 
 	ByteArray Digest(pDigest, *pulDigestLen);
@@ -831,10 +830,10 @@ CK_RV CK_ENTRY C_DigestUpdate (CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK
 		if (!bP11Initialized)
 			_return(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession == NULL)
+	if (!pSession)
 		_return(CKR_SESSION_HANDLE_INVALID);
 
 	pSession->DigestUpdate(ByteArray(pPart, ulPartLen));
@@ -858,10 +857,10 @@ CK_RV CK_ENTRY C_FindObjects(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE_PTR phO
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	if (phObject==NULL && ulMaxObjectCount>0) 
 		_return(CKR_ARGUMENTS_BAD)
@@ -882,10 +881,10 @@ CK_RV CK_ENTRY C_FindObjectsFinal(CK_SESSION_HANDLE hSession)
 		if (!bP11Initialized)
 			_return(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession == NULL)
+	if (!pSession)
 		_return(CKR_SESSION_HANDLE_INVALID);
 
 	pSession->FindObjectsFinal();
@@ -915,10 +914,10 @@ CK_RV CK_ENTRY C_FindObjectsInit(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pT
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	if (pTemplate==NULL && ulCount>0) 
 		_return(CKR_ARGUMENTS_BAD)
@@ -944,10 +943,10 @@ CK_RV CK_ENTRY C_GetAttributeValue(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE 
 		if (!bP11Initialized)
 			_return(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession == NULL)
+	if (!pSession)
 		_return(CKR_SESSION_HANDLE_INVALID);
 
 	pSession->GetAttributeValue(hObject, pTemplate, ulCount);
@@ -972,8 +971,8 @@ CK_RV CK_ENTRY C_GetMechanismList(CK_SLOT_ID slotID, CK_MECHANISM_TYPE_PTR pMech
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSlot *pSlot=NULL;
-	EDF_CALL(CSlot::GetSlotFromID(slotID,&pSlot),
+	std::shared_ptr<CSlot> pSlot;
+	EDF_CALL(CSlot::GetSlotFromID(slotID,pSlot),
 		ERR_CANT_GET_SLOT);
 	if (!pSlot)
 		_return(CKR_SLOT_ID_INVALID)
@@ -1007,8 +1006,8 @@ CK_RV CK_ENTRY C_GetMechanismInfo(CK_SLOT_ID slotID, CK_MECHANISM_TYPE type, CK_
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSlot *pSlot=NULL;
-	EDF_CALL(CSlot::GetSlotFromID(slotID,&pSlot),
+	std::shared_ptr<CSlot> pSlot;
+	EDF_CALL(CSlot::GetSlotFromID(slotID,pSlot),
 		ERR_CANT_GET_SLOT);
 
 	if (!pSlot)
@@ -1066,7 +1065,7 @@ CK_RV CK_ENTRY C_GetSessionInfo(CK_SESSION_HANDLE hSession, CK_SESSION_INFO_PTR 
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 	if (!pSession)
@@ -1119,7 +1118,7 @@ CK_RV CK_ENTRY C_Login(CK_SESSION_HANDLE hSession, CK_USER_TYPE userType, CK_CHA
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 	if (!pSession)
@@ -1145,7 +1144,7 @@ CK_RV CK_ENTRY C_Logout(CK_SESSION_HANDLE hSession)
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 	if (!pSession)
@@ -1173,7 +1172,7 @@ CK_RV CK_ENTRY C_SetAttributeValue(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE h
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
 	if (!pSession)
@@ -1203,10 +1202,10 @@ CK_RV CK_ENTRY C_Sign(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ul
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	ByteArray Signature(pSignature,*pulSignatureLen);
 	DF_CALL(pSession->Sign(ByteArray(pData,ulDataLen),Signature))
@@ -1229,10 +1228,10 @@ CK_RV CK_ENTRY C_SignFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pSignature,CK_
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	bool bSupport=false;
 	R_CALL(pSession->pSignMechanism->SignSupportMultipart(bSupport));
@@ -1262,10 +1261,10 @@ CK_RV CK_ENTRY C_SignInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanis
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 	
 	bool bValid=false;
 	EDF_CALL(CheckMechanismParam(pMechanism,bValid),
@@ -1293,10 +1292,10 @@ CK_RV CK_ENTRY C_SignUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_UL
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	bool bSupport=false;
 	R_CALL(pSession->pSignMechanism->SignSupportMultipart(bSupport))
@@ -1323,10 +1322,10 @@ CK_RV CK_ENTRY C_SignRecoverInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pM
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 	
 	bool bValid=false;
 	EDF_CALL(CheckMechanismParam(pMechanism,bValid),
@@ -1357,10 +1356,10 @@ CK_RV CK_ENTRY C_SignRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_U
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	ByteArray Signature(pSignature,*pulSignatureLen);
 	DF_CALL(pSession->SignRecover(ByteArray(pData,ulDataLen),Signature))
@@ -1384,10 +1383,10 @@ CK_RV CK_ENTRY C_VerifyRecoverInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR 
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 	
 	bool bValid=false;
 	EDF_CALL(CheckMechanismParam(pMechanism,bValid),
@@ -1418,10 +1417,10 @@ CK_RV CK_ENTRY C_VerifyRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignatur
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	ByteArray Data(pData,*pulDataLen);
 	DF_CALL(pSession->VerifyRecover(ByteArray(pSignature,ulSignatureLen),Data))
@@ -1445,10 +1444,10 @@ CK_RV CK_ENTRY C_VerifyInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechan
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 	
 	bool bValid=false;
 	if (CheckMechanismParam(pMechanism,bValid)) {
@@ -1480,10 +1479,10 @@ CK_RV CK_ENTRY C_Verify(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG 
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	DF_CALL(pSession->Verify(ByteArray(pData,ulDataLen),ByteArray(pSignature,ulSignatureLen)))
 
@@ -1505,10 +1504,10 @@ CK_RV CK_ENTRY C_VerifyUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	bool bSupport=false;
 	R_CALL(pSession->pVerifyMechanism->VerifySupportMultipart(bSupport))
@@ -1534,10 +1533,10 @@ CK_RV CK_ENTRY C_VerifyFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignature,
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	bool bSupport=false;
 	R_CALL(pSession->pVerifyMechanism->VerifySupportMultipart(bSupport))
@@ -1565,10 +1564,10 @@ CK_RV CK_ENTRY C_Encrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	ByteArray EncryptedData(pEncryptedData, *pulEncryptedDataLen);
 	DF_CALL(pSession->Encrypt(ByteArray(pData, ulDataLen), EncryptedData))
@@ -1592,10 +1591,10 @@ CK_RV CK_ENTRY C_EncryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pEncryptedD
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	bool bSupport=false;
 	R_CALL(pSession->pEncryptMechanism->EncryptSupportMultipart(bSupport))
@@ -1624,10 +1623,10 @@ CK_RV CK_ENTRY C_EncryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 	
 	bool bValid=false;
 	if (CheckMechanismParam(pMechanism,bValid)) {
@@ -1659,10 +1658,10 @@ CK_RV CK_ENTRY C_EncryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	bool bSupport=false;
 	R_CALL(pSession->pEncryptMechanism->EncryptSupportMultipart(bSupport))
@@ -1692,10 +1691,10 @@ CK_RV CK_ENTRY C_Decrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncryptedData,
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	ByteArray Data(pData, *pulDataLen);
 	DF_CALL(pSession->Decrypt(ByteArray(pEncryptedData, ulEncryptedDataLen), Data))
@@ -1719,10 +1718,10 @@ CK_RV CK_ENTRY C_DecryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pData,CK_UL
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	bool bSupport=false;
 	R_CALL(pSession->pDecryptMechanism->DecryptSupportMultipart(bSupport))
@@ -1751,10 +1750,10 @@ CK_RV CK_ENTRY C_DecryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 	
 	bool bValid=false;
 	if (CheckMechanismParam(pMechanism,bValid)) {
@@ -1786,10 +1785,10 @@ CK_RV CK_ENTRY C_DecryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncrypte
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	bool bSupport=false;
 	R_CALL(pSession->pDecryptMechanism->DecryptSupportMultipart(bSupport))
@@ -1885,10 +1884,10 @@ CK_RV CK_ENTRY C_GenerateRandom(CK_SESSION_HANDLE hSession, CK_BYTE_PTR RandomDa
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 	
 	DF_CALL(pSession->GenerateRandom(ByteArray(RandomData,ulRandomLen)))
 
@@ -1910,10 +1909,10 @@ CK_RV CK_ENTRY C_InitPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pPin,CK_ULONG ul
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 	
 	DF_CALL(pSession->InitPIN(ByteArray(pPin,ulPinLen)))
 
@@ -1937,10 +1936,10 @@ CK_RV CK_ENTRY C_SetPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pOldPin,CK_ULONG 
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 	
 	DF_CALL(pSession->SetPIN(ByteArray(pOldPin,ulOldLen),ByteArray(pNewPin,ulNewLen)))
 
@@ -1963,10 +1962,10 @@ CK_RV CK_ENTRY C_GetObjectSize(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObj
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	DF_CALL(pSession->GetObjectSize(hObject,pulSize));
 	
@@ -1988,10 +1987,10 @@ CK_RV CK_ENTRY C_GetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOpera
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	ByteArray OperationState(pOperationState,*pulOperationStateLen);
 	DF_CALL(pSession->GetOperationState(OperationState))
@@ -2017,10 +2016,10 @@ CK_RV CK_ENTRY C_SetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOpera
 	if (!bP11Initialized)
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	EDF_CALL(CSession::GetSessionFromID(hSession,pSession),
 		ERR_CANT_GET_SESSION);
-	if (pSession==NULL) _return(CKR_SESSION_HANDLE_INVALID)
+	if (!pSession) _return(CKR_SESSION_HANDLE_INVALID)
 
 	if(hEncryptionKey!=CK_INVALID_HANDLE)
 		_return(CKR_KEY_NOT_NEEDED)

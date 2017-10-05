@@ -6,7 +6,6 @@
 #include <atlstr.h>
 #include "util/defines.h"
 #include "util/array.h"
-#include "util/allocator.h"
 #include "util/log.h"
 #include "util/funccallinfo.h"
 #include "util/util.h"

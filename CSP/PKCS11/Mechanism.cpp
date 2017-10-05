@@ -14,10 +14,7 @@ static ByteArray baMD5DigestInfo(MD5_RSAcode,sizeof(MD5_RSAcode));
 namespace p11 {
 
 CMechanism::CMechanism() {}
-CMechanism::CMechanism(CK_MECHANISM_TYPE type,CSession *Session) { 
-	mtType=type; 
-	pSession=Session;
-}
+CMechanism::CMechanism(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session): mtType(type), pSession(std::move(Session)) {}
 CMechanism::~CMechanism() {}
 RESULT CDecrypt::checkCache(ByteArray &Data,ByteArray &Result,bool &bFound)
 {
@@ -49,31 +46,31 @@ RESULT CDecrypt::setCache(ByteArray &Data,ByteArray &Result)
 }
 
 CVerify::CVerify() {}
-CVerify::CVerify(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {}
+CVerify::CVerify(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CVerify::~CVerify() {}
 
 CVerifyRecover::CVerifyRecover() {}
-CVerifyRecover::CVerifyRecover(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {}
+CVerifyRecover::CVerifyRecover(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CVerifyRecover::~CVerifyRecover() {}
 
 CDigest::CDigest() {}
-CDigest::CDigest(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {}
+CDigest::CDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CDigest::~CDigest() {}
 
 CSign::CSign() {}
-CSign::CSign(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {}
+CSign::CSign(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CSign::~CSign() {}
 
 CSignRecover::CSignRecover() {}
-CSignRecover::CSignRecover(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {}
+CSignRecover::CSignRecover(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CSignRecover::~CSignRecover() {}
 
 CEncrypt::CEncrypt() {}
-CEncrypt::CEncrypt(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {}
+CEncrypt::CEncrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CEncrypt::~CEncrypt() {}
 
 CDecrypt::CDecrypt() {}
-CDecrypt::CDecrypt(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {
+CDecrypt::CDecrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {
 	cacheData.pbtData=(BYTE*)0xffffffff;
 }
 CDecrypt::~CDecrypt() {}
@@ -81,7 +78,7 @@ CDecrypt::~CDecrypt() {}
 /* ******************** */
 /*		   SHA1	        */
 /* ******************** */
-CSHA::CSHA(CSession *Session) : CDigest (CKM_SHA_1,Session) {}
+CSHA::CSHA(std::shared_ptr<CSession> Session) : CDigest (CKM_SHA_1,std::move(Session)) {}
 CSHA::~CSHA() {}
 
 RESULT CSHA::DigestInit() {
@@ -148,7 +145,7 @@ RESULT CSHA::DigestSetOperationState(ByteArray &OperationState)
 /* ******************** */
 /*		   MD5	        */
 /* ******************** */
-CMD5::CMD5(CSession *Session) : CDigest (CKM_MD5,Session) {}
+CMD5::CMD5(std::shared_ptr<CSession> Session) : CDigest (CKM_MD5,std::move(Session)) {}
 CMD5::~CMD5() {}
 
 RESULT CMD5::DigestInit() {
@@ -216,7 +213,7 @@ RESULT CMD5::DigestSetOperationState(ByteArray &OperationState)
 /*		Verify RSA		*/
 /* ******************** */
 CVerifyRSA::CVerifyRSA() {}
-CVerifyRSA::CVerifyRSA(CK_MECHANISM_TYPE type,CSession *Session) : CVerify(type,Session) {}
+CVerifyRSA::CVerifyRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CVerify(type,std::move(Session)) {}
 CVerifyRSA::~CVerifyRSA() {}
 
 RESULT CVerifyRSA::VerifySupportMultipart(bool &Support) {
@@ -231,12 +228,12 @@ RESULT CVerifyRSA::VerifyLength(CK_ULONG_PTR pulVerifyLength)
 {
 	init_func
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
-	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
+	auto pPublicKey=std::static_pointer_cast<CP11PublicKey>(pObject);
 
 	ByteArray *baKeyModule;
 	P11ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
@@ -253,12 +250,12 @@ RESULT CVerifyRSA::VerifyDecryptSignature(ByteArray &Signature,ByteDynArray &baP
 	init_func
 	ByteArray *baKeyExponent=NULL,*baKeyModule=NULL;
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
-	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
+	auto pPublicKey=std::static_pointer_cast<CP11PublicKey>(pObject);
 
 	P11ER_CALL(pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT,baKeyExponent),
 		ERR_CANT_GET_PUBKEY_EXPONENT)
@@ -305,19 +302,19 @@ RESULT CVerifyRSA::VerifySetOperationState(ByteArray &OperationState)
 /*	VerifyRecover RSA	*/
 /* ******************** */
 CVerifyRecoverRSA::CVerifyRecoverRSA() {}
-CVerifyRecoverRSA::CVerifyRecoverRSA(CK_MECHANISM_TYPE type,CSession *Session) : CVerifyRecover(type,Session) {}
+CVerifyRecoverRSA::CVerifyRecoverRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CVerifyRecover(type,std::move(Session)) {}
 CVerifyRecoverRSA::~CVerifyRecoverRSA() {}
 
 RESULT CVerifyRecoverRSA::VerifyRecoverLength(CK_ULONG_PTR pulVerifyRecoverLength)
 {
 	init_func
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyRecoverKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
-	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
+	auto pPublicKey=std::static_pointer_cast<CP11PublicKey>(pObject);
 
 	ByteArray *baKeyModule;
 	P11ER_CALL(pPublicKey->getAttribute(CKA_MODULUS,baKeyModule),
@@ -334,12 +331,12 @@ RESULT CVerifyRecoverRSA::VerifyRecoverDecryptSignature(ByteArray &Signature,Byt
 	init_func
 	ByteArray *baKeyExponent=NULL,*baKeyModule=NULL;
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSession->pSlot->GetObjectFromID(hVerifyRecoverKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
-	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
+	auto pPublicKey=std::static_pointer_cast<CP11PublicKey>(pObject);
 
 	P11ER_CALL(pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT,baKeyExponent),
 		ERR_CANT_GET_PUBKEY_EXPONENT)
@@ -386,7 +383,7 @@ RESULT CVerifyRecoverRSA::VerifyRecoverSetOperationState(ByteArray &OperationSta
 /*		SignRSA			*/
 /* ******************** */
 CSignRSA::CSignRSA() {}
-CSignRSA::CSignRSA(CK_MECHANISM_TYPE type,CSession *Session) : CSign(type,Session) {}
+CSignRSA::CSignRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CSign(type,std::move(Session)) {}
 CSignRSA::~CSignRSA() {}
 
 RESULT CSignRSA::SignSupportMultipart(bool &Support) {
@@ -399,12 +396,12 @@ RESULT CSignRSA::SignSupportMultipart(bool &Support) {
 
 RESULT CSignRSA::SignLength(CK_ULONG_PTR pulSignatureLen) {
 	init_func
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSession->pSlot->GetObjectFromID(hSignKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PRIVATE_KEY,ERR_WRONG_OBJECT_TYPE)
-	CP11PrivateKey *pPrivateKey=(CP11PrivateKey *)pObject;
+	auto pPrivateKey=std::static_pointer_cast<CP11PrivateKey>(pObject);
 
 	ByteArray *baKeyModule;
 	P11ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
@@ -439,17 +436,17 @@ RESULT CSignRSA::SignSetOperationState(ByteArray &OperationState)
 /*	SignRecoverRSA		*/
 /* ******************** */
 CSignRecoverRSA::CSignRecoverRSA() {}
-CSignRecoverRSA::CSignRecoverRSA(CK_MECHANISM_TYPE type,CSession *Session) : CSignRecover(type,Session) {}
+CSignRecoverRSA::CSignRecoverRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CSignRecover(type,std::move(Session)) {}
 CSignRecoverRSA::~CSignRecoverRSA() {}
 
 RESULT CSignRecoverRSA::SignRecoverLength(CK_ULONG_PTR pulSignRecoveratureLen) {
 	init_func
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSession->pSlot->GetObjectFromID(hSignRecoverKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PRIVATE_KEY,ERR_WRONG_OBJECT_TYPE)
-	CP11PrivateKey *pPrivateKey=(CP11PrivateKey *)pObject;
+	auto pPrivateKey=std::static_pointer_cast<CP11PrivateKey>(pObject);
 
 	ByteArray *baKeyModule;
 	P11ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
@@ -483,12 +480,12 @@ RESULT CSignRecoverRSA::SignRecoverSetOperationState(ByteArray &OperationState)
 /* ******************** */
 /*		RSA_X509		*/
 /* ******************** */
-CRSA_X509::CRSA_X509(CSession *Session) :	CSignRSA (CKM_RSA_X_509,Session), 
-											CSignRecoverRSA (CKM_RSA_X_509,Session), 
-											CVerifyRSA (CKM_RSA_X_509,Session), 
-											CVerifyRecoverRSA (CKM_RSA_X_509,Session), 
-											CEncryptRSA (CKM_RSA_X_509,Session), 
-											CDecryptRSA (CKM_RSA_X_509,Session) {}
+CRSA_X509::CRSA_X509(std::shared_ptr<CSession> Session) :	CSignRSA (CKM_RSA_X_509,Session), 
+															CSignRecoverRSA (CKM_RSA_X_509,Session), 
+															CVerifyRSA (CKM_RSA_X_509,Session), 
+															CVerifyRecoverRSA (CKM_RSA_X_509,Session), 
+															CEncryptRSA (CKM_RSA_X_509,Session), 
+															CDecryptRSA (CKM_RSA_X_509,Session) {}
 CRSA_X509::~CRSA_X509() {}
 
 RESULT CRSA_X509::VerifyInit(CK_OBJECT_HANDLE PublicKey) {
@@ -728,12 +725,12 @@ RESULT CRSA_X509::DecryptRemovePadding(ByteArray &paddedData,ByteDynArray &unpad
 /* ******************** */
 /*		RSA_PKCS1		*/
 /* ******************** */
-CRSA_PKCS1::CRSA_PKCS1(CSession *Session) :	CSignRSA (CKM_RSA_PKCS,Session),
-											CSignRecoverRSA (CKM_RSA_PKCS,Session),
-											CVerifyRSA (CKM_RSA_PKCS,Session),
-											CVerifyRecoverRSA (CKM_RSA_PKCS,Session),
-											CEncryptRSA (CKM_RSA_PKCS,Session),
-											CDecryptRSA (CKM_RSA_PKCS,Session) {}
+CRSA_PKCS1::CRSA_PKCS1(std::shared_ptr<CSession> Session) :	CSignRSA (CKM_RSA_PKCS,Session),
+															CSignRecoverRSA (CKM_RSA_PKCS,Session),
+															CVerifyRSA (CKM_RSA_PKCS,Session),
+															CVerifyRecoverRSA (CKM_RSA_PKCS,Session),
+															CEncryptRSA (CKM_RSA_PKCS,Session),
+															CDecryptRSA (CKM_RSA_PKCS,Session) {}
 CRSA_PKCS1::~CRSA_PKCS1() {}
 
 RESULT CRSA_PKCS1::VerifyInit(CK_OBJECT_HANDLE PublicKey) {
@@ -1008,7 +1005,7 @@ RESULT CRSA_PKCS1::DecryptRemovePadding(ByteArray &paddedData,ByteDynArray &unpa
 /*		SignRSA_withDigest	*/
 /* ************************ */
 
-CSignRSAwithDigest::CSignRSAwithDigest(CK_MECHANISM_TYPE type,CSession *Session,CDigest *Digest) : pDigest(Digest), CSignRSA (type,Session) {}
+CSignRSAwithDigest::CSignRSAwithDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session,CDigest *Digest) : pDigest(Digest), CSignRSA (type,std::move(Session)) {}
 CSignRSAwithDigest::~CSignRSAwithDigest() {}
 
 RESULT CSignRSAwithDigest::SignSupportMultipart(bool &Support) {
@@ -1081,7 +1078,7 @@ RESULT CSignRSAwithDigest::SignSetOperationState(ByteArray &OperationState)
 /*	VerifyRSA_withDigest	*/
 /* ************************ */
 
-CVerifyRSAwithDigest::CVerifyRSAwithDigest(CK_MECHANISM_TYPE type,CSession *Session,CDigest *Digest) : pDigest(Digest), CVerifyRSA (type,Session) {}
+CVerifyRSAwithDigest::CVerifyRSAwithDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session,CDigest *Digest) : pDigest(Digest), CVerifyRSA (type,std::move(Session)) {}
 CVerifyRSAwithDigest::~CVerifyRSAwithDigest() {}
 
 RESULT CVerifyRSAwithDigest::VerifySupportMultipart(bool &Support) {
@@ -1166,20 +1163,20 @@ RESULT CVerifyRSAwithDigest::VerifySetOperationState(ByteArray &OperationState)
 /* ******************** */
 /*		RSA_withMD5		*/
 /* ******************** */
-CRSAwithMD5::CRSAwithMD5(CSession *Session) : CSignRSAwithDigest (CKM_MD5_RSA_PKCS,Session,&md5), CVerifyRSAwithDigest (CKM_MD5_RSA_PKCS,Session,&md5),md5(Session) {}
+CRSAwithMD5::CRSAwithMD5(std::shared_ptr<CSession> Session) : CSignRSAwithDigest (CKM_MD5_RSA_PKCS,Session,&md5), CVerifyRSAwithDigest (CKM_MD5_RSA_PKCS,Session,&md5),md5(Session) {}
 CRSAwithMD5::~CRSAwithMD5() {}
 
 /* ******************** */
 /*		RSA_withSHA1	*/
 /* ******************** */
-CRSAwithSHA1::CRSAwithSHA1(CSession *Session) : CSignRSAwithDigest (CKM_SHA1_RSA_PKCS,Session,&sha1), CVerifyRSAwithDigest (CKM_SHA1_RSA_PKCS,Session,&sha1),sha1(Session) {}
+CRSAwithSHA1::CRSAwithSHA1(std::shared_ptr<CSession> Session) : CSignRSAwithDigest (CKM_SHA1_RSA_PKCS,Session,&sha1), CVerifyRSAwithDigest (CKM_SHA1_RSA_PKCS,Session,&sha1),sha1(Session) {}
 CRSAwithSHA1::~CRSAwithSHA1() {}
 
 /* ******************** */
 /*		EncryptRSA		*/
 /* ******************** */
 CEncryptRSA::CEncryptRSA() {}
-CEncryptRSA::CEncryptRSA(CK_MECHANISM_TYPE type,CSession *Session) : CEncrypt(type,Session) {}
+CEncryptRSA::CEncryptRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CEncrypt(type,std::move(Session)) {}
 CEncryptRSA::~CEncryptRSA() {}
 
 RESULT CEncryptRSA::EncryptSupportMultipart(bool &Support) {
@@ -1192,12 +1189,12 @@ RESULT CEncryptRSA::EncryptSupportMultipart(bool &Support) {
 
 RESULT CEncryptRSA::EncryptLength(CK_ULONG_PTR pulEncryptLen) {
 	init_func
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSession->pSlot->GetObjectFromID(hEncryptKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
-	CP11PrivateKey *pPrivateKey=(CP11PrivateKey *)pObject;
+	auto pPrivateKey=std::static_pointer_cast<CP11PrivateKey>(pObject);
 
 	ByteArray *baKeyModule;
 	P11ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
@@ -1214,12 +1211,12 @@ RESULT CEncryptRSA::EncryptCompute(ByteArray &baPlainData,ByteDynArray &baEncryp
 	init_func
 	ByteArray *baKeyExponent=NULL,*baKeyModule=NULL;
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSession->pSlot->GetObjectFromID(hEncryptKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PUBLIC_KEY,ERR_WRONG_OBJECT_TYPE)
-	CP11PublicKey *pPublicKey=(CP11PublicKey *)pObject;
+	auto pPublicKey=std::static_pointer_cast<CP11PublicKey>(pObject);
 
 	P11ER_CALL(pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT,baKeyExponent),
 		ERR_CANT_GET_PUBKEY_EXPONENT)
@@ -1270,7 +1267,7 @@ RESULT CEncryptRSA::EncryptSetOperationState(ByteArray &OperationState)
 /*		DecryptRSA		*/
 /* ******************** */
 CDecryptRSA::CDecryptRSA() {}
-CDecryptRSA::CDecryptRSA(CK_MECHANISM_TYPE type,CSession *Session) : CDecrypt(type,Session) {}
+CDecryptRSA::CDecryptRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CDecrypt(type,std::move(Session)) {}
 CDecryptRSA::~CDecryptRSA() {}
 
 RESULT CDecryptRSA::DecryptSupportMultipart(bool &Support) {
@@ -1283,12 +1280,12 @@ RESULT CDecryptRSA::DecryptSupportMultipart(bool &Support) {
 
 RESULT CDecryptRSA::DecryptLength(CK_ULONG_PTR pulDecryptLen) {
 	init_func
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSession->pSlot->GetObjectFromID(hDecryptKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject!=NULL,ERR_CANT_GET_OBJECT)
 	ER_ASSERT(pObject->ObjClass==CKO_PRIVATE_KEY,ERR_WRONG_OBJECT_TYPE)
-	CP11PrivateKey *pPrivateKey=(CP11PrivateKey *)pObject;
+	auto pPrivateKey=std::static_pointer_cast<CP11PrivateKey>(pObject);
 
 	ByteArray *baKeyModule;
 	P11ER_CALL(pPrivateKey->getAttribute(CKA_MODULUS,baKeyModule),
