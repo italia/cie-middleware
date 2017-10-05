@@ -5,6 +5,7 @@
 #include "../crypto/des3.h"
 #include "../crypto/mac.h"
 #include "token.h"
+#include <functional>
 
 static char *szCompiledFile=__FILE__;
 
@@ -220,24 +221,24 @@ RESULT APDU::DecodeSM(ByteArray &SMresp,ByteDynArray &resp)
 	_return(FAIL)
 }
 
-RESULT APDU::EncodeSM(CToken &Token,ByteDynArray &SMDataBuffer,APDU *&apdu)
+RESULT APDU::EncodeSM(CToken &Token,ByteDynArray &SMDataBuffer,std::function<void(APDU&)> callback)
 {
 	init_func
 	if (baSigCommandKey==NULL && baEncCommandKey==NULL) {
 		// caso base; no SM
-		apdu=this;
+		callback(*this);
 		_return(OK)
 	}
 	if (baSigCommandKey!=NULL && baEncCommandKey!=NULL) {
 		// SM in ingresso e in uscita
-		Allocator<APDU> SMapdu;
-		SMapdu->btCLA=btCLA | 0x0c;
-		SMapdu->btINS=btINS;
-		SMapdu->btP1=btP1;
-		SMapdu->btP2=btP2;
-		SMapdu->btLE=0x00;
-		SMapdu->bLE=true;
-		SMapdu->bLC=true;
+		APDU SMapdu;
+		SMapdu.btCLA=btCLA | 0x0c;
+		SMapdu.btINS=btINS;
+		SMapdu.btP1=btP1;
+		SMapdu.btP2=btP2;
+		SMapdu.btLE=0x00;
+		SMapdu.bLE=true;
+		SMapdu.bLC=true;
 		
 		ByteDynArray baChallenge(8);
 		ER_CALL(Token.GetChallenge(baChallenge),
@@ -271,10 +272,10 @@ RESULT APDU::EncodeSM(CToken &Token,ByteDynArray &SMDataBuffer,APDU *&apdu)
 		SMDataBuffer.copy(baNetLEMACObject,baCypherTextObject.size());
 		SMDataBuffer.copy(baMacObject,baCypherTextObject.size()+baNetLEMACObject.size());
 
-		SMapdu->btLC = (BYTE)SMDataBuffer.size();
-		SMapdu->pbtData=SMDataBuffer.lock();
+		SMapdu.btLC = (BYTE)SMDataBuffer.size();
+		SMapdu.pbtData=SMDataBuffer.lock();
 		
-		apdu=SMapdu.detach();
+		callback(SMapdu);
 		_return(OK)
 	}
 	exit_func

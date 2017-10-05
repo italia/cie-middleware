@@ -60,9 +60,9 @@ public:
 	}
 	CSlot &slot;
 	IAS ias;
-	CP11PublicKey *pubKey;
-	CP11PrivateKey *privKey;
-	CP11Certificate *cert;
+	std::shared_ptr<CP11PublicKey> pubKey;
+	std::shared_ptr<CP11PrivateKey> privKey;
+	std::shared_ptr<CP11Certificate> cert;
 	ByteDynArray SessionPIN;
 };
 
@@ -71,9 +71,8 @@ RESULT CIEtemplateInitCard(void *&pTemplateData, CSlot &pSlot){
 	init_func
 	ByteArray ATR;
 	pSlot.GetATR(ATR);
-	Allocator<CIEData,CSlot*,ByteArray>data(&pSlot,ATR);
 
-	pTemplateData = data.detach();
+	pTemplateData = new CIEData(&pSlot, ATR);
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -114,9 +113,9 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 
 		PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.lock(), certRaw.size());
 		if (certDS != nullptr) {
-			cie->pubKey = new CP11PublicKey(cie);
-			cie->privKey = new CP11PrivateKey(cie);
-			cie->cert = new CP11Certificate(cie);
+			cie->pubKey = std::make_shared<CP11PublicKey>(cie);
+			cie->privKey = std::make_shared<CP11PrivateKey>(cie);
+			cie->cert = std::make_shared<CP11Certificate>(cie);
 
 			CASNParser keyParser;
 			keyParser.Parse(ByteArray(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData));
@@ -433,7 +432,7 @@ RESULT CIEtemplateGenerateRandom(void *pCardTemplateData, ByteArray &baRandomDat
 RESULT CIEtemplateGetObjectSize(void *pCardTemplateData, CP11Object *pObject, CK_ULONG_PTR pulSize){ return FAIL; }
 RESULT CIEtemplateSetKeyPIN(void *pTemplateData, CP11Object *pObject, ByteArray &Pin){ return FAIL; }
 RESULT CIEtemplateSetAttribute(void *pTemplateData, CP11Object *pObject, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount){ return FAIL; }
-RESULT CIEtemplateCreateObject(void *pTemplateData, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CP11Object *&pObject){ return FAIL; }
+RESULT CIEtemplateCreateObject(void *pTemplateData, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, std::shared_ptr<CP11Object>&pObject){ return FAIL; }
 RESULT CIEtemplateDestroyObject(void *pTemplateData, CP11Object &Object){ return FAIL; }
-RESULT CIEtemplateGenerateKey(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CP11Object *&pObject){ return FAIL; }
-RESULT CIEtemplateGenerateKeyPair(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, CP11Object *&pPublicKey, CP11Object *&pPrivateKey){ return FAIL; }
+RESULT CIEtemplateGenerateKey(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, std::shared_ptr<CP11Object>&pObject){ return FAIL; }
+RESULT CIEtemplateGenerateKeyPair(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, std::shared_ptr<CP11Object>&pPublicKey, std::shared_ptr<CP11Object>&pPrivateKey){ return FAIL; }

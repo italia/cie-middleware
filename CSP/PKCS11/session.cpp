@@ -7,6 +7,60 @@
 
 static char *szCompiledFile=__FILE__;
 
+namespace {
+
+template<class T>
+class resetter;
+
+template<class T>
+resetter<T> make_resetter(T&) noexcept;
+
+template<class T>
+class resetter<std::unique_ptr<T>>
+{
+private:
+	std::unique_ptr<T> * m_p;
+
+	friend resetter<std::unique_ptr<T>> make_resetter<std::unique_ptr<T>>(std::unique_ptr<T>& p) noexcept;
+	resetter(std::unique_ptr<T>& p) noexcept : m_p(&p) {}
+
+	void reset() noexcept(noexcept(m_p->reset()))
+	{
+		if (m_p)
+			m_p->reset();
+
+		m_p = nullptr;
+	}
+
+public:
+	resetter(const resetter&) = delete;
+	resetter(resetter&& other) noexcept : m_p(std::exchange(other.m_p, nullptr)) {}
+
+	resetter& operator=(const resetter&) = delete;
+
+	resetter& operator=(resetter&& other) noexcept(noexcept(reset()))
+	{
+		reset();
+		m_p = std::exchange(other.m_p, nullptr);
+		return *this;
+	}
+
+	~resetter() noexcept(noexcept(reset())) { reset(); }
+
+	void release() noexcept
+	{
+		m_p = nullptr;
+	}
+};
+
+template<class T>
+resetter<T> make_resetter(T& p) noexcept
+{
+	return resetter<T>(p);
+}
+
+}
+
 namespace p11 {
 
 DWORD CSession::dwSessionCnt=1;
@@ -17,25 +71,6 @@ CSession::CSession()
 	init_func_internal
 	pSlot=NULL;
 	bFindInit=false;
-	pDigestMechanism=NULL;
-	pVerifyMechanism=NULL;
-	pVerifyRecoverMechanism=NULL;
-	pSignMechanism=NULL;
-	pSignRecoverMechanism=NULL;
-	pEncryptMechanism=NULL;
-	pDecryptMechanism=NULL;
-	exit_func_internal
-}
-
-CSession::~CSession() {
-	init_func_internal
-	Allocator<CDigest> Digest(pDigestMechanism);
-	Allocator<CVerify> Verify(pVerifyMechanism);
-	Allocator<CVerifyRecover> VerifyRecover(pVerifyRecoverMechanism);
-	Allocator<CSign> Sign(pSignMechanism);
-	Allocator<CSignRecover> SignRecover(pSignRecoverMechanism);
-	Allocator<CEncrypt> Encrypt(pEncryptMechanism);
-	Allocator<CDecrypt> Decrypt(pDecryptMechanism);
 	exit_func_internal
 }
 
@@ -49,13 +84,13 @@ RESULT CSession::GetNewSessionID(CK_SLOT_ID &hSlotID) {
 	_return(FAIL)
 }
 
-RESULT CSession::AddSession(CSession* pSession,CK_SESSION_HANDLE &hSession)
+RESULT CSession::AddSession(std::unique_ptr<CSession> pSession,CK_SESSION_HANDLE &hSession)
 {
 	init_func
 	P11ER_CALL(GetNewSessionID(pSession->hSessionHandle),
 		ERR_GET_NEW_SESSION)
 
-	g_mSessions.insert(std::pair<CK_SESSION_HANDLE,CSession*>(pSession->hSessionHandle,pSession));
+	g_mSessions.insert(std::make_pair(pSession->hSessionHandle,std::move(pSession)));
 	hSession=pSession->hSessionHandle;
 	P11ER_CALL(pSession->pSlot->pTemplate->FunctionList.templateInitSession(pSession->pSlot->pTemplateData),
 		ERR_INIT_SESSION)
@@ -70,11 +105,11 @@ RESULT CSession::AddSession(CSession* pSession,CK_SESSION_HANDLE &hSession)
 RESULT CSession::DeleteSession(CK_SESSION_HANDLE hSessionHandle)
 {
 	init_func
-	CSession *pSession=NULL;
+	std::shared_ptr<CSession> pSession;
 	P11ER_CALL(GetSessionFromID(hSessionHandle,pSession),
 		ERR_CANT_GET_SESSION);
 
-	ER_ASSERT(pSession!=NULL,ERR_SESSION_NOT_OPENED);
+	ER_ASSERT(pSession,ERR_SESSION_NOT_OPENED);
 
 	pSession->pSlot->dwSessionCount--;
 	if (pSession->pSlot->dwSessionCount==0) {
@@ -87,7 +122,6 @@ RESULT CSession::DeleteSession(CK_SESSION_HANDLE hSessionHandle)
 	P11ER_CALL(pSession->pSlot->pTemplate->FunctionList.templateFinalSession(pSession->pSlot->pTemplateData),
 		ERR_FINAL_SESSION)
 
-	Allocator<CSession> dealloc(pSession);
 	g_mSessions.erase(hSessionHandle);
 
 	_return(OK)
@@ -95,14 +129,14 @@ RESULT CSession::DeleteSession(CK_SESSION_HANDLE hSessionHandle)
 	_return(FAIL)
 }
 
-RESULT CSession::GetSessionFromID(CK_SESSION_HANDLE hSessionHandle,CSession *&pSession)
+RESULT CSession::GetSessionFromID(CK_SESSION_HANDLE hSessionHandle,std::shared_ptr<CSession>&pSession)
 {
 	init_func
-	pSession=NULL;
+	pSession.reset();
 	SessionMap::const_iterator pPair;
 	pPair=g_mSessions.find(hSessionHandle);
 	if (pPair==g_mSessions.end()) {
-		pSession=NULL;
+		pSession.reset();
 		_return(OK)
 	}
 	pSession=pPair->second;
@@ -151,7 +185,7 @@ CK_RV CSession::Logout() {
 		ERR_CANT_LOGOUT)
 
 	for (DWORD i=0;i<pSlot->P11Objects.size();i++) {
-		CP11Object *p11Obj=pSlot->P11Objects[i];
+		auto p11Obj=pSlot->P11Objects[i];
 		bool bPrivate;
 		P11ER_CALL(p11Obj->IsPrivate(bPrivate),
 			ERR_GET_PRIVATE)
@@ -199,7 +233,7 @@ CK_RV CSession::FindObjectsInit(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 	}
 	else {
 		for(DWORD i=0;i<pSlot->P11Objects.size();i++) {
-			CP11Object *obj=pSlot->P11Objects[i];
+			auto obj=pSlot->P11Objects[i];
 			CK_OBJECT_HANDLE hObject;
 			bool bSkip=false;
 
@@ -274,7 +308,7 @@ CK_RV CSession::GetAttributeValue(CK_OBJECT_HANDLE hObject, CK_ATTRIBUTE_PTR pTe
 {
 	init_func
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hObject,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
@@ -310,7 +344,7 @@ CK_RV CSession::CreateObject(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CK_OB
 	if (pSlot->User!=CKU_USER) 
 		_return(CKR_USER_NOT_LOGGED_IN)
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->pTemplate->FunctionList.templateCreateObject(pSlot->pTemplateData,pTemplate,ulCount,pObject),
 		ERR_CREATE_OBJECT)
 
@@ -335,7 +369,7 @@ CK_RV CSession::GenerateKey(CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTempl
 	if (pSlot->User!=CKU_USER) 
 		_return(CKR_USER_NOT_LOGGED_IN)
 
-	CP11Object *pKey=NULL;
+	std::shared_ptr<CP11Object> pKey;
 	P11ER_CALL(pSlot->pTemplate->FunctionList.templateGenerateKey(pSlot->pTemplateData,pMechanism,pTemplate,ulCount,pKey),
 		ERR_CREATE_OBJECT)
 
@@ -360,8 +394,8 @@ CK_RV CSession::GenerateKeyPair(CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pP
 	if (pSlot->User!=CKU_USER) 
 		_return(CKR_USER_NOT_LOGGED_IN)
 
-	CP11Object *pPublicKey=NULL;
-	CP11Object *pPrivateKey=NULL;
+	std::shared_ptr<CP11Object> pPublicKey=NULL;
+	std::shared_ptr<CP11Object> pPrivateKey=NULL;
 	P11ER_CALL(pSlot->pTemplate->FunctionList.templateGenerateKeyPair(pSlot->pTemplateData,pMechanism, pPublicKeyTemplate, ulPublicKeyAttributeCount, pPrivateKeyTemplate, ulPrivateKeyAttributeCount, pPublicKey, pPrivateKey),
 		ERR_CREATE_OBJECT)
 
@@ -393,7 +427,7 @@ RESULT CSession::DestroyObject(CK_OBJECT_HANDLE hObject) {
 	if (pSlot->User!=CKU_USER) 
 		_return(CKR_USER_NOT_LOGGED_IN)
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hObject,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
@@ -459,20 +493,20 @@ CK_RV CSession::DigestInit(CK_MECHANISM_PTR pMechanism)
 	switch (pMechanism->mechanism) {
 		case CKM_SHA_1:
 		{
-			Allocator<CSHA,CSession *> mech(this);
+			auto mech = std::unique_ptr<CSHA>(new CSHA(shared_from_this()));
 			P11ER_CALL(mech->DigestInit(),
 				ERR_CANT_INITIALIZE_MECHANISM)
 
-			pDigestMechanism=mech.detach();
+			pDigestMechanism=std::move(mech);
 			break;
 		}
 		case CKM_MD5:
 		{
-			Allocator<CMD5,CSession *> mech(this);
+			auto mech = std::unique_ptr<CMD5>(new CMD5(shared_from_this()));
 			P11ER_CALL(mech->DigestInit(),
 				ERR_CANT_INITIALIZE_MECHANISM)
 
-			pDigestMechanism=mech.detach();
+			pDigestMechanism=std::move(mech);
 			break;
 		}
 		default:
@@ -532,19 +566,19 @@ CK_RV CSession::DigestFinal(ByteArray &Digest)
 	if (!pDigestMechanism)
 		_return(CKR_OPERATION_NOT_INITIALIZED)
 
-	Allocator<CDigest> mech(pDigestMechanism);
+	auto mech = std::move(pDigestMechanism);
 	CK_ULONG ulReqLen=0;
 	P11ER_CALL(pDigestMechanism->DigestLength(&ulReqLen),
 		ERR_CANT_GET_MECHANISM_LENGTH)
 
 	if (!Digest.isNull() && Digest.size()<ulReqLen) {
-		mech.detach();
+		pDigestMechanism = std::move(mech);
 		_return(CKR_BUFFER_TOO_SMALL)
 	}
 
 	Digest.dwSize=ulReqLen;
 	if (Digest.isNull()) {
-		mech.detach();
+		pDigestMechanism = std::move(mech);
 		_return(OK)
 	}
 		
@@ -569,14 +603,14 @@ CK_RV CSession::VerifyInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	if (pVerifyMechanism)
 		_return(CKR_OPERATION_ACTIVE)
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
 		_return(CKR_KEY_HANDLE_INVALID)
 	if (pObject->ObjClass!=CKO_PUBLIC_KEY)
 		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PublicKey *pVerifyKey=(CP11PublicKey*)pObject;
+	auto pVerifyKey=std::static_pointer_cast<CP11PublicKey>(pObject);
 	
 	bool bPrivate=false;
 	P11ER_CALL(pVerifyKey->IsPrivate(bPrivate),
@@ -598,34 +632,34 @@ CK_RV CSession::VerifyInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	switch (pMechanism->mechanism) {
 		case CKM_SHA1_RSA_PKCS:
 		{
-			Allocator<CRSAwithSHA1,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSAwithSHA1>(new CRSAwithSHA1(shared_from_this()));
 			P11ER_CALL(mech->VerifyInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pVerifyMechanism=mech.detach();
+			pVerifyMechanism=std::move(mech);
 			break;
 		}
 		case CKM_MD5_RSA_PKCS:
 		{
-			Allocator<CRSAwithMD5,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSAwithMD5>(new CRSAwithMD5(shared_from_this()));
 			P11ER_CALL(mech->VerifyInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pVerifyMechanism=mech.detach();
+			pVerifyMechanism=std::move(mech);
 			break;
 		}
 		case CKM_RSA_PKCS:
 		{
-			Allocator<CRSA_PKCS1,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
 			P11ER_CALL(mech->VerifyInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pVerifyMechanism=mech.detach();
+			pVerifyMechanism=std::move(mech);
 			break;
 		}
 		case CKM_RSA_X_509:
 		{
-			Allocator<CRSA_X509,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			P11ER_CALL(mech->VerifyInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pVerifyMechanism=mech.detach();
+			pVerifyMechanism=std::move(mech);
 			break;
 		}
 		default:
@@ -675,7 +709,7 @@ CK_RV CSession::VerifyFinal(ByteArray &Signature)
 	if (!pVerifyMechanism)
 		_return(CKR_OPERATION_NOT_INITIALIZED)
 
-	Allocator<CVerify> mech(pVerifyMechanism);
+	auto mech = make_resetter(pVerifyMechanism);
 	P11ER_CALL(pVerifyMechanism->VerifyFinal(Signature),
 		ERR_CANT_FINAL_MECHANISM)
 
@@ -694,14 +728,14 @@ CK_RV CSession::VerifyRecoverInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE 
 	if (pVerifyRecoverMechanism)
 		_return(CKR_OPERATION_ACTIVE)
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
 		_return(CKR_KEY_HANDLE_INVALID)
 	if (pObject->ObjClass!=CKO_PUBLIC_KEY)
 		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PublicKey *pVerifyRecoverKey=(CP11PublicKey*)pObject;
+	auto pVerifyRecoverKey=std::static_pointer_cast<CP11PublicKey>(pObject);
 	
 	bool bPrivate=false;
 	P11ER_CALL(pVerifyRecoverKey->IsPrivate(bPrivate),
@@ -723,18 +757,18 @@ CK_RV CSession::VerifyRecoverInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE 
 	switch (pMechanism->mechanism) {
 		case CKM_RSA_PKCS:
 		{
-			Allocator<CRSA_PKCS1,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
 			P11ER_CALL(mech->VerifyRecoverInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pVerifyRecoverMechanism=mech.detach();
+			pVerifyRecoverMechanism=std::move(mech);
 			break;
 		}
 		case CKM_RSA_X_509:
 		{
-			Allocator<CRSA_X509,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			P11ER_CALL(mech->VerifyRecoverInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pVerifyRecoverMechanism=mech.detach();
+			pVerifyRecoverMechanism=std::move(mech);
 			break;
 		}
 		default:
@@ -752,7 +786,7 @@ CK_RV CSession::VerifyRecover(ByteArray &Signature,ByteArray &Data)
 	if (!pVerifyRecoverMechanism)
 		_return(CKR_OPERATION_NOT_INITIALIZED)
 
-	Allocator<CVerifyRecover> mech(pVerifyRecoverMechanism);
+	auto mech = std::move(pVerifyRecoverMechanism);
 
 	CK_ULONG ulKeyLen=0;
 	P11ER_CALL(pVerifyRecoverMechanism->VerifyRecoverLength(&ulKeyLen),
@@ -763,13 +797,13 @@ CK_RV CSession::VerifyRecover(ByteArray &Signature,ByteArray &Data)
 		ERR_CANT_FINAL_MECHANISM)
 
 	if (!Data.isNull() && Data.size()<baData.size()) {
-		mech.detach();
+		pVerifyRecoverMechanism = std::move(mech);
 		_return(CKR_BUFFER_TOO_SMALL)
 	}
 
 	Data.dwSize=baData.size();
 	if (Data.isNull()) {
-		mech.detach();
+		pVerifyRecoverMechanism = std::move(mech);
 		_return(OK)
 	}
 
@@ -791,14 +825,14 @@ CK_RV CSession::SignInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	if (pSignMechanism)
 		_return(CKR_OPERATION_ACTIVE)
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
 		_return(CKR_KEY_HANDLE_INVALID)
 	if (pObject->ObjClass!=CKO_PRIVATE_KEY)
 		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PrivateKey *pSignKey=(CP11PrivateKey*)pObject;
+	auto pSignKey= std::static_pointer_cast<CP11PrivateKey>(pObject);
 	
 	bool bPrivate=false;
 	P11ER_CALL(pSignKey->IsPrivate(bPrivate),
@@ -820,33 +854,33 @@ CK_RV CSession::SignInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	switch (pMechanism->mechanism) {
 		case CKM_SHA1_RSA_PKCS:
 		{
-			Allocator<CRSAwithSHA1,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSAwithSHA1>(new CRSAwithSHA1(shared_from_this()));
 			P11ER_CALL(mech->SignInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pSignMechanism=mech.detach();
+			pSignMechanism=std::move(mech);
 			break;
 		}
 		case CKM_MD5_RSA_PKCS:
 		{
-			Allocator<CRSAwithMD5,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSAwithMD5>(new CRSAwithMD5(shared_from_this()));
 			P11ER_CALL(mech->SignInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pSignMechanism=mech.detach();
+			pSignMechanism=std::move(mech);
 			break;
 		}
 		case CKM_RSA_PKCS:
 		{
-			Allocator<CRSA_PKCS1,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
 			P11ER_CALL(mech->SignInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pSignMechanism=mech.detach();
+			pSignMechanism=std::move(mech);
 			break;
 		}
 		case CKM_RSA_X_509:
 		{
-			Allocator<CRSA_X509,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			P11ER_CALL(mech->SignInit(hKey),ERR_CANT_INITIALIZE_MECHANISM)
-			pSignMechanism=mech.detach();
+			pSignMechanism=std::move(mech);
 			break;
 		}
 		default:
@@ -900,16 +934,16 @@ CK_RV CSession::SignFinal(ByteArray &Signature)
 	if (!pSignMechanism)
 		_return(CKR_OPERATION_NOT_INITIALIZED)
 
-	Allocator<CSign> mech(pSignMechanism);
+	auto mech = make_resetter(pSignMechanism);
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(pSignMechanism->hSignKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
 		_return(CKR_KEY_HANDLE_INVALID)
 	if (pObject->ObjClass!=CKO_PRIVATE_KEY)
 		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PrivateKey *pSignKey=(CP11PrivateKey*)pObject;
+	auto pSignKey= std::static_pointer_cast<CP11PrivateKey>(pObject);
 
 	bool bPrivate=false;
 	P11ER_CALL(pSignKey->IsPrivate(bPrivate),
@@ -923,7 +957,7 @@ CK_RV CSession::SignFinal(ByteArray &Signature)
 		P11ER_CALL(pSignMechanism->SignLength(&ulSignLength),
 			ERR_CANT_GET_PRIVKEY_LENGTH)
 		Signature.dwSize=ulSignLength;
-		mech.detach();
+		mech.release();
 		_return(OK)
 	}
 
@@ -934,12 +968,12 @@ CK_RV CSession::SignFinal(ByteArray &Signature)
 	
 	bool bSilent = false;
 	ByteDynArray baSignature;
-	P11ER_CALL(pSlot->pTemplate->FunctionList.templateSign(pSlot->pTemplateData,pSignKey,baSignBuffer,baSignature,pSignMechanism->mtType,bSilent),
+	P11ER_CALL(pSlot->pTemplate->FunctionList.templateSign(pSlot->pTemplateData,pSignKey.get(),baSignBuffer,baSignature,pSignMechanism->mtType,bSilent),
 		ERR_CANT_SIGN)
 	
 	if (Signature.size()<baSignature.size()) {
 		Signature.dwSize=baSignature.size();
-		mech.detach();
+		mech.release();
 		_return(CKR_BUFFER_TOO_SMALL)
 	}
 	else {
@@ -962,14 +996,14 @@ CK_RV CSession::SignRecoverInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hK
 	if (pSignRecoverMechanism)
 		_return(CKR_OPERATION_ACTIVE)
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
 		_return(CKR_KEY_HANDLE_INVALID)
 	if (pObject->ObjClass!=CKO_PRIVATE_KEY)
 		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PrivateKey *pSignRecoverKey=(CP11PrivateKey*)pObject;
+	auto pSignRecoverKey=std::static_pointer_cast<CP11PrivateKey>(pObject);
 	
 	bool bPrivate=false;
 	P11ER_CALL(pSignRecoverKey->IsPrivate(bPrivate),
@@ -991,17 +1025,17 @@ CK_RV CSession::SignRecoverInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hK
 	switch (pMechanism->mechanism) {
 		case CKM_RSA_PKCS:
 		{
-			Allocator<CRSA_PKCS1,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
 			P11ER_CALL(mech->SignRecoverInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pSignRecoverMechanism=mech.detach();
+			pSignRecoverMechanism=std::move(mech);
 			break;
 		}
 		case CKM_RSA_X_509:
 		{
-			Allocator<CRSA_X509,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			P11ER_CALL(mech->SignRecoverInit(hKey),ERR_CANT_INITIALIZE_MECHANISM)
-			pSignRecoverMechanism=mech.detach();
+			pSignRecoverMechanism=std::move(mech);
 			break;
 		}
 		default:
@@ -1019,16 +1053,16 @@ CK_RV CSession::SignRecover(ByteArray &Data, ByteArray &Signature)
 	if (!pSignRecoverMechanism)
 		_return(CKR_OPERATION_NOT_INITIALIZED)
 
-	Allocator<CSignRecover> mech(pSignRecoverMechanism);
+	auto mech = make_resetter(pSignRecoverMechanism);
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(pSignRecoverMechanism->hSignRecoverKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
 		_return(CKR_KEY_HANDLE_INVALID)
 	if (pObject->ObjClass!=CKO_PRIVATE_KEY)
 		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PrivateKey *pSignRecoverKey=(CP11PrivateKey*)pObject;
+	auto pSignRecoverKey=std::static_pointer_cast<CP11PrivateKey>(pObject);
 
 	bool bPrivate=false;
 	P11ER_CALL(pSignRecoverKey->IsPrivate(bPrivate),
@@ -1042,7 +1076,7 @@ CK_RV CSession::SignRecover(ByteArray &Data, ByteArray &Signature)
 		P11ER_CALL(pSignRecoverMechanism->SignRecoverLength(&ulSignRecoverLength),
 			ERR_CANT_GET_PRIVKEY_LENGTH)
 		Signature.dwSize=ulSignRecoverLength;
-		mech.detach();
+		mech.release();
 		_return(OK)
 	}
 
@@ -1054,12 +1088,12 @@ CK_RV CSession::SignRecover(ByteArray &Data, ByteArray &Signature)
 	bool bSilent=false;
 
 	ByteDynArray baSignature;
-	P11ER_CALL(pSlot->pTemplate->FunctionList.templateSignRecover(pSlot->pTemplateData,pSignRecoverKey,baSignRecoverBuffer,baSignature,pSignRecoverMechanism->mtType,bSilent),
+	P11ER_CALL(pSlot->pTemplate->FunctionList.templateSignRecover(pSlot->pTemplateData,pSignRecoverKey.get(),baSignRecoverBuffer,baSignature,pSignRecoverMechanism->mtType,bSilent),
 		ERR_CANT_SIGN)
 
 if (Signature.size()<baSignature.size()) {
 		Signature.dwSize=baSignature.size();
-		mech.detach();
+		mech.release();
 		_return(CKR_BUFFER_TOO_SMALL)
 	}
 
@@ -1078,14 +1112,14 @@ CK_RV CSession::EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	if (pEncryptMechanism)
 		_return(CKR_OPERATION_ACTIVE)
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
 		_return(CKR_KEY_HANDLE_INVALID)
 	if (pObject->ObjClass!=CKO_PUBLIC_KEY)
 		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PublicKey *pEncryptKey=(CP11PublicKey*)pObject;
+	auto pEncryptKey= std::static_pointer_cast<CP11PublicKey>(pObject);
 	
 	bool bPrivate=false;
 	P11ER_CALL(pEncryptKey->IsPrivate(bPrivate),
@@ -1107,18 +1141,18 @@ CK_RV CSession::EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	switch (pMechanism->mechanism) {
 		case CKM_RSA_PKCS:
 		{
-			Allocator<CRSA_PKCS1,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
 			P11ER_CALL(mech->EncryptInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pEncryptMechanism=mech.detach();
+			pEncryptMechanism=std::move(mech);
 			break;
 		}
 		case CKM_RSA_X_509:
 		{
-			Allocator<CRSA_X509,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			P11ER_CALL(mech->EncryptInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pEncryptMechanism=mech.detach();
+			pEncryptMechanism=std::move(mech);
 			break;
 		}
 		default:
@@ -1180,19 +1214,19 @@ CK_RV CSession::EncryptFinal(ByteArray &EncryptedData)
 	if (!pEncryptMechanism)
 		_return(CKR_OPERATION_NOT_INITIALIZED)
 
-	Allocator<CEncrypt> mech(pEncryptMechanism);
+	auto mech = make_resetter(pEncryptMechanism);
 	CK_ULONG ulReqLen=0;
 	P11ER_CALL(pEncryptMechanism->EncryptLength(&ulReqLen),
 		ERR_CANT_GET_MECHANISM_LENGTH)
 
 	if (!EncryptedData.isNull() && EncryptedData.size()<ulReqLen) {
-		mech.detach();
+		mech.release();
 		_return(CKR_BUFFER_TOO_SMALL)
 	}
 
 	EncryptedData.dwSize=ulReqLen;
 	if (EncryptedData.isNull()) {
-		mech.detach();
+		mech.release();
 		_return(OK)
 	}
 
@@ -1218,14 +1252,14 @@ CK_RV CSession::DecryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	if (pDecryptMechanism)
 		_return(CKR_OPERATION_ACTIVE)
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
 		_return(CKR_KEY_HANDLE_INVALID)
 	if (pObject->ObjClass!=CKO_PRIVATE_KEY)
 		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PrivateKey *pDecryptKey=(CP11PrivateKey*)pObject;
+	auto pDecryptKey= std::static_pointer_cast<CP11PrivateKey>(pObject);
 	
 	bool bPrivate=false;
 	P11ER_CALL(pDecryptKey->IsPrivate(bPrivate),
@@ -1247,18 +1281,18 @@ CK_RV CSession::DecryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	switch (pMechanism->mechanism) {
 		case CKM_RSA_PKCS:
 		{
-			Allocator<CRSA_PKCS1,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
 			P11ER_CALL(mech->DecryptInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pDecryptMechanism=mech.detach();
+			pDecryptMechanism=std::move(mech);
 			break;
 		}
 		case CKM_RSA_X_509:
 		{
-			Allocator<CRSA_X509,CSession *> mech(this);
+			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			P11ER_CALL(mech->DecryptInit(hKey),
 				ERR_CANT_INITIALIZE_MECHANISM)
-			pDecryptMechanism=mech.detach();
+			pDecryptMechanism=std::move(mech);
 			break;
 		}
 		default:
@@ -1281,7 +1315,7 @@ CK_RV CSession::Decrypt(ByteArray &EncryptedData, ByteArray &Data)
 	P11ER_CALL(pDecryptMechanism->checkCache(EncryptedData,Data,bFound),
 		ERR_MECHANISM_CACHE)
 	if (bFound) {
-		Allocator<CDecrypt> mech(pDecryptMechanism);
+		pDecryptMechanism.reset();
 		_return(OK)
 	}
 
@@ -1320,21 +1354,21 @@ CK_RV CSession::DecryptFinal(ByteArray &Data)
 	if (!pDecryptMechanism)
 		_return(CKR_OPERATION_NOT_INITIALIZED)
 
-	Allocator<CDecrypt> mech(pDecryptMechanism);
+	auto mech = make_resetter(pDecryptMechanism);
 	bool bFound=false;
 	P11ER_CALL(pDecryptMechanism->checkCache(ByteArray(),Data,bFound),
 		ERR_MECHANISM_CACHE)
 	if (bFound)
 		_return(OK)
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(pDecryptMechanism->hDecryptKey,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
 		_return(CKR_KEY_HANDLE_INVALID)
 	if (pObject->ObjClass!=CKO_PRIVATE_KEY)
 		_return(CKR_KEY_HANDLE_INVALID)
-	CP11PrivateKey *pDecryptKey=(CP11PrivateKey*)pObject;
+	auto pDecryptKey= std::static_pointer_cast<CP11PrivateKey>(pObject);
 
 	bool bPrivate=false;
 	P11ER_CALL(pDecryptKey->IsPrivate(bPrivate),
@@ -1357,7 +1391,7 @@ CK_RV CSession::DecryptFinal(ByteArray &Data)
 		_return(ris)
 
 	ByteDynArray baData;
-	P11ER_CALL(pSlot->pTemplate->FunctionList.templateDecrypt(pSlot->pTemplateData,pDecryptKey,baDecryptBuffer,baData,pDecryptMechanism->mtType,false),
+	P11ER_CALL(pSlot->pTemplate->FunctionList.templateDecrypt(pSlot->pTemplateData,pDecryptKey.get(),baDecryptBuffer,baData,pDecryptMechanism->mtType,false),
 		ERR_CANT_SIGN)
 
 	ByteDynArray baUnpaddedData;
@@ -1368,13 +1402,13 @@ CK_RV CSession::DecryptFinal(ByteArray &Data)
 		P11ER_CALL(pDecryptMechanism->setCache(ByteArray(),baUnpaddedData),
 			ERR_MECHANISM_CACHE)
 		Data.dwSize=baUnpaddedData.size();
-		mech.detach();
+		mech.release();
 	}
 	else if (Data.size()<baUnpaddedData.size()) {
 		P11ER_CALL(pDecryptMechanism->setCache(ByteArray(),baUnpaddedData),
 			ERR_MECHANISM_CACHE)
 		Data.dwSize=baUnpaddedData.size();
-		mech.detach();
+		mech.release();
 		_return(CKR_BUFFER_TOO_SMALL)
 	}
 	else {
@@ -1430,7 +1464,7 @@ CK_RV CSession::GetObjectSize(CK_OBJECT_HANDLE hObject,CK_ULONG_PTR pulSize)
 {
 	init_func
 
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hObject,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
@@ -1453,7 +1487,7 @@ CK_RV CSession::GetObjectSize(CK_OBJECT_HANDLE hObject,CK_ULONG_PTR pulSize)
 CK_RV CSession::SetAttributeValue(CK_OBJECT_HANDLE hObject,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount)
 {
 	init_func
-	CP11Object *pObject=NULL;
+	std::shared_ptr<CP11Object> pObject;
 	P11ER_CALL(pSlot->GetObjectFromID(hObject,pObject),
 		ERR_CANT_GET_OBJECT)
 	if (pObject==NULL)
@@ -1465,7 +1499,7 @@ CK_RV CSession::SetAttributeValue(CK_OBJECT_HANDLE hObject,CK_ATTRIBUTE_PTR pTem
 	if (pSlot->User!=CKU_USER)
 		_return(CKR_USER_NOT_LOGGED_IN)
 
-	P11ER_CALL(pSlot->pTemplate->FunctionList.templateSetAttribute(pSlot->pTemplateData,pObject,pTemplate,ulCount),
+	P11ER_CALL(pSlot->pTemplate->FunctionList.templateSetAttribute(pSlot->pTemplateData,pObject.get(),pTemplate,ulCount),
 		ERR_SET_ATTRIBUTE)
 
 
@@ -1496,9 +1530,7 @@ CK_RV CSession::SetOperationState(ByteArray &OperationState)
 	P11ER_CALL(Tlv.getValue(OS_Sign,SignOperationState),
 		ERR_TLV)
 	if (!SignOperationState.isNull()) {
-		{
-			Allocator<CSign> alloc(pSignMechanism);
-		}
+		pSignMechanism.reset();
 		CTLV SignTlv(SignOperationState);
 		ByteArray Algo;
 		P11ER_CALL(SignTlv.getValue(OS_Algo,Algo),ERR_TLV)
@@ -1511,7 +1543,7 @@ CK_RV CSession::SetOperationState(ByteArray &OperationState)
 		if (Key.isNull())
 			_return(CKR_SAVED_STATE_INVALID)
 
-		CP11Object *pKey=NULL;
+		std::shared_ptr<CP11Object> pKey;
 		P11ER_CALL(pSlot->FindP11Object(CKO_PRIVATE_KEY,CKA_ID,Key.lock(),Key.size(),pKey),
 			ERR_FIND_OBJECT)
 		ER_ASSERT(pKey,ERR_CANT_GET_OBJECT)
@@ -1535,9 +1567,7 @@ CK_RV CSession::SetOperationState(ByteArray &OperationState)
 	P11ER_CALL(Tlv.getValue(OS_Decrypt,DecryptOperationState),
 		ERR_TLV)
 	if (!DecryptOperationState.isNull()) {
-		{
-			Allocator<CDecrypt> alloc(pDecryptMechanism);
-		}
+		pDecryptMechanism.reset();
 		CTLV DecryptTlv(DecryptOperationState);
 		ByteArray Algo;
 		P11ER_CALL(DecryptTlv.getValue(OS_Algo,Algo),ERR_TLV)
@@ -1550,7 +1580,7 @@ CK_RV CSession::SetOperationState(ByteArray &OperationState)
 		if (Key.isNull())
 			_return(CKR_SAVED_STATE_INVALID)
 
-		CP11Object *pKey=NULL;
+		std::shared_ptr<CP11Object> pKey;
 		P11ER_CALL(pSlot->FindP11Object(CKO_PRIVATE_KEY,CKA_ID,Key.lock(),Key.size(),pKey),
 			ERR_FIND_OBJECT)
 		ER_ASSERT(pKey,ERR_CANT_GET_OBJECT)
@@ -1574,9 +1604,7 @@ CK_RV CSession::SetOperationState(ByteArray &OperationState)
 	P11ER_CALL(Tlv.getValue(OS_Verify,VerifyOperationState),
 		ERR_TLV)
 	if (!VerifyOperationState.isNull()) {
-		{
-			Allocator<CVerify> alloc(pVerifyMechanism);
-		}
+		pVerifyMechanism.reset();
 		CTLV VerifyTlv(VerifyOperationState);
 		ByteArray Algo;
 		P11ER_CALL(VerifyTlv.getValue(OS_Algo,Algo),ERR_TLV)
@@ -1589,7 +1617,7 @@ CK_RV CSession::SetOperationState(ByteArray &OperationState)
 		if (Key.isNull())
 			_return(CKR_SAVED_STATE_INVALID)
 
-		CP11Object *pKey=NULL;
+		std::shared_ptr<CP11Object> pKey;
 		P11ER_CALL(pSlot->FindP11Object(CKO_PUBLIC_KEY,CKA_ID,Key.lock(),Key.size(),pKey),
 			ERR_FIND_OBJECT)
 		ER_ASSERT(pKey,ERR_CANT_GET_OBJECT)
@@ -1613,9 +1641,7 @@ CK_RV CSession::SetOperationState(ByteArray &OperationState)
 	P11ER_CALL(Tlv.getValue(OS_Encrypt,EncryptOperationState),
 		ERR_TLV)
 	if (!EncryptOperationState.isNull()) {
-		{
-			Allocator<CEncrypt> alloc(pEncryptMechanism);
-		}
+		pEncryptMechanism.reset();
 		CTLV EncryptTlv(EncryptOperationState);
 		ByteArray Algo;
 		P11ER_CALL(EncryptTlv.getValue(OS_Algo,Algo),ERR_TLV)
@@ -1628,7 +1654,7 @@ CK_RV CSession::SetOperationState(ByteArray &OperationState)
 		if (Key.isNull())
 			_return(CKR_SAVED_STATE_INVALID)
 
-		CP11Object *pKey=NULL;
+		std::shared_ptr<CP11Object> pKey;
 		P11ER_CALL(pSlot->FindP11Object(CKO_PUBLIC_KEY,CKA_ID,Key.lock(),Key.size(),pKey),
 			ERR_FIND_OBJECT)
 		ER_ASSERT(pKey,ERR_CANT_GET_OBJECT)
@@ -1652,9 +1678,7 @@ CK_RV CSession::SetOperationState(ByteArray &OperationState)
 	P11ER_CALL(Tlv.getValue(OS_Digest,DigestOperationState),
 		ERR_TLV)
 	if (!DigestOperationState.isNull()) {
-		{
-			Allocator<CDigest> alloc(pDigestMechanism);
-		}
+		pDigestMechanism.reset();
 		CTLV DigestTlv(DigestOperationState);
 		ByteArray Algo;
 		P11ER_CALL(DigestTlv.getValue(OS_Algo,Algo),ERR_TLV)
@@ -1698,7 +1722,7 @@ CK_RV CSession::GetOperationState(ByteArray &OperationState)
 				ERR_TLV)
 		}
 
-		CP11Object *pKey=NULL;
+		std::shared_ptr<CP11Object> pKey;
 		P11ER_CALL(pSlot->GetObjectFromID(pSignMechanism->hSignKey,pKey),
 			ERR_CANT_GET_OBJECT)
 		ER_ASSERT(pKey,ERR_CANT_GET_OBJECT);
@@ -1725,7 +1749,7 @@ CK_RV CSession::GetOperationState(ByteArray &OperationState)
 				ERR_TLV)
 		}
 
-		CP11Object *pKey=NULL;
+		std::shared_ptr<CP11Object> pKey;
 		P11ER_CALL(pSlot->GetObjectFromID(pVerifyMechanism->hVerifyKey,pKey),
 			ERR_CANT_GET_OBJECT)
 		ER_ASSERT(pKey,ERR_CANT_GET_OBJECT);
@@ -1769,7 +1793,7 @@ CK_RV CSession::GetOperationState(ByteArray &OperationState)
 			ERR_TLV)
 		}
 
-		CP11Object *pKey=NULL;
+		std::shared_ptr<CP11Object> pKey;
 		P11ER_CALL(pSlot->GetObjectFromID(pEncryptMechanism->hEncryptKey,pKey),
 			ERR_CANT_GET_OBJECT)
 		ER_ASSERT(pKey,ERR_CANT_GET_OBJECT);
@@ -1796,7 +1820,7 @@ CK_RV CSession::GetOperationState(ByteArray &OperationState)
 			ERR_TLV)
 		}
 
-		CP11Object *pKey=NULL;
+		std::shared_ptr<CP11Object> pKey;
 		P11ER_CALL(pSlot->GetObjectFromID(pDecryptMechanism->hDecryptKey,pKey),
 			ERR_CANT_GET_OBJECT)
 		ER_ASSERT(pKey,ERR_CANT_GET_OBJECT);

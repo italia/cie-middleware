@@ -48,13 +48,6 @@ bool CASNTag::isSequence()
 	return forcedSequence || ((tag.size()>=1) && (tag[0] & 0x20) == 0x20);
 }
 
-void CASNTag::Free() {
-	for(int i=0;i<tags.size();i++) {
-		delete tags[i];
-	}
-	tags.clear();
-}
-
 DWORD CASNTag::ContentLen() {
 	if (!isSequence())
 		return content.size();
@@ -86,7 +79,7 @@ DWORD CASNTag::Reparse() {
 	if (parser.tags.size() > 0) {
 		forcedSequence = true;
 		for (int i = 0; i < parser.tags.size(); i++)
-			tags.push_back(parser.tags[i]);
+			tags.emplace_back(std::move(parser.tags[i]));
 		parser.tags.clear();
 		content.clear();
 	}
@@ -149,27 +142,9 @@ CASNTag::CASNTag(void)
 	forcedSequence=false;
 }
 
-CASNTag::~CASNTag(void)
-{
-	Free();
-}
-
 CASNParser::CASNParser(void)
 {
 }
-
-CASNParser::~CASNParser(void)
-{
-	Free();
-}
-
-void CASNParser::Free() {
-	for(int i=0;i<tags.size();i++) {
-		delete tags[i];
-	}
-	tags.clear();
-}
-
 
 DWORD CASNParser::CalcLen() {
 	DWORD len=0;
@@ -197,7 +172,7 @@ RESULT CASNParser::Encode(ByteDynArray &data) {
 
 RESULT CASNParser::Parse(ByteArray &data) {
 	init_func
-	Free();
+	tags.clear();
 	RESULT res=Parse(data,tags,0);
 	_return(res)
 	exit_func
@@ -255,7 +230,7 @@ RESULT CASNParser::Parse(ByteArray &data, CASNTagArray &tags, int startseq)
 		if (l+(len+llen+1)>data.size()) 
 			throw CStringException("lunghezza eccessiva nell'ASN1");
 
-		CASNTag *tag=new CASNTag();
+		auto tag=std::unique_ptr<CASNTag>(new CASNTag());
 		tag->startPos = startseq + l;
 		tag->tag=tagv;
 		if (tag->isSequence())  {
@@ -265,10 +240,10 @@ RESULT CASNParser::Parse(ByteArray &data, CASNTagArray &tags, int startseq)
 			// è un valore singolo
 			tag->content.alloc_copy(&cur[llen+1],len);
 		}
-		tags.push_back(tag);
 		l+=len+llen+1;
 		cur+=len+llen+1;
 		tag->endPos = tag->startPos + len + llen + 1;
+		tags.emplace_back(std::move(tag));
 	}
 	_return(OK)
 	exit_func

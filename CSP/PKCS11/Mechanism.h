@@ -5,6 +5,8 @@
 #include "pkcs11.h"
 #pragma pack()
 
+#include <memory>
+
 namespace p11 {
 
 class CSession;
@@ -14,16 +16,16 @@ class CMechanism
 public:
 	CK_MECHANISM_TYPE mtType;
 	CMechanism();
-	CMechanism(CK_MECHANISM_TYPE type,CSession *Session);
+	CMechanism(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CMechanism(void);
-	CSession *pSession;
+	std::shared_ptr<CSession> pSession;
 };
 
 class CDigest : public CMechanism
 {
 public:
 	CDigest();
-	CDigest(CK_MECHANISM_TYPE type,CSession *Session);
+	CDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CDigest();
 
 	virtual RESULT DigestInit()=0;
@@ -41,7 +43,7 @@ public:
 	CK_OBJECT_HANDLE hVerifyKey;
 
 	CVerify(void);
-	CVerify(CK_MECHANISM_TYPE type,CSession *Session);
+	CVerify(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CVerify();
 
 	virtual RESULT VerifySupportMultipart(bool &Support)=0;
@@ -58,7 +60,7 @@ class CVerifyRSA : public CVerify
 {
 public:
 	CVerifyRSA(void);
-	CVerifyRSA(CK_MECHANISM_TYPE type,CSession *Session);
+	CVerifyRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CVerifyRSA();
 
 	RESULT VerifySupportMultipart(bool &Support);
@@ -74,7 +76,7 @@ public:
 	CK_OBJECT_HANDLE hVerifyRecoverKey;
 
 	CVerifyRecover(void);
-	CVerifyRecover(CK_MECHANISM_TYPE type,CSession *Session);
+	CVerifyRecover(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CVerifyRecover();
 
 	virtual RESULT VerifyRecoverInit(CK_OBJECT_HANDLE PublicKey)=0;
@@ -89,7 +91,7 @@ class CVerifyRecoverRSA : public CVerifyRecover
 {
 public:
 	CVerifyRecoverRSA(void);
-	CVerifyRecoverRSA(CK_MECHANISM_TYPE type,CSession *Session);
+	CVerifyRecoverRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CVerifyRecoverRSA();
 
 	RESULT VerifyRecoverDecryptSignature(ByteArray &Signature,ByteDynArray &baDecryptedSignature);
@@ -104,7 +106,7 @@ public:
 	CK_OBJECT_HANDLE hSignKey;
 
 	CSign(void);
-	CSign(CK_MECHANISM_TYPE type,CSession *Session);
+	CSign(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CSign();
 
 	virtual RESULT SignSupportMultipart(bool &Support)=0;
@@ -121,7 +123,7 @@ class CSignRSA : public CSign
 {
 public:
 	CSignRSA(void);
-	CSignRSA(CK_MECHANISM_TYPE type,CSession *Session);
+	CSignRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CSignRSA();
 
 	RESULT SignSupportMultipart(bool &Support);
@@ -136,7 +138,7 @@ public:
 	CK_OBJECT_HANDLE hSignRecoverKey;
 
 	CSignRecover(void);
-	CSignRecover(CK_MECHANISM_TYPE type,CSession *Session);
+	CSignRecover(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CSignRecover();
 
 	virtual RESULT SignRecoverInit(CK_OBJECT_HANDLE PrivateKey)=0;
@@ -150,7 +152,7 @@ class CSignRecoverRSA : public CSignRecover
 {
 public:
 	CSignRecoverRSA(void);
-	CSignRecoverRSA(CK_MECHANISM_TYPE type,CSession *Session);
+	CSignRecoverRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CSignRecoverRSA();
 
 	RESULT SignRecoverLength(CK_ULONG_PTR pulSignatureLen);
@@ -164,7 +166,7 @@ public:
 	CK_OBJECT_HANDLE hEncryptKey;
 
 	CEncrypt(void);
-	CEncrypt(CK_MECHANISM_TYPE type,CSession *Session);
+	CEncrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CEncrypt();
 
 	virtual RESULT EncryptSupportMultipart(bool &Support)=0;
@@ -180,7 +182,7 @@ class CEncryptRSA : public CEncrypt
 {
 public:
 	CEncryptRSA(void);
-	CEncryptRSA(CK_MECHANISM_TYPE type,CSession *Session);
+	CEncryptRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CEncryptRSA();
 
 	RESULT EncryptSupportMultipart(bool &Support);
@@ -196,7 +198,7 @@ public:
 	CK_OBJECT_HANDLE hDecryptKey;
 
 	CDecrypt(void);
-	CDecrypt(CK_MECHANISM_TYPE type,CSession *Session);
+	CDecrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CDecrypt();
 
 	virtual RESULT DecryptSupportMultipart(bool &Support)=0;
@@ -218,7 +220,7 @@ class CDecryptRSA : public CDecrypt
 {
 public:
 	CDecryptRSA(void);
-	CDecryptRSA(CK_MECHANISM_TYPE type,CSession *Session);
+	CDecryptRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CDecryptRSA();
 
 	RESULT DecryptSupportMultipart(bool &Support);
@@ -231,7 +233,7 @@ class CSHA : public CDigest
 {
 public:
 	CSHA(void);
-	CSHA(CSession *Session);
+	CSHA(std::shared_ptr<CSession> Session);
 	virtual ~CSHA();
 
 	SHA_CTX Sha1Context;
@@ -249,7 +251,7 @@ class CMD5 : public CDigest
 {
 public:
 	CMD5();
-	CMD5(CSession *Session);
+	CMD5(std::shared_ptr<CSession> Session);
 	virtual ~CMD5();
 
 	MD5_CTX	MD5Context;
@@ -267,7 +269,7 @@ class CRSA_X509 : public CSignRSA,public CSignRecoverRSA,public CVerifyRSA,publi
 {
 public:
 	CRSA_X509();
-	CRSA_X509(CSession *Session);
+	CRSA_X509(std::shared_ptr<CSession> Session);
 	virtual ~CRSA_X509();
 
 	ByteDynArray baVerifyBuffer;
@@ -304,7 +306,7 @@ class CRSA_PKCS1 : public CSignRSA,public CSignRecoverRSA,public CVerifyRSA,publ
 {
 public:
 	CRSA_PKCS1();
-	CRSA_PKCS1(CSession *Session);
+	CRSA_PKCS1(std::shared_ptr<CSession> Session);
 	virtual ~CRSA_PKCS1();
 
 	ByteDynArray baVerifyBuffer;
@@ -341,7 +343,7 @@ class CSignRSAwithDigest : public CSignRSA
 {
 public:
 	CSignRSAwithDigest(void);
-	CSignRSAwithDigest(CK_MECHANISM_TYPE type,CSession *Session,CDigest *Digest);
+	CSignRSAwithDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session,CDigest *Digest);
 	virtual ~CSignRSAwithDigest();
 	
 	CDigest *pDigest;
@@ -358,7 +360,7 @@ class CVerifyRSAwithDigest : public CVerifyRSA
 {
 public:
 	CVerifyRSAwithDigest(void);
-	CVerifyRSAwithDigest(CK_MECHANISM_TYPE type,CSession *Session,CDigest *Digest);
+	CVerifyRSAwithDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session,CDigest *Digest);
 	virtual ~CVerifyRSAwithDigest();
 	
 	CDigest *pDigest;
@@ -374,7 +376,7 @@ class CRSAwithMD5 : public CSignRSAwithDigest,public CVerifyRSAwithDigest
 {
 public:
 	CRSAwithMD5();
-	CRSAwithMD5(CSession *Session);
+	CRSAwithMD5(std::shared_ptr<CSession> Session);
 	virtual ~CRSAwithMD5();
 
 	CMD5 md5;
@@ -384,7 +386,7 @@ class CRSAwithSHA1 : public CSignRSAwithDigest,public CVerifyRSAwithDigest
 {
 public:
 	CRSAwithSHA1();
-	CRSAwithSHA1(CSession *Session);
+	CRSAwithSHA1(std::shared_ptr<CSession> Session);
 	virtual ~CRSAwithSHA1();
 
 	CSHA sha1;

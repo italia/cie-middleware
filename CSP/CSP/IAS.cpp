@@ -790,7 +790,7 @@ void IAS::InitDHParam() {
 CASNTag *GetTag(CASNTagArray &tags, DWORD id) {
 	for (int i = 0; i < tags.size(); i++) {
 		if (tags[i]->tagInt() == id)
-			return tags[i];
+			return tags[i].get();
 	}
 	return nullptr;
 }

@@ -709,41 +709,35 @@ RESULT CToken::Transmit(APDU &apdu, ByteDynArray *resp)
 	BYTE pbtAPDU[3000];
 	BYTE pbtResp[3000];
 
+	int iAPDUSize = 0;
 	ByteDynArray baSMData;
-	APDU *SMApdu = &apdu;
-	ER_CALL(apdu.EncodeSM(*this, baSMData, SMApdu),
+	ER_CALL(apdu.EncodeSM(*this, baSMData, [&pbtAPDU, &iAPDUSize] (APDU& sendApdu) {
+		pbtAPDU[0] = sendApdu.btCLA;
+		pbtAPDU[1] = sendApdu.btINS;
+		pbtAPDU[2] = sendApdu.btP1;
+		pbtAPDU[3] = sendApdu.btP2;
+		if (sendApdu.bLC && sendApdu.bLE) {
+			iAPDUSize = sendApdu.btLC + 6;
+			pbtAPDU[4] = sendApdu.btLC;
+			memcpy_s(pbtAPDU + 5, 2995, sendApdu.pbtData, sendApdu.btLC);
+			pbtAPDU[5 + sendApdu.btLC] = sendApdu.btLE;
+		}
+		else if (sendApdu.bLC && !sendApdu.bLE) {
+			iAPDUSize = sendApdu.btLC + 5;
+			pbtAPDU[4] = sendApdu.btLC;
+			memcpy_s(pbtAPDU + 5, 2995, sendApdu.pbtData, sendApdu.btLC);
+		}
+		else if (!sendApdu.bLC && sendApdu.bLE) {
+			iAPDUSize = 5;
+			pbtAPDU[4] = sendApdu.btLE;
+		}
+		else  { // (!bLC && !bLE)
+			iAPDUSize = 4;
+		}
+	}),
 		"Errore nella codifica dell'APDU")
 
-		Allocator<APDU> sendApdu(SMApdu);
-
-	int iAPDUSize = 0;
-	pbtAPDU[0] = sendApdu->btCLA;
-	pbtAPDU[1] = sendApdu->btINS;
-	pbtAPDU[2] = sendApdu->btP1;
-	pbtAPDU[3] = sendApdu->btP2;
-	if (sendApdu->bLC && sendApdu->bLE) {
-		iAPDUSize = sendApdu->btLC + 6;
-		pbtAPDU[4] = sendApdu->btLC;
-		memcpy_s(pbtAPDU + 5, 2995, sendApdu->pbtData, sendApdu->btLC);
-		pbtAPDU[5 + sendApdu->btLC] = sendApdu->btLE;
-	}
-	else if (sendApdu->bLC && !sendApdu->bLE) {
-		iAPDUSize = sendApdu->btLC + 5;
-		pbtAPDU[4] = sendApdu->btLC;
-		memcpy_s(pbtAPDU + 5, 2995, sendApdu->pbtData, sendApdu->btLC);
-	}
-	else if (!sendApdu->bLC && sendApdu->bLE) {
-		iAPDUSize = 5;
-		pbtAPDU[4] = sendApdu->btLE;
-	}
-	else  { // (!bLC && !bLE)
-		iAPDUSize = 4;
-	}
-
 	DWORD dwResp = 3000;
-
-	if (sendApdu == &apdu)
-		sendApdu.detach();
 
 	HRESULT res = transmitCallback(transmitCallbackData, pbtAPDU, iAPDUSize, pbtResp, &dwResp);
 	//HRESULT res=SCardTransmit(hCard,SCARD_PCI_T1,pbtAPDU,iAPDUSize,NULL,pbtResp,&dwResp);

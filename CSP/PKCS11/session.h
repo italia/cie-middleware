@@ -9,6 +9,7 @@
 #include "../PCSC/token.h"
 #include <winscard.h>
 #include "p11object.h"
+#include <memory>
 
 namespace p11 {
 
@@ -25,13 +26,13 @@ enum OperationStateTag {
 	OS_Key
 };
 
-typedef std::map<CK_SESSION_HANDLE,class CSession*> SessionMap;
+typedef std::map<CK_SESSION_HANDLE,std::shared_ptr<CSession>> SessionMap;
 
 class CCardTemplate;
 class CP11PublicKey;
 class CP11PrivateKey;
 
-class CSession 
+class CSession : public std::enable_shared_from_this<CSession>
 {
 private:
 	static DWORD dwSessionCnt;
@@ -44,11 +45,10 @@ public:
 	CK_VOID_PTR pApplication;
 	CK_NOTIFY notify;
 
-	CSlot *pSlot;
+	std::shared_ptr<CSlot> pSlot;
 	CSession();
-	~CSession();
-	static RESULT GetSessionFromID(CK_SESSION_HANDLE hSessionHandle,CSession *&pSession);
-	static RESULT AddSession(CSession* pSession,CK_SESSION_HANDLE &phSession);
+	static RESULT GetSessionFromID(CK_SESSION_HANDLE hSessionHandle,std::shared_ptr<CSession>&pSession);
+	static RESULT AddSession(std::unique_ptr<CSession> pSession,CK_SESSION_HANDLE &phSession);
 	static RESULT DeleteSession(CK_SESSION_HANDLE hSessionHandle);
 	static RESULT GetNewSessionID(CK_SLOT_ID &hSlotID);
 
@@ -79,39 +79,39 @@ public:
 	CK_RV Digest(ByteArray &Data, ByteArray &Digest);
 	CK_RV DigestUpdate(ByteArray &Data);
 	CK_RV DigestFinal(ByteArray &Digest);
-	CDigest *pDigestMechanism;
+	std::unique_ptr<CDigest> pDigestMechanism;
 
 	CK_RV VerifyInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
 	CK_RV Verify(ByteArray &Data, ByteArray &Signature);
 	CK_RV VerifyUpdate(ByteArray &Data);
 	CK_RV VerifyFinal(ByteArray &Signature);
-	CVerify *pVerifyMechanism;
+	std::unique_ptr<CVerify> pVerifyMechanism;
 
 	CK_RV VerifyRecoverInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
 	CK_RV VerifyRecover(ByteArray &Signature, ByteArray &Data);
-	CVerifyRecover *pVerifyRecoverMechanism;
+	std::unique_ptr<CVerifyRecover> pVerifyRecoverMechanism;
 
 	CK_RV SignInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
 	CK_RV Sign(ByteArray &Data, ByteArray &Signature);
 	CK_RV SignUpdate(ByteArray &Data);
 	CK_RV SignFinal(ByteArray &Signature);
-	CSign *pSignMechanism;
+	std::unique_ptr<CSign> pSignMechanism;
 
 	CK_RV SignRecoverInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
 	CK_RV SignRecover(ByteArray &Data, ByteArray &Signature);
-	CSignRecover *pSignRecoverMechanism;
+	std::unique_ptr<CSignRecover> pSignRecoverMechanism;
 
 	CK_RV EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
 	CK_RV Encrypt(ByteArray &Data, ByteArray &EncryptedData);
 	CK_RV EncryptUpdate(ByteArray &Data,ByteArray &EncryptedData);
 	CK_RV EncryptFinal(ByteArray &EncryptedData);
-	CEncrypt *pEncryptMechanism;
+	std::unique_ptr<CEncrypt> pEncryptMechanism;
 
 	CK_RV DecryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
 	CK_RV Decrypt(ByteArray &EncryptedData, ByteArray &DataData);
 	CK_RV DecryptUpdate(ByteArray &EncryptedData,ByteArray &Data);
 	CK_RV DecryptFinal(ByteArray &Data);
-	CDecrypt *pDecryptMechanism;
+	std::unique_ptr<CDecrypt> pDecryptMechanism;
 
 	CK_RV SetOperationState(ByteArray &OperationState);
 	CK_RV GetOperationState(ByteArray &OperationState);

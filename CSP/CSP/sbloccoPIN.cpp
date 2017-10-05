@@ -27,8 +27,7 @@ DWORD WINAPI _sbloccoPIN(
 		try {
 		DWORD len = 0;
 		ByteDynArray IdServizi;
-		safeDesktop *desk = nullptr;
-		Allocator<safeDesktop> alloDesktop(desk);
+		std::unique_ptr<safeDesktop> desk;
 
 		SCARDCONTEXT hSC;
 
@@ -75,8 +74,8 @@ DWORD WINAPI _sbloccoPIN(
 						continue;
 				}
 				foundCIE = true;
-				if (desk == nullptr)
-					desk = new safeDesktop("AbilitaCIE");
+				if (!desk)
+					desk.reset(new safeDesktop("AbilitaCIE"));
 
 				CPin puk(8, "Inserire le 8 cifre del PUK della CIE", "", "", "Sblocco PIN");
 				if (puk.DoModal() == IDOK) {
@@ -156,8 +155,8 @@ DWORD WINAPI _sbloccoPIN(
 			}
 		}
 		if (!foundCIE) {
-			if (desk == nullptr)
-				desk = new safeDesktop("AbilitaCIE");
+			if (!desk)
+				desk.reset(new safeDesktop("AbilitaCIE"));
 			CMessage msg(MB_OK, "Sblocco PIN",
 				"Impossibile trovare una CIE",
 				"nei lettori di smart card");
