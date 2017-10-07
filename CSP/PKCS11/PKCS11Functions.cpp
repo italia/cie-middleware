@@ -58,8 +58,8 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 		//xmlInit();
 		String configPath;
 		configPath.printf("%s%s.ini", moduleInfo.szModulePath.stringlock(), moduleInfo.szModuleName.stringlock());
-		initLog(configPath.stringlock(), __DATE__" "__TIME__);
-		Log.initModule("PKCS11", __DATE__" "__TIME__);
+		initLog(configPath.stringlock(), __DATE__ " " __TIME__);
+		Log.initModule("PKCS11", __DATE__ " " __TIME__);
 		p11::InitP11(configPath.stringlock());
 
 	}
