@@ -1,40 +1,11 @@
-========================================================================
-    CONSOLE APPLICATION : EsempioPCSC Project Overview
-========================================================================
-
-AppWizard has created this EsempioPCSC application for you.
-
-This file contains a summary of what you will find in each of the files that
-make up your EsempioPCSC application.
 
 
-EsempioPCSC.vcxproj
-    This is the main project file for VC++ projects generated using an Application Wizard.
-    It contains information about the version of Visual C++ that generated the file, and
-    information about the platforms, configurations, and project features selected with the
-    Application Wizard.
 
-EsempioPCSC.vcxproj.filters
-    This is the filters file for VC++ projects generated using an Application Wizard. 
-    It contains information about the association between the files in your project 
-    and the filters. This association is used in the IDE to show grouping of files with
-    similar extensions under a specific node (for e.g. ".cpp" files are associated with the
-    "Source Files" filter).
+    Per un riferimento ai comandi APDU da inviare alla CIE vedere:
+    
+    -   EUROPEAN CARD FOR e-SERVICES AND NATIONAL e-ID APPLICATIONS
+        http://www.unsads.com/specs/IASECC/IAS_ECC_v1.0.1_UK.pdf
+        
+    -   Carta d’Identità Elettronica CIE 3.0 – Specifiche Chip (Allegato A: Tabella File System)
+        http://www.cartaidentita.interno.gov.it/wp-content/uploads/2016/07/cie_3.0_-_specifiche_chip.pdf
 
-EsempioPCSC.cpp
-    This is the main application source file.
-
-/////////////////////////////////////////////////////////////////////////////
-Other standard files:
-
-StdAfx.h, StdAfx.cpp
-    These files are used to build a precompiled header (PCH) file
-    named EsempioPCSC.pch and a precompiled types file named StdAfx.obj.
-
-/////////////////////////////////////////////////////////////////////////////
-Other notes:
-
-AppWizard uses "TODO:" comments to indicate parts of the source code you
-should add to or customize.
-
-/////////////////////////////////////////////////////////////////////////////
