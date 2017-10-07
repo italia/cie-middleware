@@ -2,6 +2,7 @@
 #include <Wincrypt.h>
 #include <stdio.h>
 #include "../util/moduleinfo.h"
+#include <vector>
 
 #ifdef _WIN64
 #pragma comment(linker, "/export:CertDllOpenStoreProv")
@@ -130,11 +131,12 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 
 	SCardReleaseContext(hSC);
 
-	WCHAR *modName = new WCHAR[moduleInfo.szModuleName.size() + 10];
-	swprintf_s(modName, moduleInfo.szModuleName.size() + 10, L"%S.dll", moduleInfo.szModuleName.lock());
-	if (!CryptRegisterOIDFunction(0, CRYPT_OID_OPEN_STORE_PROV_FUNC, "CIECertProvider", modName, CRYPT_OID_OPEN_STORE_PROV_FUNC))
-		return E_UNEXPECTED;
-	delete[] modName;
+	{
+		auto modName = std::vector<WCHAR>(moduleInfo.szModuleName.size() + 10);
+		swprintf_s(modName.data(), modName.size(), L"%S.dll", moduleInfo.szModuleName.lock());
+		if (!CryptRegisterOIDFunction(0, CRYPT_OID_OPEN_STORE_PROV_FUNC, "CIECertProvider", modName.data(), CRYPT_OID_OPEN_STORE_PROV_FUNC))
+			return E_UNEXPECTED;
+	}
 
 	CERT_PHYSICAL_STORE_INFO PhysicalStoreInfo;
 	PhysicalStoreInfo.cbSize = sizeof(CERT_PHYSICAL_STORE_INFO);
