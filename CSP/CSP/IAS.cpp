@@ -905,13 +905,11 @@ void IAS::IconaSbloccoPIN() {
 void IAS::GetFirstPIN(ByteDynArray &PIN) {
 	String PANStr;
 	dumpHexData(PAN.mid(5, 6), PANStr, false);
-	BYTE* EncPINBuf;
-	int EncPINSize;
-	CacheGetPIN(PANStr.lock(), EncPINBuf, EncPINSize);
+	std::vector<BYTE> EncPINBuf;
+	CacheGetPIN(PANStr.lock(), EncPINBuf);
 
 	CAES enc(CardEncKey);
-	enc.Decode(ByteArray(EncPINBuf, EncPINSize), PIN);
-	CacheFree(EncPINBuf);
+	enc.Decode(ByteArray(EncPINBuf.data(), EncPINBuf.size()), PIN);
 }
 
 bool IAS::IsEnrolled() {
@@ -956,13 +954,11 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 	}
 	if (!CacheExists(PANStr.lock()))
 		throw CStringException("Errore in abilitazione CIE");
-	BYTE* certEncBuf;
-	int certEncSize;
-	CacheGetCertificate(PANStr.lock(), certEncBuf, certEncSize);
+	std::vector<BYTE> certEncBuf;
+	CacheGetCertificate(PANStr.lock(), certEncBuf);
 
 	CAES enc(CardEncKey);	
-	enc.Decode(ByteArray(certEncBuf, certEncSize), certificate);
-	CacheFree(certEncBuf);
+	enc.Decode(ByteArray(certEncBuf.data(), certEncBuf.size()), certificate);
 	Certificate = certificate;
 }
 
