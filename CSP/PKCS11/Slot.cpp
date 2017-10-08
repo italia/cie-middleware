@@ -7,6 +7,8 @@
 #include "../util/util.h"
 #include "../util/syncroevent.h"
 
+#include <vector>
+
 static char *szCompiledFile=__FILE__;
 //extern CSyncroMutex p11EventMutex;
 extern CSyncroMutex p11Mutex;
@@ -64,7 +66,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 		CSlot::ThreadContext=&Context;
 		DWORD dwSlotNum = (DWORD)pSlotMap->size();
 		DynArray<SCARD_READERSTATE> state(dwSlotNum);
-		DynArray<std::shared_ptr<CSlot>> slot(dwSlotNum);
+		std::vector<std::shared_ptr<CSlot>> slot(dwSlotNum);
 		ZeroMemory(state.lock(),sizeof(SCARD_READERSTATE)*dwSlotNum);
 		DWORD i=0;
 		DWORD ris;
