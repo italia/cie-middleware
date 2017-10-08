@@ -261,6 +261,8 @@ typedef Array<BYTE> ByteArray;
 template <class T> class DynArray : public Array<T>
 {
 public:
+	static_assert(std::is_nothrow_destructible<T>::value, "Il distruttore di T può sollevare eccezioni");
+
 	DynArray()  { 
 		dwSize=0;
 		pbtData=NULL;
@@ -281,22 +283,19 @@ public:
 	};
 	DynArray(const T *src,DWORD size) {
 		init_func_internal
-		dwSize=size;
-		pbtData=(T*)malloc(sizeof(T)*size);
+		pbtData=new T[size];
+		dwSize = size;
 		copy(src,size);
 		exit_func_internal
 	}
 	DynArray(DWORD size) {
 		init_func_internal
+		pbtData=new T[size];
 		dwSize=size;
-		pbtData=(T*)malloc(sizeof(T)*dwSize);
 		exit_func_internal
 	};
 	~DynArray() {
-		init_func_internal
-		if (pbtData!=NULL)
-			free(pbtData);
-		exit_func_internal
+		delete[] pbtData;
 	}
 	DynArray<T> &operator=(const DynArray<T> src) {
 		init_func_internal
@@ -309,11 +308,11 @@ public:
 		init_func_internal
 		if (!bKeepData) {
 			clear();
+			pbtData = new T[size];
 			dwSize=size;
-			pbtData=(T*)malloc(sizeof(T)*dwSize);
 		}
 		else {
-			T* pbtNewData=(T*)malloc(sizeof(T)*size);
+			T* pbtNewData=new T[size];
 			DWORD dwMinSize=min(size,dwSize);
 			if (dwMinSize>0)
 				memcpy_s(pbtNewData, sizeof(T)*size, pbtData, sizeof(T)*dwMinSize);
@@ -325,8 +324,7 @@ public:
 	}
 	void clear() {
 		init_func_internal
-		if (pbtData!=NULL)
-			free(pbtData);
+		delete[] pbtData;
 		pbtData=NULL;
 		dwSize=0;
 		exit_func_internal
@@ -334,8 +332,8 @@ public:
 	void alloc_copy(const Array<T> &src) {
 		init_func_internal
 		clear();
+		pbtData = new T[src.dwSize];
 		dwSize=src.dwSize;
-		pbtData=(T*)malloc(sizeof(T)*dwSize);
 		copy(src);
 		return;
 		exit_func_internal
@@ -343,8 +341,8 @@ public:
 	void alloc_copy(const T *src,DWORD size) {
 		init_func_internal
 		clear();
+		pbtData = new T[size];
 		dwSize=size;
-		pbtData=(T*)malloc(sizeof(T)*size);
 		copy(src,size);
 		return;
 		exit_func_internal
@@ -544,8 +542,8 @@ public:
 	String(const BYTE *src, DWORD size) {
 		init_func_internal
 			clear();
+		pbtData = new char[size + 1];
 		dwSize = size + 1;
-		pbtData = (char*)malloc(dwSize);
 		fill(0);
 		copy((char *)src, size);
 		exit_func_internal
@@ -584,8 +582,9 @@ public:
 			clear();
 		if (str == 0)
 			return;
-		dwSize = (DWORD)::strlen(str) + 1;
-		pbtData = (char*)malloc(dwSize);
+		DWORD size = ::strlen(str) + 1;
+		pbtData = new char[size];
+		dwSize = size;
 		copy(str, dwSize);
 		exit_func_internal
 	}
