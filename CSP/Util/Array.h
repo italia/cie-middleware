@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <openssl/rand.h>
+#include <type_traits>
 
 #ifndef min
 #define min(a,b) ((a)<(b)) ? (a) : (b)
@@ -21,6 +22,9 @@ int ASN1LLength(LONG len);
 class ByteDynArray;
 template <class T> class Array {
 public:
+	// Array funziona correttamente solo con i TrivialType, perché usa memcpy, memcmp, ecc.
+	static_assert(std::is_trivial<T>::value, "T non è un TrivialType");
+
 	DWORD dwSize;
 	T *pbtData;
 
