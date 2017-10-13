@@ -70,8 +70,8 @@ CEncrypt::CEncrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : C
 CEncrypt::~CEncrypt() {}
 
 CDecrypt::CDecrypt() {}
-CDecrypt::CDecrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {
-	cacheData.pbtData=(BYTE*)0xffffffff;
+CDecrypt::CDecrypt(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {
+	cacheData.pbtData=(BYTE*)~(ULONG_PTR)0;
 }
 CDecrypt::~CDecrypt() {}
 
@@ -517,8 +517,8 @@ RESULT CRSA_X509::VerifyFinal(ByteArray &Signature)
 	if (Signature.size()!=ulVerifyLength)
 		_return(CKR_SIGNATURE_LEN_RANGE)
 
-	// il buffer da verificare può anche essere
-	// più corto della chiave, viene paddato automaticamente
+	// il buffer da verificare puÃ² anche essere
+	// piÃ¹ corto della chiave, viene paddato automaticamente
 	// specifiche P11
 	if (baVerifyBuffer.size()>ulVerifyLength) 
 		_return(CKR_DATA_LEN_RANGE)
@@ -716,7 +716,7 @@ RESULT CRSA_X509::DecryptFinal(ByteDynArray &DecryptBuffer)
 RESULT CRSA_X509::DecryptRemovePadding(ByteArray &paddedData,ByteDynArray &unpaddedData)
 {
 	init_func
-		// non faccio nulla perchè l'RSA_X509 non leva il padding
+		// non faccio nulla perchÃ¨ l'RSA_X509 non leva il padding
 	unpaddedData.alloc_copy(paddedData);
 	_return(OK)
 	exit_func
@@ -814,7 +814,7 @@ RESULT CRSA_PKCS1::VerifyRecover(ByteArray &Signature,ByteDynArray &Data)
 		_return(CKR_SIGNATURE_INVALID)
 	}
 
-	// i dati restutuiti non possono essere più
+	// i dati restutuiti non possono essere piÃ¹
 	// lunghi di k-11!! (specifiche p11)
 	Data.alloc_copy(baPlainSignature.mid(dwPadLen));
 	if (Data.size()>ulVerifyRecoverLength-11)
@@ -1228,8 +1228,8 @@ RESULT CEncryptRSA::EncryptCompute(ByteArray &baPlainData,ByteDynArray &baEncryp
 
 	DWORD dwKeyLenBytes=baKeyModule->size();
 
-	// è molto strano che baPlainData non sia lungo quanto la chiave...
-	// il controllo su CKR_DATA_LEN_RANGE è stato fatto prima, ma
+	// Ã¨ molto strano che baPlainData non sia lungo quanto la chiave...
+	// il controllo su CKR_DATA_LEN_RANGE Ã¨ stato fatto prima, ma
 	// lo uso anche in questo caso
 	if (baPlainData.size()!=dwKeyLenBytes)
 		_return(CKR_DATA_LEN_RANGE)

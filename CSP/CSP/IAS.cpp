@@ -12,6 +12,7 @@
 #include "../util/ModuleInfo.h"
 #include "../res/resource.h"
 #include "../../cacheLib/cacheLib.h"
+#include <intsafe.h>
 
 #define CIE_KEY_DH_ID 0x81
 #define CIE_KEY_ExtAuth_ID 0x84
@@ -146,16 +147,16 @@ void IAS::readfile(WORD id, ByteDynArray &content){
 
 	ByteDynArray resp;
 	BYTE selectFile[] = { 0x00, 0xa4, 0x02, 0x04 };
-	BYTE fileId[] = { id >> 8, id & 0xff };
+	BYTE fileId[] = { HIBYTE(id), LOBYTE(id) };
 	CARD_R_CALL(SendAPDU(VarToByteArray(selectFile), VarToByteArray(fileId), resp))
 
 
-	int cnt = 0;
+	WORD cnt = 0;
 	BYTE chunk = 128;
 	DWORD sw;
 	while (true) {
 		ByteDynArray chn;
-		BYTE readFile[] = { 0x00, 0xb0, cnt >> 8, cnt & 0xff };
+		BYTE readFile[] = { 0x00, 0xb0, HIBYTE(cnt), LOBYTE(cnt) };
 		sw = SendAPDU(VarToByteArray(readFile), ByteArray(), chn, &chunk);
 		if ((sw >> 8) == 0x6c)  {
 			BYTE le = sw & 0xff;
@@ -163,7 +164,9 @@ void IAS::readfile(WORD id, ByteDynArray &content){
 		}
 		if (sw == 0x9000) {
 			content.append(chn);
-			cnt += chn.size();
+			WORD chnSize;
+			if (FAILED(SizeTToWord(chn.size(), &chnSize)) || FAILED(WordAdd(cnt, chnSize, &cnt)))
+				throw CStringException("File troppo grande");
 			chunk = 128;
 		}
 		else {
@@ -182,16 +185,16 @@ void IAS::readfile_SM(WORD id, ByteDynArray &content) {
 
 	ByteDynArray resp;
 	BYTE selectFile[] = { 0x00, 0xa4, 0x02, 0x04 };
-	BYTE fileId[] = { id >> 8, id & 0xff };
+	BYTE fileId[] = { HIBYTE(id), LOBYTE(id) };
 	CARD_R_CALL(SendAPDU_SM(VarToByteArray(selectFile), VarToByteArray(fileId), resp))
 
 
-	int cnt = 0;
+	WORD cnt = 0;
 	BYTE chunk = 128;
 	DWORD sw;
 	while (true) {
 		ByteDynArray chn;
-		BYTE readFile[] = { 0x00, 0xb0, cnt >> 8, cnt & 0xff };
+		BYTE readFile[] = { 0x00, 0xb0, HIBYTE(cnt), LOBYTE(cnt) };
 		sw = SendAPDU_SM(VarToByteArray(readFile), ByteArray(), chn, &chunk);
 		if ((sw >> 8) == 0x6c)  {
 			BYTE le = sw & 0xff;
@@ -199,7 +202,9 @@ void IAS::readfile_SM(WORD id, ByteDynArray &content) {
 		}
 		if (sw == 0x9000) {
 			content.append(chn);
-			cnt += chn.size();
+			WORD chnSize;
+			if (FAILED(SizeTToWord(chn.size(), &chnSize)) || FAILED(WordAdd(cnt, chnSize, &cnt)))
+				throw CStringException("File troppo grande");
 			chunk = 128;
 		}
 		else {
@@ -788,7 +793,7 @@ void IAS::InitDHParam() {
 }
 
 CASNTag *GetTag(CASNTagArray &tags, DWORD id) {
-	for (int i = 0; i < tags.size(); i++) {
+	for (std::size_t i = 0; i < tags.size(); i++) {
 		if (tags[i]->tagInt() == id)
 			return tags[i].get();
 	}
@@ -1074,7 +1079,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	CASNTag &CertIssuer = *issuerParser.tags[0];
 	if (issuerName.tags.size() != CertIssuer.tags.size())
 		throw CStringException("Issuer name non corrispondente");
-	for (int i = 0; i < issuerName.tags.size(); i++) {
+	for (std::size_t i = 0; i < issuerName.tags.size(); i++) {
 		CASNTag &certElem = *CertIssuer.tags[i]->tags[0];
 		CASNTag &SODElem = *issuerName.tags[i]->tags[0];
 		certElem.tags[0]->Verify(SODElem.tags[0]->content);
@@ -1092,7 +1097,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	signedData.Child(1, 0x30).Child(0, 06).Verify(VarToByteArray(OID_SH256));
 	
 	CASNTag &hashTag = signedData.Child(2, 0x30);
-	for (int i = 0; i<hashTag.tags.size();i++) {
+	for (std::size_t i = 0; i<hashTag.tags.size();i++) {
 		CASNTag &hashDG = *(hashTag.tags[i]);
 		CASNTag &dgNum = hashDG.CheckTag(0x30).Child(0, 02);
 		CASNTag &dgHash = hashDG.Child(1, 04);
