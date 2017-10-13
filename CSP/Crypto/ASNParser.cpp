@@ -48,6 +48,7 @@ bool CASNTag::isSequence()
 	return forcedSequence || ((tag.size()>=1) && (tag[0] & 0x20) == 0x20);
 }
 
+
 DWORD CASNTag::ContentLen() {
 	if (!isSequence())
 		return content.size();
@@ -61,7 +62,7 @@ DWORD CASNTag::ContentLen() {
 
 DWORD CASNTag::tagInt() {
 	DWORD intVal = 0;
-	for (int i = 0; i < tag.size(); i++) {
+	for (std::size_t i = 0; i < tag.size(); i++) {
 		intVal = (intVal << 8) | tag[i];
 	}
 	return intVal;
@@ -69,7 +70,7 @@ DWORD CASNTag::tagInt() {
 
 DWORD CASNTag::Reparse() {
 	CASNParser parser;
-	//se è una bit string salto il numero di bit non usati
+	//se Ã¨ una bit string salto il numero di bit non usati
 	//attenzione in encode! non memorizzo il numero di bit non usati, quindi non posso
 	//ricostruirl'array originale! quindi lancio un'eccezione
 	if (tag.size()==1 && tag[0]==3)
@@ -118,7 +119,7 @@ RESULT CASNTag::Encode(ByteArray &data,DWORD &len) {
 	return OK;
 }
 
-CASNTag &CASNTag::Child(int num, BYTE tag) {
+CASNTag &CASNTag::Child(std::size_t num, BYTE tag) {
 	if (num >= tags.size())
 		throw CStringException("Errore nella verifica della struttura ASN1");
 	if (tags[num]->tag.size() == 1 && tags[num]->tag[0]==tag)
@@ -202,7 +203,7 @@ RESULT CASNParser::Parse(ByteArray &data, CASNTagArray &tags, int startseq)
                 curv = cur[0];
 				tagv.push_back(curv);
                 if ((curv & 0x80) != 0x80)
-                    // è l'ultimo byte del tag
+                    // Ã¨ l'ultimo byte del tag
                     break;
             }
         }
@@ -237,7 +238,7 @@ RESULT CASNParser::Parse(ByteArray &data, CASNTagArray &tags, int startseq)
 			ER_CALL(Parse(ByteArray(&cur[llen + 1], len), tag->tags, startseq + l + llen + 1), "Errore nel parse del sub-tag");
 		}
 		else {
-			// è un valore singolo
+			// Ã¨ un valore singolo
 			tag->content.alloc_copy(&cur[llen+1],len);
 		}
 		l+=len+llen+1;
