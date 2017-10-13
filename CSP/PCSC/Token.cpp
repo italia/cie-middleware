@@ -387,9 +387,12 @@ RESULT CToken::GenerateKeyOberthur(BYTE* key,BYTE *pubkey,int modSize,ByteArray 
 {
 	init_func
 	ER_ASSERT(transmitCallback,"Carta non Connessa")
+	
+	if (modSize < 0 || modSize > MAXBYTE)
+		throw "modSize fuori intervallo";
 
 
-	BYTE data[]={key[0],key[1],pubkey[0],pubkey[1],0x00,0x000,0x00,modSize};
+	BYTE data[]={key[0],key[1],pubkey[0],pubkey[1],0x00,0x000,0x00,static_cast<BYTE>(modSize)};
 	APDU apdu(0x00,0x46,0x00,0x00,sizeof(data),data,0x00);
 	apdu.setSM(sigIn,encIn,sigOut,encOut);
 	ByteDynArray response;
