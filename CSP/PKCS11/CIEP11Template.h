@@ -26,7 +26,7 @@ RESULT CIEtemplateGetObjectSize(void *pCardTemplateData, CP11Object *pObject, CK
 RESULT CIEtemplateUnblockSecAuthPIN(void *pTemplateData, CP11Object *pObject, ByteArray &Puk, ByteArray &newPin);
 RESULT CIEtemplateSetKeyPIN(void *pTemplateData, CP11Object *pObject, ByteArray &Pin);
 RESULT CIEtemplateSetAttribute(void *pTemplateData, CP11Object *pObject, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount);
-RESULT CIEtemplateCreateObject(void *pTemplateData, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CP11Object *&pObject);
+RESULT CIEtemplateCreateObject(void *pTemplateData, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, std::shared_ptr<CP11Object>&pObject);
 RESULT CIEtemplateDestroyObject(void *pTemplateData, CP11Object &Object);
-RESULT CIEtemplateGenerateKey(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CP11Object *&pObject);
-RESULT CIEtemplateGenerateKeyPair(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, CP11Object *&pPublicKey, CP11Object *&pPrivateKey);
+RESULT CIEtemplateGenerateKey(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, std::shared_ptr<CP11Object>&pObject);
+RESULT CIEtemplateGenerateKeyPair(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, std::shared_ptr<CP11Object>&pPublicKey, std::shared_ptr<CP11Object>&pPrivateKey);

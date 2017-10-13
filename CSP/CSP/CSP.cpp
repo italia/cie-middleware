@@ -780,7 +780,7 @@ extern "C" DWORD WINAPI CardAcquireContext(
 		pCardData->hScard == NULL)
 		return SCARD_E_INVALID_PARAMETER;
 
-	Allocator<IAS, CToken::TokenTransmitCallback, ByteArray> ias((CToken::TokenTransmitCallback)TokenTransmitCallback, ByteArray(pCardData->pbAtr, pCardData->cbAtr));
+	auto ias = std::unique_ptr<IAS>(new IAS((CToken::TokenTransmitCallback)TokenTransmitCallback, ByteArray(pCardData->pbAtr, pCardData->cbAtr)));
 	ias->SetCardContext(pCardData);
 
 	ByteDynArray data;
@@ -841,7 +841,7 @@ extern "C" DWORD WINAPI CardAcquireContext(
 	pCardData->pfnCardDestroyKey = CardDestroyKey;
 	pCardData->pfnCardProcessEncryptedData = CardProcessEncryptedData;
 	pCardData->pfnCardCreateContainerEx = CardCreateContainerEx;
-	pCardData->pvVendorSpecific = ias.detach();
+	pCardData->pvVendorSpecific = ias.release();
 
 
 	return 0;

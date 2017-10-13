@@ -238,15 +238,6 @@ extern DWORD ERR_OBJECT_HASNT_ATTRIBUTE;
 		}
 
 
-class StringCopier {
-	String *str;
-	BYTE **copyBuf;
-	int *copyBufLen;
-public:
-	StringCopier(String *str,BYTE **copyBuf,int *copyBufLen);
-	~StringCopier();
-};
-
 #define VarToByteArray(a) (ByteArray((BYTE*)&(a),sizeof(a)))
 #define VarToByteDynArray(a) (ByteDynArray((BYTE*)&(a),sizeof(a)))
 #define ByteArrayToVar(a,b) (*(b*)(a).lock(sizeof(b)))

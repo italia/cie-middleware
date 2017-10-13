@@ -42,8 +42,7 @@ DWORD WINAPI _abilitaCIE(
 		ByteDynArray CertCIE;
 		ByteDynArray SOD;
 		ByteDynArray IdServizi;
-		safeDesktop *desk = nullptr;
-		Allocator<safeDesktop> alloDesktop(desk);
+		std::unique_ptr<safeDesktop> desk;
 
 		SCARDCONTEXT hSC;
 
@@ -90,8 +89,8 @@ DWORD WINAPI _abilitaCIE(
 				}
 
 				foundCIE = true;
-				if (desk == nullptr)
-					desk = new safeDesktop("AbilitaCIE");
+				if (!desk)
+					desk.reset(new safeDesktop("AbilitaCIE"));
 
 				CMessage msg(MB_OKCANCEL, "Abilitazione CIE",
 					"Premere OK per effettuare la verifica di autenticità",
@@ -238,8 +237,8 @@ DWORD WINAPI _abilitaCIE(
 			}
 		}
 		if (!foundCIE) {
-			if (desk == nullptr)
-				desk = new safeDesktop("AbilitaCIE");
+			if (!desk)
+				desk.reset(new safeDesktop("AbilitaCIE"));
 			String num;
 			num.printf("%s nei lettori di smart card", PAN);
 			CMessage msg(MB_OK,

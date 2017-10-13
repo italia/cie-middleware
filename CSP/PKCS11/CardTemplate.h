@@ -2,6 +2,7 @@
 
 #include "../PCSC/token.h"
 #include "session.h"
+#include <memory>
 
 
 namespace p11 {
@@ -27,10 +28,10 @@ typedef RESULT (*templateSetPINFunc)(void *pCardTemplateData,ByteArray &baOldPin
 typedef RESULT (*templateGetObjectSizeFunc)(void *pCardTemplateData,CP11Object *pObject,CK_ULONG_PTR pulSize);
 typedef RESULT (*templateSetKeyPINFunc)(void *pTemplateData,CP11Object *pObject,ByteArray &Pin);
 typedef RESULT (*templateSetAttributeFunc)(void *pTemplateData,CP11Object *pObject,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount);
-typedef RESULT (*templateCreateObjectFunc)(void *pTemplateData,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount,CP11Object *&pObject);
+typedef RESULT (*templateCreateObjectFunc)(void *pTemplateData,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount,std::shared_ptr<CP11Object>&pObject);
 typedef RESULT (*templateDestroyObjectFunc)(void *pTemplateData,CP11Object &Object);
-typedef RESULT (*templateGenerateKeyFunc)(void *pCardTemplateData,CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CP11Object *&pObject);
-typedef RESULT (*templateGenerateKeyPairFunc)(void *pCardTemplateData,CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, CP11Object *&pPublicKey, CP11Object *&pPrivateKey);
+typedef RESULT (*templateGenerateKeyFunc)(void *pCardTemplateData,CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, std::shared_ptr<CP11Object>&pObject);
+typedef RESULT (*templateGenerateKeyPairFunc)(void *pCardTemplateData,CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, std::shared_ptr<CP11Object>&pPublicKey, std::shared_ptr<CP11Object>&pPrivateKey);
 
 class TemplateFuncList {
 public:
@@ -61,7 +62,7 @@ public:
 	templateGenerateKeyPairFunc			templateGenerateKeyPair;
 };
 
-typedef std::vector<class CCardTemplate*> TemplateVector;
+typedef std::vector<std::shared_ptr<CCardTemplate>> TemplateVector;
 typedef RESULT (*templateFuncListFunc)(TemplateFuncList *);
 
 class CCardTemplate
@@ -72,12 +73,12 @@ public:
 
 	static TemplateVector g_mCardTemplates;
 
-	static RESULT AddTemplate(CCardTemplate *pTemplate);
+	static RESULT AddTemplate(std::shared_ptr<CCardTemplate> pTemplate);
 
 	static RESULT InitTemplateList();
 	static RESULT DeleteTemplateList();
 
-	static RESULT GetTemplate(CSlot &pSlot,CCardTemplate *&pTemplate);
+	static RESULT GetTemplate(CSlot &pSlot,std::shared_ptr<CCardTemplate>&pTemplate);
 
 	RESULT InitLibrary(const char *szPath,void *templateData);
 

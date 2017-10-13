@@ -3,6 +3,7 @@
 #include <Shlwapi.h>
 #include <Shlobj.h>
 #include <stdio.h>
+#include <vector>
 
 #include "..\CSP\Util\util.h"
 
@@ -31,11 +32,7 @@ bool CacheExists(char *PAN) {
 	return (PathFileExists(szPath)!=FALSE);
 }
 
-void CacheFree(BYTE *data) {
-	delete data;
-}
-
-void CacheGetCertificate(char *PAN, BYTE *&certificate, int &certificateSize)
+void CacheGetCertificate(char *PAN, std::vector<BYTE>&certificate)
 {
 	if (PAN == nullptr)
 		throw CStringException("Il PAN è necessario");
@@ -54,15 +51,14 @@ void CacheGetCertificate(char *PAN, BYTE *&certificate, int &certificateSize)
 		len = *(int*)ptr; ptr += sizeof(int);
 		Cert.resize(len); Cert.copy(ptr, len);
 
-		certificate = new BYTE[Cert.size()];
-		certificateSize = Cert.size();
-		ByteArray(certificate, certificateSize).copy(Cert);
+		certificate.resize(Cert.size());
+		ByteArray(certificate.data(), certificate.size()).copy(Cert);
 	}
 	else
 		throw CStringException("CIE non abilitata");
 }
 
-void CacheGetPIN(char *PAN, BYTE *&PIN, int &PINSize) {
+void CacheGetPIN(char *PAN, std::vector<BYTE>&PIN) {
 	if (PAN == nullptr)
 		throw CStringException("Il PAN è necessario");
 
@@ -76,9 +72,8 @@ void CacheGetPIN(char *PAN, BYTE *&PIN, int &PINSize) {
 		int len = *(int*)ptr; ptr += sizeof(int);
 		ClearPIN.resize(len); ClearPIN.copy(ptr, len);
 
-		PIN = new BYTE[ClearPIN.size()];
-		PINSize = ClearPIN.size();
-		ByteArray(PIN, PINSize).copy(ClearPIN);
+		PIN.resize(ClearPIN.size());
+		ByteArray(PIN.data(), PIN.size()).copy(ClearPIN);
 
 	}
 	else

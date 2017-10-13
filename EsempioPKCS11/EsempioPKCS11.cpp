@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #pragma pack(1)
 #include "pkcs11.h"
@@ -75,7 +76,8 @@ void _tmain(int argc, _TCHAR* argv[])
 
 	// leggo il valore del certificato
 	FunctionList->C_GetAttributeValue(Session, Object, &CertValue, 1);
-	CertValue.pValue = new BYTE[CertValue.ulValueLen];
+	std::vector<BYTE> CertBuffer(CertValue.ulValueLen);
+	CertValue.pValue = CertBuffer.data();
 	FunctionList->C_GetAttributeValue(Session, Object, &CertValue, 1);
 
 	// chiude la sessione e termina il PKCS11
@@ -87,13 +89,11 @@ void _tmain(int argc, _TCHAR* argv[])
 
 	// converte il Subject name in stringa e lo scrive sullo schermo
 	int NameSize = CertNameToStr(X509_ASN_ENCODING, &cer->pCertInfo->Subject, CERT_X500_NAME_STR, NULL, 0);
-	char *Name = new char[NameSize];
-	CertNameToStr(X509_ASN_ENCODING, &cer->pCertInfo->Subject, CERT_X500_NAME_STR, Name, NameSize);
-	std::cout << "Titolare :" << Name << "\n";
+	std::vector<char> Name(NameSize);
+	CertNameToStr(X509_ASN_ENCODING, &cer->pCertInfo->Subject, CERT_X500_NAME_STR, Name.data(), NameSize);
+	std::cout << "Titolare :" << Name.data() << "\n";
 
 	CertFreeCertificateContext(cer);
-	delete CertValue.pValue;
-	delete Name;
 	
 	system("pause");
 	return;

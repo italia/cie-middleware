@@ -22,22 +22,20 @@ CBaseException::CBaseException(int _line,char *_fileName) {
 }
 
 
-CBaseException::CBaseException(CBaseException& inner) {
+CBaseException::CBaseException(const CBaseException& inner) {
 	type=UTILEX_BASE;
 	innerException=inner.Clone();
-	inner.innerException=NULL;
 }
 
-CBaseException::CBaseException(CBaseException& inner,int _line,char *_fileName) {
+CBaseException::CBaseException(const CBaseException& inner,int _line,char *_fileName) {
 	line=_line;
 	fileName=_fileName;
 	type=UTILEX_BASE;
 	innerException=inner.Clone();
-	inner.innerException=NULL;
 }
 
-CBaseException *CBaseException::Clone() {
-	CBaseException* cb=new CBaseException();
+std::unique_ptr<CBaseException> CBaseException::Clone() const {
+	auto cb=std::unique_ptr<CBaseException>(new CBaseException());
 	*cb=*this;
 	return cb;
 }
@@ -49,15 +47,16 @@ const CBaseException& CBaseException::operator=(const CBaseException& orig) {
 		fileName.clear();
 	type=orig.type;
 	line=orig.line;
-	innerException=orig.innerException;
+	if (orig.innerException)
+		innerException=orig.innerException->Clone();
+	else
+		innerException.reset();
 	
 	return *this;
 }
 
 CBaseException::~CBaseException(void)
 {
-	if (innerException)
-		delete innerException;
 }
 
 void CBaseException::DumpError(String &dump) {
@@ -77,7 +76,7 @@ void CBaseException::DumpTree(String &dump)
 		char *exName=exc->ExceptionName();
 		int sz=dump.size()-1;
 		dump.printf("%s : %s:%s\n", pos.lock(), exName, desc.lock());
-		exc=exc->innerException;
+		exc=exc->innerException.get();
 	}
 }
 
@@ -89,11 +88,11 @@ CStringException::CStringException(int line,char *fileName) : CBaseException(lin
 	type=UTILEX_STRING;
 }
 
-CStringException::CStringException(CBaseException& inner) : CBaseException(inner) {
+CStringException::CStringException(const CBaseException& inner) : CBaseException(inner) {
 	type=UTILEX_STRING;
 }
 
-CStringException::CStringException(CBaseException& inner,int line,char *fileName) : CBaseException(inner,line,fileName) {
+CStringException::CStringException(const CBaseException& inner,int line,char *fileName) : CBaseException(inner,line,fileName) {
 	type=UTILEX_STRING;
 }
 
@@ -113,7 +112,7 @@ CStringException::CStringException(int line,char *fileName,const char *fmt,...) 
 	va_end (args);
 }
 
-CStringException::CStringException(CBaseException& inner,const char *fmt,...) : CBaseException(inner)  {
+CStringException::CStringException(const CBaseException& inner,const char *fmt,...) : CBaseException(inner)  {
 	type=UTILEX_STRING;
 	va_list args;
 	va_start (args, fmt);
@@ -121,7 +120,7 @@ CStringException::CStringException(CBaseException& inner,const char *fmt,...) : 
 	va_end (args);
 }
 
-CStringException::CStringException(CBaseException& inner,int line,char *fileName,const char *fmt,...) : CBaseException(inner,line,fileName)  {
+CStringException::CStringException(const CBaseException& inner,int line,char *fileName,const char *fmt,...) : CBaseException(inner,line,fileName)  {
 	type=UTILEX_STRING;
 	va_list args;
 	va_start (args, fmt);
@@ -137,10 +136,10 @@ void CStringException::DumpError(String &dump) {
 	dump=description;
 }
 
-CBaseException *CStringException::Clone() {
-	CStringException* cb=new CStringException();
+std::unique_ptr<CBaseException> CStringException::Clone() const {
+	auto cb=std::unique_ptr<CStringException>(new CStringException());
 	*cb=*this;
-	return cb;
+	return std::unique_ptr<CBaseException>(cb.release());
 }
 
 
@@ -171,30 +170,30 @@ CWinException::CWinException (int line,char *fileName,DWORD _errorCode) : CStrin
 	Init(_errorCode);
 }
 
-CWinException::CWinException (CBaseException& inner) : CStringException(inner) {
+CWinException::CWinException (const CBaseException& inner) : CStringException(inner) {
 	type=UTILEX_WIN;
 	Init(GetLastError());
 }
 
-CWinException::CWinException (CBaseException& inner,int line,char *fileName) : CStringException(inner,line,fileName) {
+CWinException::CWinException (const CBaseException& inner,int line,char *fileName) : CStringException(inner,line,fileName) {
 	type=UTILEX_WIN;
 	Init(GetLastError());
 }
 
-CWinException::CWinException (CBaseException& inner,DWORD _errorCode) : CStringException(inner) {
+CWinException::CWinException (const CBaseException& inner,DWORD _errorCode) : CStringException(inner) {
 	type=UTILEX_WIN;
 	Init(_errorCode);
 }
 
-CWinException::CWinException (CBaseException& inner,int line,char *fileName,DWORD _errorCode) : CStringException(inner,line,fileName) {
+CWinException::CWinException (const CBaseException& inner,int line,char *fileName,DWORD _errorCode) : CStringException(inner,line,fileName) {
 	type=UTILEX_WIN;
 	Init(_errorCode);
 }
 
-CBaseException *CWinException::Clone() {
-	CWinException* cb=new CWinException();
+std::unique_ptr<CBaseException> CWinException::Clone() const {
+	auto cb=std::unique_ptr<CWinException>(new CWinException());
 	*cb=*this;
-	return cb;
+	return std::unique_ptr<CBaseException>(cb.release());
 }
 
 void CSCardException::Init(WORD error) {
@@ -220,20 +219,20 @@ CSCardException::CSCardException (int line,char *fileName,WORD _errorCode) : CSt
 	Init(_errorCode);
 }
 
-CSCardException::CSCardException (CBaseException& inner,WORD _errorCode) : CStringException(inner) {
+CSCardException::CSCardException (const CBaseException& inner,WORD _errorCode) : CStringException(inner) {
 	type=UTILEX_SCARD;
 	Init(_errorCode);
 }
 
-CSCardException::CSCardException (CBaseException& inner,int line,char *fileName,WORD _errorCode) : CStringException(inner,line,fileName) {
+CSCardException::CSCardException (const CBaseException& inner,int line,char *fileName,WORD _errorCode) : CStringException(inner,line,fileName) {
 	type=UTILEX_SCARD;
 	Init(_errorCode);
 }
 
-CBaseException *CSCardException::Clone() {
-	CSCardException* cb=new CSCardException();
+std::unique_ptr<CBaseException> CSCardException::Clone() const {
+	auto cb=std::unique_ptr<CSCardException>(new CSCardException());
 	*cb=*this;
-	return cb;
+	return std::unique_ptr<CBaseException>(cb.release());
 }
 
 char *CStringException::ExceptionName() {
@@ -268,10 +267,10 @@ CSystemException::CSystemException (unsigned int _errorCode,LPCONTEXT context) :
 	Init(_errorCode,context);
 }
 
-CBaseException *CSystemException::Clone() {
-	CSystemException* cb=new CSystemException();
+std::unique_ptr<CBaseException> CSystemException::Clone() const {
+	auto cb=std::unique_ptr<CSystemException>(new CSystemException());
 	*cb=*this;
-	return cb;
+	return std::unique_ptr<CBaseException>(cb.release());
 }
 
 char *sep="-----------------\n";
