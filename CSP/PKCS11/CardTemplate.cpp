@@ -29,9 +29,9 @@ CCardTemplate::~CCardTemplate(void)
 		FreeLibrary(hLibrary);
 }
 
-RESULT CCardTemplate::AddTemplate(CCardTemplate *pTemplate) {
+RESULT CCardTemplate::AddTemplate(std::shared_ptr<CCardTemplate> pTemplate) {
 	init_func
-	g_mCardTemplates.push_back(pTemplate);
+	g_mCardTemplates.emplace_back(std::move(pTemplate));
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -39,9 +39,6 @@ RESULT CCardTemplate::AddTemplate(CCardTemplate *pTemplate) {
 
 RESULT CCardTemplate::DeleteTemplateList() {
 	init_func
-	for (DWORD i=0;i<g_mCardTemplates.size();i++)
-		delete(g_mCardTemplates[i]);
-	
 	g_mCardTemplates.clear();
 	_return(OK)
 	exit_func
@@ -52,7 +49,7 @@ RESULT CCardTemplate::InitTemplateList()
 {
 	init_func
 
-		Allocator<CCardTemplate> pTemplate;
+		auto pTemplate = std::unique_ptr<CCardTemplate>(new CCardTemplate());
 	pTemplate->szName = "CIE";// "Carta d'Identità Elettronica";
 	pTemplate->szManifacturer = "";
 	pTemplate->FunctionList.templateInitLibrary = CIEtemplateInitLibrary;
@@ -81,7 +78,7 @@ RESULT CCardTemplate::InitTemplateList()
 	pTemplate->FunctionList.templateGenerateKey = CIEtemplateGenerateKey;
 	pTemplate->FunctionList.templateGenerateKeyPair = CIEtemplateGenerateKeyPair;
 
-	if (AddTemplate(pTemplate.detach())) {
+	if (AddTemplate(std::move(pTemplate))) {
 		throw CStringException(ERR_CANT_ADD_SLOT);
 	}
 
@@ -90,7 +87,7 @@ RESULT CCardTemplate::InitTemplateList()
 		_return(FAIL)
 }
 
-RESULT CCardTemplate::GetTemplate(CSlot &pSlot,CCardTemplate *&pTemplate)
+RESULT CCardTemplate::GetTemplate(CSlot &pSlot,std::shared_ptr<CCardTemplate>&pTemplate)
 {
 	init_func
 	for (DWORD i=0;i<g_mCardTemplates.size();i++) {
@@ -103,7 +100,7 @@ RESULT CCardTemplate::GetTemplate(CSlot &pSlot,CCardTemplate *&pTemplate)
 			_return(OK)
 		}
 	}
-	pTemplate=NULL;
+	pTemplate=nullptr;
 	_return(OK)
 	exit_func
 	_return(FAIL)

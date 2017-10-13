@@ -48,12 +48,6 @@ bool CASNTag::isSequence()
 	return forcedSequence || ((tag.size()>=1) && (tag[0] & 0x20) == 0x20);
 }
 
-void CASNTag::Free() {
-	for(std::size_t i=0;i<tags.size();i++) {
-		delete tags[i];
-	}
-	tags.clear();
-}
 
 DWORD CASNTag::ContentLen() {
 	if (!isSequence())
@@ -76,7 +70,7 @@ DWORD CASNTag::tagInt() {
 
 DWORD CASNTag::Reparse() {
 	CASNParser parser;
-	//se è una bit string salto il numero di bit non usati
+	//se Ã¨ una bit string salto il numero di bit non usati
 	//attenzione in encode! non memorizzo il numero di bit non usati, quindi non posso
 	//ricostruirl'array originale! quindi lancio un'eccezione
 	if (tag.size()==1 && tag[0]==3)
@@ -85,8 +79,8 @@ DWORD CASNTag::Reparse() {
 		parser.Parse(content);
 	if (parser.tags.size() > 0) {
 		forcedSequence = true;
-		for (std::size_t i = 0; i < parser.tags.size(); i++)
-			tags.push_back(parser.tags[i]);
+		for (int i = 0; i < parser.tags.size(); i++)
+			tags.emplace_back(std::move(parser.tags[i]));
 		parser.tags.clear();
 		content.clear();
 	}
@@ -149,27 +143,9 @@ CASNTag::CASNTag(void)
 	forcedSequence=false;
 }
 
-CASNTag::~CASNTag(void)
-{
-	Free();
-}
-
 CASNParser::CASNParser(void)
 {
 }
-
-CASNParser::~CASNParser(void)
-{
-	Free();
-}
-
-void CASNParser::Free() {
-	for(std::size_t i=0;i<tags.size();i++) {
-		delete tags[i];
-	}
-	tags.clear();
-}
-
 
 DWORD CASNParser::CalcLen() {
 	DWORD len=0;
@@ -197,7 +173,7 @@ RESULT CASNParser::Encode(ByteDynArray &data) {
 
 RESULT CASNParser::Parse(ByteArray &data) {
 	init_func
-	Free();
+	tags.clear();
 	RESULT res=Parse(data,tags,0);
 	_return(res)
 	exit_func
@@ -227,7 +203,7 @@ RESULT CASNParser::Parse(ByteArray &data, CASNTagArray &tags, int startseq)
                 curv = cur[0];
 				tagv.push_back(curv);
                 if ((curv & 0x80) != 0x80)
-                    // è l'ultimo byte del tag
+                    // Ã¨ l'ultimo byte del tag
                     break;
             }
         }
@@ -255,20 +231,20 @@ RESULT CASNParser::Parse(ByteArray &data, CASNTagArray &tags, int startseq)
 		if (l+(len+llen+1)>data.size()) 
 			throw CStringException("lunghezza eccessiva nell'ASN1");
 
-		CASNTag *tag=new CASNTag();
+		auto tag=std::unique_ptr<CASNTag>(new CASNTag());
 		tag->startPos = startseq + l;
 		tag->tag=tagv;
 		if (tag->isSequence())  {
 			ER_CALL(Parse(ByteArray(&cur[llen + 1], len), tag->tags, startseq + l + llen + 1), "Errore nel parse del sub-tag");
 		}
 		else {
-			// è un valore singolo
+			// Ã¨ un valore singolo
 			tag->content.alloc_copy(&cur[llen+1],len);
 		}
-		tags.push_back(tag);
 		l+=len+llen+1;
 		cur+=len+llen+1;
 		tag->endPos = tag->startPos + len + llen + 1;
+		tags.emplace_back(std::move(tag));
 	}
 	_return(OK)
 	exit_func

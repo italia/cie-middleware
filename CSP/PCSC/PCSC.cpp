@@ -1,10 +1,10 @@
 #include "PCSC.h"
 #include "../util/UtilException.h"
+#include <thread>
 
 struct transData {
 	SCARDCONTEXT context;
 	bool started;
-	HANDLE thread;
 };
 bool safeTransaction::isLocked() {
 	return locked;
@@ -14,25 +14,20 @@ safeTransaction::safeTransaction(safeConnection &conn, DWORD dwDisposition) {
 	this->dwDisposition = dwDisposition;
 	locked = false;
 
-	struct transData *td = new struct transData;
+	auto td = std::make_shared<struct transData>();
 	td->context = conn.hContext;
 	td->started = false;
-	DWORD id = 0;
-	td->thread = CreateThread(nullptr, 0, [](LPVOID lpThreadParameter) -> DWORD {
-		struct transData *td = (struct transData*)lpThreadParameter;
+	auto thread = std::thread([td]() {
 		for (int i = 0; i < 10; i++) {
 			Sleep(500);
 			if (td->started) {
-				CloseHandle(td->thread);
-				delete td;
 				return 0;
 			}
 		}
 		SCardCancel(td->context);
-		CloseHandle(td->thread);
-		delete td;
 		return 0;
-	}, td, 0, &id);
+	});
+	thread.detach();
 
 
 	if (SCardBeginTransaction(hCard) != SCARD_S_SUCCESS) {

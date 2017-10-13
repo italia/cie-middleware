@@ -22,26 +22,6 @@ public:
 	}
 } _initRand;
 
-StringCopier::StringCopier(String *str, BYTE **copyBuf, int *copyBufLen) {
-	this->str=str;
-	this->copyBuf=copyBuf;
-	this->copyBufLen=copyBufLen;
-}
-StringCopier::~StringCopier() {
-	if (copyBuf!=nullptr) {
-		if (str->isNull()) {
-			(*copyBuf)=NULL;
-			if (copyBufLen!=nullptr)
-				(*copyBufLen)=0;
-			return;
-		}
-		(*copyBuf)=new BYTE[str->size()];
-		strcpy_s((char*)(*copyBuf), str->size(),str->lock());
-		if (copyBufLen!=nullptr)
-			(*copyBufLen)=str->size();
-	}
-}
-
 BYTE hex2byte(char h) {
 	if (h>='0' && h<='9') return(h-'0');
 	if (h>='A' && h<='F') return(h+10-'A');

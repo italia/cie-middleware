@@ -1,5 +1,6 @@
 #pragma once
 #include <winscard.h>
+#include <functional>
 
 class CToken;
 class APDU
@@ -16,7 +17,7 @@ public:
 	RESULT GenerateRandom(ByteArray &baRandom);
 
 	RESULT DecodeSM(ByteArray &SMresp,ByteDynArray &resp);
-	RESULT EncodeSM(CToken &Token,ByteDynArray &SMDataBuffer,APDU *&apdu);
+	RESULT EncodeSM(CToken &Token,ByteDynArray &SMDataBuffer,std::function<void(APDU&)> callback);
 	RESULT CypherTextObject(ByteDynArray &CypherTextObject);
 	RESULT HeaderBlock(ByteArray &Challenge,ByteDynArray &HeaderBlock);
 	RESULT NetLEMACObject(ByteDynArray &NetLEMACObject);

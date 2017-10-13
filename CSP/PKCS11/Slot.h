@@ -9,14 +9,15 @@
 #include "cardcontext.h"
 #include <map>
 #include <vector>
+#include <memory>
 
 namespace p11 {
 
-typedef std::map<CK_SLOT_ID,class CSlot*> SlotMap;
-typedef std::map<CK_OBJECT_HANDLE,class CP11Object*> HandleObjMap;
-typedef std::map<class CP11Object*,CK_OBJECT_HANDLE> ObjHandleMap;
+typedef std::map<CK_SLOT_ID,std::shared_ptr<class CSlot>> SlotMap;
+typedef std::map<CK_OBJECT_HANDLE,std::shared_ptr<class CP11Object>> HandleObjMap;
+typedef std::map<std::shared_ptr<class CP11Object>,CK_OBJECT_HANDLE> ObjHandleMap;
 
-typedef std::vector<class CP11Object*> P11ObjectVector;
+typedef std::vector<std::shared_ptr<class CP11Object>> P11ObjectVector;
 
 // lo slot contiene la mappa degli oggetti della carta che ci
 // sta dentro; quindi ogni sessione su quella carta condivide
@@ -57,7 +58,7 @@ public:
 					// che attualmente è nel lettore?
 	
 	ByteDynArray baSerial;
-	CCardTemplate *pSerialTemplate;
+	std::shared_ptr<CCardTemplate> pSerialTemplate;
 
 	ByteDynArray baATR;
 	RESULT GetATR(ByteArray &ATR);
@@ -70,12 +71,12 @@ public:
 								// ha già un ID o meno
 
 	RESULT GetNewObjectID(CK_OBJECT_HANDLE &hObject);
-	RESULT GetIDFromObject(CP11Object *pObject,CK_OBJECT_HANDLE &hObject);
+	RESULT GetIDFromObject(const std::shared_ptr<CP11Object>& pObject,CK_OBJECT_HANDLE &hObject);
 								// restituisce l'handle di sessione dell'oggetto corrispondente
 								// pObject, e lo crea se non esiste
-	RESULT DelObjectHandle(CP11Object *pObject);
+	RESULT DelObjectHandle(const std::shared_ptr<CP11Object>& pObject);
 								// cancella l'handle dell'oggetto pObject
-	RESULT GetObjectFromID(CK_OBJECT_HANDLE hObjectHandle,CP11Object *&pObject);
+	RESULT GetObjectFromID(CK_OBJECT_HANDLE hObjectHandle,std::shared_ptr<CP11Object>&pObject);
 
 
 	CK_USER_TYPE User; 
@@ -85,23 +86,23 @@ public:
 	static RESULT GetNewSlotID(CK_SLOT_ID *pSlotID);
 	static RESULT InitSlotList();
 	static RESULT DeleteSlotList();
-	static RESULT GetSlotFromID(CK_SLOT_ID hSlotId,CSlot **ppSlot);
-	static RESULT GetSlotFromReaderName(const char *name,CSlot **ppSlot);
-	static RESULT AddSlot(CSlot* pSlot,CK_SLOT_ID *pSlotID);
+	static RESULT GetSlotFromID(CK_SLOT_ID hSlotId,std::shared_ptr<CSlot>&ppSlot);
+	static RESULT GetSlotFromReaderName(const char *name,std::shared_ptr<CSlot>&ppSlot);
+	static RESULT AddSlot(std::shared_ptr<CSlot> pSlot,CK_SLOT_ID *pSlotID);
 	static RESULT DeleteSlot(CK_SLOT_ID hSlotId);
 	RESULT Init();
 	void Final();
 
-	RESULT AddP11Object(CP11Object*object);
-	RESULT FindP11Object(CK_OBJECT_CLASS objClass,CK_ATTRIBUTE_TYPE attr,BYTE *val,int valLen,CP11Object *&ppObject);
-	RESULT DelP11Object(CP11Object *pObject);
+	RESULT AddP11Object(std::shared_ptr<CP11Object> object);
+	RESULT FindP11Object(CK_OBJECT_CLASS objClass,CK_ATTRIBUTE_TYPE attr,BYTE *val,int valLen,std::shared_ptr<CP11Object>&ppObject);
+	RESULT DelP11Object(const std::shared_ptr<CP11Object>& pObject);
 	RESULT ClearP11Objects();
 	RESULT IsTokenPresent(bool *bPresent);
 
 	P11ObjectVector P11Objects; // vettore degli oggetti
 
-	CCardTemplate *pTemplate;	// template della carta
-								// (aggoirnato se bUpdated=true
+	std::shared_ptr<CCardTemplate> pTemplate;	// template della carta
+												// (aggoirnato se bUpdated=true
 
 	void *pTemplateData;
 								// i dati specifici del template della carta,

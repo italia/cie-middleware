@@ -7,6 +7,8 @@
 #include "../util/util.h"
 #include "../util/syncroevent.h"
 
+#include <vector>
+
 static char *szCompiledFile=__FILE__;
 //extern CSyncroMutex p11EventMutex;
 extern CSyncroMutex p11Mutex;
@@ -64,7 +66,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 		CSlot::ThreadContext=&Context;
 		DWORD dwSlotNum = (DWORD)pSlotMap->size();
 		DynArray<SCARD_READERSTATE> state(dwSlotNum);
-		DynArray<CSlot*> slot(dwSlotNum);
+		std::vector<std::shared_ptr<CSlot>> slot(dwSlotNum);
 		ZeroMemory(state.lock(),sizeof(SCARD_READERSTATE)*dwSlotNum);
 		DWORD i=0;
 		DWORD ris;
@@ -159,7 +161,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 	return 0;
 }
 
-RESULT CSlot::AddSlot(CSlot* pSlot,CK_SLOT_ID *pSlotID)
+RESULT CSlot::AddSlot(std::shared_ptr<CSlot> pSlot,CK_SLOT_ID *pSlotID)
 {
 	init_func
 	P11ER_CALL(GetNewSlotID(&pSlot->hSlot),
@@ -167,7 +169,7 @@ RESULT CSlot::AddSlot(CSlot* pSlot,CK_SLOT_ID *pSlotID)
 
 	*pSlotID=pSlot->hSlot;
 
-	g_mSlots.insert(std::pair<CK_SLOT_ID,CSlot*>(pSlot->hSlot,pSlot));
+	g_mSlots.insert(std::make_pair(pSlot->hSlot,std::move(pSlot)));
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -176,48 +178,47 @@ RESULT CSlot::AddSlot(CSlot* pSlot,CK_SLOT_ID *pSlotID)
 RESULT CSlot::DeleteSlot(CK_SLOT_ID hSlotId)
 {
 	init_func
-	CSlot *pSlot=NULL;
-	P11ER_CALL(GetSlotFromID(hSlotId, &pSlot),
+	std::shared_ptr<CSlot> pSlot;
+	P11ER_CALL(GetSlotFromID(hSlotId, pSlot),
 		ERR_CANT_GET_SLOT);
 
-	if (pSlot == NULL) _return(CKR_SLOT_ID_INVALID);
+	if (!pSlot) _return(CKR_SLOT_ID_INVALID);
 
 	pSlot->CloseAllSessions();
 
 	g_mSlots.erase(hSlotId);
-	delete(pSlot);
+	pSlot->Final();
 	_return(OK)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CSlot::GetSlotFromReaderName(const char *name,CSlot **ppSlot)
+RESULT CSlot::GetSlotFromReaderName(const char *name,std::shared_ptr<CSlot>&ppSlot)
 {
 	init_func
 	for (SlotMap::iterator it=g_mSlots.begin();it!=g_mSlots.end();it++) {
 		if (strcmp(it->second->szName.stringlock(),name)==0) {
-			*ppSlot=it->second;
+			ppSlot=it->second;
 			_return(OK)
 		}
 	}
-	*ppSlot=NULL;
+	ppSlot=nullptr;
 
 	_return(OK)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CSlot::GetSlotFromID(CK_SLOT_ID hSlotId,CSlot**ppSlot) 
+RESULT CSlot::GetSlotFromID(CK_SLOT_ID hSlotId,std::shared_ptr<CSlot>&ppSlot)
 {
 	init_func
-	CSlot* pSlot=NULL;
 	SlotMap::const_iterator pPair;
 	pPair=g_mSlots.find(hSlotId);
 	if (pPair==g_mSlots.end()) {
-		*ppSlot=NULL;
+		ppSlot=nullptr;
 		_return(OK)
 	}
-	*ppSlot=pPair->second;
+	ppSlot=pPair->second;
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -282,14 +283,13 @@ RESULT CSlot::InitSlotList()
 
 		// vediamo questo slot c'era già prima
 		Log.write("reader:%s",szReaderName);
-		CSlot *pSlot=NULL;
-		GetSlotFromReaderName(szReaderName, &pSlot);
+		std::shared_ptr<CSlot> pSlot;
+		GetSlotFromReaderName(szReaderName, pSlot);
 		if (!pSlot) {
-			Allocator<CSlot,const char *> pSlot(szReaderName);
+			auto pSlot = std::make_shared<CSlot>(szReaderName);
 			CK_SLOT_ID hSlotID;
 			AddSlot(pSlot, &hSlotID);
 			bMapChanged=true;
-			pSlot.detach();
 		}
 		szReaderName = szReaderName + strnlen(szReaderName, readersLen) + 1;
 	}
@@ -496,9 +496,9 @@ CK_RV CSlot::CloseAllSessions()
 
 	SessionMap::iterator it=CSession::g_mSessions.begin();
 	while (it!=CSession::g_mSessions.end()) {
-		if (it->second->pSlot==this) 
+		if (it->second->pSlot.get()==this) 
 		{
-			CSession *pSession=it->second;
+			CSession *pSession=it->second.get();
 			it++;
 			CSession::DeleteSession(pSession->hSessionHandle);
 		}
@@ -542,20 +542,15 @@ void CSlot::Final()
 		baATR.clear();
 		baSerial.clear();
 
-		for (DWORD i=0;i<P11Objects.size();i++)
-			delete(P11Objects[i]);
-
 		P11Objects.clear();
 		
 		// cancello tutte le sessioni
 		SessionMap::iterator it=CSession::g_mSessions.begin();
 		while (it!=CSession::g_mSessions.end()) {
-			if (it->second->pSlot==this) 
+			if (it->second->pSlot.get()==this) 
 			{
-				CSession *pSession=it->second;
 				it=CSession::g_mSessions.erase(it);
 				dwSessionCount--;
-				delete(pSession);
 			}
 			else it++;
 		}
@@ -568,13 +563,13 @@ void CSlot::Final()
 	}
 }
 
-RESULT CSlot::FindP11Object(CK_OBJECT_CLASS objClass,CK_ATTRIBUTE_TYPE attr,BYTE *val,int valLen,CP11Object *&pObject)
+RESULT CSlot::FindP11Object(CK_OBJECT_CLASS objClass,CK_ATTRIBUTE_TYPE attr,BYTE *val,int valLen,std::shared_ptr<CP11Object>&pObject)
 {
 	init_func
-	pObject=NULL;
+	pObject=nullptr;
 	for(DWORD i=0;i<P11Objects.size();i++)
 	{
-		CP11Object *obj=P11Objects[i];
+		auto obj=P11Objects[i];
 		if (obj->ObjClass==objClass) {
 			ByteArray *attrVal=NULL;
 			obj->getAttribute(attr, attrVal);
@@ -591,10 +586,10 @@ RESULT CSlot::FindP11Object(CK_OBJECT_CLASS objClass,CK_ATTRIBUTE_TYPE attr,BYTE
 	_return(FAIL)
 }
 
-RESULT CSlot::AddP11Object(CP11Object* p11obj)
+RESULT CSlot::AddP11Object(std::shared_ptr<CP11Object> p11obj)
 {
 	init_func
-	P11Objects.push_back(p11obj);
+	P11Objects.emplace_back(std::move(p11obj));
 	p11obj->pSlot=this;
 	_return(OK)
 	exit_func
@@ -604,10 +599,6 @@ RESULT CSlot::AddP11Object(CP11Object* p11obj)
 RESULT CSlot::ClearP11Objects()
 {
 	init_func
-	for (P11ObjectVector::iterator it = P11Objects.begin(); it != P11Objects.end(); it++) {
-		delete (*it);
-	}
-
 	P11Objects.clear();
 	ObjP11Map.clear();
 	HandleP11Map.clear();
@@ -616,7 +607,7 @@ RESULT CSlot::ClearP11Objects()
 	_return(NULL)
 }
 
-RESULT CSlot::DelP11Object(CP11Object*object)
+RESULT CSlot::DelP11Object(const std::shared_ptr<CP11Object>& object)
 {
 	init_func
 	bool bFound=false;
@@ -637,8 +628,6 @@ RESULT CSlot::DelP11Object(CP11Object*object)
 			HandleP11Map.erase(itHandle);
 	}
 
-	delete object;
-
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -658,7 +647,7 @@ RESULT CSlot::RWSessionCount(DWORD &dwRWSessCount)
 	init_func
 	dwRWSessCount=0;
 	for(SessionMap::iterator it=CSession::g_mSessions.begin();it!=CSession::g_mSessions.end();it++) {
-		if (it->second->pSlot==this && (it->second->flags & CKF_RW_SESSION)!=0)
+		if (it->second->pSlot.get()==this && (it->second->flags & CKF_RW_SESSION)!=0)
 			dwRWSessCount++;
 	}
 	_return(OK)
@@ -666,7 +655,7 @@ RESULT CSlot::RWSessionCount(DWORD &dwRWSessCount)
 	_return(FAIL)
 }
 
-RESULT CSlot::GetIDFromObject(CP11Object *pObject,CK_OBJECT_HANDLE &hObject)
+RESULT CSlot::GetIDFromObject(const std::shared_ptr<CP11Object>&pObject,CK_OBJECT_HANDLE &hObject)
 {
 	init_func
 
@@ -707,7 +696,7 @@ RESULT CSlot::GetNewObjectID(CK_OBJECT_HANDLE &hObject) {
 	_return(FAIL)
 }
 
-RESULT CSlot::DelObjectHandle(CP11Object *pObject)
+RESULT CSlot::DelObjectHandle(const std::shared_ptr<CP11Object>& pObject)
 {
 	init_func
 	ObjHandleMap::iterator pPair;
@@ -725,14 +714,14 @@ RESULT CSlot::DelObjectHandle(CP11Object *pObject)
 	_return(FAIL)
 }
 
-RESULT CSlot::GetObjectFromID(CK_OBJECT_HANDLE hObjectHandle,CP11Object *&pObject)
+RESULT CSlot::GetObjectFromID(CK_OBJECT_HANDLE hObjectHandle,std::shared_ptr<CP11Object>&pObject)
 {
 	init_func
-	pObject=NULL;
+	pObject=nullptr;
 	HandleObjMap::const_iterator pPair;
 	pPair=HandleP11Map.find(hObjectHandle);
 	if (pPair==HandleP11Map.end()) {
-		pObject=NULL;
+		pObject=nullptr;
 		_return(OK)
 	}
 	pObject=pPair->second;
