@@ -19,7 +19,7 @@ public:
 	DWORD Reparse();
 	DWORD tagInt();
 
-	CASNTag &Child(int num, BYTE tag);
+	CASNTag &Child(std::size_t num, BYTE tag);
 	void Verify(ByteArray &content);
 	CASNTag &CheckTag(BYTE tag);
 

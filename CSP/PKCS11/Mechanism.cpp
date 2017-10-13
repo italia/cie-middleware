@@ -74,7 +74,7 @@ CEncrypt::~CEncrypt() {}
 
 CDecrypt::CDecrypt() {}
 CDecrypt::CDecrypt(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {
-	cacheData.pbtData=(BYTE*)0xffffffff;
+	cacheData.pbtData=(BYTE*)~(ULONG_PTR)0;
 }
 CDecrypt::~CDecrypt() {}
 
