@@ -111,7 +111,7 @@ DWORD WINAPI _sbloccoPIN(
 									"prima di bloccare il PUK");
 								msg.DoModal();
 								if (lpThreadParameter != nullptr)
-									PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 1, 0);
+									PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 1, 0);
 
 								break;
 							}
@@ -121,7 +121,7 @@ DWORD WINAPI _sbloccoPIN(
 									"Il PUK è bloccato. La CIE non può più essere sbloccata");
 								msg.DoModal();
 								if (lpThreadParameter != nullptr)
-									PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
+									PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 0, 0);
 								break;
 							}
 							else if (ris != 0)
@@ -131,7 +131,7 @@ DWORD WINAPI _sbloccoPIN(
 								"Il PIN è stato sbloccato correttamente");
 							msg.DoModal();
 							if (lpThreadParameter != nullptr)
-								PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
+								PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 0, 0);
 
 						}
 						catch (CBaseException &ex) {
@@ -141,17 +141,17 @@ DWORD WINAPI _sbloccoPIN(
 								"Si è verificato un errore nella verifica del PUK");
 							msg.DoModal();
 							if (lpThreadParameter != nullptr)
-								PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
+								PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 0, 0);
 							break;
 						}
 					}
 					else
 						if (lpThreadParameter != nullptr)
-							PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 1, 0);
+							PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 1, 0);
 				}
 				else
 					if (lpThreadParameter != nullptr)
-						PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 1, 0);
+						PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 1, 0);
 				break;
 			}
 		}
@@ -163,7 +163,7 @@ DWORD WINAPI _sbloccoPIN(
 				"nei lettori di smart card");
 			msg.DoModal();
 			if (lpThreadParameter != nullptr)
-				PostThreadMessage((DWORD)lpThreadParameter, WM_COMMAND, 0, 0);
+				PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 0, 0);
 		}
 		SCardFreeMemory(hSC, readers);
 	}
@@ -181,7 +181,7 @@ DWORD WINAPI _sbloccoPIN(
 void TrayNotification(CSystemTray* tray, WPARAM uID, LPARAM lEvent) {
 	if (lEvent == WM_LBUTTONUP || lEvent== 0x405) {
 		DWORD id;
-		HANDLE thread = CreateThread(nullptr, 0, _sbloccoPIN, (LPVOID)GetCurrentThreadId(), 0, &id);
+		HANDLE thread = CreateThread(nullptr, 0, _sbloccoPIN, UlongToPtr(GetCurrentThreadId()), 0, &id);
 		tray->HideIcon();
 	}
 }
