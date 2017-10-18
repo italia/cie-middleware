@@ -77,8 +77,7 @@ safeConnection::operator SCARDHANDLE() {
 readerMonitor::~readerMonitor() {
 	stopMonitor = true;
 	SCardCancel(hContext);
-	WaitForSingleObject(hThread, INFINITE);
-	CloseHandle(hThread);
+	Thread.join();
 	SCardReleaseContext(hContext);
 }
 
@@ -90,10 +89,10 @@ readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, vo
 	stopMonitor = false;
 	readerEvent = eventHandler;
 	DWORD tid = 0;
-	hThread = CreateThread(nullptr, 0, [](LPVOID lpThreadParameter) -> DWORD {
-		readerMonitor *rm = (readerMonitor *)lpThreadParameter;
+	
+	Thread = std::thread([](readerMonitor *rm) -> DWORD {
 		std::vector<String> readerList;
-		DynArray<SCARD_READERSTATE> states;
+		std::vector<SCARD_READERSTATE> states;
 
 		auto loadReaderList = [&]() -> void {
 			char *readers = nullptr;
@@ -109,22 +108,20 @@ readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, vo
 			SCardFreeMemory(rm->hContext, readers);
 			states.resize((DWORD)readerList.size() + 1);
 			for (DWORD i = 0; i < readerList.size(); i++) {
-				ZeroMem(states[i]);
 				states[i].szReader = readerList[i].lock();
 			}
 			auto &PnP = states[(DWORD)readerList.size()];
-			ZeroMem(PnP);
 			PnP.szReader = "\\\\?PnP?\\Notification";
 			PnP.pvUserData = (void*)PnP.szReader;		
 
-			SCardGetStatusChange(rm->hContext, 0, states.lock(), states.size());
+			SCardGetStatusChange(rm->hContext, 0, states.data(), states.size());
 			for (DWORD i = 0; i < states.size(); i++)
 				states[i].dwCurrentState = states[i].dwEventState;
 		};
 		loadReaderList();
 
 		while (!rm->stopMonitor) {
-			if (SCardGetStatusChange(rm->hContext, INFINITE, states.lock(), states.size()) == SCARD_E_CANCELLED)
+			if (SCardGetStatusChange(rm->hContext, INFINITE, states.data(), states.size()) == SCARD_E_CANCELLED)
 				break;
 			for (DWORD i = 0; i < states.size(); i++) {
 				auto &state = states[i];
@@ -145,5 +142,5 @@ readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, vo
 			}
 		}
 		return 0;
-	}, this, 0, &tid);
+	}, this);
 }

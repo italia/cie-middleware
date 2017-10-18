@@ -64,11 +64,10 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 	while (true) {
 		CCardContext Context;
 		CSlot::ThreadContext=&Context;
-		DWORD dwSlotNum = (DWORD)pSlotMap->size();
-		DynArray<SCARD_READERSTATE> state(dwSlotNum);
+		size_t dwSlotNum = pSlotMap->size();
+		std::vector<SCARD_READERSTATE> state(dwSlotNum);
 		std::vector<std::shared_ptr<CSlot>> slot(dwSlotNum);
-		ZeroMemory(state.lock(),sizeof(SCARD_READERSTATE)*dwSlotNum);
-		DWORD i=0;
+		size_t i = 0;
 		DWORD ris;
 		{
 			CSyncroLocker lock(p11Mutex);
@@ -96,7 +95,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 		CSlot::bMonitorUpdate=false;
 		while (true) {
 			Context.validate();
-			ris=SCardGetStatusChange(Context,1000,state.lock(),dwSlotNum);
+			ris=SCardGetStatusChange(Context,1000,state.data(),(DWORD)dwSlotNum);
 			if (ris!=S_OK) {
 				if (CSlot::bMonitorUpdate || ris==SCARD_E_SYSTEM_CANCELLED || ris==SCARD_E_SERVICE_STOPPED || ris==SCARD_E_INVALID_HANDLE || ris==ERROR_INVALID_HANDLE) {
 					Log.write("Monitor Update");
@@ -117,7 +116,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 					return 1;
 				}
 			}
-			for (DWORD i=0;i<dwSlotNum;i++) {
+			for (size_t i = 0; i<dwSlotNum; i++) {
 				if ((state[i].dwCurrentState & SCARD_STATE_PRESENT) &&
 					((state[i].dwEventState & SCARD_STATE_EMPTY) || 
 					(state[i].dwEventState & SCARD_STATE_UNAVAILABLE))) {
@@ -128,7 +127,6 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 					// mentre sto firmado mica è colpa mia!
 
 					CSyncroLocker lock(p11Mutex);
-					//CSyncroLocker lock2(p11EventMutex);
 
 					slot[i]->lastEvent=SE_Removed;
 					slot[i]->Final();
@@ -140,7 +138,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 					(state[i].dwEventState & SCARD_STATE_PRESENT)) {
 					// una carta è stata inserita!!
 					CSyncroLocker lock(p11Mutex);
-					//CSyncroLocker lock(p11EventMutex);
+
 					slot[i]->lastEvent=SE_Inserted;
 					ByteArray ba;
 					slot[i]->GetATR(ba);
