@@ -434,27 +434,23 @@ private:
 		return countHexData(data);
 	}
 
-	template<typename Arg0, typename Arg1, typename ... Args>
-	size_t internalSet(ByteArray* ba, Arg0 &&arg0, Arg1 &&arg1, Args &&... args) {
-		size_t totSize = internalSet(ba, std::forward<Arg0>(arg0));
-		ByteArray mid;
-		if (ba != NULL) {
-			mid = ba->mid(totSize);
-			ba = &mid;
-		}
-		totSize += internalSet(ba, std::forward<Arg1>(arg1), std::forward<Args>(args)...);
-		return totSize;
+	size_t internalSet(ByteArray* ba) {
+		return 0;
 	}
 
 public:
-	template<typename Arg0, typename Arg1, typename ... Args>
-	ByteDynArray& set(Arg0 &&arg0, Arg1 &&arg1, Args &&... args){
-		size_t totSize = internalSet(NULL, std::forward<Arg0>(arg0), std::forward<Arg1>(arg1), std::forward<Args>(args)...);
+	template<typename Arg0, typename ... Args>
+	ByteDynArray& set(Arg0 &&arg0, Args &&... args) {
+		size_t totSize = internalSet(NULL, arg0) + internalSet(NULL, args...);
 		resize(totSize);
-		internalSet(this, std::forward<Arg0>(arg0), std::forward<Arg1>(arg1), std::forward<Args>(args)...);
+
+		ByteArray buffer(*this);
+		buffer = buffer.mid(internalSet(&buffer, arg0));
+		buffer = buffer.mid(internalSet(&buffer, args...));
+
 		return *this;
 	}
-
+		
 	ByteDynArray &setASN1Tag(int tag,ByteArray &content) {
 		int tl=ASN1TLength(tag);
 		int ll=ASN1LLength(content.size());
