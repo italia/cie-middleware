@@ -71,7 +71,7 @@ void IniSettingsByteArray::GetValue(char* fileName,ByteDynArray &value) {
 	if (buf.size()==1)
 		value = defaultVal;
 	else
-		value.set(1,buf.lock());
+		value.init(buf.lock());
 }
 
 IniSettingsByteArray::~IniSettingsByteArray() {}
