@@ -332,18 +332,18 @@ void IAS::DAPP() {
 	BYTE snIFD[] = { 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
 	BYTE CPI=0x8A;
 	BYTE baseCHR[] = { 0x00, 0x00, 0x00, 0x00 };
-	CHR.set(2, &VarToByteArray(baseCHR), &VarToByteArray(snIFD));
-	CHA.set(2,&CA_AID,01);
+	CHR.set(&VarToByteArray(baseCHR), &VarToByteArray(snIFD));
+	CHA.set(&CA_AID,01);
 	BYTE baseOID[] = { 0x2A, 0x81, 0x22, 0xF4, 0x2A, 0x02, 0x04, 0x01 };
-	OID.set(2, &VarToByteArray(baseOID), shaOID);
+	OID.set(&VarToByteArray(baseOID), shaOID);
 
 	ByteDynArray endEntityCert;
-	endEntityCert.set(0, CPI, &CA_CAR, &CHR, &CHA, &OID, &module, &pubexp, &term___set);
+	endEntityCert.set(CPI, &CA_CAR, &CHR, &CHA, &OID, &module, &pubexp);
 
 	ByteDynArray certSign, toSign, d1;
 	sha256.Digest(endEntityCert, d1);
 	BYTE ValBC = 0xBC;
-	toSign.set(0, 0x6A, &(endEntityCert.left(CA_module.size() - shaSize - 2)), &d1, 0xbc, &term___set);
+	toSign.set(0x6A, &(endEntityCert.left(CA_module.size() - shaSize - 2)), &d1, 0xbc);
 	CRSA caKey(CA_module, CA_privexp);
 	caKey.RSA_PURE(toSign, certSign);
 	ByteDynArray certVerif;
@@ -376,14 +376,14 @@ void IAS::DAPP() {
 	DWORD padSize = module.size() - shaSize - 2;
 	ByteDynArray PRND;
 	PRND.random(padSize);
-	toHash.set(0, &PRND, &dh_pubKey, &VarToByteArray(snIFD), &challenge, &dh_ICCpubKey, &dh_g, &dh_p, &dh_q, &term___set);
+	toHash.set(&PRND, &dh_pubKey, &VarToByteArray(snIFD), &challenge, &dh_ICCpubKey, &dh_g, &dh_p, &dh_q);
 	sha256.Digest(toHash,d1);
-	toSign.set(0, 0x6a, &PRND, &d1, 0xBC, &term___set);
+	toSign.set(0x6a, &PRND, &d1, 0xBC);
 	ByteDynArray signResp;
 	CRSA certKey(module, privexp);
 	certKey.RSA_PURE(toSign, signResp);
 	ByteDynArray chResponse;
-	chResponse.set(2, &VarToByteArray(snIFD), &signResp);
+	chResponse.set(&VarToByteArray(snIFD), &signResp);
 
 	BYTE ExtAuth[] = { 0x00, 0x82, 0x00, 0x00 };
 	CARD_R_CALL(SendAPDU_SM(VarToByteArray(ExtAuth), chResponse, resp))
@@ -407,12 +407,12 @@ void IAS::DAPP() {
 	ByteArray hashICC = intAuthResp.mid(PRND2.size() + 1, 32);
 
 	ByteDynArray toHashIFD, calcHashIFD;
-	toHashIFD.set(0, &PRND2, &dh_ICCpubKey, &SN_ICC, &rndIFD, &dh_pubKey, &dh_g, &dh_p, &dh_q, &term___set);
+	toHashIFD.set(&PRND2, &dh_ICCpubKey, &SN_ICC, &rndIFD, &dh_pubKey, &dh_g, &dh_p, &dh_q);
 	sha256.Digest(toHashIFD, calcHashIFD);
 	ER_ASSERT(calcHashIFD == hashICC, "Errore nell'autenticazione del chip")
 	ER_ASSERT(intAuthResp.right(1)[0] == 0xbc, "Errore nell'autenticazione del chip");
 
-	sessSSC.set(2, &(challenge.right(4)), &(rndIFD.right(4)), &term___set);
+	sessSSC.set(&(challenge.right(4)), &(rndIFD.right(4)));
 	exit_func
 }
 
@@ -506,7 +506,7 @@ DWORD IAS::SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &
 	sigMac.Mac(d1, smMac);
 	datafield.append(ASN1Tag(0x8e, smMac));
 
-	elabResp.set(0, &smHead, datafield.size(), &datafield, 0x00, &term___set);
+	elabResp.set(&smHead, datafield.size(), &datafield, 0x00);
 	return OK;
 	exit_func
 }
@@ -670,7 +670,7 @@ DWORD IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYT
 	ByteDynArray s, curresp;
 	DWORD sw;
 	if (data.size() < 0xE7) {
-		smApdu.set(0, &head, data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)), &term___set);
+		smApdu.set(&head, data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
 
 		ODS(String().printf("Clear APDU: %s\n", dumpHexData(smApdu, String()).lock()).lock());
 		SM(sessENC, sessMAC, smApdu, sessSSC, smApdu);
@@ -692,9 +692,9 @@ DWORD IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYT
 			else
 				head[0] = cla;
 			if (s.size()!=0)
-				smApdu.set(4, &head, (BYTE)s.size(), &s, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
+				smApdu.set(&head, (BYTE)s.size(), &s, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
 			else
-				smApdu.set(2, &head, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
+				smApdu.set(&head, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
 			ODS(String().printf("Clear APDU: %s\n", dumpHexData(smApdu, String()).lock()).lock());
 			SM(sessENC, sessMAC, smApdu, sessSSC, smApdu);
 			sw = token.Transmit(smApdu, &curresp);
@@ -726,7 +726,7 @@ DWORD IAS::SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYTE *
 			else
 				head[0] = cla;
 
-			apdu.set(4, &head, (BYTE)s.size(), &s, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+			apdu.set(&head, (BYTE)s.size(), &s, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
 
 			DWORD sw=token.Transmit(apdu, &curresp);
 			if (i == data.size()) {
@@ -738,9 +738,9 @@ DWORD IAS::SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYTE *
 	}
 	else {
 		if (data.size()!=0)
-			apdu.set(4, &head, (BYTE)data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+			apdu.set(&head, (BYTE)data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
 		else
-			apdu.set(2, &head, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+			apdu.set(&head, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
 
 		DWORD sw = token.Transmit(apdu, &curresp);
 		sw=getResp(curresp, sw, resp);
