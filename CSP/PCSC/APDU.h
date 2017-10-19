@@ -13,16 +13,6 @@ public:
 	APDU(BYTE CLA,BYTE INS,BYTE P1,BYTE P2);
 	~APDU();
 
-	RESULT setSM(ByteArray *SigCommandKey,ByteArray *EncCommandKey,ByteArray *SigResponseKey,ByteArray *EncResponseKey);
-	RESULT GenerateRandom(ByteArray &baRandom);
-
-	RESULT DecodeSM(ByteArray &SMresp,ByteDynArray &resp);
-	RESULT EncodeSM(CToken &Token,ByteDynArray &SMDataBuffer,std::function<void(APDU&)> callback);
-	RESULT CypherTextObject(ByteDynArray &CypherTextObject);
-	RESULT HeaderBlock(ByteArray &Challenge,ByteDynArray &HeaderBlock);
-	RESULT NetLEMACObject(ByteDynArray &NetLEMACObject);
-	RESULT MacObject(ByteArray &HeaderObject,ByteArray &CypherTextBlock,ByteArray &ThirdObject,ByteArray &SigKey,ByteDynArray &MacObject);
-
 	BYTE btINS;	//INS dell'APDU
 	BYTE btCLA;	//CLA dell'APDU
 	BYTE btP1;	//P1 dell'APDU
@@ -32,10 +22,4 @@ public:
 	BYTE *pbtData;	//campo dati dell'APDU
 	BYTE btLE;	//flag: LE è da includere? (caso 2 e 4)
 	bool bLE;	//LE dell'APDU
-	ByteArray *baSigCommandKey;		//chiave da usare per il SM_SIG_COMMAND
-	ByteArray *baEncCommandKey;		//chiave da usare per il SM_ENC_COMMAND
-	ByteArray *baSigResponseKey;	//chiave da usare per il SM_SIG_RESPONSE
-	ByteArray *baEncResponseKey;	//chiave da usare per il SM_ENC_RESPONSE
-	BYTE pbtRandom[8];
-	ByteArray baRandom;				//random da verificare nella decodifica dell'apdu
 };
