@@ -8,7 +8,9 @@ platform:
 
 configuration:
   - Debug
-  - Release
+
+# Disable the Release builds until we fix code signing
+#  - Release
 
 init:
   - cmd: git config --global core.autocrlf true
