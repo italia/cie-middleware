@@ -70,7 +70,7 @@ CEncrypt::CEncrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : C
 CEncrypt::~CEncrypt() {}
 
 CDecrypt::CDecrypt() {}
-CDecrypt::CDecrypt(CK_MECHANISM_TYPE type,CSession *Session) : CMechanism(type,Session) {
+CDecrypt::CDecrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,Session) {
 	cacheData.pbtData=(BYTE*)~(ULONG_PTR)0;
 }
 CDecrypt::~CDecrypt() {}
