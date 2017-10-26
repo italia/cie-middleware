@@ -1,4 +1,4 @@
-# MIDDLEWARE CSP-PKCS11 PER LA CIE 3.0
+# MIDDLEWARE CSP-PKCS11 PER LA CIE 3.0 [![Build status](https://ci.appveyor.com/api/projects/status/dpc0ditjn04ylw6y?svg=true)](https://ci.appveyor.com/project/italia/cie-middleware)
 
 ## VERSIONE BETA
 
