@@ -394,9 +394,6 @@ public:
 	}
 };
 
-extern DWORD term___set;
-extern DWORD *endSet;
-
 void readHexData(const char *data,ByteDynArray &ba);
 DWORD countHexData(const char *data);
 DWORD setHexData(const char *data,BYTE *buf);
@@ -417,93 +414,43 @@ public:
 		readHexData(data,*this);
 		return *this;
 	}
-	ByteDynArray& set(int num,...) {
-		ByteDynArray s1;
-		ByteArray s2;
-		va_list params;
-		void *bdaVf=*(void**)&s1;
-		void *baVf=*(void**)&s2;
-		if (num==0) {
-			va_start (params, num);
-			while(true) {
-				int* cur=va_arg(params,int* );
-				if ((DWORD_PTR)cur>256) {
-					if (*cur==term___set)
-						break;
-				}
-				num++;
-				
-			}
-			va_end (params);
-		}
 
-		int totSize=0;
-		va_start (params, num);
-		for (int i=0;i<num;i++) {
-			void* cur=va_arg(params,void*);
-			if ((DWORD_PTR)cur<256)
-				totSize++;
-			else {
-				void *derCur = nullptr;
-				if (cur != nullptr)
-					derCur = *(void**)cur;
+private:
+	size_t internalSet(ByteArray* ba, BYTE data) {
+		if (ba != NULL)
+			(*ba)[0] = data;
+		return 1;
+	}
 
-				if (derCur == bdaVf){
-					ByteDynArray *bda = (ByteDynArray *)cur;
-					if (bda != nullptr)
-						totSize += bda->size();
-					else
-						err_string("Parametro NULL");
-				}
-				else if (derCur == baVf){
-					ByteArray *ba = (ByteArray *)cur;
-					if (ba!=nullptr)
-						totSize += ba->size();
-					else
-						err_string("Parametro NULL");
-				}
-				else if (cur == bdaVf){
-					throw err_string("I dati di tipo ByteDynArray nel metodo set vanno passati per riferimento!");
-				}
-				else if (cur == baVf){
-					throw err_string("I dati di tipo ByteArray nel metodo set vanno passati per riferimento!");
-				}
-				else {
-					// suppongo sia una stringa
-					totSize += countHexData((const char*)cur);
-				}
-			}
-		}
-		va_end (params);
+	size_t internalSet(ByteArray* ba, ByteArray *data) {
+		if (ba != NULL)
+			ba->copy(*data);
+		return data->size();
+	}
+
+	size_t internalSet(ByteArray* ba, const char *data) {
+		if (ba != NULL)
+			return setHexData(data, ba->lock());
+		return countHexData(data);
+	}
+
+	size_t internalSet(ByteArray* ba) {
+		return 0;
+	}
+
+public:
+	template<typename Arg0, typename ... Args>
+	ByteDynArray& set(Arg0 &&arg0, Args &&... args) {
+		size_t totSize = internalSet(NULL, arg0) + internalSet(NULL, args...);
 		resize(totSize);
 
-		int cntPos=0;
-		va_start (params, num);
-		for (int i=0;i<num;i++) {
-			void* cur=va_arg(params,void*);
-			if ((DWORD_PTR)cur<256) {
-				pbtData[cntPos]=(BYTE)(DWORD_PTR)cur;
-				cntPos++;
-			}
-			else if (*(void**)cur==bdaVf) {
-				ByteDynArray *bda=(ByteDynArray *)cur;
-				copy(*bda,cntPos);
-				cntPos+=bda->size();
-			}
-			else if (*(void**)cur==baVf){
-				ByteArray *ba=(ByteArray *)cur;
-				copy(*ba,cntPos);
-				cntPos+=ba->size();
-			}
-			else {
-				// suppongo sia una stringa
-				cntPos+=setHexData((const char*)cur,pbtData+cntPos);
-			}
-		}
-		va_end (params);
+		ByteArray buffer(*this);
+		buffer = buffer.mid(internalSet(&buffer, arg0));
+		buffer = buffer.mid(internalSet(&buffer, args...));
 
 		return *this;
 	}
+		
 	ByteDynArray &setASN1Tag(int tag,ByteArray &content) {
 		int tl=ASN1TLength(tag);
 		int ll=ASN1LLength(content.size());
@@ -582,7 +529,7 @@ public:
 			clear();
 		if (str == 0)
 			return;
-		DWORD size = ::strlen(str) + 1;
+		size_t size = ::strlen(str) + 1;
 		pbtData = new char[size];
 		dwSize = size;
 		copy(str, dwSize);
