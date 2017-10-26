@@ -13,7 +13,6 @@ static ByteArray baMD5DigestInfo(MD5_RSAcode,sizeof(MD5_RSAcode));
 
 namespace p11 {
 
-CMechanism::CMechanism() {}
 CMechanism::CMechanism(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session): mtType(type), pSession(std::move(Session)) {}
 CMechanism::~CMechanism() {}
 RESULT CDecrypt::checkCache(ByteArray &Data,ByteArray &Result,bool &bFound)
@@ -45,34 +44,29 @@ RESULT CDecrypt::setCache(ByteArray &Data,ByteArray &Result)
 	_return(FAIL)
 }
 
-CVerify::CVerify() {}
 CVerify::CVerify(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CVerify::~CVerify() {}
 
-CVerifyRecover::CVerifyRecover() {}
 CVerifyRecover::CVerifyRecover(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CVerifyRecover::~CVerifyRecover() {}
 
-CDigest::CDigest() {}
 CDigest::CDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CDigest::~CDigest() {}
 
-CSign::CSign() {}
 CSign::CSign(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CSign::~CSign() {}
 
-CSignRecover::CSignRecover() {}
 CSignRecover::CSignRecover(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CSignRecover::~CSignRecover() {}
 
-CEncrypt::CEncrypt() {}
 CEncrypt::CEncrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,std::move(Session)) {}
 CEncrypt::~CEncrypt() {}
 
-CDecrypt::CDecrypt() {}
-CDecrypt::CDecrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CMechanism(type,Session) {
-	cacheData.pbtData=(BYTE*)~(ULONG_PTR)0;
-}
+BYTE CDecrypt::uninitializedCacheData = 0;
+CDecrypt::CDecrypt(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session)
+    : CMechanism(type, Session), cacheData(&uninitializedCacheData, 1)
+    {}
+
 CDecrypt::~CDecrypt() {}
 
 /* ******************** */
@@ -212,7 +206,6 @@ RESULT CMD5::DigestSetOperationState(ByteArray &OperationState)
 /* ******************** */
 /*		Verify RSA		*/
 /* ******************** */
-CVerifyRSA::CVerifyRSA() {}
 CVerifyRSA::CVerifyRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CVerify(type,std::move(Session)) {}
 CVerifyRSA::~CVerifyRSA() {}
 
@@ -301,7 +294,6 @@ RESULT CVerifyRSA::VerifySetOperationState(ByteArray &OperationState)
 /* ******************** */
 /*	VerifyRecover RSA	*/
 /* ******************** */
-CVerifyRecoverRSA::CVerifyRecoverRSA() {}
 CVerifyRecoverRSA::CVerifyRecoverRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CVerifyRecover(type,std::move(Session)) {}
 CVerifyRecoverRSA::~CVerifyRecoverRSA() {}
 
@@ -382,7 +374,6 @@ RESULT CVerifyRecoverRSA::VerifyRecoverSetOperationState(ByteArray &OperationSta
 /* ******************** */
 /*		SignRSA			*/
 /* ******************** */
-CSignRSA::CSignRSA() {}
 CSignRSA::CSignRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CSign(type,std::move(Session)) {}
 CSignRSA::~CSignRSA() {}
 
@@ -435,7 +426,6 @@ RESULT CSignRSA::SignSetOperationState(ByteArray &OperationState)
 /* ******************** */
 /*	SignRecoverRSA		*/
 /* ******************** */
-CSignRecoverRSA::CSignRecoverRSA() {}
 CSignRecoverRSA::CSignRecoverRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CSignRecover(type,std::move(Session)) {}
 CSignRecoverRSA::~CSignRecoverRSA() {}
 
@@ -1175,7 +1165,6 @@ CRSAwithSHA1::~CRSAwithSHA1() {}
 /* ******************** */
 /*		EncryptRSA		*/
 /* ******************** */
-CEncryptRSA::CEncryptRSA() {}
 CEncryptRSA::CEncryptRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CEncrypt(type,std::move(Session)) {}
 CEncryptRSA::~CEncryptRSA() {}
 
@@ -1266,7 +1255,7 @@ RESULT CEncryptRSA::EncryptSetOperationState(ByteArray &OperationState)
 /* ******************** */
 /*		DecryptRSA		*/
 /* ******************** */
-CDecryptRSA::CDecryptRSA() {}
+//CDecryptRSA::CDecryptRSA() {}
 CDecryptRSA::CDecryptRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session) : CDecrypt(type,std::move(Session)) {}
 CDecryptRSA::~CDecryptRSA() {}
 
