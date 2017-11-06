@@ -10,6 +10,7 @@
 #include "../UI/safeDesktop.h"
 #include "../PCSC/PCSC.h"
 #include <atlbase.h>
+#include <string>
 
 extern CModuleInfo moduleInfo;
 extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD dwFlags);
@@ -28,10 +29,10 @@ struct threadData {
 DWORD WINAPI _abilitaCIE(
 	LPVOID lpThreadParameter) {
 	init_main_func
-		char *PAN = (char *)lpThreadParameter;
+	const char *PAN = (char *)lpThreadParameter;
 
-	String container;
-	container.printf("CIE-%s", PAN);
+	std::string container ("CIE-");
+	container += PAN;
 
 	try {
 

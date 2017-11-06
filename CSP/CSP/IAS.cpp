@@ -863,7 +863,7 @@ void IAS::InitEncKey() {
 	CardEncKey = keySha.left(32);
 }
 
-void IAS::SetCache(char *PAN, ByteArray &certificate, ByteArray &FirstPIN) {
+void IAS::SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN) {
 	ByteDynArray encCert, encPIN;
 	CAES enc(CardEncKey);
 	enc.Encode(certificate, encCert);
