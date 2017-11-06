@@ -42,7 +42,7 @@ IniSettingsString::IniSettingsString(char* section,char* name,char* defaultValue
 	this->defaultVal=defaultValue;
 }
 
-void IniSettingsString::GetValue(char* fileName,String &value) {
+void IniSettingsString::GetValue(char* fileName, std::string &value) {
 	GetIniString(fileName,section.lock(),name.lock(),value);
 	if (value.size()==1)
 		value = defaultVal;

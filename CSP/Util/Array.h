@@ -529,17 +529,17 @@ public:
 #define ASN1Tag(tag,content) ByteDynArray().setASN1Tag(tag,content)
 
 typedef DynArray<char> CharDynArray;
-class String : public CharDynArray
+class Stringa : public CharDynArray
 {
 public:
-	String() : CharDynArray() {};
-	String(const char *src) {
+	Stringa() : CharDynArray() {};
+	Stringa(const char *src) {
 		init_func_internal
 			alloc_copy(src);
 		exit_func_internal
 	};
 
-	String(const BYTE *src, DWORD size) {
+	Stringa(const BYTE *src, DWORD size) {
 		init_func_internal
 			clear();
 		pbtData = new char[size + 1];
@@ -549,14 +549,14 @@ public:
 		exit_func_internal
 	};
 
-	String(const CharDynArray &src) : CharDynArray(src) {};
-	String(DWORD size) : CharDynArray(size) {};
+	Stringa(const CharDynArray &src) : CharDynArray(src) {};
+	Stringa(DWORD size) : CharDynArray(size) {};
 
-	inline bool operator<(const String &op) const  {
+	inline bool operator<(const Stringa &op) const  {
 		return(memcmp(pbtData, op.pbtData, min(dwSize, op.dwSize)) < 0);
 	}
 
-	inline bool operator>(const String &op) const  {
+	inline bool operator>(const Stringa &op) const  {
 		return(memcmp(pbtData, op.pbtData, min(dwSize, op.dwSize)) > 0);
 	}
 
@@ -572,7 +572,7 @@ public:
 		return(memcmp(pbtData, op, dwSize) != 0);
 	}
 
-	inline bool operator==(const String &op) const  {
+	inline bool operator==(const Stringa &op) const  {
 		if (dwSize != op.dwSize) return(false);
 		return(memcmp(pbtData, op.pbtData, dwSize) == 0);
 	}
@@ -618,7 +618,7 @@ public:
 		//return(lock((DWORD)strlen()+1));
 	}
 
-	String &printf(const char *format,...) {
+	Stringa &printf(const char *format,...) {
 		init_func_internal
 		va_list params;
 		va_start (params, format);
