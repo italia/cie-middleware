@@ -14,7 +14,7 @@ typedef RESULT (*templateInitSessionFunc)(void *pTemplateData);
 typedef RESULT (*templateFinalSessionFunc)(void *pTemplateData);
 typedef RESULT (*templateMatchCardFunc)(bool &bMatched,CSlot &pSlot);
 typedef RESULT (*templateGetSerialFunc)(CSlot &pSlot,ByteDynArray &baSerial);
-typedef RESULT (*templateGetModelFunc)(CSlot &pSlot,String &szModel);
+typedef RESULT(*templateGetModelFunc)(CSlot &pSlot, std::string &szModel);
 typedef RESULT (*templateGetTokenFlagsFunc)(CSlot &pSlot,DWORD &dwFlags);
 typedef RESULT (*templateLoginFunc)(void *pTemplateData,CK_USER_TYPE userType, ByteArray &Pin);
 typedef RESULT (*templateLogoutFunc)(void *pTemplateData,CK_USER_TYPE userType);
@@ -85,8 +85,8 @@ public:
 	HMODULE hLibrary;
 	TemplateFuncList FunctionList;
 
-	String szName;
-	String szManifacturer;
+	std::string szName;
+	std::string szManifacturer;
 };
 
 };

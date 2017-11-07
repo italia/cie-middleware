@@ -11,7 +11,7 @@ RESULT CIEtemplateInitSession(void *pTemplateData);
 RESULT CIEtemplateFinalSession(void *pTemplateData);
 RESULT CIEtemplateMatchCard(bool &bMatched, CSlot &pSlot);
 RESULT CIEtemplateGetSerial(CSlot &pSlot, ByteDynArray &baSerial);
-RESULT CIEtemplateGetModel(CSlot &pSlot, String &szModel);
+RESULT CIEtemplateGetModel(CSlot &pSlot, std::string &szModel);
 RESULT CIEtemplateGetTokenFlags(CSlot &pSlot, DWORD &dwFlags);
 RESULT CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &Pin);
 RESULT CIEtemplateLogout(void *pTemplateData, CK_USER_TYPE userType);

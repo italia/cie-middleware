@@ -166,15 +166,15 @@ DWORD WINAPI _abilitaCIE(
 							if (rs == SCARD_W_WRONG_CHV) {
 								if (progWin != nullptr)
 									SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
-								String num;
+								std::string num;
 								if (attempts > 0)
-									num.printf("Sono rimasti %i tentativi prima del blocco", attempts);
+									num = "Sono rimasti " + std::to_string(attempts ) + " tentativi prima del blocco";
 								else
 									num = "";
 								CMessage msg(MB_OK,
 									"Abilitazione CIE",
 									"PIN Errato",
-									num.lock());
+									num.c_str());
 								msg.DoModal();
 								break;
 							}
@@ -222,7 +222,7 @@ DWORD WINAPI _abilitaCIE(
 							msg.DoModal();
 						}
 						catch (CBaseException &ex) {
-							String dump;
+							std::string dump;
 							ex.DumpTree(dump);
 							CMessage msg(MB_OK,
 								"Abilitazione CIE",
@@ -240,20 +240,20 @@ DWORD WINAPI _abilitaCIE(
 		if (!foundCIE) {
 			if (!desk)
 				desk.reset(new safeDesktop("AbilitaCIE"));
-			String num;
-			num.printf("%s nei lettori di smart card", PAN);
+			std::string num(PAN);
+			num+=" nei lettori di smart card";
 			CMessage msg(MB_OK,
 				"Abilitazione CIE",
 				"Impossibile trovare la CIE con Numero Identificativo",
-				num.lock());
+				num.c_str());
 			msg.DoModal();
 		}
 		SCardFreeMemory(hSC, readers);
 	}
 	catch (CBaseException &ex) {
-		String dump;
+		std::string dump;
 		ex.DumpTree(dump);
-		MessageBox(nullptr, String().printf("Si è verificato un errore nella verifica di autenticità del documento :%s", dump.lock()).lock(), "CIE", MB_OK);
+		MessageBox(nullptr, std::string().append("Si è verificato un errore nella verifica di autenticità del documento").append(dump).c_str(), "CIE", MB_OK);
 	}
 
 	return 0;

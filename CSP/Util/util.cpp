@@ -2,16 +2,13 @@
 #include <conio.h>
 #include <vector>
 #include <dbghelp.h>
-//#include "SyncroEvent.h"
-//#include "utilexception.h"
+#include <iomanip>
+#include <sstream>
 
 static char *szCompiledFile=__FILE__;
 
 DWORD ERR_ATTRIBUTE_IS_SENSITIVE = 0x40000008;
 DWORD ERR_OBJECT_HASNT_ATTRIBUTE = 0x40000009;
-
-DWORD term___set=0xffff;
-DWORD *endSet=&term___set;
 
 class initRand {
 public:
@@ -149,41 +146,45 @@ void readHexData(const char *data,ByteDynArray &ba)
 		ba.clear();
 }
 
-String &dumpHexData(ByteArray &data,String &dump)
+std::string HexByte(BYTE data, bool uppercase) {
+	std::stringstream dmp;
+	dmp << std::hex << std::setfill('0');
+	if (uppercase)
+		dmp << std::uppercase;
+	dmp << std::setw(2) << static_cast<unsigned>(data);
+	return dmp.str();
+}
+
+std::string &dumpHexData(ByteArray &data, std::string &dump)
 {
-	dumpHexData(data,dump,true);
+	dumpHexData(data,dump,true,true);
 	return dump;
 }
 
-String &dumpHexData(ByteArray &data, String &dump, bool withSpace)
+std::string &dumpHexData(ByteArray &data, std::string &dump, bool withSpace, bool uppercase)
 {
-	DWORD size=withSpace ? (data.size()*3+1) : (data.size()*2+1);
-	dump.resize(size);
-	dump[0]=0;
-	for (DWORD i=0;i<data.size();i++) {
+	std::stringstream dmp;
+	dmp << std::hex << std::setfill('0');
+	if (uppercase)
+		dmp << std::uppercase;
+	for (DWORD i = 0; i<data.size(); i++) {
+		dmp << std::setw(2) << static_cast<unsigned>(data[i]);
 		if (withSpace)
-			sprintf_s((char*)dump.lock(4, i * 3), 4, "%02X ", data[i]);
-		else
-			sprintf_s((char*)dump.lock(3, i * 2), 3, "%02X", data[i]);
+			dmp << " ";
 	}
+	dump = dmp.str();
 	return dump;
 }
 void Debug(ByteArray ba) {
-	String out;
+	std::string out;
 	dumpHexData(ba,out);
-	OutputDebugString(out.stringlock());
+	OutputDebugString(out.c_str());
 	OutputDebugString("\n");
 }
 
-String &dumpHexDataLowerCase(ByteArray &data, String &dump)
+std::string &dumpHexDataLowerCase(ByteArray &data, std::string &dump)
 {
-	DWORD size=data.size()*3+1;
-	dump.resize(size);
-	dump[0]=0;
-	for (DWORD i=0;i<data.size();i++) {
-		sprintf_s((char*)dump.lock(4,i*3),size,"%02x ",data[i]);
-	}
-	return dump;
+	return dumpHexData(data, dump, false, false);
 }
 
 void PutPaddingBT0(ByteArray &ba,DWORD dwLen)

@@ -18,16 +18,16 @@ class CMessage :
 	public CDialogImpl<CMessage>
 {
 public:
-CAtlBitmapButton okButton,cancelButton;
-	char *title;
-	char *riga1;
-	char *riga2;
-	char *riga3;
-	char *riga4;
+	CAtlBitmapButton okButton,cancelButton;
+	const char *title;
+	const char *riga1;
+	const char *riga2;
+	const char *riga3;
+	const char *riga4;
 	DWORD tipo;
 	CStatic tit;
 
-	CMessage(DWORD tipo, char *title, char *riga1, char *riga2 = NULL, char *riga3 = NULL, char *riga4 = NULL);
+	CMessage(DWORD tipo, const char *title, const char *riga1, const char *riga2 = NULL, const char *riga3 = NULL, const char *riga4 = NULL);
 
 	~CMessage();
 

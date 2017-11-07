@@ -332,18 +332,18 @@ void IAS::DAPP() {
 	BYTE snIFD[] = { 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
 	BYTE CPI=0x8A;
 	BYTE baseCHR[] = { 0x00, 0x00, 0x00, 0x00 };
-	CHR.set(2, &VarToByteArray(baseCHR), &VarToByteArray(snIFD));
-	CHA.set(2,&CA_AID,01);
+	CHR.set(&VarToByteArray(baseCHR), &VarToByteArray(snIFD));
+	CHA.set(&CA_AID,01);
 	BYTE baseOID[] = { 0x2A, 0x81, 0x22, 0xF4, 0x2A, 0x02, 0x04, 0x01 };
-	OID.set(2, &VarToByteArray(baseOID), shaOID);
+	OID.set(&VarToByteArray(baseOID), shaOID);
 
 	ByteDynArray endEntityCert;
-	endEntityCert.set(0, CPI, &CA_CAR, &CHR, &CHA, &OID, &module, &pubexp, &term___set);
+	endEntityCert.set(CPI, &CA_CAR, &CHR, &CHA, &OID, &module, &pubexp);
 
 	ByteDynArray certSign, toSign, d1;
 	sha256.Digest(endEntityCert, d1);
 	BYTE ValBC = 0xBC;
-	toSign.set(0, 0x6A, &(endEntityCert.left(CA_module.size() - shaSize - 2)), &d1, 0xbc, &term___set);
+	toSign.set(0x6A, &(endEntityCert.left(CA_module.size() - shaSize - 2)), &d1, 0xbc);
 	CRSA caKey(CA_module, CA_privexp);
 	caKey.RSA_PURE(toSign, certSign);
 	ByteDynArray certVerif;
@@ -376,14 +376,14 @@ void IAS::DAPP() {
 	DWORD padSize = module.size() - shaSize - 2;
 	ByteDynArray PRND;
 	PRND.random(padSize);
-	toHash.set(0, &PRND, &dh_pubKey, &VarToByteArray(snIFD), &challenge, &dh_ICCpubKey, &dh_g, &dh_p, &dh_q, &term___set);
+	toHash.set(&PRND, &dh_pubKey, &VarToByteArray(snIFD), &challenge, &dh_ICCpubKey, &dh_g, &dh_p, &dh_q);
 	sha256.Digest(toHash,d1);
-	toSign.set(0, 0x6a, &PRND, &d1, 0xBC, &term___set);
+	toSign.set(0x6a, &PRND, &d1, 0xBC);
 	ByteDynArray signResp;
 	CRSA certKey(module, privexp);
 	certKey.RSA_PURE(toSign, signResp);
 	ByteDynArray chResponse;
-	chResponse.set(2, &VarToByteArray(snIFD), &signResp);
+	chResponse.set(&VarToByteArray(snIFD), &signResp);
 
 	BYTE ExtAuth[] = { 0x00, 0x82, 0x00, 0x00 };
 	CARD_R_CALL(SendAPDU_SM(VarToByteArray(ExtAuth), chResponse, resp))
@@ -407,12 +407,12 @@ void IAS::DAPP() {
 	ByteArray hashICC = intAuthResp.mid(PRND2.size() + 1, 32);
 
 	ByteDynArray toHashIFD, calcHashIFD;
-	toHashIFD.set(0, &PRND2, &dh_ICCpubKey, &SN_ICC, &rndIFD, &dh_pubKey, &dh_g, &dh_p, &dh_q, &term___set);
+	toHashIFD.set(&PRND2, &dh_ICCpubKey, &SN_ICC, &rndIFD, &dh_pubKey, &dh_g, &dh_p, &dh_q);
 	sha256.Digest(toHashIFD, calcHashIFD);
 	ER_ASSERT(calcHashIFD == hashICC, "Errore nell'autenticazione del chip")
 	ER_ASSERT(intAuthResp.right(1)[0] == 0xbc, "Errore nell'autenticazione del chip");
 
-	sessSSC.set(2, &(challenge.right(4)), &(rndIFD.right(4)), &term___set);
+	sessSSC.set(&(challenge.right(4)), &(rndIFD.right(4)));
 	exit_func
 }
 
@@ -506,7 +506,7 @@ DWORD IAS::SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &
 	sigMac.Mac(d1, smMac);
 	datafield.append(ASN1Tag(0x8e, smMac));
 
-	elabResp.set(0, &smHead, datafield.size(), &datafield, 0x00, &term___set);
+	elabResp.set(&smHead, datafield.size(), &datafield, 0x00);
 	return OK;
 	exit_func
 }
@@ -670,14 +670,14 @@ DWORD IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYT
 	ByteDynArray s, curresp;
 	DWORD sw;
 	if (data.size() < 0xE7) {
-		smApdu.set(0, &head, data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)), &term___set);
+		smApdu.set(&head, data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
 
-		ODS(String().printf("Clear APDU: %s\n", dumpHexData(smApdu, String()).lock()).lock());
+		ODS(std::string().append("Clear APDU:").append(dumpHexData(smApdu, std::string())).append("\n").c_str());
 		SM(sessENC, sessMAC, smApdu, sessSSC, smApdu);
 		sw = token.Transmit(smApdu, &curresp);
 		sw = getResp_SM(curresp, sw, resp);
 
-		ODS(String().printf("Clear RESP: %s %02X %02X\n", dumpHexData(resp, String()).lock(), sw >> 8, sw & 0xff).lock());
+		ODS(std::string().append("Clear RESP:").append(dumpHexData(resp, std::string())).append(HexByte(sw >> 8)).append(HexByte(sw & 0xff)).append("\n").c_str());
 		return sw;
 	}
 	else {
@@ -692,15 +692,15 @@ DWORD IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYT
 			else
 				head[0] = cla;
 			if (s.size()!=0)
-				smApdu.set(4, &head, (BYTE)s.size(), &s, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
+				smApdu.set(&head, (BYTE)s.size(), &s, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
 			else
-				smApdu.set(2, &head, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
-			ODS(String().printf("Clear APDU: %s\n", dumpHexData(smApdu, String()).lock()).lock());
+				smApdu.set(&head, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
+			ODS(std::string("Clear APDU:").append(dumpHexData(smApdu, std::string())).append("\n").c_str());
 			SM(sessENC, sessMAC, smApdu, sessSSC, smApdu);
 			sw = token.Transmit(smApdu, &curresp);
 			sw = getResp_SM(curresp, sw, resp);
 
-			ODS(String().printf("Clear RESP: %s %02X %02X\n", dumpHexData(resp, String()).lock(), sw >> 8, sw & 0xff).lock());
+			ODS(std::string("Clear RESP:").append(dumpHexData(resp, std::string())).append(HexByte(sw >> 8)).append(HexByte(sw & 0xff)).append("\n").c_str());
 			if (i == data.size())
 				return sw;
 		}
@@ -726,7 +726,7 @@ DWORD IAS::SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYTE *
 			else
 				head[0] = cla;
 
-			apdu.set(4, &head, (BYTE)s.size(), &s, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+			apdu.set(&head, (BYTE)s.size(), &s, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
 
 			DWORD sw=token.Transmit(apdu, &curresp);
 			if (i == data.size()) {
@@ -738,9 +738,9 @@ DWORD IAS::SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYTE *
 	}
 	else {
 		if (data.size()!=0)
-			apdu.set(4, &head, (BYTE)data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+			apdu.set(&head, (BYTE)data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
 		else
-			apdu.set(2, &head, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+			apdu.set(&head, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
 
 		DWORD sw = token.Transmit(apdu, &curresp);
 		sw=getResp(curresp, sw, resp);
@@ -840,7 +840,7 @@ void IAS::InitEncKey() {
 	// uso la chiave di intAuth per i servizi per decifrare il certificato
 	RESULT _call_ris;
 
-	String strPAN;
+	std::string strPAN;
 	dumpHexData(PAN.mid(5, 6), strPAN, false);
 
 	BYTE mseSet[] = { 0x00, 0x22, 0x41, 0xa4 };
@@ -849,12 +849,12 @@ void IAS::InitEncKey() {
 	if (sessSSC.isEmpty()) {
 		CARD_R_CALL(SendAPDU(VarToByteArray(mseSet), VarToByteArray(mseSetData), resp))
 		BYTE intAuth[] = { 0x00, 0x88, 0x00, 0x00 };
-		CARD_R_CALL(SendAPDU(VarToByteArray(intAuth), strPAN.toByteArray(), resp))
+		CARD_R_CALL(SendAPDU(VarToByteArray(intAuth), ByteArray((BYTE*)strPAN.c_str(), strPAN.length()), resp))
 	}
 	else {
 		CARD_R_CALL(SendAPDU_SM(VarToByteArray(mseSet), VarToByteArray(mseSetData), resp))
 		BYTE intAuth[] = { 0x00, 0x88, 0x00, 0x00 };
-		CARD_R_CALL(SendAPDU_SM(VarToByteArray(intAuth), strPAN.toByteArray(), resp))
+		CARD_R_CALL(SendAPDU_SM(VarToByteArray(intAuth), ByteArray((BYTE*)strPAN.c_str(), strPAN.length()), resp))
 	}
 
 	CSHA256 sha256;
@@ -898,7 +898,7 @@ void IAS::IconaSbloccoPIN() {
 		ByteDynArray resp;
 		token.Transmit(VarToByteArray(getHandle), &resp);
 		SCARDHANDLE hCard = *(SCARDHANDLE*)resp.lock();
-		if (!CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",SbloccoPIN ICON", moduleInfo.szModuleFullPath.lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) 
+		if (!CreateProcess(nullptr, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",SbloccoPIN ICON").c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
 			throw CStringException("Errore in creazione processo SbloccoPIN");
 		else {
 			CloseHandle(pi.hThread);
@@ -908,19 +908,19 @@ void IAS::IconaSbloccoPIN() {
 }
 
 void IAS::GetFirstPIN(ByteDynArray &PIN) {
-	String PANStr;
+	std::string PANStr;
 	dumpHexData(PAN.mid(5, 6), PANStr, false);
 	std::vector<BYTE> EncPINBuf;
-	CacheGetPIN(PANStr.lock(), EncPINBuf);
+	CacheGetPIN(PANStr.c_str(), EncPINBuf);
 
 	CAES enc(CardEncKey);
 	enc.Decode(ByteArray(EncPINBuf.data(), EncPINBuf.size()), PIN);
 }
 
 bool IAS::IsEnrolled() {
-	String PANStr;
+	std::string PANStr;
 	dumpHexData(PAN.mid(5, 6), PANStr, false);
-	return CacheExists(PANStr.lock());
+	return CacheExists(PANStr.c_str());
 }
 
 void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
@@ -929,9 +929,9 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 		return;
 	}
 
-	String PANStr;
+	std::string PANStr;
 	dumpHexData(PAN.mid(5, 6), PANStr, false);
-	if (!CacheExists(PANStr.lock())) {
+	if (!CacheExists(PANStr.c_str())) {
 		if (askEnable && IsUserInteractive()) {
 			PROCESS_INFORMATION pi;
 			STARTUPINFO si;
@@ -944,7 +944,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			SCARDHANDLE hCard = *(SCARDHANDLE*)resp.lock();
 
 			SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
-			if (!CreateProcess(nullptr, String().printf("rundll32.exe \"%s\",AbilitaCIE %s", moduleInfo.szModuleFullPath.lock(), dumpHexData(PAN.mid(5, 6), String(), false).lock()).lock(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
+			if (!CreateProcess(nullptr, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",AbilitaCIE ").append(dumpHexData(PAN.mid(5, 6), std::string(), false)).c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
 				throw CStringException("Errore in creazione processo SbloccoPIN");
 			else
 				CloseHandle(pi.hThread);
@@ -957,10 +957,10 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			return;
 		}
 	}
-	if (!CacheExists(PANStr.lock()))
+	if (!CacheExists(PANStr.c_str()))
 		throw CStringException("Errore in abilitazione CIE");
 	std::vector<BYTE> certEncBuf;
-	CacheGetCertificate(PANStr.lock(), certEncBuf);
+	CacheGetCertificate(PANStr.c_str(), certEncBuf);
 
 	CAES enc(CardEncKey);	
 	enc.Decode(ByteArray(certEncBuf.data(), certEncBuf.size()), certificate);
@@ -972,7 +972,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	CASNParser parser;
 	parser.Parse(SOD);
 
-	String dump;
+	std::string dump;
 	dumpHexData(SOD, dump);
 
 	CASNTag &SODTag = *parser.tags[0];
@@ -1104,10 +1104,10 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 		BYTE num = ByteArrayToVar(dgNum.content, BYTE);
 
 		if (hashSet.find(num) == hashSet.end() || hashSet[num].size() == 0)
-			throw CStringException(String().printf("Digest non trovato per il DG %02X", num).lock());
+			throw CStringException("Digest non trovato per il DG %02X", num);
 		
 		if (hashSet[num] != dgHash.content)
-			throw CStringException(String().printf("Digest non corrispondente per il DG %02X", num).lock());
+			throw CStringException("Digest non corrispondente per il DG %02X", num);
 	}
 
 	/*if (CSCA != null && CSCA.Count > 0)

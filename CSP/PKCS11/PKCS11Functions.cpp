@@ -52,15 +52,15 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 	if (ul_reason_for_call==DLL_PROCESS_ATTACH && !bModuleInit) {
 		bModuleInit=true;
 		moduleInfo.init(hModule);
-		String mainMutexName;
-		mainMutexName.printf("CIE_P11_Mutex_%s",moduleInfo.szModuleName.stringlock());
-		p11Mutex.Create(mainMutexName.stringlock());
+		std::string mainMutexName;
+		mainMutexName="CIE_P11_Mutex_"+moduleInfo.szModuleName;
+		p11Mutex.Create(mainMutexName.c_str());
 		//xmlInit();
-		String configPath;
-		configPath.printf("%s%s.ini", moduleInfo.szModulePath.stringlock(), moduleInfo.szModuleName.stringlock());
-		initLog(configPath.stringlock(), __DATE__ " " __TIME__);
+		std::string configPath;
+		configPath = moduleInfo.szModulePath + moduleInfo.szModuleName + ".ini";
+		initLog(configPath.c_str(), __DATE__ " " __TIME__);
 		Log.initModule("PKCS11", __DATE__ " " __TIME__);
-		p11::InitP11(configPath.stringlock());
+		p11::InitP11(configPath.c_str());
 
 	}
 
@@ -333,11 +333,11 @@ CK_RV CK_ENTRY C_OpenSession(CK_SLOT_ID slotID, CK_FLAGS flags, CK_VOID_PTR pApp
 
 	if (Log.bEnabled) {
 		Log.writePure("Sessione: %i",*phSession);
-		Log.writePure("Lettore: %s",pSlot->szName.lock());
-		Log.writePure("CardManager: %s",pSlot->pTemplate->szName.lock());
-		String szModel;
+		Log.writePure("Lettore: %s",pSlot->szName.c_str());
+		Log.writePure("CardManager: %s",pSlot->pTemplate->szName.c_str());
+		std::string szModel;
 		pSlot->pTemplate->FunctionList.templateGetModel(*pSlot,szModel);
-		Log.writePure("Tipo Carta: %s",szModel.lock());
+		Log.writePure("Tipo Carta: %s",szModel.c_str());
 	}
 
 	_return(CKR_OK)

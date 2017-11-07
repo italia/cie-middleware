@@ -6,9 +6,9 @@ class CModuleInfo
 {
 	HANDLE module;
 public:
-	String szModuleFullPath;
-	String szModulePath;
-	String szModuleName;
+	std::string szModuleFullPath;
+	std::string szModulePath;
+	std::string szModuleName;
 
 	CModuleInfo(void);
 	virtual ~CModuleInfo(void);

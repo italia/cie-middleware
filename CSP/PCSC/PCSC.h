@@ -28,9 +28,9 @@ class readerMonitor {
 	SCARDCONTEXT hContext;
 	std::thread Thread;
 	void *appData;
-	void(*readerEvent)(String &reader, bool insert,void *appData);
+	void(*readerEvent)(std::string &reader, bool insert,void *appData);
 	bool stopMonitor;
 public:
-	readerMonitor(void(*readerEvent)(String &reader, bool insert, void* appData), void* appData);
+	readerMonitor(void(*readerEvent)(std::string &reader, bool insert, void* appData), void* appData);
 	~readerMonitor();
 };

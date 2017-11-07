@@ -81,7 +81,7 @@ readerMonitor::~readerMonitor() {
 	SCardReleaseContext(hContext);
 }
 
-readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, void *appData), void *appData) : appData(appData) {
+readerMonitor::readerMonitor(void(*eventHandler)(std::string &reader, bool insert, void *appData), void *appData) : appData(appData) {
 	LONG _call_ris;
 	if ((_call_ris = (SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &hContext))) != S_OK) {
 		throw CWinException();
@@ -91,7 +91,7 @@ readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, vo
 	DWORD tid = 0;
 	
 	Thread = std::thread([](readerMonitor *rm) -> DWORD {
-		std::vector<String> readerList;
+		std::vector<std::string> readerList;
 		std::vector<SCARD_READERSTATE> states;
 
 		auto loadReaderList = [&]() -> void {
@@ -103,12 +103,12 @@ readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, vo
 			char *curReader = readers;
 			readerList.clear();
 			for (; curReader[0] != 0; curReader += strnlen(curReader, len) + 1)
-				readerList.push_back(String(curReader));
+				readerList.push_back(std::string(curReader));
 
 			SCardFreeMemory(rm->hContext, readers);
 			states.resize((DWORD)readerList.size() + 1);
 			for (DWORD i = 0; i < readerList.size(); i++) {
-				states[i].szReader = readerList[i].lock();
+				states[i].szReader = readerList[i].c_str();
 			}
 			auto &PnP = states[(DWORD)readerList.size()];
 			PnP.szReader = "\\\\?PnP?\\Notification";

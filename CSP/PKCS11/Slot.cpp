@@ -34,7 +34,7 @@ char *CSlot::mutexName(const char *szName) {
 }
 
 CSlot::CSlot(const char *szReader) {
-	szName.alloc_copy(szReader);
+	szName=szReader;
 	lastEvent=SE_NoEvent;
 	bUpdated=0;
 	User=CKU_NOBODY;
@@ -77,7 +77,7 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 					return 0;
 				}
 
-				state[i].szReader=it->second->szName.stringlock();
+				state[i].szReader = it->second->szName.c_str();
 				slot[i]=it->second;
 				if (ris=SCardGetStatusChange(Context,0,&state[i],1)!=S_OK) {
 					if (ris!=SCARD_E_TIMEOUT) {
@@ -195,7 +195,7 @@ RESULT CSlot::GetSlotFromReaderName(const char *name,std::shared_ptr<CSlot>&ppSl
 {
 	init_func
 	for (SlotMap::iterator it=g_mSlots.begin();it!=g_mSlots.end();it++) {
-		if (strcmp(it->second->szName.stringlock(),name)==0) {
+		if (strcmp(it->second->szName.c_str(), name) == 0) {
 			ppSlot=it->second;
 			_return(OK)
 		}
@@ -270,10 +270,11 @@ RESULT CSlot::InitSlotList()
 			_return(OK)
 		_return(FAIL)
 	}
-	String readers(readersLen+1);
-	WIN_R_CALL(SCardListReaders(Context,NULL,readers.lock(readersLen+1),&readersLen),SCARD_S_SUCCESS)
+	std::string readers;
+	readers.resize(readersLen + 1);
+	WIN_R_CALL(SCardListReaders(Context,NULL,&readers[0],&readersLen),SCARD_S_SUCCESS)
 
-	char *szReaderName=readers.stringlock();
+	const char *szReaderName=readers.c_str();
 
 	while (*szReaderName!=0) {
 		if (!bP11Initialized)
@@ -296,10 +297,10 @@ RESULT CSlot::InitSlotList()
 		if (!bP11Initialized)
 			return 0;
 
-		Log.write("%s", it->second->szName.pbtData);
-		const char *name=it->second->szName.stringlock();
+		Log.write("%s", it->second->szName.c_str());
+		const char *name = it->second->szName.c_str();
 
-		char *szReaderName=readers.stringlock();
+		const char *szReaderName = readers.c_str();
 		//char *szReaderName=szReaderAlloc;
 		bool bFound=false;
 		while (*szReaderName!=0) {
@@ -335,7 +336,7 @@ RESULT CSlot::IsTokenPresent(bool *bPresent)
 	init_func
 	SCARD_READERSTATE state;
 	memset(&state,0,sizeof(SCARD_READERSTATE));
-	state.szReader=szName.stringlock();
+	state.szReader=szName.c_str();
 
 	Context.validate();
 	bool retry=false;
@@ -384,12 +385,12 @@ CK_RV CSlot::GetInfo(CK_SLOT_INFO_PTR pInfo)
 
 	memset(pInfo->slotDescription,' ',64);
 	int iSDLen=min(64,szName.size()-1);
-	memcpy_s(pInfo->slotDescription,64,szName.lock(iSDLen),iSDLen);
+	memcpy_s(pInfo->slotDescription,64,szName.c_str(),iSDLen);
 
 	memset(pInfo->manufacturerID,' ',32);
 	// non so esattamente perchè, ma nella R1 il manufacturerID sono i primi 32 dello slotDescription
 	int iMIDLen=min(32,szName.size());
-	memcpy_s(pInfo->manufacturerID,32,szName.lock(iMIDLen),iMIDLen);
+	memcpy_s(pInfo->manufacturerID, 32, szName.c_str(), iMIDLen);
 
 	pInfo->hardwareVersion.major = 0;
 	pInfo->hardwareVersion.minor = 0;
@@ -417,7 +418,7 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 		_return(CKR_TOKEN_NOT_RECOGNIZED)
 	
 	memset(pInfo->label,' ', sizeof(pInfo->label));
-	memcpy_s((char*)pInfo->label, 32, pTemplate->szName.lock(),min(pTemplate->szName.strlen(),sizeof(pInfo->label)));
+	memcpy_s((char*)pInfo->label, 32, pTemplate->szName.c_str(), min(pTemplate->szName.length(), sizeof(pInfo->label)));
 	memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
 
 	char *manifacturer;
@@ -438,7 +439,7 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 			ERR_READ_SERIAL)
 	}
 
-	String model;
+	std::string model;
 	P11ER_CALL(pTemplate->FunctionList.templateGetModel(*this,model),
 		ERR_READ_MODEL)
 
@@ -446,10 +447,10 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 	int UIDsize=min(sizeof(pInfo->serialNumber),baSerial.size());
 	memcpy_s(pInfo->serialNumber,16,baSerial.lock(UIDsize),UIDsize);
 
-	memcpy_s((char*)pInfo->label + pTemplate->szName.strlen() + 1, sizeof(pInfo->label) - pTemplate->szName.strlen() - 1, baSerial.lock(), baSerial.size());
+	memcpy_s((char*)pInfo->label + pTemplate->szName.length() + 1, sizeof(pInfo->label) - pTemplate->szName.length() - 1, baSerial.lock(), baSerial.size());
 
 	memset(pInfo->model,' ',sizeof(pInfo->model));
-	memcpy_s(pInfo->model,16,model.lock(),min(model.strlen(),sizeof(pInfo->model)));	
+	memcpy_s(pInfo->model,16,model.c_str(),min(model.length(),sizeof(pInfo->model)));	
 
 	DWORD dwFlags;
 	P11ER_CALL(pTemplate->FunctionList.templateGetTokenFlags(*this,dwFlags),
@@ -735,7 +736,7 @@ RESULT CSlot::Connect() {
 	Context.validate();
 	bool retry = false;
 	while (true) {
-		DWORD ris = SCardConnect(Context, szName.stringlock(), SCARD_SHARE_SHARED, SCARD_PROTOCOL_T1, &hCard, &dwProtocol);
+		DWORD ris = SCardConnect(Context, szName.c_str(), SCARD_SHARE_SHARED, SCARD_PROTOCOL_T1, &hCard, &dwProtocol);
 		if (ris == OK) {
 			_return(OK)
 		}

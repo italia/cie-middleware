@@ -83,7 +83,7 @@ extern "C" HRESULT __stdcall DllUnregisterServer(void) {
 	return E_UNEXPECTED;
 }
 
-LONG RegisterCard(SCARDCONTEXT hSC, char *name, BYTE* ATR, int ATRLen) {
+LONG RegisterCard(SCARDCONTEXT hSC, const char *name, BYTE* ATR, int ATRLen) {
 	ByteDynArray ATRMask;
 	LONG ris;
 	SCardForgetCardType(hSC, name);
@@ -97,7 +97,7 @@ LONG RegisterCard(SCARDCONTEXT hSC, char *name, BYTE* ATR, int ATRLen) {
 	{
 		return E_UNEXPECTED;
 	}
-	if ((ris = SCardSetCardTypeProviderName(hSC, name, 0x80000001, moduleInfo.szModuleFullPath.lock()) != SCARD_S_SUCCESS))
+	if ((ris = SCardSetCardTypeProviderName(hSC, name, 0x80000001, moduleInfo.szModuleFullPath.c_str()) != SCARD_S_SUCCESS))
 	{
 		return E_UNEXPECTED;
 	}
@@ -105,10 +105,11 @@ LONG RegisterCard(SCARDCONTEXT hSC, char *name, BYTE* ATR, int ATRLen) {
 	{
 		return E_UNEXPECTED;
 	}
-	String kName;
-	kName.printf("%s%s", "SOFTWARE\\Microsoft\\Cryptography\\Calais\\SmartCards\\", name);
+	std::string kName;
+	kName = "SOFTWARE\\Microsoft\\Cryptography\\Calais\\SmartCards\\";
+	kName += name;
 	HKEY scardKey=NULL;
-	RegOpenKeyA(HKEY_LOCAL_MACHINE, kName.lock(), &scardKey);
+	RegOpenKeyA(HKEY_LOCAL_MACHINE, kName.c_str(), &scardKey);
 	char pinLabel[] = "it-IT,Immettere le ultime 4 cifre del PIN";
 	RegSetKeyValueA(scardKey, NULL, "80000100", REG_SZ, pinLabel, sizeof(pinLabel));
 	return S_OK;
@@ -133,7 +134,7 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 
 	{
 		auto modName = std::vector<WCHAR>(moduleInfo.szModuleName.size() + 10);
-		swprintf_s(modName.data(), modName.size(), L"%S.dll", moduleInfo.szModuleName.lock());
+		swprintf_s(modName.data(), modName.size(), L"%S.dll", moduleInfo.szModuleName.c_str());
 		if (!CryptRegisterOIDFunction(0, CRYPT_OID_OPEN_STORE_PROV_FUNC, "CIECertProvider", modName.data(), CRYPT_OID_OPEN_STORE_PROV_FUNC))
 			return E_UNEXPECTED;
 	}
