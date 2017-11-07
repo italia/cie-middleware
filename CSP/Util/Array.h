@@ -441,12 +441,16 @@ private:
 public:
 	template<typename Arg0, typename ... Args>
 	ByteDynArray& set(Arg0 &&arg0, Args &&... args) {
-		size_t totSize = internalSet(NULL, arg0) + internalSet(NULL, args...);
-		resize(totSize);
+		size_t totSize = internalSet((ByteArray*)NULL, std::forward<Arg0>(arg0));
+
+		size_t totSize2 = 0;
+		int dummy[] = { 0, ((void)(totSize2 += internalSet((ByteArray*)NULL, std::forward<Args>(args))), 0) ... };
+
+		resize(totSize + totSize2);
 
 		ByteArray buffer(*this);
-		buffer = buffer.mid(internalSet(&buffer, arg0));
-		buffer = buffer.mid(internalSet(&buffer, args...));
+		buffer = buffer.mid(internalSet(&buffer, std::forward<Arg0>(arg0)));
+		int dummy2[] = { 0, ((void)(buffer = buffer.mid(internalSet(&buffer, std::forward<Args>(args)))), 0) ... };
 
 		return *this;
 	}
