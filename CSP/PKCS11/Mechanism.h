@@ -15,7 +15,6 @@ class CMechanism
 {
 public:
 	CK_MECHANISM_TYPE mtType;
-	CMechanism();
 	CMechanism(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CMechanism(void);
 	std::shared_ptr<CSession> pSession;
@@ -24,7 +23,6 @@ public:
 class CDigest : public CMechanism
 {
 public:
-	CDigest();
 	CDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CDigest();
 
@@ -42,7 +40,6 @@ class CVerify : public CMechanism
 public:
 	CK_OBJECT_HANDLE hVerifyKey;
 
-	CVerify(void);
 	CVerify(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CVerify();
 
@@ -59,7 +56,6 @@ public:
 class CVerifyRSA : public CVerify
 {
 public:
-	CVerifyRSA(void);
 	CVerifyRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CVerifyRSA();
 
@@ -75,7 +71,6 @@ class CVerifyRecover : public CMechanism
 public:
 	CK_OBJECT_HANDLE hVerifyRecoverKey;
 
-	CVerifyRecover(void);
 	CVerifyRecover(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CVerifyRecover();
 
@@ -90,7 +85,6 @@ public:
 class CVerifyRecoverRSA : public CVerifyRecover
 {
 public:
-	CVerifyRecoverRSA(void);
 	CVerifyRecoverRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CVerifyRecoverRSA();
 
@@ -105,7 +99,6 @@ class CSign : public CMechanism
 public:
 	CK_OBJECT_HANDLE hSignKey;
 
-	CSign(void);
 	CSign(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CSign();
 
@@ -122,7 +115,6 @@ public:
 class CSignRSA : public CSign
 {
 public:
-	CSignRSA(void);
 	CSignRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CSignRSA();
 
@@ -137,7 +129,6 @@ class CSignRecover : public CMechanism
 public:
 	CK_OBJECT_HANDLE hSignRecoverKey;
 
-	CSignRecover(void);
 	CSignRecover(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CSignRecover();
 
@@ -151,7 +142,6 @@ public:
 class CSignRecoverRSA : public CSignRecover
 {
 public:
-	CSignRecoverRSA(void);
 	CSignRecoverRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CSignRecoverRSA();
 
@@ -165,7 +155,6 @@ class CEncrypt : public CMechanism
 public:
 	CK_OBJECT_HANDLE hEncryptKey;
 
-	CEncrypt(void);
 	CEncrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CEncrypt();
 
@@ -181,7 +170,6 @@ public:
 class CEncryptRSA : public CEncrypt
 {
 public:
-	CEncryptRSA(void);
 	CEncryptRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CEncryptRSA();
 
@@ -198,7 +186,6 @@ class CDecrypt : public CMechanism
 public:
 	CK_OBJECT_HANDLE hDecryptKey;
 
-	CDecrypt(void);
 	CDecrypt(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CDecrypt();
 
@@ -220,7 +207,6 @@ public:
 class CDecryptRSA : public CDecrypt
 {
 public:
-	CDecryptRSA(void);
 	CDecryptRSA(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session);
 	virtual ~CDecryptRSA();
 
@@ -233,7 +219,6 @@ public:
 class CSHA : public CDigest
 {
 public:
-	CSHA(void);
 	CSHA(std::shared_ptr<CSession> Session);
 	virtual ~CSHA();
 
@@ -251,7 +236,6 @@ public:
 class CMD5 : public CDigest
 {
 public:
-	CMD5();
 	CMD5(std::shared_ptr<CSession> Session);
 	virtual ~CMD5();
 
@@ -269,7 +253,6 @@ public:
 class CRSA_X509 : public CSignRSA,public CSignRecoverRSA,public CVerifyRSA,public CVerifyRecoverRSA,public CEncryptRSA,public CDecryptRSA
 {
 public:
-	CRSA_X509();
 	CRSA_X509(std::shared_ptr<CSession> Session);
 	virtual ~CRSA_X509();
 
@@ -306,7 +289,6 @@ public:
 class CRSA_PKCS1 : public CSignRSA,public CSignRecoverRSA,public CVerifyRSA,public CVerifyRecoverRSA,public CEncryptRSA,public CDecryptRSA
 {
 public:
-	CRSA_PKCS1();
 	CRSA_PKCS1(std::shared_ptr<CSession> Session);
 	virtual ~CRSA_PKCS1();
 
@@ -343,7 +325,6 @@ public:
 class CSignRSAwithDigest : public CSignRSA
 {
 public:
-	CSignRSAwithDigest(void);
 	CSignRSAwithDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session,CDigest *Digest);
 	virtual ~CSignRSAwithDigest();
 	
@@ -360,7 +341,6 @@ public:
 class CVerifyRSAwithDigest : public CVerifyRSA
 {
 public:
-	CVerifyRSAwithDigest(void);
 	CVerifyRSAwithDigest(CK_MECHANISM_TYPE type,std::shared_ptr<CSession> Session,CDigest *Digest);
 	virtual ~CVerifyRSAwithDigest();
 	
@@ -376,7 +356,6 @@ public:
 class CRSAwithMD5 : public CSignRSAwithDigest,public CVerifyRSAwithDigest
 {
 public:
-	CRSAwithMD5();
 	CRSAwithMD5(std::shared_ptr<CSession> Session);
 	virtual ~CRSAwithMD5();
 
@@ -386,7 +365,6 @@ public:
 class CRSAwithSHA1 : public CSignRSAwithDigest,public CVerifyRSAwithDigest
 {
 public:
-	CRSAwithSHA1();
 	CRSAwithSHA1(std::shared_ptr<CSession> Session);
 	virtual ~CRSAwithSHA1();
 

@@ -455,7 +455,7 @@ public:
 		return *this;
 	}
 
-	ByteDynArray &setASN1Tag(int tag,ByteArray &content) {
+  ByteDynArray &setASN1Tag(int tag,ByteArray &content) {
 		int tl=ASN1TLength(tag);
 		int ll=ASN1LLength(content.size());
 		resize(tl+ll+content.size());
@@ -533,7 +533,7 @@ public:
 			clear();
 		if (str == 0)
 			return;
-		DWORD size = ::strlen(str) + 1;
+		size_t size = ::strlen(str) + 1;
 		pbtData = new char[size];
 		dwSize = size;
 		copy(str, dwSize);

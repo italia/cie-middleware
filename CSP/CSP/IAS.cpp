@@ -318,7 +318,7 @@ void IAS::DAPP() {
 	BYTE Val01 = 1;
 
 	if (DappPubKey.isEmpty()) {
-		throw CStringException("La chiave DAPP non Ë diponibile");
+		throw CStringException("La chiave DAPP non ƒç diponibile");
 	}
 
 	ByteDynArray module = VarToByteArray(defModule);
@@ -695,7 +695,8 @@ DWORD IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYT
 				smApdu.set(&head, (BYTE)s.size(), &s, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
 			else
 				smApdu.set(&head, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
-			ODS(std::string("Clear APDU:").append(dumpHexData(smApdu, std::string())).append("\n").c_str());
+
+      ODS(std::string("Clear APDU:").append(dumpHexData(smApdu, std::string())).append("\n").c_str());
 			SM(sessENC, sessMAC, smApdu, sessSSC, smApdu);
 			sw = token.Transmit(smApdu, &curresp);
 			sw = getResp_SM(curresp, sw, resp);
@@ -1116,7 +1117,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 		X509CertChain chain = new X509CertChain(CSCA);
 		var certChain = chain.getPath(certDS);
 		if (certChain == null)
-			throw Exception("Il certificato di Document Signer non Ë valido");
+			throw Exception("Il certificato di Document Signer non ƒç valido");
 
 		var rootCert = certChain[0];
 		if (!new ByteArray(rootCert.SubjectName.RawData).IsEqual(rootCert.IssuerName.RawData))
