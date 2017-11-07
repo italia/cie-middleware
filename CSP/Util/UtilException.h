@@ -12,7 +12,7 @@
 class CBaseException
 {
 protected:
-	virtual char *ExceptionName();
+	virtual const char *ExceptionName();
 	virtual std::unique_ptr<CBaseException> Clone() const;
 
 	const CBaseException& operator=(const CBaseException&);
@@ -25,11 +25,11 @@ public:
 	virtual ~CBaseException(void);
 	std::unique_ptr<CBaseException> innerException;
 
-	void DumpTree(String &dump);
-	virtual void DumpError(String &dump);
+	void DumpTree(std::string &dump);
+	virtual void DumpError(std::string &dump);
 	int type;
 	int line;
-	String fileName;
+	std::string fileName;
 };
 
 class CStringException : public CBaseException
@@ -45,17 +45,17 @@ public:
 	CStringException(const CBaseException& inner,int line,char *fileName,const char *fmt,...);
 
 	virtual ~CStringException();
-	void DumpError(String &dump) override;
+	void DumpError(std::string &dump) override;
 protected:
-	char *ExceptionName() override;
+	const char *ExceptionName() override;
 	std::unique_ptr<CBaseException> Clone() const override;
-	String description;
+	std::string description;
 };
 
 class CWinException : public CStringException
 {
 protected:
-	virtual char *ExceptionName();
+	virtual const char *ExceptionName();
 	void Init(DWORD error);
 	std::unique_ptr<CBaseException> Clone() const override;
 public:
@@ -73,7 +73,7 @@ public:
 class CSCardException : public CStringException
 {
 protected:
-	virtual char *ExceptionName();
+	virtual const char *ExceptionName();
 	void Init(WORD error);
 	std::unique_ptr<CBaseException> Clone() const override;
 public:
@@ -90,7 +90,7 @@ public:
 class CSystemException : public CStringException
 {
 protected:
-	virtual char *ExceptionName();
+	virtual const char *ExceptionName();
 	void Init(unsigned int error,LPCONTEXT context);
 	unsigned int errorCode;
 	std::unique_ptr<CBaseException> Clone() const override;
@@ -98,6 +98,6 @@ public:
 	CSystemException ();
 	CSystemException (unsigned int errorCode,LPCONTEXT context);
 
-	String stackWalk;
-	virtual void DumpError(String & dump);
+	std::string stackWalk;
+	virtual void DumpError(std::string & dump);
 };

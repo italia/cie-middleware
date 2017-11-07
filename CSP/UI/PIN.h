@@ -18,8 +18,8 @@ class CPin:
 {
 	CAtlBitmapButton okButton, cancelButton;
 	int PinLen;
-	char *message, *message2, *message3;
-	char *title;
+	const char *message, *message2, *message3;
+	const char *title;
 	bool repeat;
 
 	CBitmap backGround;
@@ -30,7 +30,7 @@ class CPin:
 
 public:
 	char PIN[100];
-	CPin(int PinLen, char *message, char *message2, char *message3, char *title = NULL, bool repeat = false);
+	CPin(int PinLen, const char *message, const char *message2, const char *message3, const char *title = NULL, bool repeat = false);
 	~CPin();
 
 	enum { IDD = IDD_PIN };

@@ -52,7 +52,7 @@ public:
 
 	CK_SLOT_ID hSlot; // ID P11 dello slot
 
-	String szName; // nome del lettore associato
+	std::string szName; // nome del lettore associato
 
 	bool bUpdated;	// flag: la mappa degli oggetti è aggiornata alla carta
 					// che attualmente è nel lettore?

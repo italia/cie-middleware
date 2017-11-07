@@ -3,7 +3,7 @@
 #include "../stdafx.h"
 #include "Message.h"
 
-CMessage::CMessage(DWORD tipo, char *title, char *riga1, char *riga2, char *riga3, char *riga4)
+CMessage::CMessage(DWORD tipo, const char *title, const char *riga1, const char *riga2, const char *riga3, const char *riga4)
 {
 	this->title = title;
 	this->riga1 = riga1;

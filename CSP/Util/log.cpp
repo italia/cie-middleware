@@ -2,6 +2,8 @@
 #include "util.h"
 #include "moduleinfo.h"
 #include <vector>
+#include <sstream>
+#include <iomanip>
 #include "log.h"
 #include "DbgHelp.h"
 #include "UtilException.h"
@@ -14,7 +16,7 @@ static char *szCompiledFile=__FILE__;
 std::vector<CLog> logInit;
 std::vector<CLog*> logToInit;
 
-String logDirGlobal;
+std::string logDirGlobal;
 bool bInitLog=false;
 bool bFirstGlobal=false;
 bool bFunctionLog=false;
@@ -30,7 +32,7 @@ enum logMode {
 	LM_Module,	// un file per modulo
 	LM_Thread,	// un file per thread
 	LM_Module_Thread	// un file per modulo e per thread
-} LogMode = logMode::LM_Module;
+} LogMode = LM_Module;
 
 bool bMainInit=false;
 bool bMainEnable=false;
@@ -73,7 +75,7 @@ void initLog(const char *iniFile,const char *version) {
 	int numMod=1;
 	while (true) {
 		sprintf_s(SectionName,30,"%s%i","LogModule",numMod);
-		String modName;
+		std::string modName;
 
 		(IniSettingsString(SectionName, "Name", "", "Nome della sezione log di log")).GetValue((char*)iniFile, modName);
 
@@ -87,9 +89,9 @@ void initLog(const char *iniFile,const char *version) {
 
 		log.bEnabled = (IniSettingsBool(SectionName, "LogEnable", bMainEnable, "Abilitazione log della sezione")).GetValue((char*)iniFile);
 
-		(IniSettingsString(SectionName, "LogDir", logDirGlobal.lock(), "Definisce il path in cui salvare il file di log di questa sezione (con \\ finale). Default: directory di log globale")).GetValue((char*)iniFile, log.logDir);
+		(IniSettingsString(SectionName, "LogDir", logDirGlobal.c_str(), "Definisce il path in cui salvare il file di log di questa sezione (con \\ finale). Default: directory di log globale")).GetValue((char*)iniFile, log.logDir);
 
-		(IniSettingsString(SectionName, "LogFile", log.logName.lock(), "Definisce il nome del file in cui salvare il file di log di questa sezione (con \\ finale). Default: il nome della sezione di log")).GetValue((char*)iniFile, log.logFileName);
+		(IniSettingsString(SectionName, "LogFile", log.logName.c_str(), "Definisce il nome del file in cui salvare il file di log di questa sezione (con \\ finale). Default: il nome della sezione di log")).GetValue((char*)iniFile, log.logFileName);
 
 		log.bFunctionLog = (IniSettingsBool(SectionName, "FunctionLog", bFunctionLog, "Abilitazione log delle chiamate a funzione per questa sezione")).GetValue((char*)iniFile);
 
@@ -132,42 +134,46 @@ void CLog::initParam(CLog &log) {
 	SYSTEMTIME  stTime;
 	GetLocalTime(&stTime);
 
+	std::stringstream th;
+	th << std::setw(8) << std::setfill('0');
+
 	switch (LogMode) {
 		case (LM_Single): {
-			// log singolo: il nome del file è yyyy-mm-gg.log, senza alcun path assegnato
-			logPath.printf("%s_%04i-%02i-%02i.log",log.logFileName.lock(),stTime.wYear,stTime.wMonth,stTime.wDay);
+			th << log.logFileName << "_" << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << ".log";
 			break;
 		}
 		case (LM_Module): {
+			th << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << "_" << logFileName << ".log";
 			// log per modulo: il nome del file è yyyy-mm-gg_name.log, senza alcun path assegnato
-			logPath.printf("%04i-%02i-%02i_%s.log",stTime.wYear,stTime.wMonth,stTime.wDay,log.logFileName.lock());
 			break;
 		}
 		case (LM_Thread): {
+			th << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << "_00000000.log";
 			// log per thread: il nome del file è yyyy-mm-gg_tttttttt.log, senza alcun path assegnato
-			logPath.printf("%04i-%02i-%02i_00000000.log",stTime.wYear,stTime.wMonth,stTime.wDay);
 			break;
 		}
 		case (LM_Module_Thread): {
+			th << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << "_" << logFileName << "_00000000.log";
 			// log per modulo e per thread: il nome del file è yyyy-mm-gg_name_tttttttt.log, senza alcun path assegnato
-			logPath.printf("%04i-%02i-%02i_%s_00000000.log",stTime.wYear,stTime.wMonth,stTime.wDay,log.logFileName.lock());
 			break;
 		}
 	}
-	if ((LogMode==LM_Module || LogMode==LM_Module_Thread) && log.logDir.strlen()!=0) {
+	logPath = th.str();
+
+	if ((LogMode==LM_Module || LogMode==LM_Module_Thread) && log.logDir.length()!=0) {
 		// se c'è un path specifico lo metto lì
-		String path=logPath;
-		logPath.printf("%s\\%s",log.logDir.stringlock(),path.stringlock());
+		std::string path = logPath;
+		logPath=log.logDir.append("\\").append(path);
 	}
-	else if (!logDirGlobal.isEmpty()) {
+	else if (!logDirGlobal.empty()) {
 		// se c'è un path globale lo metto lì
-		String path=logPath;
-		logPath.printf("%s\\%s",logDirGlobal.stringlock(),path.stringlock());
+		std::string path=logPath;
+		logPath = logDirGlobal.append("\\").append(path);
 	}
-	threadPos=logPath.lock()+logPath.strlen()-12;
+	threadPos = logPath.begin()+logPath.length() - 12;
 	bInitialized=true;
 
-	if (LogMode!=LM_Module && LogMode!=LM_Module_Thread && bEnabled) writePure("Module %02i: %s",dwModuleNum,logName.lock());
+	if (LogMode!=LM_Module && LogMode!=LM_Module_Thread && bEnabled) writePure("Module %02i: %s",dwModuleNum,logName.c_str());
 	exit_func_internal
 }
 
@@ -183,7 +189,7 @@ void CLog::initModule(const char *name,char *version) {
 	else {
 		// vediamo se ce l'ho...
 		for (DWORD i=0;i<logInit.size();i++) {
-			if (strcmp(logInit[i].logName.lock(),logName.lock())==0) {
+			if (logInit[i].logName==logName) {
 				initParam(logInit[i]);
 			}
 		}
@@ -208,7 +214,7 @@ DWORD CLog::write(const char *format,...) {
 		}
 		if (!bFirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
 			bFirstLog=true;
-			write("%s - Inizio Sessione - versione file: %s",logName.lock(),logVersion);
+			write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion);
 			writeModuleInfo();
 		}
 
@@ -226,10 +232,16 @@ DWORD CLog::write(const char *format,...) {
 	 
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
 		DWORD dwThreadID=CThread::getID();
-		if (LogMode==LM_Thread || LogMode==LM_Module_Thread)
-			sprintf_s(threadPos,14,"%08x.log",dwThreadID);
+		if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
+			std::stringstream th;
+			th << std::setiosflags(std::ios::hex | std::ios::uppercase);
+			th << std::setw(8);
+			th << dwThreadID << ".log";
+
+			logPath.replace(threadPos, threadPos + 14, th.str());
+		}
 		FILE *lf=nullptr;
-		fopen_s(&lf,logPath.lock(), "a+t");
+		fopen_s(&lf,logPath.c_str(), "a+t");
 		if (lf) {
 			switch(LogMode) {
 				case (LM_Single) : fprintf(lf,"%s|%04i|%04i|%02i|", pbtDate, GetCurrentProcessId(), dwThreadID, dwModuleNum); break;
@@ -247,7 +259,7 @@ DWORD CLog::write(const char *format,...) {
 #ifdef WIN32
 	vsprintf_s(pbtDate, format, params);
 	int dtLen = (int)strnlen(pbtDate, sizeof(pbtDate));
-	sprintf_s(pbtDate + dtLen, 2048 - dtLen, "|thread:%08x|%s|", GetCurrentThreadId(), logName.lock());
+	sprintf_s(pbtDate + dtLen, 2048 - dtLen, "|thread:%08x|%s|", GetCurrentThreadId(), logName.c_str());
 	dtLen = (int)strnlen(pbtDate, sizeof(pbtDate));
 	sprintf_s(pbtDate+ dtLen, 2048 - dtLen , "\n");
 	OutputDebugString(pbtDate);
@@ -277,17 +289,22 @@ void CLog::writePure(const char *format,...) {
 		}
 		if (!bFirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
 			bFirstLog=true;
-			write("%s - Inizio Sessione - versione file: %s",logName.lock(),logVersion);
+			write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion);
 			writeModuleInfo();
 		}
 
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
 		DWORD dwThreadID=CThread::getID();
-		if (LogMode==LM_Thread || LogMode==LM_Module_Thread)
-			sprintf_s(threadPos,14,"%08x.log",dwThreadID);
+		if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
+			std::stringstream th;
+			th << std::setiosflags(std::ios::hex | std::ios::uppercase);
+			th << std::setw(8);
+			th << dwThreadID << ".log";
 
+			logPath.replace(threadPos, threadPos + 14, th.str());
+		}
 		FILE *lf = nullptr;
-		fopen_s(&lf,logPath.lock(), "a+t");
+		fopen_s(&lf,logPath.c_str(), "a+t");
 		if (lf) {
 			vfprintf(lf, format, params);
 			fprintf(lf, "\n");
@@ -317,7 +334,7 @@ void CLog::writeBinData(BYTE *data,int datalen) {
 	}
 	if (!bFirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
 		bFirstLog=true;
-		write("%s - Inizio Sessione - versione file: %s",logName.lock(),logVersion);
+		write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion);
 		writeModuleInfo();
 	}
 
@@ -325,11 +342,17 @@ void CLog::writeBinData(BYTE *data,int datalen) {
 
 	// se siamo in LM_thread devo scrivere il thread nel nome del file
 	DWORD dwThreadID=CThread::getID();
-	if (LogMode==LM_Thread || LogMode==LM_Module_Thread)
-		sprintf_s(threadPos,14,"%08x.log",dwThreadID);
+	if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
+		std::stringstream th;
+		th << std::setiosflags(std::ios::hex | std::ios::uppercase);
+		th << std::setw(8);
+		th << dwThreadID << ".log";
+
+		logPath.replace(threadPos, threadPos + 14, th.str());
+	}
 
 	FILE *lf = nullptr;
-	fopen_s(&lf,logPath.lock(), "a+t");
+	fopen_s(&lf,logPath.c_str(), "a+t");
 	if (lf) {
 		if (datalen>100) datalen=100;
 		for (int i=0;i<datalen;i++)
@@ -344,7 +367,7 @@ void CLog::writeModuleInfo() {
 	CModuleInfo module;
 	HANDLE mainModule = module.getApplicationModule();
 	module.init(mainModule);
-	write("Applicazione chiamante: %s",module.szModuleName.stringlock());
+	write("Applicazione chiamante: %s",module.szModuleName.c_str());
 }
 
 void CLog::__dumpStack() {
