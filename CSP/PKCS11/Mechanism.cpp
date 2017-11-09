@@ -64,9 +64,7 @@ CEncrypt::~CEncrypt() {}
 
 BYTE CDecrypt::uninitializedCacheData = 0;
 CDecrypt::CDecrypt(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session)
-    : CMechanism(type, Session), cacheData(&uninitializedCacheData, 1)
-    {}
-
+    : CMechanism(type, Session), cacheData(&uninitializedCacheData, 1) {}
 CDecrypt::~CDecrypt() {}
 
 /* ******************** */

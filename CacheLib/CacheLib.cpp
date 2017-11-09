@@ -15,24 +15,24 @@
 
 char commonData[MAX_PATH] = "";
 
-void GetCardPath(char *PAN,char szPath[MAX_PATH]) {
+void GetCardPath(const char *PAN, char szPath[MAX_PATH]) {
 	if (commonData[0]==0)
 		if (SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath) != S_OK)
 			throw CStringException("Errore in GetFolderPath per COMMONDATA");
 
 	PathAppend(szPath, "CIEPKI");
-	String s;
-	s.printf("%s.cache", PAN);
-	PathAppend(szPath, s.lock());
+	std::string s(PAN);
+	s+= ".cache";
+	PathAppend(szPath, s.c_str());
 }
 
-bool CacheExists(char *PAN) {
+bool CacheExists(const char *PAN) {
 	char szPath[MAX_PATH];
 	GetCardPath(PAN, szPath);
 	return (PathFileExists(szPath)!=FALSE);
 }
 
-void CacheGetCertificate(char *PAN, std::vector<BYTE>&certificate)
+void CacheGetCertificate(const char *PAN, std::vector<BYTE>&certificate)
 {
 	if (PAN == nullptr)
 		throw CStringException("Il PAN è necessario");
@@ -58,7 +58,7 @@ void CacheGetCertificate(char *PAN, std::vector<BYTE>&certificate)
 		throw CStringException("CIE non abilitata");
 }
 
-void CacheGetPIN(char *PAN, std::vector<BYTE>&PIN) {
+void CacheGetPIN(const char *PAN, std::vector<BYTE>&PIN) {
 	if (PAN == nullptr)
 		throw CStringException("Il PAN è necessario");
 
@@ -83,7 +83,7 @@ void CacheGetPIN(char *PAN, std::vector<BYTE>&PIN) {
 
 
 
-void CacheSetData(char *PAN, BYTE *certificate, int certificateSize, BYTE *FirstPIN, int FirstPINSize) {
+void CacheSetData(const char *PAN, BYTE *certificate, int certificateSize, BYTE *FirstPIN, int FirstPINSize) {
 	if (PAN == nullptr)
 		throw CStringException("Il PAN è necessario");
 
@@ -93,7 +93,7 @@ void CacheSetData(char *PAN, BYTE *certificate, int certificateSize, BYTE *First
 	PathAppend(szPath, "\\CIEPKI");
 	if (!PathFileExists(szPath))
 		CreateDirectory(szPath, nullptr);
-	PathAppend(szPath, String().printf("\\%s.cache", PAN).lock());
+	PathAppend(szPath, std::string("\\").append(PAN).append(".cache").c_str());
 
 	ByteArray baCertificate(certificate, certificateSize);
 	ByteArray baFirstPIN(FirstPIN, FirstPINSize);

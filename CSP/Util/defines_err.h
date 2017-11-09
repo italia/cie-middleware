@@ -11,7 +11,7 @@
 	DWORD _call_ris=0; \
 	int _this_func_checkpoint=__LINE__; \
 	char *_this_func_name=__FUNCTION__; \
-	String _errDump; \
+	std::string _errDump; \
 	CFuncCallInfo::startCall(); \
 	CFuncCallInfo info(_this_func_name,Log);  \
 	try {
@@ -32,7 +32,7 @@
 	} \
 	catch(CBaseException &ex) { \
 		 ex.DumpTree(_errDump); \
-		 Log.write((char*)_errDump.lock()); \
+		 Log.write((char*)_errDump.c_str()); \
 	} \
 	catch(char *ex) { \
 		_errDump=ex; \

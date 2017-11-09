@@ -20,7 +20,7 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 		}
 		else if (code == 0xfffe) {
 			DWORD protocol = 0;
-			ODS(String().printf("UNPOWER CARD").lock());
+			ODS("UNPOWER CARD");
 			auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
 			if (sw == SCARD_S_SUCCESS)
 				SCardBeginTransaction(data->hCard);
@@ -31,17 +31,17 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 			auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
 			if (sw == SCARD_S_SUCCESS)
 				SCardBeginTransaction(data->hCard);
-			ODS(String().printf("RESET CARD").lock());
+			ODS("RESET CARD");
 			return sw;
 		}
 	}
-	ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
+	//ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
 	auto sw = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
-	if (sw==SCARD_S_SUCCESS)
-		ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
-	else {
+	if (sw!=SCARD_S_SUCCESS)
 		ODS("Errore trasmissione APDU");
-	}
+	//else 
+		//ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
+	
 	return sw;
 }
 
@@ -156,17 +156,17 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 			cie->cert->addAttribute(CKA_CERTIFICATE_TYPE, VarToByteArray(certx509));
 			CK_DATE start, end;
 			SYSTEMTIME sFrom, sTo;
-			String temp;
+			char temp[10];
 			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotBefore, &sFrom))
 				return FAIL;
 			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotAfter, &sTo))
 				return FAIL;
-			temp.printf("%04i", sFrom.wYear); VarToByteArray(start.year).copy(temp.toByteArray());
-			temp.printf("%02i", sFrom.wMonth); VarToByteArray(start.month).copy(temp.toByteArray());
-			temp.printf("%02i", sFrom.wDay); VarToByteArray(start.day).copy(temp.toByteArray());
-			temp.printf("%04i", sTo.wYear); VarToByteArray(end.year).copy(temp.toByteArray());
-			temp.printf("%02i", sTo.wMonth); VarToByteArray(end.month).copy(temp.toByteArray());
-			temp.printf("%02i", sTo.wDay); VarToByteArray(end.day).copy(temp.toByteArray());
+			sprintf_s(temp, "%04i", sFrom.wYear); VarToByteArray(start.year).copy(ByteArray((BYTE*)temp, 4));
+			sprintf_s(temp, "%02i", sFrom.wMonth); VarToByteArray(start.month).copy(ByteArray((BYTE*)temp, 2));
+			sprintf_s(temp, "%02i", sFrom.wDay); VarToByteArray(start.day).copy(ByteArray((BYTE*)temp, 2));
+			sprintf_s(temp, "%04i", sTo.wYear); VarToByteArray(end.year).copy(ByteArray((BYTE*)temp, 2));
+			sprintf_s(temp, "%02i", sTo.wMonth); VarToByteArray(end.month).copy(ByteArray((BYTE*)temp, 2));
+			sprintf_s(temp, "%02i", sTo.wDay); VarToByteArray(end.day).copy(ByteArray((BYTE*)temp, 2));
 			cie->cert->addAttribute(CKA_START_DATE, VarToByteArray(start));
 			cie->cert->addAttribute(CKA_END_DATE, VarToByteArray(end));
 
@@ -217,15 +217,15 @@ RESULT CIEtemplateGetSerial(CSlot &pSlot, ByteDynArray &baSerial){
 		IAS ias((CToken::TokenTransmitCallback)TokenTransmitCallback, ATR);
 		ias.SetCardContext(&pSlot);
 		ias.ReadPAN();
-		String numSerial;
+		std::string numSerial;
 		dumpHexData(ias.PAN.mid(5, 6), numSerial, false);
-		baSerial = ByteArray((BYTE*)numSerial.lock(),numSerial.strlen());
+		baSerial = ByteArray((BYTE*)numSerial.c_str(),numSerial.length());
 		_return(OK);
 	}
 	exit_func
 		_return(FAIL)
 }
-RESULT CIEtemplateGetModel(CSlot &pSlot, String &szModel){ 
+RESULT CIEtemplateGetModel(CSlot &pSlot, std::string &szModel){ 
 	szModel = ""; 
 	return OK;
 }

@@ -83,14 +83,14 @@ DWORD WINAPI _cambioPIN(
 		}
 		case SCARD_W_WRONG_CHV:
 		{
-			String msg1, msg2;
+			std::string msg1, msg2;
 			if (attempts >= 0) {
-				msg1.printf("PIN errato. Sono rimasti %i tentativi", attempts);
+				msg1 = "PIN errato. Sono rimasti " + std::to_string(attempts) + " tentativi";
 				msg2 = "prima di bloccare il PIN";
 			}
 			else
 				msg1 = "PIN errato";
-			CMessage msg(MB_OK, "Cambio PIN", "", msg1.lock(), msg2.lock());
+			CMessage msg(MB_OK, "Cambio PIN", "", msg1.c_str(), msg2.c_str());
 			msg.DoModal();
 			return;
 		}
@@ -174,11 +174,11 @@ DWORD WINAPI _cambioPIN(
 		data.checkCIE = checkCIE;
 		data.changePIN = changePIN;
 		data.showMessage = showMessage;
-		readerMonitor monitor([](String &reader, bool insert, void* appData) -> void {
+		readerMonitor monitor([](std::string &reader, bool insert, void* appData) -> void {
 			struct _data *data = (struct _data *)appData;
 			if (insert) {
 				DWORD ris = 0;
-				safeConnection conn(data->hSC, reader.lock(), SCARD_SHARE_SHARED);
+				safeConnection conn(data->hSC, reader.c_str(), SCARD_SHARE_SHARED);
 				if (conn.hCard == NULL)
 					return;
 

@@ -77,12 +77,11 @@ safeConnection::operator SCARDHANDLE() {
 readerMonitor::~readerMonitor() {
 	stopMonitor = true;
 	SCardCancel(hContext);
-	WaitForSingleObject(hThread, INFINITE);
-	CloseHandle(hThread);
+	Thread.join();
 	SCardReleaseContext(hContext);
 }
 
-readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, void *appData), void *appData) : appData(appData) {
+readerMonitor::readerMonitor(void(*eventHandler)(std::string &reader, bool insert, void *appData), void *appData) : appData(appData) {
 	LONG _call_ris;
 	if ((_call_ris = (SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &hContext))) != S_OK) {
 		throw CWinException();
@@ -90,10 +89,10 @@ readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, vo
 	stopMonitor = false;
 	readerEvent = eventHandler;
 	DWORD tid = 0;
-	hThread = CreateThread(nullptr, 0, [](LPVOID lpThreadParameter) -> DWORD {
-		readerMonitor *rm = (readerMonitor *)lpThreadParameter;
-		std::vector<String> readerList;
-		DynArray<SCARD_READERSTATE> states;
+	
+	Thread = std::thread([](readerMonitor *rm) -> DWORD {
+		std::vector<std::string> readerList;
+		std::vector<SCARD_READERSTATE> states;
 
 		auto loadReaderList = [&]() -> void {
 			char *readers = nullptr;
@@ -104,27 +103,25 @@ readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, vo
 			char *curReader = readers;
 			readerList.clear();
 			for (; curReader[0] != 0; curReader += strnlen(curReader, len) + 1)
-				readerList.push_back(String(curReader));
+				readerList.push_back(std::string(curReader));
 
 			SCardFreeMemory(rm->hContext, readers);
 			states.resize((DWORD)readerList.size() + 1);
 			for (DWORD i = 0; i < readerList.size(); i++) {
-				ZeroMem(states[i]);
-				states[i].szReader = readerList[i].lock();
+				states[i].szReader = readerList[i].c_str();
 			}
 			auto &PnP = states[(DWORD)readerList.size()];
-			ZeroMem(PnP);
 			PnP.szReader = "\\\\?PnP?\\Notification";
 			PnP.pvUserData = (void*)PnP.szReader;		
 
-			SCardGetStatusChange(rm->hContext, 0, states.lock(), states.size());
+			SCardGetStatusChange(rm->hContext, 0, states.data(), states.size());
 			for (DWORD i = 0; i < states.size(); i++)
 				states[i].dwCurrentState = states[i].dwEventState;
 		};
 		loadReaderList();
 
 		while (!rm->stopMonitor) {
-			if (SCardGetStatusChange(rm->hContext, INFINITE, states.lock(), states.size()) == SCARD_E_CANCELLED)
+			if (SCardGetStatusChange(rm->hContext, INFINITE, states.data(), states.size()) == SCARD_E_CANCELLED)
 				break;
 			for (DWORD i = 0; i < states.size(); i++) {
 				auto &state = states[i];
@@ -145,5 +142,5 @@ readerMonitor::readerMonitor(void(*eventHandler)(String &reader, bool insert, vo
 			}
 		}
 		return 0;
-	}, this, 0, &tid);
+	}, this);
 }
