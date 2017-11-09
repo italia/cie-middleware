@@ -38,7 +38,7 @@ int TokenTransmitCallback(PCARD_DATA data, BYTE *apdu, DWORD apduSize, BYTE *res
 		}
 		if (code == 0xfffe) {
 			DWORD protocol=0;
-			ODS(String().printf("UNPOWER CARD").lock());
+			ODS("UNPOWER CARD");
 			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
 			if (sw == SCARD_S_SUCCESS)
 				SCardBeginTransaction(data->hScard);
@@ -49,14 +49,14 @@ int TokenTransmitCallback(PCARD_DATA data, BYTE *apdu, DWORD apduSize, BYTE *res
 			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
 			if (sw == SCARD_S_SUCCESS)
 				SCardBeginTransaction(data->hScard);
-			ODS(String().printf("RESET CARD").lock());
+			ODS("RESET CARD");
 			return sw;
 		}
 	}
-	ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
+	ODS(std::string("APDU: ").append(dumpHexData(ByteArray(apdu, apduSize), std::string())).append("\n").c_str());
 	auto sw=SCardTransmit(data->hScard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
 	if (sw == SCARD_S_SUCCESS) {
-		ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
+		ODS(std::string("RESP: ").append(dumpHexData(ByteArray(resp, *respSize), std::string())).append("\n").c_str());
 	}
 	return sw;
 }
@@ -137,16 +137,16 @@ DWORD WINAPI CardReadFile(
 			if (!cert.isEmpty()) {
 				PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.lock(), cert.size());
 				if (cer == nullptr)
-					throw CStringException(String().printf("Errore nella lettura del certificato:%08x", GetLastError()).lock());
+					throw CStringException("Errore nella lettura del certificato:%08x", GetLastError());
 				keylen = CertGetPublicKeyLength(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, &cer->pCertInfo->SubjectPublicKeyInfo);
 				if (keylen == 0)
-					throw CStringException(String().printf("Errore nella lettura della lunghezza della chiave del certificato:%08x", GetLastError()).lock());
+					throw CStringException("Errore nella lettura della lunghezza della chiave del certificato:%08x", GetLastError());
 				CertFreeCertificateContext(cer);
 			}
 
 			CONTAINER_MAP_RECORD value;
 			
-			swprintf_s(value.wszGuid, L"%s-%S", CIE_CONTAINER_NAME, dumpHexData(ias->PAN.mid(5, 6), String(), false).lock());
+			swprintf_s(value.wszGuid, L"%s-%S", CIE_CONTAINER_NAME, dumpHexData(ias->PAN.mid(5, 6), std::string(), false).c_str());
 			value.wSigKeySizeBits = (WORD)keylen;
 			value.wKeyExchangeKeySizeBits = 0;
 			value.bReserved = 0;
@@ -357,14 +357,14 @@ void GetContainerInfo(CONTAINER_INFO &value, PCARD_DATA  pCardData) {
 
 	PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.lock(), cert.size());
 	if (cer == nullptr)
-		throw CStringException(String().printf("Errore nella lettura del certificato:%08x", GetLastError()).lock());
+		throw CStringException("Errore nella lettura del certificato:%08x", GetLastError());
 	PCERT_PUBLIC_KEY_INFO pinf = &(cer->pCertInfo->SubjectPublicKeyInfo);
 	DWORD PubKeyLen = 0;
 	if (!CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, pinf->PublicKey.pbData, pinf->PublicKey.cbData, 0, NULL, &PubKeyLen))
-		throw CStringException(String().printf("Errore nella decodifica della chiave pubblica:%08x", GetLastError()).lock());
+		throw CStringException("Errore nella decodifica della chiave pubblica:%08x", GetLastError());
 	PUBKEYSTRUCT_BASE* PubKey = (PUBKEYSTRUCT_BASE*)pCardData->pfnCspAlloc(PubKeyLen);
 	if (!CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, pinf->PublicKey.pbData, pinf->PublicKey.cbData, 0, PubKey, &PubKeyLen))
-		throw CStringException(String().printf("Errore nella decodifica della chiave pubblica:%08x", GetLastError()).lock());
+		throw CStringException("Errore nella decodifica della chiave pubblica:%08x", GetLastError());
 	PubKey->publickeystruc.aiKeyAlg = CALG_RSA_SIGN;
 	CertFreeCertificateContext(cer);
 

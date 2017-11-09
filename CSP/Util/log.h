@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include "defines.h"
+#include <string>
 
 
 struct _ATL_SYMBOL_INFO
@@ -20,12 +21,12 @@ public:
 	bool bFunctionLog;
 	bool bLogParam;
 	DWORD dwModuleNum;
-	String logDir;
-	String logPath;
-	String logName;
-	String logFileName;
-	char *threadPos;
-	String logVersion;
+	std::string logDir;
+	std::string logPath;
+	std::string logName;
+	std::string logFileName;
+	std::string::iterator threadPos;
+	std::string logVersion;
 	bool bFirstLog;
 
 	bool _stack_logged;

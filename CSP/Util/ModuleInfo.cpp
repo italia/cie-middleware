@@ -27,14 +27,14 @@ void CModuleInfo::init(HANDLE module)
 	if (GetModuleFileName((HMODULE)module,path,MAX_PATH)==0)
 		throw CWinException();
 	
-	szModuleFullPath.alloc_copy(path);
+	szModuleFullPath=path;
 
 	char drive[_MAX_DRIVE], dir[_MAX_DIR],fname[_MAX_FNAME],ext[_MAX_EXT];
-	_splitpath_s((const char *)szModuleFullPath.stringlock(), drive, dir, fname, ext);
-	szModuleName.alloc_copy(fname);
+	_splitpath_s(szModuleFullPath.c_str(), drive, dir, fname, ext);
+	szModuleName = fname;
 	char moddir[MAX_PATH];
 	_makepath_s( moddir,drive,dir,NULL,NULL);
-	szModulePath.alloc_copy(moddir);
+	szModulePath = moddir;
 	exit_func_internal
 }
 

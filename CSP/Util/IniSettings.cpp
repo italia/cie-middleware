@@ -1,13 +1,14 @@
 #include "../stdafx.h"
 #include "IniSettings.h"
 #include "../crypto/base64.h"
+#include <sstream>
 
 std::vector<IniSettings*> _iniSettings;
 
-void GetIniString(char *fileName,char* section,char* name,String &buf) {
+void GetIniString(const char *fileName, const char* section, const char* name, std::string &buf) {
 	buf.resize(100);
 	while (true) {
-		DWORD size=GetPrivateProfileStringA(section,name,"",buf.lock(),buf.size(),fileName);
+		DWORD size=GetPrivateProfileStringA(section,name,"",&buf[0],buf.size(),fileName);
 		if (size<(buf.size()-2)) {
 			buf.resize(size+1,true);
 			return;
@@ -16,7 +17,7 @@ void GetIniString(char *fileName,char* section,char* name,String &buf) {
 	}	
 }
 
-IniSettings::IniSettings(int typeId,char* section,char* name,char *description) {
+IniSettings::IniSettings(int typeIdconst, const char* section, const char* name, const char *description) {
 	_iniSettings.push_back(this);
 	this->typeId = typeId;
 	this->section = section;
@@ -28,71 +29,71 @@ int IniSettings::GetTypeId() { return typeId; }
 
 IniSettings::~IniSettings() {}
 
-IniSettingsInt::IniSettingsInt(char* section,char* name,int defaultValue,char *description) : IniSettings(0,section,name,description) {
+IniSettingsInt::IniSettingsInt(const char* section, const char* name, int defaultValue, const char *description) : IniSettings(0, section, name, description) {
 	this->defaultVal=defaultValue;
 }
 
-int IniSettingsInt::GetValue(char* fileName) {
-	return GetPrivateProfileInt(section.lock(),name.lock(),defaultVal,fileName);
+int IniSettingsInt::GetValue(const char* fileName) {
+	return GetPrivateProfileInt(section.c_str(),name.c_str(),defaultVal,fileName);
 }
 
 IniSettingsInt::~IniSettingsInt() {}
 
-IniSettingsString::IniSettingsString(char* section,char* name,char* defaultValue,char *description) : IniSettings(1,section,name,description) {
+IniSettingsString::IniSettingsString(const char* section, const char* name, const char* defaultValue, const char *description) : IniSettings(1, section, name, description) {
 	this->defaultVal=defaultValue;
 }
 
-void IniSettingsString::GetValue(char* fileName,String &value) {
-	GetIniString(fileName,section.lock(),name.lock(),value);
+void IniSettingsString::GetValue(const char* fileName, std::string &value) {
+	GetIniString(fileName,section.c_str(),name.c_str(),value);
 	if (value.size()==1)
 		value = defaultVal;
 }
 
 IniSettingsString::~IniSettingsString() {}
 
-IniSettingsBool::IniSettingsBool(char* section,char* name,bool defaultValue,char *description) : IniSettings(2,section,name,description) {
+IniSettingsBool::IniSettingsBool(const char* section, const char* name, bool defaultValue, const char *description) : IniSettings(2, section, name, description) {
 	this->defaultVal=defaultValue;
 }
-bool IniSettingsBool::GetValue(char* fileName) {
-	int val=GetPrivateProfileInt(section.lock(),name.lock(),-100,fileName);
+bool IniSettingsBool::GetValue(const char* fileName) {
+	int val = GetPrivateProfileInt(section.c_str(), name.c_str(), -100, fileName);
 	if (val==-100)
 		return defaultVal;
 	return val!=0;
 }
 IniSettingsBool::~IniSettingsBool() {}
 
-IniSettingsByteArray::IniSettingsByteArray(char* section,char* name,ByteArray defaultValue,char *description) : IniSettings(3,section,name,description) {
+IniSettingsByteArray::IniSettingsByteArray(const char* section, const char* name, ByteArray defaultValue, const char *description) : IniSettings(3, section, name, description) {
 	this->defaultVal=defaultValue;
 }
 
-void IniSettingsByteArray::GetValue(char* fileName,ByteDynArray &value) {
-	String buf;
-	GetIniString(fileName,section.lock(),name.lock(),buf);
+void IniSettingsByteArray::GetValue(const char* fileName, ByteDynArray &value) {
+	std::string buf;
+	GetIniString(fileName, section.c_str(), name.c_str(), buf);
 	if (buf.size()==1)
 		value = defaultVal;
 	else
-		value.init(buf.lock());
+		value.set(buf.c_str());
 }
 
 IniSettingsByteArray::~IniSettingsByteArray() {}
 
-IniSettingsB64::IniSettingsB64(char* section,char* name,ByteArray defaultValue,char *description) : IniSettings(4,section,name,description) {
+IniSettingsB64::IniSettingsB64(const char* section, const char* name, ByteArray defaultValue, const char *description) : IniSettings(4, section, name, description) {
 	this->defaultVal=defaultValue;
 }
 
-IniSettingsB64::IniSettingsB64(char* section,char* name,char *defaultValueB64,char *description) : IniSettings(4,section,name,description) {
+IniSettingsB64::IniSettingsB64(const char* section, const char* name, const char *defaultValueB64, const char *description) : IniSettings(4, section, name, description) {
 	CBase64 b64;
 	b64.Decode(defaultValueB64,defaultVal);
 }
 
-void IniSettingsB64::GetValue(char* fileName,ByteDynArray &value) {
+void IniSettingsB64::GetValue(const char* fileName, ByteDynArray &value) {
 	CBase64 b64;
-	String buf;
-	GetIniString(fileName,section.lock(),name.lock(),buf);
+	std::string buf;
+	GetIniString(fileName, section.c_str(), name.c_str(), buf);
 	if (buf.size()==1)
 		value = defaultVal;
 	else
-		b64.Decode(buf.lock(),value);
+		b64.Decode(buf.c_str(),value);
 }
 
 IniSettingsB64::~IniSettingsB64() {}
@@ -114,25 +115,29 @@ extern "C" {
 		CBase64 b64;
 		IniSettings* is=_iniSettings[i];
 		int id=is->GetTypeId();
-		String out;
-		out.printf("%s|%s|%s|%i|",is->section.lock(),is->name.lock(),is->description.lock(),id);
-		String out2;
+		std::string out;
+		{
+			std::stringstream th;
+			th << is->section << "|" << is->name << "|" << is->description << "|" << is->GetTypeId() << "|";
+			out = th.str();
+		}
+
+		std::string out2;
 		if (id==0) {
-			out2.printf("%i",((IniSettingsInt*)is)->defaultVal);
+			out2 = ((IniSettingsInt*)is)->defaultVal;
 		}
 		else if (id==1) {
-			out2.printf("%s",((IniSettingsString*)is)->defaultVal.lock());
+			out2 = ((IniSettingsString*)is)->defaultVal;
 		}
 		else if (id==2) {
-			out2.printf("%i",((IniSettingsBool*)is)->defaultVal ? 1 : 0);
+			out2 = ((IniSettingsBool*)is)->defaultVal ? 1 : 0;
 		}
 		else if (id==3 || id==4) {
 			b64.Encode(((IniSettingsByteArray*)is)->defaultVal,out2);
 		}
-		String res;
-		res.printf("%s%s",out.lock(),out2.lock());
+		std::string res = out + out2;
 		if (data!=NULL) 
-			memcpy_s(data,res.size(),res.lock(),res.size());
+			memcpy_s(data,res.size(),res.c_str(),res.size());
 		return res.size();
 	}
 }

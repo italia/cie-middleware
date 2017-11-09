@@ -7,11 +7,11 @@ extern std::vector<IniSettings*> _iniSettings;
 class IniSettings {
 public:
 	int typeId;
-	String section;
-	String name;
-	String description;
+	std::string section;
+	std::string name;
+	std::string description;
 
-	IniSettings(int typeId,char* section,char* name,char *description);
+	IniSettings(int typeId, const char* section, const char* name, const char *description);
 	int GetTypeId();
 	virtual ~IniSettings();
 };
@@ -19,42 +19,42 @@ public:
 class IniSettingsInt : public IniSettings {
 public:
 	int defaultVal;
-	IniSettingsInt(char* section,char* name,int defaultValue,char *description);
+	IniSettingsInt(const char* section,const char* name,int defaultValue,const char *description);
 	~IniSettingsInt();
-	int GetValue(char *fileName);
+	int GetValue(const char *fileName);
 };
 
 class IniSettingsString : public IniSettings {
 public:
-	String defaultVal;
-	IniSettingsString(char* section,char* name,char* defaultValue,char *description);
+	std::string defaultVal;
+	IniSettingsString(const char* section,const char* name,const char* defaultValue,const char *description);
 	~IniSettingsString();
-	void GetValue(char *fileName,String &value);
+	void GetValue(const char *fileName, std::string &value);
 };
 
 class IniSettingsBool : public IniSettings {
 public:
 	bool defaultVal;
-	IniSettingsBool(char* section,char* name,bool defaultValue,char *description);
+	IniSettingsBool(const char* section,const char* name,bool defaultValue,const char *description);
 	~IniSettingsBool();
-	bool GetValue(char *fileName);
+	bool GetValue(const char *fileName);
 };
 
 class IniSettingsByteArray : public IniSettings {
 public:
 	ByteDynArray defaultVal;
-	IniSettingsByteArray(char* section,char* name,ByteArray defaultValue,char *description);
+	IniSettingsByteArray(const char* section,const char* name,ByteArray defaultValue,const char *description);
 	~IniSettingsByteArray();
-	void GetValue(char *fileName,ByteDynArray &value);
+	void GetValue(const char *fileName, ByteDynArray &value);
 };
 
 class IniSettingsB64 : public IniSettings {
 public:
 	ByteDynArray defaultVal;
-	IniSettingsB64(char* section,char* name,ByteArray defaultValue,char *description);
-	IniSettingsB64(char* section,char* name,char *defaultValueB64,char *description);
+	IniSettingsB64(const char* section,const char* name,ByteArray defaultValue,const char *description);
+	IniSettingsB64(const char* section, const char* name, const char *defaultValueB64, const char *description);
 	~IniSettingsB64();
-	void GetValue(char *fileName,ByteDynArray &value);
+	void GetValue(const char *fileName, ByteDynArray &value);
 };
 
 extern "C" {

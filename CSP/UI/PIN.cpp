@@ -3,7 +3,7 @@
 #include "../stdafx.h"
 #include "Pin.h"
 
-CPin::CPin(int PinLen, char *message, char *message2, char *message3, char *title, bool repeat)
+CPin::CPin(int PinLen, const char *message, const char *message2, const char *message3, const char *title, bool repeat)
 {
 	txtFont = CreateFont(20, 0, 0, 0, 800, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, DEFAULT_PITCH, "Arial");
 	txtFont2 = CreateFont(15, 0, 0, 0, 400, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, DEFAULT_PITCH, "Arial");

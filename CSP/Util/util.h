@@ -246,9 +246,10 @@ void randomize(ByteArray &ba);
 
 BYTE hex2byte(char h);
 void readHexData(const char *data,ByteDynArray &ba);
-String &dumpHexData(ByteArray &data,String &dump);
-String &dumpHexData(ByteArray &data, String &dump, bool withSpace);
-String &dumpHexDataLowerCase(ByteArray &data, String &dump);
+std::string HexByte(BYTE data, bool uppercase = true);
+std::string &dumpHexData(ByteArray &data, std::string &dump);
+std::string &dumpHexData(ByteArray &data, std::string &dump, bool withSpace, bool uppercase = true);
+std::string &dumpHexDataLowerCase(ByteArray &data, std::string &dump);
 
  void PutPaddingBT0(ByteArray &ba,DWORD dwLen);
  void PutPaddingBT1(ByteArray &ba,DWORD dwLen);
@@ -274,7 +275,7 @@ const ByteDynArray& ISOPad16(const ByteArray &data, ByteDynArray &resp);
  char * err_string(const char *format,...);
 
  void exceptionTranslator( unsigned int u, _EXCEPTION_POINTERS* pExp );
- void StackWalkThread(String &stack);
+ void StackWalkThread(std::string &stack);
 
  void Debug(ByteArray ba);
  ByteDynArray& setASN1Tag(ByteDynArray& result,DWORD tag,ByteArray &content);

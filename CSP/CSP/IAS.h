@@ -88,7 +88,7 @@ public:
 	void Deauthenticate();
 	void GetCertificate(ByteDynArray &certificate, bool askEnable = true);
 	void GetFirstPIN(ByteDynArray &PIN);
-	void SetCache(char *PAN, ByteArray &certificate, ByteArray &FirstPIN);
+	void SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN);
 	bool IsEnrolled();
 	void IconaSbloccoPIN();
 

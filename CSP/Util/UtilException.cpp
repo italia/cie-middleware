@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 
-char *CBaseException::ExceptionName() {
+const char *CBaseException::ExceptionName() {
 	return "Base Exception";
 }
 
@@ -41,7 +41,7 @@ std::unique_ptr<CBaseException> CBaseException::Clone() const {
 }
 
 const CBaseException& CBaseException::operator=(const CBaseException& orig) {
-	if (orig.fileName.pbtData!=NULL)
+	if (!orig.fileName.empty())
 		fileName=orig.fileName;
 	else
 		fileName.clear();
@@ -59,23 +59,23 @@ CBaseException::~CBaseException(void)
 {
 }
 
-void CBaseException::DumpError(String &dump) {
+void CBaseException::DumpError(std::string &dump) {
 	dump="Eccezione generica";
 }
 
-void CBaseException::DumpTree(String &dump) 
+void CBaseException::DumpTree(std::string &dump)
 {
 	CBaseException *exc=this;
 	dump="";
 	while(exc!=NULL) {
-		String desc;
+		std::string  desc;
 		exc->DumpError(desc);
-		String pos="";
-		if (exc->fileName.pbtData!=NULL)
-			pos.printf("%s(%i)",exc->fileName.stringlock(),exc->line);
-		char *exName=exc->ExceptionName();
+		std::string pos = "";
+		if (!exc->fileName.empty())
+			pos = exc->fileName.append("(").append(std::to_string(exc->line)).append(")");
+		const char *exName=exc->ExceptionName();
 		int sz=dump.size()-1;
-		dump.printf("%s : %s:%s\n", pos.lock(), exName, desc.lock());
+		dump = pos.append(" : ").append(exName).append(desc).append("\n");
 		exc=exc->innerException.get();
 	}
 }
@@ -100,39 +100,47 @@ CStringException::CStringException(const char *fmt,...) : CBaseException() {
 	type=UTILEX_STRING;
 	va_list args;
 	va_start (args, fmt);
-	description.printfList(fmt,args);
+	int size = _vscprintf(fmt, args) + 1;
+	description.resize(size);
+	vsprintf_s(&description[0], size, fmt, args);
 	va_end (args);
 }
 
 CStringException::CStringException(int line,char *fileName,const char *fmt,...) : CBaseException(line,fileName) {
 	type=UTILEX_STRING;
 	va_list args;
-	va_start (args, fmt);
-	description.printfList(fmt,args);
-	va_end (args);
+	va_start(args, fmt);
+	int size = _vscprintf(fmt, args) + 1;
+	description.resize(size);
+	vsprintf_s(&description[0], size, fmt, args);
+	va_end(args);
 }
 
 CStringException::CStringException(const CBaseException& inner,const char *fmt,...) : CBaseException(inner)  {
 	type=UTILEX_STRING;
 	va_list args;
 	va_start (args, fmt);
-	description.printfList(fmt,args);
+	int size = _vscprintf(fmt, args) + 1;
+	description.resize(size);
+	vsprintf_s(&description[0], size, fmt, args);
 	va_end (args);
 }
 
 CStringException::CStringException(const CBaseException& inner,int line,char *fileName,const char *fmt,...) : CBaseException(inner,line,fileName)  {
 	type=UTILEX_STRING;
 	va_list args;
-	va_start (args, fmt);
-	description.printfList(fmt,args);
-	va_end (args);
+	va_start(args, fmt);
+	int size = _vscprintf(fmt, args) + 1;
+	description.resize(size);
+	vsprintf_s(&description[0], size, fmt, args);
+	va_end(args);
 }
 
 CStringException::~CStringException(void)
 {
 }
 
-void CStringException::DumpError(String &dump) {
+void CStringException::DumpError(std::string &dump) {
 	dump=description;
 }
 
@@ -235,19 +243,19 @@ std::unique_ptr<CBaseException> CSCardException::Clone() const {
 	return std::unique_ptr<CBaseException>(cb.release());
 }
 
-char *CStringException::ExceptionName() {
+const char *CStringException::ExceptionName() {
 	return "Exception";
 }
 
-char *CWinException::ExceptionName() {
+const char *CWinException::ExceptionName() {
 	return "Windows Error";
 }
 
-char *CSCardException::ExceptionName() {
+const char *CSCardException::ExceptionName() {
 	return "SCard Error";
 }
 
-char *CSystemException::ExceptionName() {
+const char *CSystemException::ExceptionName() {
 	return "System Error";
 }
 
@@ -274,8 +282,8 @@ std::unique_ptr<CBaseException> CSystemException::Clone() const {
 }
 
 char *sep="-----------------\n";
-void CSystemException::DumpError(String &dump) {
-	dump.printf("%s\n%s%s%s",description.lock(),sep,stackWalk.lock(),sep);
+void CSystemException::DumpError(std::string &dump) {
+	dump = description.append("\n").append(sep).append(stackWalk).append(sep);
 }
 
 void exceptionTranslator( unsigned int u, _EXCEPTION_POINTERS* pExp ) {

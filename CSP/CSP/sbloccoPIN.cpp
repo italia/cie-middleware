@@ -80,14 +80,14 @@ DWORD WINAPI _sbloccoPIN(
 				CPin puk(8, "Inserire le 8 cifre del PUK della CIE", "", "", "Sblocco PIN");
 				if (puk.DoModal() == IDOK) {
 					int numCifre = 4;
-					String msg;
+					std::string msg;
 					if (!isEnrolled) {
 						msg = "Inserire le 8 cifre del nuovo PIN";
 						numCifre = 8;
 					}
 					else
 						msg = "Inserire le ultime 4 cifre del nuovo PIN";
-					CPin newPin(numCifre, msg.lock(), "", "", "Sblocco PIN", true);
+					CPin newPin(numCifre, msg.c_str(), "", "", "Sblocco PIN", true);
 					if (newPin.DoModal() == IDOK) {
 						try {
 
@@ -100,13 +100,13 @@ DWORD WINAPI _sbloccoPIN(
 
 							auto ris = CardUnblockPin(&cData, wszCARD_USER_USER, (BYTE*)puk.PIN, (DWORD)strnlen(puk.PIN, sizeof(puk.PIN)), (BYTE*)newPin.PIN, (DWORD)strnlen(newPin.PIN, sizeof(newPin.PIN)), 0, CARD_AUTHENTICATE_PIN_PIN);
 							if (ris == SCARD_W_WRONG_CHV) {
-								String num;
+								std::string num;
 								if (ias->attemptsRemaining >= 0)
-									num.printf("PUK errato. Sono rimasti %i tentativi", ias->attemptsRemaining);
+									num = "PUK errato. Sono rimasti " + std::to_string(ias->attemptsRemaining) + " tentativi";
 								else
 									num = "";
 								CMessage msg(MB_OK, "Sblocco PIN",									
-									num.lock(),
+									num.c_str(),
 									"prima di bloccare il PUK");
 								msg.DoModal();
 								if (lpThreadParameter != nullptr)
@@ -134,7 +134,7 @@ DWORD WINAPI _sbloccoPIN(
 
 						}
 						catch (CBaseException &ex) {
-							String dump;
+							std::string dump;
 							ex.DumpTree(dump);
 							CMessage msg(MB_OK, "Sblocco PIN",
 								"Si è verificato un errore nella verifica del PUK");
@@ -167,9 +167,9 @@ DWORD WINAPI _sbloccoPIN(
 		SCardFreeMemory(hSC, readers);
 	}
 	catch (CBaseException &ex) {
-		String dump;
+		std::string dump;
 		ex.DumpTree(dump);
-		MessageBox(nullptr, String().printf("Si è verificato un errore nella verifica di autenticità del documento :%s", dump.lock()).lock(), "CIE", MB_OK);
+		MessageBox(nullptr, std::string().append("Si è verificato un errore nella verifica di autenticità del documento").append(dump).c_str(), "CIE", MB_OK);
 	}
 
 	return 0;
