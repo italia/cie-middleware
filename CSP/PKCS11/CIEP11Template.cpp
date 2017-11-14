@@ -52,8 +52,8 @@ public:
 	CToken token;
 	bool init;
 	CIEData(CSlot *slot,ByteArray atr) : ias((CToken::TokenTransmitCallback)TokenTransmitCallback,atr), slot(*slot) {
-		ByteDynArray key;
-		aesKey.Init(key.random(32));
+		ByteDynArray key(32);
+		aesKey.Init(key.random());
 		token.setTransmitCallbackData(slot);
 		userType = -1;
 		init = false;
@@ -111,7 +111,7 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 		CK_BBOOL vtrue = TRUE;
 		CK_BBOOL vfalse = FALSE;
 
-		PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.lock(), certRaw.size());
+		PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), certRaw.size());
 		if (certDS != nullptr) {
 			cie->pubKey = std::make_shared<CP11PublicKey>(cie);
 			cie->privKey = std::make_shared<CP11PrivateKey>(cie);
@@ -300,7 +300,7 @@ RESULT CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &P
 			throw CSCardException((WORD)sw);
 		}
 
-		cie->aesKey.Encode(Pin, cie->SessionPIN);
+		cie->SessionPIN = cie->aesKey.Encode(Pin);
 		cie->userType = userType;
 		_return(OK);
 	}
@@ -328,7 +328,7 @@ RESULT CIEtemplateSign(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteAr
 		{
 			safeConnection safeConn(cie->slot.hCard);
 			CCardLocker lockCard(cie->slot.hCard);
-			cie->aesKey.Decode(cie->SessionPIN, Pin);
+			Pin = cie->aesKey.Decode(cie->SessionPIN);
 			cie->ias.SelectAID_IAS();
 			cie->ias.SelectAID_CIE();
 			cie->ias.DHKeyExchange();
@@ -359,7 +359,7 @@ RESULT CIEtemplateInitPIN(void *pCardTemplateData, ByteArray &baPin){
 		{
 			safeConnection safeConn(cie->slot.hCard);
 			CCardLocker lockCard(cie->slot.hCard);
-			cie->aesKey.Decode(cie->SessionPIN, Pin);
+			Pin = cie->aesKey.Decode(cie->SessionPIN);
 			cie->ias.SelectAID_IAS();
 			cie->ias.SelectAID_CIE();
 

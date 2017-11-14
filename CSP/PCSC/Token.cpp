@@ -56,7 +56,7 @@ RESULT CToken::BinaryRead(ByteDynArray &data,WORD start,BYTE size) {
 	ByteDynArray resp;
 	CARD_R_CALL(Transmit(apdu,&resp))
 
-	data.alloc_copy(resp);
+	data = resp;
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -67,18 +67,20 @@ RESULT CToken::Transmit(ByteArray &apdu, ByteDynArray *resp)
 	init_func
 	BYTE pbtResp[3000];
 	DWORD dwResp = 3000;
-	HRESULT res = transmitCallback(transmitCallbackData, apdu.lock(), apdu.size(), pbtResp, &dwResp);
+	HRESULT res = transmitCallback(transmitCallbackData, apdu.data(), apdu.size(), pbtResp, &dwResp);
+	ByteArray scResp(pbtResp, dwResp);
 
 	if (res != SCARD_S_SUCCESS) // la smart card è stata estratta durante l'operazione
 		throw CWinException(res);
 
-	if (dwResp < 2)
+	if (scResp.size() < 2)
 		throw CStringException("Risposta della smart card non valida");
 
 	if (resp != nullptr)
-		resp->alloc_copy(pbtResp, dwResp - 2);
-
-	_return(pbtResp[dwResp - 2] << 8 | pbtResp[dwResp - 1])
+		*resp = scResp.left(scResp.size() - 2);
+	
+	auto sw = ByteArrayToVar(scResp.right(2).reverse(), uint16_t);
+	_return(sw)
 	exit_func
 	_return(FAIL)
 }
@@ -118,17 +120,19 @@ RESULT CToken::Transmit(APDU &apdu, ByteDynArray *resp)
 
 	DWORD dwResp = 3000;
 	HRESULT res = transmitCallback(transmitCallbackData, pbtAPDU, iAPDUSize, pbtResp, &dwResp);
+	ByteArray scResp(pbtResp, dwResp);
 
 	if (res != SCARD_S_SUCCESS) // la smart card è stata estratta durante l'operazione
 		_return(FAIL)
 
-	if (dwResp < 2)
+	if (scResp.size() < 2)
 		_return(FAIL)
 
-	if (resp)
-		resp->alloc_copy(pbtResp, dwResp - 2);	
+	if (resp != nullptr)
+		*resp = scResp.left(scResp.size() - 2);
 
-	_return(pbtResp[dwResp - 2] << 8 | pbtResp[dwResp - 1])
+	auto sw = ByteArrayToVar(scResp.right(2).reverse(), uint16_t);
+	_return(sw)
 	exit_func
 	_return(FAIL)
 }

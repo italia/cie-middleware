@@ -3,7 +3,6 @@
 #define OK 0
 #define FAIL ((DWORD)0xFFFFFFFF)
 typedef unsigned long RESULT;
-typedef unsigned char BYTE;
 
 #define ERR_CARD_FILE_DEACTIVATED		0x6283
 #define ERR_CARD_FILE_TERMINATED		0x6285
@@ -60,10 +59,10 @@ typedef unsigned char BYTE;
 #define exit_func_internal \
 	} \
 	catch(const char *ex) { \
-		throw err_string("Eccezione in %s:%s",_this_func_name,ex); \
+		throw std::runtime_error(stdPrintf("Eccezione in %s:%s",_this_func_name,ex)); \
 	} \
 	catch(...) { \
-		throw err_string("Errore in %s",_this_func_name); \
+		throw std::runtime_error(stdPrintf("Errore in %s",_this_func_name)); \
 	}
 
 

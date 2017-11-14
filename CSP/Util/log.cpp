@@ -17,14 +17,14 @@ std::vector<CLog> logInit;
 std::vector<CLog*> logToInit;
 
 std::string logDirGlobal;
-bool bInitLog=false;
-bool bFirstGlobal=false;
-bool bFunctionLog=false;
-bool bGlobalParam=false;
+bool InitLog=false;
+bool FirstGlobal=false;
+bool FunctionLog=false;
+bool GlobalParam=false;
 const char *logGlobalVersion;
-DWORD dwGlobalModuleNum=1;
-DWORD dwGlobalCount;
-DWORD dwGlobalDepth=0;
+unsigned int GlobalModuleNum=1;
+unsigned int GlobalCount;
+unsigned int GlobalDepth = 0;
 CLog Log;
 
 enum logMode {
@@ -34,16 +34,16 @@ enum logMode {
 	LM_Module_Thread	// un file per modulo e per thread
 } LogMode = LM_Module;
 
-bool bMainInit=false;
-bool bMainEnable=false;
+bool MainInit=false;
+bool MainEnable=false;
 
 void initLog(const char *iniFile,const char *version) {
 	init_func_internal
 
-	if (bMainInit)
+	if (MainInit)
 		return;
-	bMainInit=true;
-	bInitLog=true;
+	MainInit=true;
+	InitLog=true;
 
 	logGlobalVersion=version;
 	
@@ -61,13 +61,13 @@ void initLog(const char *iniFile,const char *version) {
 		LogMode=LM_Single;
 	}
 
-	bMainEnable=(IniSettingsBool("Log","LogEnable",false,"Abilitazione log globale")).GetValue((char*)iniFile);
+	MainEnable=(IniSettingsBool("Log","LogEnable",false,"Abilitazione log globale")).GetValue((char*)iniFile);
 
-	bFunctionLog = (IniSettingsBool("Log", "FunctionLog", false, "Abilitazione log delle chiamate a funzione")).GetValue((char*)iniFile);
+	FunctionLog = (IniSettingsBool("Log", "FunctionLog", false, "Abilitazione log delle chiamate a funzione")).GetValue((char*)iniFile);
 
-	dwGlobalDepth = (IniSettingsInt("Log", "FunctionDepth", 10, "Definisce la profondità massima di log delle funzioni\n")).GetValue((char*)iniFile);
+	GlobalDepth = (IniSettingsInt("Log", "FunctionDepth", 10, "Definisce la profondità massima di log delle funzioni\n")).GetValue((char*)iniFile);
 
-	bGlobalParam = (IniSettingsBool("Log", "ParamLog", false, "Abilitazione log dei parametri di input delle funzioni")).GetValue((char*)iniFile);
+	GlobalParam = (IniSettingsBool("Log", "ParamLog", false, "Abilitazione log dei parametri di input delle funzioni")).GetValue((char*)iniFile);
 
 	(IniSettingsString("Log", "LogDir", "c:\\", "Definisce il path in cui salvare il file di log (con \\ finale)")).GetValue((char*)iniFile, logDirGlobal);
 
@@ -87,49 +87,48 @@ void initLog(const char *iniFile,const char *version) {
 		CLog &log=logInit[logInit.size()-1];
 		log.logName=modName;
 
-		log.bEnabled = (IniSettingsBool(SectionName, "LogEnable", bMainEnable, "Abilitazione log della sezione")).GetValue((char*)iniFile);
+		log.Enabled = (IniSettingsBool(SectionName, "LogEnable", MainEnable, "Abilitazione log della sezione")).GetValue((char*)iniFile);
 
 		(IniSettingsString(SectionName, "LogDir", logDirGlobal.c_str(), "Definisce il path in cui salvare il file di log di questa sezione (con \\ finale). Default: directory di log globale")).GetValue((char*)iniFile, log.logDir);
 
 		(IniSettingsString(SectionName, "LogFile", log.logName.c_str(), "Definisce il nome del file in cui salvare il file di log di questa sezione (con \\ finale). Default: il nome della sezione di log")).GetValue((char*)iniFile, log.logFileName);
 
-		log.bFunctionLog = (IniSettingsBool(SectionName, "FunctionLog", bFunctionLog, "Abilitazione log delle chiamate a funzione per questa sezione")).GetValue((char*)iniFile);
+		log.FunctionLog = (IniSettingsBool(SectionName, "FunctionLog", FunctionLog, "Abilitazione log delle chiamate a funzione per questa sezione")).GetValue((char*)iniFile);
 
-		log.bLogParam = (IniSettingsBool(SectionName, "ParamLog", bGlobalParam, "Abilitazione log dei parametri di input delle funzioni per questa sezione")).GetValue((char*)iniFile);
+		log.LogParam = (IniSettingsBool(SectionName, "ParamLog", GlobalParam, "Abilitazione log dei parametri di input delle funzioni per questa sezione")).GetValue((char*)iniFile);
 
-		log.bInitialized=true;
+		log.Initialized=true;
 		numMod++;
 	}
 	if (logInit.size()==0) {
 		OutputDebugString("Nessun LogModule definito. Impostare le sezioni [LogModule1]...[LogModuleN] con i valori:\n");
 		OutputDebugString("Name,LogEnable,LogDir,LogFile,FunctionLog,ParamLog\n");
 	}
-
 	exit_func_internal
 }
 
 CLog::CLog() {
 	init_func_internal
-	bFirstLog=false;
-	bInitialized=false;
-	bEnabled=false;
-	bLogParam=false;
-	dwLogCount=0;
+	FirstLog=false;
+	Initialized=false;
+	Enabled=false;
+	LogParam=false;
+	LogCount=0;
 	exit_func_internal
 }
 
 CLog::~CLog() {
-	bEnabled=false;
-	bFirstLog=false;
+	Enabled=false;
+	FirstLog=false;
 }
 
 void CLog::initParam(CLog &log) {
 	init_func_internal
-	bEnabled=log.bEnabled;
-	bLogParam=log.bLogParam;
+	Enabled=log.Enabled;
+	LogParam=log.LogParam;
 
-	dwModuleNum=dwGlobalModuleNum;
-	dwGlobalModuleNum++;
+	ModuleNum=GlobalModuleNum;
+	GlobalModuleNum++;
 
 	SYSTEMTIME  stTime;
 	GetLocalTime(&stTime);
@@ -171,19 +170,19 @@ void CLog::initParam(CLog &log) {
 		logPath = logDirGlobal.append("\\").append(path);
 	}
 	threadPos = logPath.begin()+logPath.length() - 12;
-	bInitialized=true;
+	Initialized=true;
 
-	if (LogMode!=LM_Module && LogMode!=LM_Module_Thread && bEnabled) writePure("Module %02i: %s",dwModuleNum,logName.c_str());
+	if (LogMode!=LM_Module && LogMode!=LM_Module_Thread && Enabled) writePure("Module %02i: %s",ModuleNum,logName.c_str());
 	exit_func_internal
 }
 
-void CLog::initModule(const char *name,char *version) {
+void CLog::initModule(const char *name, const char *version) {
 	init_func_internal
 	
 	logName=name;
 	logVersion=version;
 
-	if (!bInitLog)
+	if (!InitLog)
 	// verrà inizializzato dopo, quando chiamo logInit
 		logToInit.push_back(this);
 	else {
@@ -194,7 +193,6 @@ void CLog::initModule(const char *name,char *version) {
 			}
 		}
 	}
-
 	exit_func_internal
 }
 
@@ -202,33 +200,33 @@ DWORD CLog::write(const char *format,...) {
  	va_list params;
 	va_start (params, format);
 	char pbtDate[0x800];
-	DWORD dummy=0;
-	DWORD *dwNum=&dummy;
+	unsigned int dummy = 0;
+	unsigned int *Num = &dummy;
 
-	if (bEnabled && bInitialized && bMainEnable) {
+	if (Enabled && Initialized && MainEnable) {
 
-		if (!bFirstGlobal && LogMode==LM_Single) {
-			bFirstGlobal =true;
+		if (!FirstGlobal && LogMode==LM_Single) {
+			FirstGlobal =true;
 			write("Inizio Sessione - versione: %s",logGlobalVersion);
 			writeModuleInfo();
 		}
-		if (!bFirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
-			bFirstLog=true;
+		if (!FirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
+			FirstLog=true;
 			write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion);
 			writeModuleInfo();
 		}
 
 		//DWORD thNum;
 		switch(LogMode) {
-			case (LM_Module) : dwNum=&dwLogCount; break;
+			case (LM_Module) : Num=&LogCount; break;
 			case (LM_Module_Thread) :
 			//case (LM_Thread) : thNum=dwThreadCount;dwNum=&thNum; break;
-			case (LM_Single) : dwNum=&dwGlobalCount; break;
+			case (LM_Single) : Num=&GlobalCount; break;
 		}
 
 		SYSTEMTIME  stTime;
 		GetLocalTime(&stTime);
-		sprintf_s(pbtDate,sizeof(pbtDate),"%05u:[%02d:%02d:%02d.%03d]", *dwNum, stTime.wHour, stTime.wMinute, stTime.wSecond, stTime.wMilliseconds);	
+		sprintf_s(pbtDate,sizeof(pbtDate),"%05u:[%02d:%02d:%02d.%03d]", *Num, stTime.wHour, stTime.wMinute, stTime.wSecond, stTime.wMilliseconds);	
 	 
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
 		DWORD dwThreadID=CThread::getID();
@@ -244,9 +242,9 @@ DWORD CLog::write(const char *format,...) {
 		fopen_s(&lf,logPath.c_str(), "a+t");
 		if (lf) {
 			switch(LogMode) {
-				case (LM_Single) : fprintf(lf,"%s|%04i|%04i|%02i|", pbtDate, GetCurrentProcessId(), dwThreadID, dwModuleNum); break;
+				case (LM_Single) : fprintf(lf,"%s|%04i|%04i|%02i|", pbtDate, GetCurrentProcessId(), dwThreadID, ModuleNum); break;
 				case (LM_Module) : fprintf(lf,"%s|%04i|%04x|", pbtDate, GetCurrentProcessId(), dwThreadID); break;
-				case (LM_Thread) : fprintf(lf,"%s|%04i|%02i|", pbtDate, GetCurrentProcessId(), dwModuleNum); break;
+				case (LM_Thread) : fprintf(lf,"%s|%04i|%02i|", pbtDate, GetCurrentProcessId(), ModuleNum); break;
 				case (LM_Module_Thread) : fprintf(lf,"%s|", pbtDate); break;
 			}
 			vfprintf(lf, format, params);
@@ -269,26 +267,26 @@ DWORD CLog::write(const char *format,...) {
 #endif
  	va_end(params);
 	switch(LogMode) {
-		case (LM_Module) : dwLogCount++; break;
+		case (LM_Module) : LogCount++; break;
 		case (LM_Module_Thread) :
 		//case (LM_Thread) : dwThreadCount=thNum+1; break;
-		case (LM_Single) : dwGlobalCount++; break;
+		case (LM_Single) : GlobalCount++; break;
 	}
-	return(*dwNum);
+	return(*Num);
 }
 
 void CLog::writePure(const char *format,...) {
  	va_list params;
 	va_start (params, format);
 	char pbtDate[0x800]={NULL};
-	if (bEnabled && bInitialized && bMainEnable) {
-		if (!bFirstGlobal && LogMode==LM_Single) {
-			bFirstGlobal =true;
+	if (Enabled && Initialized && MainEnable) {
+		if (!FirstGlobal && LogMode==LM_Single) {
+			FirstGlobal =true;
 			write("Inizio Sessione - versione: %s",logGlobalVersion);
 			writeModuleInfo();
 		}
-		if (!bFirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
-			bFirstLog=true;
+		if (!FirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
+			FirstLog=true;
 			write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion);
 			writeModuleInfo();
 		}
@@ -325,15 +323,15 @@ void CLog::writePure(const char *format,...) {
  	va_end(params);
 }
 
-void CLog::writeBinData(BYTE *data,int datalen) {
-	if (!bEnabled || !bInitialized || !bMainEnable) return;
-	if (!bFirstGlobal && LogMode==LM_Single) {
-		bFirstGlobal =true;
+void CLog::writeBinData(BYTE *data, size_t datalen) {
+	if (!Enabled || !Initialized || !MainEnable) return;
+	if (!FirstGlobal && LogMode==LM_Single) {
+		FirstGlobal =true;
 		write("Inizio Sessione - versione: %s",logGlobalVersion);
 		writeModuleInfo();
 	}
-	if (!bFirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
-		bFirstLog=true;
+	if (!FirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
+		FirstLog=true;
 		write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion);
 		writeModuleInfo();
 	}
@@ -363,7 +361,7 @@ void CLog::writeBinData(BYTE *data,int datalen) {
 }
 
 void CLog::writeModuleInfo() {
-	if (!bEnabled) return;
+	if (!Enabled) return;
 	CModuleInfo module;
 	HANDLE mainModule = module.getApplicationModule();
 	module.init(mainModule);

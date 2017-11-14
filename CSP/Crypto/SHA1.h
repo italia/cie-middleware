@@ -6,5 +6,5 @@
 class CSHA1
 {
 public:
-	ByteDynArray &Digest(ByteArray data,ByteDynArray &digest);
+	ByteDynArray Digest(ByteArray data);
 };

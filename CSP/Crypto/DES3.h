@@ -18,8 +18,8 @@ public:
 	~CDES3(void);
 
 	void Init(const ByteArray &key);
-	const ByteDynArray &Encode(const ByteArray &data,ByteDynArray &result);
-	const ByteDynArray &Decode(const ByteArray &data,ByteDynArray &result);
-	const ByteDynArray &RawEncode(const ByteArray &data,ByteDynArray &result);
-	const ByteDynArray &RawDecode(const ByteArray &data,ByteDynArray &result);
+	ByteDynArray Encode(const ByteArray &data);
+	ByteDynArray Decode(const ByteArray &data);
+	ByteDynArray RawEncode(const ByteArray &data);
+	ByteDynArray RawDecode(const ByteArray &data);
 };

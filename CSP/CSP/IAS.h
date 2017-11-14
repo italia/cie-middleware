@@ -36,16 +36,16 @@ class IAS
 	ByteDynArray ATR;
 	ByteDynArray Certificate;
 	ByteDynArray CardEncKey;
-	DWORD SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYTE *le = NULL);
-	DWORD SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYTE *le = NULL);
+	DWORD SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
+	DWORD SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
 	DWORD getResp(ByteDynArray &Cardresp, DWORD sw, ByteDynArray &resp);
 	DWORD getResp_SM(ByteArray &Cardresp, DWORD sw, ByteDynArray &resp);
 
 	DWORD SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &seq, ByteDynArray &elabResp);
 	DWORD respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &seq, ByteDynArray &elabResp);
 
-	void readfile_SM(WORD id, ByteDynArray &content);
-	void readfile(WORD id, ByteDynArray &content);
+	void readfile_SM(uint16_t id, ByteDynArray &content);
+	void readfile(uint16_t id, ByteDynArray &content);
 
 	void increment(ByteArray &seq);
 	void ReadCIEType();
@@ -92,7 +92,7 @@ public:
 	bool IsEnrolled();
 	void IconaSbloccoPIN();
 
-	void VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet);
+	void VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 
 	void(*Callback)(int progress, char *desc,void *data);
 	void* CallbackData;

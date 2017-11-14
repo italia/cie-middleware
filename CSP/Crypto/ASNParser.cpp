@@ -5,10 +5,10 @@
 
 DWORD GetASN1DataLenght(ByteArray &data) {
 	DWORD l = 1;
-	BYTE *cur = data.lock();
+	uint8_t *cur = data.data();
 
 	int len = 0;
-	BYTE curv = cur[0];
+	uint8_t curv = cur[0];
 
 	if ((curv & 0x1f) == 0x1f)
 	{
@@ -98,7 +98,7 @@ RESULT CASNTag::Encode(ByteArray &data,DWORD &len) {
 	int tlen = (int)tag.size();
 	if (tlen==1 && tag[0]==3 && forcedSequence)
 		throw CStringException("Bit string reparsed non gestite in encode!");
-	data.copy(&tag[0], tlen);
+	data.copy(ByteArray(&tag[0], tlen));
 	DWORD clen = ContentLen();
 	int llen = ASN1LLength(clen);
 	putASN1Length(clen, data.mid(tlen));
@@ -119,7 +119,7 @@ RESULT CASNTag::Encode(ByteArray &data,DWORD &len) {
 	return OK;
 }
 
-CASNTag &CASNTag::Child(std::size_t num, BYTE tag) {
+CASNTag &CASNTag::Child(std::size_t num, uint8_t tag) {
 	if (num >= tags.size())
 		throw CStringException("Errore nella verifica della struttura ASN1");
 	if (tags[num]->tag.size() == 1 && tags[num]->tag[0]==tag)
@@ -127,7 +127,7 @@ CASNTag &CASNTag::Child(std::size_t num, BYTE tag) {
 	else
 		throw CStringException("Errore nella verifica del tag ASN1");
 }
-CASNTag &CASNTag::CheckTag(BYTE checkTag) {
+CASNTag &CASNTag::CheckTag(uint8_t checkTag) {
 	if (tag.size() != 1 || tag[0] != checkTag)
 		throw CStringException("Errore nella verifica del tag ASN1");
 	return *this;
@@ -184,12 +184,12 @@ RESULT CASNParser::Parse(ByteArray &data, CASNTagArray &tags, int startseq)
 {
 	init_func
 	DWORD l=0;
-	BYTE *cur=data.pbtData;
+	uint8_t *cur = data.data();
 	while (l<data.size()) {
 		int len=0;
 
-		std::vector<BYTE> tagv;
-		BYTE curv = cur[0];
+		std::vector<uint8_t> tagv;
+		uint8_t curv = cur[0];
 		tagv.push_back(curv);
 
         if ((curv & 0x1f) == 0x1f)
@@ -239,7 +239,7 @@ RESULT CASNParser::Parse(ByteArray &data, CASNTagArray &tags, int startseq)
 		}
 		else {
 			// è un valore singolo
-			tag->content.alloc_copy(&cur[llen+1],len);
+			tag->content= ByteArray(&cur[llen+1],len);
 		}
 		l+=len+llen+1;
 		cur+=len+llen+1;
