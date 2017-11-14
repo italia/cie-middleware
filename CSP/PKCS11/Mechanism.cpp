@@ -19,13 +19,13 @@ RESULT CDecrypt::checkCache(ByteArray &Data,ByteArray &Result,bool &bFound)
 {
 	init_func
 	bFound=false;
-	if (Data.lock()==cacheData.lock() && Data.size()==cacheData.size()) {
+	if (Data.data() == cacheData.data() && Data.size() == cacheData.size()) {
 		if (!Result.isNull()) {
 			if (Result.size()<resultCache.size())
 				_return(CKR_BUFFER_TOO_SMALL)
 		
 			Result.copy(resultCache);
-			Result.dwSize=resultCache.size();
+			Result=Result.left(resultCache.size());
 			bFound=true;
 		}
 	}
@@ -38,7 +38,7 @@ RESULT CDecrypt::setCache(ByteArray &Data,ByteArray &Result)
 {
 	init_func
 	cacheData=Data;
-	resultCache.alloc_copy(Result);
+	resultCache= Result;
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -83,7 +83,7 @@ RESULT CSHA::DigestInit() {
 
 RESULT CSHA::DigestUpdate(ByteArray &Part) {
 	init_func
-	SHA1_Update(&Sha1Context,Part.lock(),Part.size());
+	SHA1_Update(&Sha1Context,Part.data(),Part.size());
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -91,7 +91,7 @@ RESULT CSHA::DigestUpdate(ByteArray &Part) {
 
 RESULT CSHA::DigestFinal(ByteArray &Digest) {
 	init_func
-	SHA1_Final(Digest.lock(),&Sha1Context);
+		SHA1_Final(Digest.data(), &Sha1Context);
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -117,7 +117,7 @@ RESULT CSHA::DigestGetOperationState(ByteDynArray &OperationState)
 {
 	init_func
 	OperationState.resize(sizeof(Sha1Context));
-	OperationState.copy((BYTE*)&Sha1Context,sizeof(Sha1Context));
+	OperationState.copy(ByteArray((BYTE*)&Sha1Context,sizeof(Sha1Context)));
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -128,7 +128,7 @@ RESULT CSHA::DigestSetOperationState(ByteArray &OperationState)
 	init_func
 	if (OperationState.size()!=sizeof(Sha1Context))
 		_return(CKR_SAVED_STATE_INVALID)
-		memcpy_s(&Sha1Context, sizeof(SHA_CTX), OperationState.lock(), sizeof(Sha1Context));
+		memcpy_s(&Sha1Context, sizeof(SHA_CTX), OperationState.data(), sizeof(Sha1Context));
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -150,7 +150,7 @@ RESULT CMD5::DigestInit() {
 
 RESULT CMD5::DigestUpdate(ByteArray &Part) {
 	init_func
-	MD5_Update(&MD5Context,Part.lock(),Part.size());
+		MD5_Update(&MD5Context, Part.data(), Part.size());
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -158,7 +158,7 @@ RESULT CMD5::DigestUpdate(ByteArray &Part) {
 
 RESULT CMD5::DigestFinal(ByteArray &Digest) {
 	init_func
-	MD5_Final(Digest.lock(),&MD5Context);
+		MD5_Final(Digest.data(), &MD5Context);
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -183,8 +183,7 @@ RESULT CMD5::DigestInfo(ByteArray *&pbaDigestInfo) {
 RESULT CMD5::DigestGetOperationState(ByteDynArray &OperationState)
 {
 	init_func
-	OperationState.resize(sizeof(MD5Context));
-	OperationState.copy((BYTE*)&MD5Context,sizeof(MD5Context));
+	OperationState= VarToByteArray(MD5Context);
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -195,7 +194,7 @@ RESULT CMD5::DigestSetOperationState(ByteArray &OperationState)
 	init_func
 	if (OperationState.size()!=sizeof(MD5Context))
 		_return(CKR_SAVED_STATE_INVALID)
-	memcpy_s(&MD5Context,sizeof(MD5_CTX),OperationState.lock(),sizeof(MD5Context));
+		memcpy_s(&MD5Context, sizeof(MD5_CTX), OperationState.data(), sizeof(MD5Context));
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -262,9 +261,7 @@ RESULT CVerifyRSA::VerifyDecryptSignature(ByteArray &Signature,ByteDynArray &baP
 		_return(CKR_SIGNATURE_LEN_RANGE)
 
 	CRSA rsa(*baKeyModule,*baKeyExponent);
-	baPlainSignature.resize(Signature.size());
-	P11ER_CALL(rsa.RSA_PURE(Signature,baPlainSignature),
-		ERR_CRYPTO_ERROR)
+	baPlainSignature = rsa.RSA_PURE(Signature);
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -342,9 +339,7 @@ RESULT CVerifyRecoverRSA::VerifyRecoverDecryptSignature(ByteArray &Signature,Byt
 		_return(CKR_SIGNATURE_LEN_RANGE)
 
 	CRSA rsa(*baKeyModule,*baKeyExponent);
-	baPlainSignature.resize(Signature.size());
-	P11ER_CALL(rsa.RSA_PURE(Signature,baPlainSignature),
-		ERR_CRYPTO_ERROR)
+	baPlainSignature = rsa.RSA_PURE(Signature);
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -591,7 +586,7 @@ RESULT CRSA_X509::SignFinal(ByteDynArray &SignBuffer)
 	if (baSignBuffer.size()>ulSignatureLength)
 		_return(CKR_DATA_LEN_RANGE)
 
-	SignBuffer.alloc_copy(baSignBuffer);
+	SignBuffer= baSignBuffer;
 
 	_return(OK)
 	exit_func
@@ -616,7 +611,7 @@ RESULT CRSA_X509::SignRecover(ByteArray &Data,ByteDynArray &SignBuffer) {
 	if (Data.size()>ulSignatureLength)
 		_return(CKR_DATA_LEN_RANGE)
 
-	SignBuffer.alloc_copy(Data);
+	SignBuffer= Data;
 
 	_return(OK)
 	exit_func
@@ -694,7 +689,7 @@ RESULT CRSA_X509::DecryptFinal(ByteDynArray &DecryptBuffer)
 	if (baDecryptBuffer.size()!=ulDecryptLength)
 		_return(CKR_ENCRYPTED_DATA_LEN_RANGE)
 
-	DecryptBuffer.alloc_copy(baDecryptBuffer);
+	DecryptBuffer= baDecryptBuffer;
 
 	_return(OK)
 	exit_func
@@ -705,7 +700,7 @@ RESULT CRSA_X509::DecryptRemovePadding(ByteArray &paddedData,ByteDynArray &unpad
 {
 	init_func
 		// non faccio nulla perchè l'RSA_X509 non leva il padding
-	unpaddedData.alloc_copy(paddedData);
+		unpaddedData = paddedData;
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -804,7 +799,7 @@ RESULT CRSA_PKCS1::VerifyRecover(ByteArray &Signature,ByteDynArray &Data)
 
 	// i dati restutuiti non possono essere più
 	// lunghi di k-11!! (specifiche p11)
-	Data.alloc_copy(baPlainSignature.mid(dwPadLen));
+	Data= baPlainSignature.mid(dwPadLen);
 	if (Data.size()>ulVerifyRecoverLength-11)
 		_return(CKR_DATA_LEN_RANGE)
 
@@ -849,10 +844,10 @@ RESULT CRSA_PKCS1::SignFinal(ByteDynArray &SignBuffer)
 		ERR_CANT_GET_KEY_LENGTH)
 
 	// al massimo k-11 bytes (specifiche p11)
-	if (baSignBuffer.size()>ulSignatureLength-11)
+	if (baSignBuffer.size() > ulSignatureLength - 11)
 		_return(CKR_DATA_LEN_RANGE)
 
-	SignBuffer.alloc_copy(baSignBuffer);
+		SignBuffer = baSignBuffer;
 
 	_return(OK)
 	exit_func
@@ -879,7 +874,7 @@ RESULT CRSA_PKCS1::SignRecover(ByteArray &Data,ByteDynArray &SignBuffer) {
 	if (Data.size()>ulSignatureLength-11)
 		_return(CKR_DATA_LEN_RANGE)
 
-	SignBuffer.alloc_copy(Data);
+	SignBuffer = Data;
 
 	_return(OK)
 	exit_func
@@ -956,7 +951,7 @@ RESULT CRSA_PKCS1::DecryptFinal(ByteDynArray &DecryptBuffer)
 	if (baDecryptBuffer.size()!=ulDecryptLength)
 		_return(CKR_ENCRYPTED_DATA_LEN_RANGE)
 
-	DecryptBuffer.alloc_copy(baDecryptBuffer);
+	DecryptBuffer = baDecryptBuffer;
 
 	_return(OK)
 	exit_func
@@ -977,7 +972,7 @@ RESULT CRSA_PKCS1::DecryptRemovePadding(ByteArray &paddedData,ByteDynArray &unpa
 		_return(CKR_ENCRYPTED_DATA_INVALID)
 	}
 
-	unpaddedData.alloc_copy(paddedData.mid(dwPaddingLen));
+	unpaddedData = paddedData.mid(dwPaddingLen);
 
 	// i dati possono essere lunghi al massiko k-11
 	// (specifiche p11)
@@ -1119,7 +1114,7 @@ RESULT CVerifyRSAwithDigest::VerifyFinal(ByteArray &Signature)
 
 	ER_ASSERT(baDigestInfo!=NULL,ERR_CANT_GET_DIGEST_INFO)
 
-	pDigest->DigestFinal(baExpectedResult.revmid(0,ulDigestLen));
+	pDigest->DigestFinal(baExpectedResult.right(ulDigestLen));
 	baExpectedResult.rightcopy(*baDigestInfo,ulDigestLen);
 	PutPaddingBT1(baExpectedResult, ulDigestLen + baDigestInfo->size());
 
@@ -1222,9 +1217,7 @@ RESULT CEncryptRSA::EncryptCompute(ByteArray &baPlainData,ByteDynArray &baEncryp
 		_return(CKR_DATA_LEN_RANGE)
 
 	CRSA rsa(*baKeyModule,*baKeyExponent);
-	baEncryptedData.resize(dwKeyLenBytes);
-	P11ER_CALL(rsa.RSA_PURE(baPlainData,baEncryptedData),
-		ERR_CRYPTO_ERROR)
+	baEncryptedData = rsa.RSA_PURE(baPlainData);
 
 	_return(OK)
 	exit_func

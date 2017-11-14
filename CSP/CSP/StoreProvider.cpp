@@ -89,7 +89,7 @@ LONG RegisterCard(SCARDCONTEXT hSC, const char *name, BYTE* ATR, int ATRLen) {
 	SCardForgetCardType(hSC, name);
 	ATRMask.resize(ATRLen);
 	ATRMask.fill(0xff);
-	if ((ris = SCardIntroduceCardType(hSC, name, nullptr, nullptr, 0, ATR, ATRMask.lock(), ATRMask.size()) != SCARD_S_SUCCESS))
+	if ((ris = SCardIntroduceCardType(hSC, name, nullptr, nullptr, 0, ATR, ATRMask.data(), ATRMask.size()) != SCARD_S_SUCCESS))
 	{
 		return E_UNEXPECTED;
 	}

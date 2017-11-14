@@ -331,7 +331,7 @@ CK_RV CK_ENTRY C_OpenSession(CK_SLOT_ID slotID, CK_FLAGS flags, CK_VOID_PTR pApp
 	EDF_CALL(CSession::AddSession(std::move(pSession),*phSession),
 		ERR_CANT_ADD_SESSION)
 
-	if (Log.bEnabled) {
+	if (Log.Enabled) {
 		Log.writePure("Sessione: %i",*phSession);
 		Log.writePure("Lettore: %s",pSlot->szName.c_str());
 		Log.writePure("CardManager: %s",pSlot->pTemplate->szName.c_str());
@@ -781,7 +781,7 @@ CK_RV CK_ENTRY C_Digest(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG 
 
 	ByteArray Digest(pDigest, *pulDigestLen);
 	DF_CALL(pSession->Digest(ByteArray(pData, ulDataLen), Digest))
-	*pulDigestLen=Digest.dwSize;
+	*pulDigestLen = (CK_ULONG)Digest.size();
 
 	_return(CKR_OK)
 	exit_main_func
@@ -810,7 +810,7 @@ CK_RV CK_ENTRY C_DigestFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pDigest, CK
 
 	ByteArray Digest(pDigest, *pulDigestLen);
 	pSession->DigestFinal(Digest);
-	*pulDigestLen=Digest.size();
+	*pulDigestLen = (CK_ULONG)Digest.size();
 
 	_return(CKR_OK)
 	exit_main_func
@@ -903,7 +903,7 @@ CK_RV CK_ENTRY C_FindObjectsInit(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pT
 	logParam(pTemplate)
 	logParam(ulCount)
 
-	if (Log.bLogParam) {
+	if (Log.LogParam) {
 		for (DWORD i=0;i<ulCount;i++) {
 			Log.writePure("Template %i:",i+1);
 			Log.writePure("Type: %s (%x)",getAttributeName(pTemplate[i].type),pTemplate[i].type);
@@ -1209,7 +1209,7 @@ CK_RV CK_ENTRY C_Sign(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ul
 
 	ByteArray Signature(pSignature,*pulSignatureLen);
 	DF_CALL(pSession->Sign(ByteArray(pData,ulDataLen),Signature))
-	*pulSignatureLen=Signature.size();
+		*pulSignatureLen = (CK_ULONG)Signature.size();
 	_return(CKR_OK)
 	exit_main_func
 	_return(CKR_GENERAL_ERROR)	
@@ -1240,7 +1240,7 @@ CK_RV CK_ENTRY C_SignFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pSignature,CK_
 
 	ByteArray Signature(pSignature,*pulSignatureLen);
 	DF_CALL(pSession->SignFinal(Signature))
-	*pulSignatureLen=Signature.dwSize;
+		*pulSignatureLen = (CK_ULONG)Signature.size();
 
 	_return(CKR_OK)
 	exit_main_func
@@ -1363,7 +1363,7 @@ CK_RV CK_ENTRY C_SignRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_U
 
 	ByteArray Signature(pSignature,*pulSignatureLen);
 	DF_CALL(pSession->SignRecover(ByteArray(pData,ulDataLen),Signature))
-	*pulSignatureLen=Signature.size();
+		*pulSignatureLen = (CK_ULONG)Signature.size();
 	_return(CKR_OK)
 	exit_main_func
 	_return(CKR_GENERAL_ERROR)	
@@ -1424,7 +1424,7 @@ CK_RV CK_ENTRY C_VerifyRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignatur
 
 	ByteArray Data(pData,*pulDataLen);
 	DF_CALL(pSession->VerifyRecover(ByteArray(pSignature,ulSignatureLen),Data))
-	*pulDataLen=Data.size();
+		*pulDataLen = (CK_ULONG)Data.size();
 	_return(CKR_OK)
 	exit_main_func
 	_return(CKR_GENERAL_ERROR)	
@@ -1571,7 +1571,7 @@ CK_RV CK_ENTRY C_Encrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG
 
 	ByteArray EncryptedData(pEncryptedData, *pulEncryptedDataLen);
 	DF_CALL(pSession->Encrypt(ByteArray(pData, ulDataLen), EncryptedData))
-	*pulEncryptedDataLen=EncryptedData.dwSize;
+		*pulEncryptedDataLen = (CK_ULONG)EncryptedData.size();
 
 	_return(CKR_OK)
 	exit_main_func
@@ -1602,7 +1602,7 @@ CK_RV CK_ENTRY C_EncryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pEncryptedD
 
 	ByteArray EncryptedData(pEncryptedData, *pulEncryptedDataLen);
 	DF_CALL(pSession->EncryptFinal(EncryptedData))
-	*pulEncryptedDataLen=EncryptedData.dwSize;
+		*pulEncryptedDataLen = (CK_ULONG)EncryptedData.size();
 
 	_return(CKR_OK)
 	exit_main_func
@@ -1669,7 +1669,7 @@ CK_RV CK_ENTRY C_EncryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK
 
 	ByteArray EncryptedPart(pEncryptedPart, *pulEncryptedPartLen);
 	DF_CALL(pSession->EncryptUpdate(ByteArray(pPart,ulPartLen),EncryptedPart))
-	*pulEncryptedPartLen=EncryptedPart.dwSize;
+		*pulEncryptedPartLen = (CK_ULONG)EncryptedPart.size();
 
 	_return(CKR_OK)
 	exit_main_func
@@ -1698,7 +1698,7 @@ CK_RV CK_ENTRY C_Decrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncryptedData,
 
 	ByteArray Data(pData, *pulDataLen);
 	DF_CALL(pSession->Decrypt(ByteArray(pEncryptedData, ulEncryptedDataLen), Data))
-	*pulDataLen=Data.size();
+		*pulDataLen = (CK_ULONG)Data.size();
 	
 	_return(CKR_OK)
 	exit_main_func
@@ -1729,7 +1729,7 @@ CK_RV CK_ENTRY C_DecryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pData,CK_UL
 
 	ByteArray Data(pData, *pulDataLen);
 	DF_CALL(pSession->DecryptFinal(Data))
-	*pulDataLen=Data.size();
+		*pulDataLen = (CK_ULONG)Data.size();
 
 	_return(CKR_OK)
 	exit_main_func
@@ -1796,7 +1796,7 @@ CK_RV CK_ENTRY C_DecryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncrypte
 
 	ByteArray Part(pPart, *pulPartLen);
 	DF_CALL(pSession->DecryptUpdate(ByteArray(pEncryptedPart, ulEncryptedPartLen), Part))
-	*pulPartLen=Part.dwSize;
+		*pulPartLen = (CK_ULONG)Part.size();
 
 	_return(CKR_OK)
 	exit_main_func
@@ -1994,7 +1994,7 @@ CK_RV CK_ENTRY C_GetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOpera
 
 	ByteArray OperationState(pOperationState,*pulOperationStateLen);
 	DF_CALL(pSession->GetOperationState(OperationState))
-	*pulOperationStateLen=OperationState.size();
+		*pulOperationStateLen = (CK_ULONG)OperationState.size();
 
 	_return(CKR_OK)
 	exit_main_func

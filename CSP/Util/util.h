@@ -238,47 +238,42 @@ extern DWORD ERR_OBJECT_HASNT_ATTRIBUTE;
 		}
 
 
-#define VarToByteArray(a) (ByteArray((BYTE*)&(a),sizeof(a)))
-#define VarToByteDynArray(a) (ByteDynArray((BYTE*)&(a),sizeof(a)))
-#define ByteArrayToVar(a,b) (*(b*)(a).lock(sizeof(b)))
 
-void randomize(ByteArray &ba);
-
-BYTE hex2byte(char h);
+uint8_t hex2byte(char h);
 void readHexData(const char *data,ByteDynArray &ba);
-std::string HexByte(BYTE data, bool uppercase = true);
+std::string HexByte(uint8_t data, bool uppercase = true);
 std::string &dumpHexData(ByteArray &data, std::string &dump);
 std::string &dumpHexData(ByteArray &data, std::string &dump, bool withSpace, bool uppercase = true);
 std::string &dumpHexDataLowerCase(ByteArray &data, std::string &dump);
 
- void PutPaddingBT0(ByteArray &ba,DWORD dwLen);
- void PutPaddingBT1(ByteArray &ba,DWORD dwLen);
- void PutPaddingBT2(ByteArray &ba,DWORD dwLen);
- DWORD RemovePaddingBT1(ByteArray &paddedData);
- DWORD RemovePaddingBT2(ByteArray &paddedData);
- DWORD RemoveISOPad(ByteArray &paddedData);
+void PutPaddingBT0(ByteArray &ba, size_t dwLen);
+void PutPaddingBT1(ByteArray &ba, size_t dwLen);
+void PutPaddingBT2(ByteArray &ba, size_t dwLen);
+size_t RemovePaddingBT1(ByteArray &paddedData);
+size_t RemovePaddingBT2(ByteArray &paddedData);
+size_t RemoveISOPad(ByteArray &paddedData);
 
- DWORD RemoveSha1(ByteArray &paddedData);
- DWORD RemoveSha256(ByteArray &paddedData);
+size_t RemoveSha1(ByteArray &paddedData);
+size_t RemoveSha256(ByteArray &paddedData);
 
- DWORD ANSIPadLen(DWORD Len);
- void ANSIPad(ByteArray &Data,DWORD DataLen);
- DWORD ISOPadLen(DWORD Len);
- void ISOPad(const ByteArray &Data,DWORD DataLen);
- DWORD ByteArrayToInt(ByteArray &ba);
-const ByteDynArray& ISOPad(const ByteArray &data,ByteDynArray &resp);
-const ByteDynArray& ISOPad16(const ByteArray &data, ByteDynArray &resp);
+size_t ANSIPadLen(size_t Len);
+void ANSIPad(ByteArray &Data, size_t DataLen);
+size_t ISOPadLen(size_t Len);
+void ISOPad(const ByteArray &Data, size_t DataLen);
+long ByteArrayToInt(ByteArray &ba);
+const ByteDynArray ISOPad(const ByteArray &data);
+const ByteDynArray ISOPad16(const ByteArray &data);
 
- char * WinErr(HRESULT ris);
+ std::string WinErr(HRESULT ris);
  char * CardErr(DWORD dwSW);
  char * SystemErr(DWORD dwExcept);
- char * err_string(const char *format,...);
-
+ 
  void exceptionTranslator( unsigned int u, _EXCEPTION_POINTERS* pExp );
  void StackWalkThread(std::string &stack);
 
  void Debug(ByteArray ba);
- ByteDynArray& setASN1Tag(ByteDynArray& result,DWORD tag,ByteArray &content);
- BYTE checkdigit(ByteArray &data);
+ ByteDynArray ASN1Tag(DWORD tag,ByteArray &content);
+ uint8_t checkdigit(ByteArray &data);
  void ICAODate(SYSTEMTIME &time,ByteDynArray &result);
 
+ std::string stdPrintf(const char *format, ...);

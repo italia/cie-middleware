@@ -7,8 +7,5 @@
 class CSHA256
 {
 public:
-	CSHA256(void);
-	~CSHA256(void);
-
-	RESULT Digest(ByteArray &data,ByteDynArray &resp);
+	ByteDynArray Digest(ByteArray &data);
 };

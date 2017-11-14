@@ -169,7 +169,7 @@ DWORD WINAPI _sbloccoPIN(
 	catch (CBaseException &ex) {
 		std::string dump;
 		ex.DumpTree(dump);
-		MessageBox(nullptr, std::string().append("Si è verificato un errore nella verifica di autenticità del documento").append(dump).c_str(), "CIE", MB_OK);
+		MessageBox(nullptr, stdPrintf("Si è verificato un errore nella verifica di autenticità del documento :%s",dump.c_str()).c_str(), "CIE", MB_OK);
 	}
 
 	return 0;

@@ -18,16 +18,7 @@ CP11Object::CP11Object(CK_OBJECT_CLASS objClass,void *TemplateData)
 RESULT CP11Object::addAttribute(CK_ATTRIBUTE_TYPE type,ByteArray &data)
 {
 	init_func
-	attributes[type].alloc_copy(data);
-	_return(OK)
-	exit_func
-	_return(FAIL)
-}
-
-RESULT CP11Object::addAttribute(CK_ATTRIBUTE_TYPE type,BYTE *pData,DWORD dwLen)
-{
-	init_func
-	attributes[type].alloc_copy(pData,dwLen);
+	attributes[type] = data;
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -70,7 +61,7 @@ CK_RV CP11Object::GetAttributeValue(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount
 			else {
 				if (attr->size()>ulValLen)
 					_return(CKR_BUFFER_TOO_SMALL)
-					memcpy_s(pTemplate[i].pValue, attr->size(), attr->lock(), attr->size());
+					memcpy_s(pTemplate[i].pValue, attr->size(), attr->data(), attr->size());
 				pTemplate[i].ulValueLen=attr->size();
 			}
 		}

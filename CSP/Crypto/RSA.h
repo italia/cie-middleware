@@ -10,7 +10,7 @@ public:
 	CRSA(ByteArray &mod, ByteArray &exp);
 	~CRSA(void);
 
-	RESULT RSA_PURE(ByteArray &data,ByteDynArray &resp);
+	ByteDynArray RSA_PURE(ByteArray &data);
 	RESULT GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, ByteDynArray &privexp);
-	DWORD dwKeySize;
+	size_t dwKeySize;
 };

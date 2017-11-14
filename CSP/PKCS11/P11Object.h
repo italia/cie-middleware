@@ -26,7 +26,6 @@ public:
 	CK_OBJECT_CLASS ObjClass;
 	AttributeMap attributes;
 	RESULT addAttribute(CK_ATTRIBUTE_TYPE type,ByteArray &data);
-	RESULT addAttribute(CK_ATTRIBUTE_TYPE type,BYTE *pData,DWORD dwLen);
 	virtual RESULT getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue);
 
 	virtual CK_RV GetAttributeValue(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount);

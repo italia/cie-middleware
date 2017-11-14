@@ -182,7 +182,7 @@ public:
 
 class CDecrypt : public CMechanism
 {
-	static BYTE uninitializedCacheData;
+	static uint8_t uninitializedCacheData;
 public:
 	CK_OBJECT_HANDLE hDecryptKey;
 
