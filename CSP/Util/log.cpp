@@ -52,7 +52,7 @@ void initLog(const char *iniFile,const char *version) {
 	OutputDebugString(iniFile);
 	OutputDebugString("\n");
 
-	LogMode = (logMode)(IniSettingsInt("Log", "LogMode", (int)LM_Single, "Modalit‡ di Log. Valori possibili:\n"
+	LogMode = (logMode)(IniSettingsInt("Log", "LogMode", (int)LM_Single, "Modalit√† di Log. Valori possibili:\n"
 		"0 ;LM_Single,	// un solo file\n"
 		"1 ;LM_Module,	// un file per modulo\n"
 		"2 ;LM_Thread,	// un file per thread\n"
@@ -66,7 +66,7 @@ void initLog(const char *iniFile,const char *version) {
 
 	FunctionLog = (IniSettingsBool("Log", "FunctionLog", false, "Abilitazione log delle chiamate a funzione")).GetValue((char*)iniFile);
 
-	GlobalDepth = (IniSettingsInt("Log", "FunctionDepth", 10, "Definisce la profondit‡ massima di log delle funzioni\n")).GetValue((char*)iniFile);
+	GlobalDepth = (IniSettingsInt("Log", "FunctionDepth", 10, "Definisce la profondit√† massima di log delle funzioni\n")).GetValue((char*)iniFile);
 
 	GlobalParam = (IniSettingsBool("Log", "ParamLog", false, "Abilitazione log dei parametri di input delle funzioni")).GetValue((char*)iniFile);
 
@@ -144,29 +144,29 @@ void CLog::initParam(CLog &log) {
 		}
 		case (LM_Module): {
 			th << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << "_" << logFileName << ".log";
-			// log per modulo: il nome del file Ë yyyy-mm-gg_name.log, senza alcun path assegnato
+			// log per modulo: il nome del file √® yyyy-mm-gg_name.log, senza alcun path assegnato
 			break;
 		}
 		case (LM_Thread): {
 			th << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << "_00000000.log";
-			// log per thread: il nome del file Ë yyyy-mm-gg_tttttttt.log, senza alcun path assegnato
+			// log per thread: il nome del file √® yyyy-mm-gg_tttttttt.log, senza alcun path assegnato
 			break;
 		}
 		case (LM_Module_Thread): {
 			th << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << "_" << logFileName << "_00000000.log";
-			// log per modulo e per thread: il nome del file Ë yyyy-mm-gg_name_tttttttt.log, senza alcun path assegnato
+			// log per modulo e per thread: il nome del file √® yyyy-mm-gg_name_tttttttt.log, senza alcun path assegnato
 			break;
 		}
 	}
 	logPath = th.str();
 
 	if ((LogMode==LM_Module || LogMode==LM_Module_Thread) && log.logDir.length()!=0) {
-		// se c'Ë un path specifico lo metto lÏ
+		// se c'√® un path specifico lo metto l√¨
 		std::string path = logPath;
 		logPath=log.logDir.append("\\").append(path);
 	}
 	else if (!logDirGlobal.empty()) {
-		// se c'Ë un path globale lo metto lÏ
+		// se c'√® un path globale lo metto l√¨
 		std::string path=logPath;
 		logPath = logDirGlobal.append("\\").append(path);
 	}
@@ -184,7 +184,7 @@ void CLog::initModule(const char *name, const char *version) {
 	logVersion=version;
 
 	if (!InitLog)
-	// verr‡ inizializzato dopo, quando chiamo logInit
+	// verr√† inizializzato dopo, quando chiamo logInit
 		logToInit.push_back(this);
 	else {
 		// vediamo se ce l'ho...
@@ -230,7 +230,8 @@ DWORD CLog::write(const char *format,...) {
 		sprintf_s(pbtDate,sizeof(pbtDate),"%05u:[%02d:%02d:%02d.%03d]", *Num, stTime.wHour, stTime.wMinute, stTime.wSecond, stTime.wMilliseconds);	
 	 
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
-		auto dwThreadID = std::this_thread::get_id().hash();
+		std::hash<std::thread::id> hasher;
+		auto dwThreadID = hasher(std::this_thread::get_id);
 		if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
 			std::stringstream th;
 			th << std::setiosflags(std::ios::hex | std::ios::uppercase);
@@ -293,7 +294,8 @@ void CLog::writePure(const char *format,...) {
 		}
 
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
-		auto dwThreadID = std::this_thread::get_id().hash();
+		std::hash<std::thread::id> hasher;
+		auto dwThreadID = hasher(std::this_thread::get_id);
 		if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
 			std::stringstream th;
 			th << std::setiosflags(std::ios::hex | std::ios::uppercase);
@@ -340,7 +342,8 @@ void CLog::writeBinData(BYTE *data, size_t datalen) {
 	char pbtDate[0x800]={NULL};
 
 	// se siamo in LM_thread devo scrivere il thread nel nome del file
-	auto dwThreadID = std::this_thread::get_id().hash();
+	std::hash<std::thread::id> hasher;
+	auto dwThreadID = hasher(std::this_thread::get_id);
 	if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
 		std::stringstream th;
 		th << std::setiosflags(std::ios::hex | std::ios::uppercase);
