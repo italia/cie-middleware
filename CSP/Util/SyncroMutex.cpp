@@ -28,7 +28,7 @@ void CSyncroMutex::Create(const char *szName)
 			SECURITY_DESCRIPTOR secDesc;
 			DWORD dwACL=sizeof(ACL)+sizeof(ACCESS_ALLOWED_ACE)+sizeof(SID);
 			ByteDynArray pbtACL(dwACL);
-			PACL pACL=(PACL)pbtACL.lock();
+			PACL pACL=(PACL)pbtACL.data();
 
 			InitializeAcl(pACL,dwACL,ACL_REVISION);
 			PSID pSid;

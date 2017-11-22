@@ -5,13 +5,10 @@
 static char *szCompiledFile=__FILE__;
 
 
-ByteDynArray &CSHA1::Digest(ByteArray data,ByteDynArray &digest)
+ByteDynArray CSHA1::Digest(ByteArray data)
 {
-	init_func
+	ByteDynArray digest(SHA_DIGEST_LENGTH);
+	SHA1(data.data(), data.size(), digest.data());
 
-	digest.resize(SHA_DIGEST_LENGTH);
-	SHA1(data.lock(),data.size(),digest.lock());
-
-	_return(digest)
-	exit_func
+	return digest;
 }

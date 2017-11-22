@@ -15,19 +15,19 @@ struct _ATL_SYMBOL_INFO
 
 class CLog {
 public:
-	DWORD dwLogCount;
-	bool bInitialized;
-	bool bEnabled;
-	bool bFunctionLog;
-	bool bLogParam;
-	DWORD dwModuleNum;
+	unsigned int LogCount;
+	bool Initialized;
+	bool Enabled;
+	bool FunctionLog;
+	bool LogParam;
+	unsigned int ModuleNum;
 	std::string logDir;
 	std::string logPath;
 	std::string logName;
 	std::string logFileName;
 	std::string::iterator threadPos;
 	std::string logVersion;
-	bool bFirstLog;
+	bool FirstLog;
 
 	bool _stack_logged;
 
@@ -35,8 +35,8 @@ public:
 	~CLog(void);
 	DWORD write(const char *format,...);
 	void writePure(const char *format,...);
-	void writeBinData(BYTE *data,int datalen);
-	void initModule(const char *name,char *version);
+	void writeBinData(uint8_t *data, size_t datalen);
+	void initModule(const char *name,const char *version);
 	void initParam(CLog &log);
 	void writeModuleInfo();
 	void dumpErr();

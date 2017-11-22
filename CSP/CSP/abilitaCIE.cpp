@@ -37,8 +37,8 @@ DWORD WINAPI _abilitaCIE(
 	try {
 
 		CSHA256 sha256;
-		std::map<BYTE, ByteDynArray> hashSet;
-		BYTE* data;
+		std::map<uint8_t, ByteDynArray> hashSet;
+		uint8_t* data;
 		DWORD len = 0;
 		ByteDynArray CertCIE;
 		ByteDynArray SOD;
@@ -111,7 +111,7 @@ DWORD WINAPI _abilitaCIE(
 							CardReadFile(&cData, DirCIE, EfIdServizi, 0, &data, &len);
 							IdServizi = ByteArray(data, len);
 							cData.pfnCspFree(data);
-							sha256.Digest(IdServizi.left(12), hashSet[0xa1]);
+							hashSet[0xa1] = sha256.Digest(IdServizi.left(12));
 
 							len = 0;
 							CardReadFile(&cData, DirCIE, EfSOD, 0, &data, &len);
@@ -122,22 +122,22 @@ DWORD WINAPI _abilitaCIE(
 							CardReadFile(&cData, DirCIE, EfIntAuth, 0, &data, &len);
 							IntAuth = ByteArray(data, len);
 							cData.pfnCspFree(data);
-							sha256.Digest(IntAuth.left(GetASN1DataLenght(IntAuth)), hashSet[0xa4]);
+							hashSet[0xa4] = sha256.Digest(IntAuth.left(GetASN1DataLenght(IntAuth)));
 
 							ByteDynArray IntAuthServizi; len = 0;
 							CardReadFile(&cData, DirCIE, EfIntAuthServizi, 0, &data, &len);
 							IntAuthServizi = ByteArray(data, len);
 							cData.pfnCspFree(data);
-							sha256.Digest(IntAuthServizi.left(GetASN1DataLenght(IntAuthServizi)), hashSet[0xa5]);
+							hashSet[0xa5] = sha256.Digest(IntAuthServizi.left(GetASN1DataLenght(IntAuthServizi)));
 
 							ByteDynArray DH; len = 0;
 							CardReadFile(&cData, DirCIE, EfDH, 0, &data, &len);
 							DH = ByteArray(data, len);
 							cData.pfnCspFree(data);
 
-							sha256.Digest(DH.left(GetASN1DataLenght(DH)), hashSet[0x1b]);
+							hashSet[0x1b] = sha256.Digest(DH.left(GetASN1DataLenght(DH)));
 							auto ias = ((IAS*)cData.pvVendorSpecific);
-							if (IdServizi != ByteArray((BYTE*)PAN, (DWORD)strnlen(PAN,20)))
+							if (IdServizi != ByteArray((uint8_t*)PAN, strnlen(PAN, 20)))
 								continue;
 
 							DWORD id;
@@ -197,12 +197,12 @@ DWORD WINAPI _abilitaCIE(
 							CardReadFile(&cData, DirCIE, EfSerial, 0, &data, &len);
 							Serial = ByteArray(data, len);
 							cData.pfnCspFree(data);
-							sha256.Digest(Serial.left(9), hashSet[0xa2]);
+							hashSet[0xa2] = sha256.Digest(Serial.left(9));
 							len = 0;
 							CardReadFile(&cData, DirCIE, EfCertCIE, 0, &data, &len);
 							CertCIE = ByteArray(data, len);
 							cData.pfnCspFree(data);
-							sha256.Digest(CertCIE.left(GetASN1DataLenght(CertCIE)), hashSet[0xa3]);
+							hashSet[0xa3] = sha256.Digest(CertCIE.left(GetASN1DataLenght(CertCIE)));
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 5, (LPARAM)"Verifica SOD");
@@ -210,7 +210,7 @@ DWORD WINAPI _abilitaCIE(
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 6, (LPARAM)"Cifratura dati");
-							ias->SetCache(PAN, CertCIE, ByteArray((BYTE*)pin.PIN, 4));
+							ias->SetCache(PAN, CertCIE, ByteArray((uint8_t*)pin.PIN, 4));
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
 
@@ -253,7 +253,7 @@ DWORD WINAPI _abilitaCIE(
 	catch (CBaseException &ex) {
 		std::string dump;
 		ex.DumpTree(dump);
-		MessageBox(nullptr, std::string().append("Si è verificato un errore nella verifica di autenticità del documento").append(dump).c_str(), "CIE", MB_OK);
+		MessageBox(nullptr, stdPrintf("Si è verificato un errore nella verifica di autenticità del documento :%s",dump.c_str()).c_str(), "CIE", MB_OK);
 	}
 
 	return 0;

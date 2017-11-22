@@ -6,7 +6,7 @@ static char *szCompiledFile=__FILE__;
 CTLV::CTLV(ByteArray &data)
 {
 	init_func
-	DWORD dwPtr=0;
+	uint32_t dwPtr=0;
 	while (dwPtr<data.size()) {
 		BYTE btLen=data[dwPtr+1];
 		if (btLen<255) {
@@ -15,10 +15,10 @@ CTLV::CTLV(ByteArray &data)
 			dwPtr+=btLen+2;
 		}
 		else {
-			DWORD dwLen=*(DWORD*)data.lock(4,dwPtr+2);
-			if (dwPtr+dwLen+2+sizeof(DWORD)>data.size()) _returnVoid
-			map[data[dwPtr]]=ByteArray(data.mid(dwPtr,dwLen+2+sizeof(DWORD)));
-			dwPtr+=dwLen+2+sizeof(DWORD);
+			uint32_t dwLen = ByteArrayToVar(data.mid(dwPtr + 2),uint32_t);
+			if (dwPtr + dwLen + 2 + sizeof(uint32_t)>data.size()) _returnVoid
+			map[data[dwPtr]] = ByteArray(data.mid(dwPtr, dwLen + 2 + sizeof(uint32_t)));
+			dwPtr += dwLen + 2 + sizeof(uint32_t);
 		}
 	}
 	exit_func
@@ -92,7 +92,7 @@ RESULT CTLVCreate::addValue(BYTE Tag,ByteDynArray *&Value)
 RESULT CTLVCreate::setValue(BYTE Tag,ByteArray &Value)
 {
 	init_func
-	map[Tag].alloc_copy(Value);
+	map[Tag] = Value;
 	_return(OK)
 	exit_func
 	_return(FAIL)
@@ -101,35 +101,35 @@ RESULT CTLVCreate::setValue(BYTE Tag,ByteArray &Value)
 RESULT CTLVCreate::getBuffer(ByteDynArray &Value)
 {
 	init_func
-	DWORD dwSize=0;
+	uint32_t dwSize=0;
 	tlvCreateMap::iterator it=map.begin();
 	while (it!=map.end()) {
-		if (it->second.size()<0xff)
-			dwSize+=it->second.size()+2;
+		if (it->second.size() < 0xff)
+			dwSize += (uint32_t)it->second.size() + 2;
 		else
-			dwSize+=it->second.size()+2+sizeof(DWORD);
+			dwSize += (uint32_t)it->second.size() + 2 + sizeof(uint32_t);
 		it++;
 	}
 	Value.resize(dwSize);
-	DWORD dwPtr=0;
+	uint32_t dwPtr = 0;
 	it=map.begin();
 	while (it!=map.end()) {
 		Value[dwPtr]=it->first;
 		dwPtr++;
 		if (it->second.size()<0xff) {
-			Value[dwPtr]=(BYTE)it->second.size();
+			Value[dwPtr] = (uint8_t)it->second.size();
 			dwPtr++;
 		}
 		else {
 			Value[dwPtr]=0xff;
 			dwPtr++;
-			DWORD dwSize=it->second.size();
-			Value.copy((BYTE*)&dwSize,sizeof(DWORD),dwPtr);
-			dwPtr+=sizeof(DWORD);
+			uint32_t dwSize = (uint32_t)it->second.size();
+			Value.copy(VarToByteArray(dwSize), dwPtr);
+			dwPtr += sizeof(uint32_t);
 		}
 
-		Value.copy(it->second,dwPtr);
-		dwPtr+=it->second.size();
+		Value.copy(it->second, dwPtr);
+		dwPtr += (uint32_t)it->second.size();
 		it++;
 	}
 	_return(OK)

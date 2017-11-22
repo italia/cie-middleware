@@ -53,10 +53,10 @@ int TokenTransmitCallback(PCARD_DATA data, BYTE *apdu, DWORD apduSize, BYTE *res
 			return sw;
 		}
 	}
-	ODS(std::string("APDU: ").append(dumpHexData(ByteArray(apdu, apduSize), std::string())).append("\n").c_str());
+	ODS(stdPrintf("APDU: %s\n",dumpHexData(ByteArray(apdu, apduSize), std::string()).c_str()).c_str());
 	auto sw=SCardTransmit(data->hScard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
 	if (sw == SCARD_S_SUCCESS) {
-		ODS(std::string("RESP: ").append(dumpHexData(ByteArray(resp, *respSize), std::string())).append("\n").c_str());
+		ODS(stdPrintf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), std::string()).c_str()).c_str());
 	}
 	return sw;
 }
@@ -135,7 +135,7 @@ DWORD WINAPI CardReadFile(
 			ias->GetCertificate(cert, false);
 			DWORD keylen = 2048;
 			if (!cert.isEmpty()) {
-				PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.lock(), cert.size());
+				PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());
 				if (cer == nullptr)
 					throw CStringException("Errore nella lettura del certificato:%08x", GetLastError());
 				keylen = CertGetPublicKeyLength(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, &cer->pCertInfo->SubjectPublicKeyInfo);
@@ -167,13 +167,13 @@ DWORD WINAPI CardReadFile(
 	}
 	else
 		return SCARD_E_FILE_NOT_FOUND;
-	DWORD dataLen = response.size();
+	size_t dataLen = response.size();
 	if (pcbData != nullptr && *pcbData != 0)
 		dataLen = min(dataLen, *pcbData);
 	*ppbData = (PBYTE)pCardData->pfnCspAlloc(dataLen);
-	memcpy_s(*ppbData, dataLen, response.lock(), dataLen);
+	memcpy_s(*ppbData, dataLen, response.data(), dataLen);
 	if (pcbData != nullptr)
-		*pcbData = dataLen;
+		*pcbData = (DWORD)dataLen;
 	return 0;
 	exit_main_func
 	return E_UNEXPECTED;
@@ -217,7 +217,7 @@ DWORD WINAPI CardSignData(
 	else 
 		return SCARD_E_INVALID_PARAMETER;
 
-	toSign.alloc_copy(pInfo->pbData, pInfo->cbData);
+	toSign= ByteArray(pInfo->pbData, pInfo->cbData);
 	switch (alg) {
 		case 0:
 			// nessun OID da aggiungere
@@ -245,7 +245,7 @@ DWORD WINAPI CardSignData(
 	ias->Sign(toSign, resp);
 
 	pInfo->pbSignedData = (BYTE*)pCardData->pfnCspAlloc(resp.size());
-	pInfo->cbSignedData = resp.size();
+	pInfo->cbSignedData = (DWORD)resp.size();
 	resp.reverse();
 	ByteArray(pInfo->pbSignedData, pInfo->cbSignedData).copy(resp);
 	return 0;
@@ -355,7 +355,7 @@ void GetContainerInfo(CONTAINER_INFO &value, PCARD_DATA  pCardData) {
 	ByteDynArray cert;
 	ias->GetCertificate(cert);
 
-	PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.lock(), cert.size());
+	PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());
 	if (cer == nullptr)
 		throw CStringException("Errore nella lettura del certificato:%08x", GetLastError());
 	PCERT_PUBLIC_KEY_INFO pinf = &(cer->pCertInfo->SubjectPublicKeyInfo);
@@ -402,10 +402,10 @@ DWORD WINAPI CardGetContainerProperty(
 	}
 	else
 		return SCARD_E_INVALID_PARAMETER;
-	*pdwDataLen = response.size();
+	*pdwDataLen = (DWORD)response.size();
 	if (cbData < response.size())
 		return ERROR_INSUFFICIENT_BUFFER;
-	memcpy_s(pbData, cbData, response.lock(), response.size());
+	memcpy_s(pbData, cbData, response.data(), response.size());
 	return 0;
 	exit_main_func
 	return E_UNEXPECTED;
@@ -543,10 +543,10 @@ __in                                        DWORD       dwFlags)
 	}
 	else
 		return SCARD_E_INVALID_PARAMETER;
-	*pdwDataLen = response.size();
+	*pdwDataLen = (DWORD)response.size();
 	if (cbData < response.size())
 		return ERROR_INSUFFICIENT_BUFFER;
-	memcpy_s(pbData, cbData, response.lock(), response.size());
+	memcpy_s(pbData, cbData, response.data(), response.size());
 	return 0;
 	exit_main_func
 	return E_UNEXPECTED;

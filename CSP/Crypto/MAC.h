@@ -14,6 +14,6 @@ public:
 	~CMAC(void);
 
 	void Init(ByteArray &key);
-	const ByteDynArray &Mac(const ByteArray &data,ByteDynArray &result);
+	ByteDynArray Mac(const ByteArray &data);
 
 };

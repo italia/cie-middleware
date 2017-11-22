@@ -82,4 +82,5 @@ if ((_call_ris=(call))!=CARD_OK) { \
 
 
 #define ER_ASSERT(a,b) \
-	if (!(a)) throw CStringException(__LINE__,__FILE__,b);
+	if (!(a)) \
+		throw CStringException(__LINE__,__FILE__,b);

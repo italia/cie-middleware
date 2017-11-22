@@ -142,7 +142,8 @@ DWORD WINAPI _cambioPIN(
 				continue;
 
 			isCIE = checkCIE(conn.hCard, hSC, cData);
-			isEnrolled = ((IAS*)cData.pvVendorSpecific)->IsEnrolled();
+			if (isCIE)
+				isEnrolled = ((IAS*)cData.pvVendorSpecific)->IsEnrolled();
 
 		}
 		if (isCIE) {
@@ -192,7 +193,8 @@ DWORD WINAPI _cambioPIN(
 					if (!checkTran.isLocked())
 						return;
 					isCIE = data->checkCIE(conn.hCard, data->hSC, cData);
-					isEnrolled = ((IAS*)cData.pvVendorSpecific)->IsEnrolled();
+					if (isCIE)
+						isEnrolled = ((IAS*)cData.pvVendorSpecific)->IsEnrolled();
 				}
 				if (isCIE) {
 					if (!isEnrolled) {

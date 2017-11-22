@@ -32,7 +32,7 @@ bool CacheExists(const char *PAN) {
 	return (PathFileExists(szPath)!=FALSE);
 }
 
-void CacheGetCertificate(const char *PAN, std::vector<BYTE>&certificate)
+void CacheGetCertificate(const char *PAN, std::vector<uint8_t>&certificate)
 {
 	if (PAN == nullptr)
 		throw CStringException("Il PAN è necessario");
@@ -44,12 +44,12 @@ void CacheGetCertificate(const char *PAN, std::vector<BYTE>&certificate)
 
 		ByteDynArray data,Cert;
 		data.load(szPath);
-		BYTE *ptr = data.lock();
+		uint8_t *ptr = data.data();
 		int len = *(int*)ptr; ptr += sizeof(int);
 		// salto il PIN
 		ptr += len;
 		len = *(int*)ptr; ptr += sizeof(int);
-		Cert.resize(len); Cert.copy(ptr, len);
+		Cert.resize(len); Cert.copy(ByteArray(ptr, len));
 
 		certificate.resize(Cert.size());
 		ByteArray(certificate.data(), certificate.size()).copy(Cert);
@@ -58,7 +58,7 @@ void CacheGetCertificate(const char *PAN, std::vector<BYTE>&certificate)
 		throw CStringException("CIE non abilitata");
 }
 
-void CacheGetPIN(const char *PAN, std::vector<BYTE>&PIN) {
+void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 	if (PAN == nullptr)
 		throw CStringException("Il PAN è necessario");
 
@@ -68,9 +68,9 @@ void CacheGetPIN(const char *PAN, std::vector<BYTE>&PIN) {
 	if (PathFileExists(szPath)) {
 		ByteDynArray data, ClearPIN;
 		data.load(szPath);
-		BYTE *ptr = data.lock();
+		uint8_t *ptr = data.data();
 		int len = *(int*)ptr; ptr += sizeof(int);
-		ClearPIN.resize(len); ClearPIN.copy(ptr, len);
+		ClearPIN.resize(len); ClearPIN.copy(ByteArray(ptr, len));
 
 		PIN.resize(ClearPIN.size());
 		ByteArray(PIN.data(), PIN.size()).copy(ClearPIN);
@@ -83,7 +83,7 @@ void CacheGetPIN(const char *PAN, std::vector<BYTE>&PIN) {
 
 
 
-void CacheSetData(const char *PAN, BYTE *certificate, int certificateSize, BYTE *FirstPIN, int FirstPINSize) {
+void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, uint8_t *FirstPIN, int FirstPINSize) {
 	if (PAN == nullptr)
 		throw CStringException("Il PAN è necessario");
 
@@ -103,13 +103,13 @@ void CacheSetData(const char *PAN, BYTE *certificate, int certificateSize, BYTE 
 	if (f == nullptr)
 		throw CStringException("Errore in scrittura file cache del certificato");
 
-	int len = baFirstPIN.size();
+	size_t len = baFirstPIN.size();
 	fwrite(&len, sizeof(len), 1, f);
-	fwrite(baFirstPIN.lock(), len, 1, f);
+	fwrite(baFirstPIN.data(), len, 1, f);
 
 	len = baCertificate.size();
 	fwrite(&len, sizeof(len), 1, f);
-	fwrite(baCertificate.lock(), len, 1, f);
+	fwrite(baCertificate.data(), len, 1, f);
 
 	fclose(f);
 }

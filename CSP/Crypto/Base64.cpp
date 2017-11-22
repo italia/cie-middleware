@@ -16,9 +16,9 @@ std::string &CBase64::Encode(ByteArray &data, std::string &encodedData) {
 
 	init_func
 	DWORD dwStrSize = 0;
-	CryptBinaryToString(data.lock(), data.size(), CRYPT_STRING_BASE64, NULL, &dwStrSize);
+	CryptBinaryToString(data.data(), (DWORD)data.size(), CRYPT_STRING_BASE64, NULL, &dwStrSize);
 	encodedData.resize(dwStrSize);
-	CryptBinaryToString(data.lock(),data.size(),CRYPT_STRING_BASE64,&encodedData.front(),&dwStrSize);
+	CryptBinaryToString(data.data(), (DWORD)data.size(), CRYPT_STRING_BASE64, &encodedData.front(), &dwStrSize);
 
 	return encodedData;
 	exit_func
@@ -30,7 +30,7 @@ ByteDynArray &CBase64::Decode(const char *encodedData,ByteDynArray &data) {
 	DWORD dwDataSize = 0;
 	CryptStringToBinary(encodedData, 0, CRYPT_STRING_BASE64, NULL, &dwDataSize, NULL, NULL);
 	data.resize(dwDataSize);
-	CryptStringToBinary(encodedData, 0, CRYPT_STRING_BASE64, data.lock(), &dwDataSize, NULL, NULL);
+	CryptStringToBinary(encodedData, 0, CRYPT_STRING_BASE64, data.data(), &dwDataSize, NULL, NULL);
 	
 	_return(data)
 	exit_func
