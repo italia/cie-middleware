@@ -11,6 +11,7 @@
 #include "../util/ModuleInfo.h"
 #include "../util/util.h"
 #include "../util/syncroevent.h"
+#include <mutex>
 
 static char *szCompiledFile=__FILE__;
 
@@ -22,8 +23,8 @@ using namespace p11;
 
 // Function list P11
 CK_FUNCTION_LIST m_FunctionList;
-CSyncroMutex p11Mutex;
-CSyncroEvent p11slotEvent/*("CardOS_P11_Event")*/;
+std::mutex p11Mutex;
+auto_reset_event p11slotEvent/*("CardOS_P11_Event")*/;
 
 // meccanismi supportati
 
@@ -53,8 +54,8 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 		bModuleInit=true;
 		moduleInfo.init(hModule);
 		std::string mainMutexName;
-		mainMutexName="CIE_P11_Mutex_"+moduleInfo.szModuleName;
-		p11Mutex.Create(mainMutexName.c_str());
+		//mainMutexName="CIE_P11_Mutex_"+moduleInfo.szModuleName;
+		//p11Mutex.Create(mainMutexName.c_str());
 		//xmlInit();
 		std::string configPath;
 		configPath = moduleInfo.szModulePath + moduleInfo.szModuleName + ".ini";
@@ -81,7 +82,7 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 		if (CCardTemplate::DeleteTemplateList() == FAIL)
 			return FALSE;
 
-		p11slotEvent.Signal();
+		p11slotEvent.set();
 
 	}
 
@@ -107,7 +108,7 @@ RESULT CheckMechanismParam(CK_MECHANISM *pParam,bool &bValid) {
 CK_RV CK_ENTRY C_UpdateSlotList()
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	CSlot::InitSlotList();
 
@@ -119,7 +120,7 @@ CK_RV CK_ENTRY C_UpdateSlotList()
 CK_RV CK_ENTRY C_GetSlotList(CK_BBOOL tokenPresent, CK_SLOT_ID_PTR pSlotList, CK_ULONG_PTR pulCount)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutArray(pSlotList,pulCount)
 
@@ -192,7 +193,7 @@ CK_RV CK_ENTRY C_GetSlotList(CK_BBOOL tokenPresent, CK_SLOT_ID_PTR pSlotList, CK
 CK_RV CK_ENTRY C_Initialize(CK_VOID_PTR pReserved)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 	
 	logParam(pReserved)
 	
@@ -244,7 +245,7 @@ CK_RV CK_ENTRY C_Initialize(CK_VOID_PTR pReserved)
 CK_RV CK_ENTRY C_Finalize(CK_VOID_PTR pReserved)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	logParam(pReserved)
 
@@ -256,19 +257,19 @@ CK_RV CK_ENTRY C_Finalize(CK_VOID_PTR pReserved)
 
 	bP11Initialized = false;
 
-	if (CSlot::Thread.dwThreadID != 0) {
+	// TODO verificare thread "vuoto"
+	if (CSlot::Thread.joinable()) {
 		CCardContext *tc = CSlot::ThreadContext;
 		if (tc != nullptr) {
 			SCARDCONTEXT hC = tc->hContext;
 			if (hC != NULL)
 				SCardCancel(hC);
 		}
-		p11Mutex.Unlock();
-		CSlot::Thread.joinThread(INFINITE);
-		p11Mutex.Lock();
+		p11Mutex.unlock();
+		CSlot::Thread.join();
+		p11Mutex.lock();
 	}
 
-	CSlot::Thread.close();
 
 	for(SlotMap::const_iterator it=CSlot::g_mSlots.begin();it!=CSlot::g_mSlots.end();it++) {
 		it->second->CloseAllSessions();
@@ -282,7 +283,7 @@ CK_RV CK_ENTRY C_Finalize(CK_VOID_PTR pReserved)
 CK_RV CK_ENTRY C_OpenSession(CK_SLOT_ID slotID, CK_FLAGS flags, CK_VOID_PTR pApplication, CK_NOTIFY notify, CK_SESSION_HANDLE_PTR phSession)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutPtr(phSession)
 		
@@ -348,7 +349,7 @@ CK_RV CK_ENTRY C_OpenSession(CK_SLOT_ID slotID, CK_FLAGS flags, CK_VOID_PTR pApp
 CK_RV CK_ENTRY C_GetTokenInfo(CK_SLOT_ID slotID, CK_TOKEN_INFO_PTR pInfo)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutPtr(pInfo)
 		
@@ -407,7 +408,7 @@ CK_RV CK_ENTRY C_GetTokenInfo(CK_SLOT_ID slotID, CK_TOKEN_INFO_PTR pInfo)
 CK_RV CK_ENTRY C_CloseSession(CK_SESSION_HANDLE hSession)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	logParam(hSession)
 
@@ -431,7 +432,7 @@ CK_RV CK_ENTRY C_CloseSession(CK_SESSION_HANDLE hSession)
 CK_RV CK_ENTRY C_CloseAllSessions(CK_SLOT_ID slotID)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	logParam(slotID)
 
@@ -456,7 +457,7 @@ CK_RV CK_ENTRY C_CloseAllSessions(CK_SLOT_ID slotID)
 CK_RV CK_ENTRY C_GetSlotInfo(CK_SLOT_ID slotID, CK_SLOT_INFO_PTR pInfo)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutPtr(pInfo)
 
@@ -485,7 +486,7 @@ CK_RV CK_ENTRY C_GetSlotInfo(CK_SLOT_ID slotID, CK_SLOT_INFO_PTR pInfo)
 CK_RV CK_ENTRY C_GetInfo(CK_INFO_PTR pInfo /* location that receives information */)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutPtr(pInfo)
 
@@ -514,7 +515,7 @@ CK_RV CK_ENTRY C_GetInfo(CK_INFO_PTR pInfo /* location that receives information
 CK_RV CK_ENTRY C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR ppFunctionList)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutPtr(ppFunctionList)
 
@@ -608,7 +609,7 @@ CK_RV CK_ENTRY C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR ppFunctionList)
 CK_RV CK_ENTRY C_CreateObject(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CK_OBJECT_HANDLE_PTR phObject)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 	
 
 	checkOutPtr(phObject)
@@ -639,7 +640,7 @@ CK_RV CK_ENTRY C_CreateObject(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemp
 CK_RV CK_ENTRY C_GenerateKey(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, CK_OBJECT_HANDLE_PTR phKey)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 	
 	checkInPtr(pMechanism)
 	checkOutPtr(phKey)
@@ -670,7 +671,7 @@ CK_RV CK_ENTRY C_GenerateKey(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 CK_RV CK_ENTRY C_GenerateKeyPair(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, CK_OBJECT_HANDLE_PTR phPublicKey, CK_OBJECT_HANDLE_PTR phPrivateKey)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 	
 	checkInPtr(pMechanism)
 		checkOutPtr(phPublicKey)
@@ -706,7 +707,7 @@ CK_RV CK_ENTRY C_GenerateKeyPair(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pM
 CK_RV CK_ENTRY C_DestroyObject(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE hObject)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 	
 	logParam(hSession)
 	logParam(hObject)
@@ -731,7 +732,7 @@ CK_RV CK_ENTRY C_DestroyObject(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE hObje
 CK_RV CK_ENTRY C_DigestInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism) 
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInPtr(pMechanism)
 
@@ -762,7 +763,7 @@ CK_RV CK_ENTRY C_DigestInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechan
 CK_RV CK_ENTRY C_Digest(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ulDataLen, CK_BYTE_PTR pDigest, CK_ULONG_PTR pulDigestLen) 
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pData,ulDataLen)
 	checkOutArray(pDigest,pulDigestLen)
@@ -791,7 +792,7 @@ CK_RV CK_ENTRY C_Digest(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG 
 CK_RV CK_ENTRY C_DigestFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pDigest, CK_ULONG_PTR pulDigestLen) 
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutArray(pDigest,pulDigestLen)
 
@@ -820,7 +821,7 @@ CK_RV CK_ENTRY C_DigestFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pDigest, CK
 CK_RV CK_ENTRY C_DigestUpdate (CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_ULONG ulPartLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pPart, ulPartLen)
 
@@ -845,7 +846,7 @@ CK_RV CK_ENTRY C_DigestUpdate (CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK
 CK_RV CK_ENTRY C_FindObjects(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE_PTR phObject,CK_ULONG ulMaxObjectCount,CK_ULONG_PTR pulObjectCount)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutBuffer(phObject,sizeof(CK_OBJECT_HANDLE)*ulMaxObjectCount)
 
@@ -874,7 +875,7 @@ CK_RV CK_ENTRY C_FindObjects(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE_PTR phO
 CK_RV CK_ENTRY C_FindObjectsFinal(CK_SESSION_HANDLE hSession)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	logParam(hSession)
 
@@ -895,7 +896,7 @@ CK_RV CK_ENTRY C_FindObjectsFinal(CK_SESSION_HANDLE hSession)
 CK_RV CK_ENTRY C_FindObjectsInit(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInArray(pTemplate,ulCount)
 
@@ -931,7 +932,7 @@ CK_RV CK_ENTRY C_FindObjectsInit(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pT
 CK_RV CK_ENTRY C_GetAttributeValue(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObject, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount )
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInArray(pTemplate, ulCount)
 
@@ -958,7 +959,7 @@ CK_RV CK_ENTRY C_GetAttributeValue(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE 
 CK_RV CK_ENTRY C_GetMechanismList(CK_SLOT_ID slotID, CK_MECHANISM_TYPE_PTR pMechanismList, CK_ULONG_PTR pulCount)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutArray(pMechanismList,pulCount)
 
@@ -997,7 +998,7 @@ CK_RV CK_ENTRY C_GetMechanismList(CK_SLOT_ID slotID, CK_MECHANISM_TYPE_PTR pMech
 CK_RV CK_ENTRY C_GetMechanismInfo(CK_SLOT_ID slotID, CK_MECHANISM_TYPE type, CK_MECHANISM_INFO_PTR pInfo)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	logParam(slotID)
 	logParam(type)
@@ -1055,7 +1056,7 @@ CK_RV CK_ENTRY C_GetMechanismInfo(CK_SLOT_ID slotID, CK_MECHANISM_TYPE type, CK_
 CK_RV CK_ENTRY C_GetSessionInfo(CK_SESSION_HANDLE hSession, CK_SESSION_INFO_PTR pInfo)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutPtr(pInfo)
 
@@ -1107,7 +1108,7 @@ CK_RV CK_ENTRY C_GetSessionInfo(CK_SESSION_HANDLE hSession, CK_SESSION_INFO_PTR 
 CK_RV CK_ENTRY C_Login(CK_SESSION_HANDLE hSession, CK_USER_TYPE userType, CK_CHAR_PTR pPin, CK_ULONG ulPinLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pPin,ulPinLen)
 
@@ -1137,7 +1138,7 @@ CK_RV CK_ENTRY C_Login(CK_SESSION_HANDLE hSession, CK_USER_TYPE userType, CK_CHA
 CK_RV CK_ENTRY C_Logout(CK_SESSION_HANDLE hSession)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	logParam(hSession)
 		 
@@ -1162,7 +1163,7 @@ CK_RV CK_ENTRY C_Logout(CK_SESSION_HANDLE hSession)
 CK_RV CK_ENTRY C_SetAttributeValue(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE hObject,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	logParam(hSession)
 	logParam(hObject)
@@ -1188,7 +1189,7 @@ CK_RV CK_ENTRY C_SetAttributeValue(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE h
 CK_RV CK_ENTRY C_Sign(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ulDataLen, CK_BYTE_PTR pSignature, CK_ULONG_PTR pulSignatureLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pData,ulDataLen)
 	checkOutArray(pSignature,pulSignatureLen)
@@ -1218,7 +1219,7 @@ CK_RV CK_ENTRY C_Sign(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ul
 CK_RV CK_ENTRY C_SignFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pSignature,CK_ULONG_PTR pulSignatureLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutArray(pSignature,pulSignatureLen)
 
@@ -1250,7 +1251,7 @@ CK_RV CK_ENTRY C_SignFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pSignature,CK_
 CK_RV CK_ENTRY C_SignInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInPtr(pMechanism)
 
@@ -1282,7 +1283,7 @@ CK_RV CK_ENTRY C_SignInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanis
 CK_RV CK_ENTRY C_SignUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_ULONG ulPartLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pPart,ulPartLen)
 
@@ -1311,7 +1312,7 @@ CK_RV CK_ENTRY C_SignUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_UL
 CK_RV CK_ENTRY C_SignRecoverInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInPtr(pMechanism)
 
@@ -1344,7 +1345,7 @@ CK_RV CK_ENTRY C_SignRecoverInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pM
 CK_RV CK_ENTRY C_SignRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ulDataLen, CK_BYTE_PTR pSignature, CK_ULONG_PTR pulSignatureLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pData,ulDataLen)
 	checkOutArray(pSignature,pulSignatureLen)
@@ -1372,7 +1373,7 @@ CK_RV CK_ENTRY C_SignRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_U
 CK_RV CK_ENTRY C_VerifyRecoverInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInPtr(pMechanism)
 
@@ -1405,7 +1406,7 @@ CK_RV CK_ENTRY C_VerifyRecoverInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR 
 CK_RV CK_ENTRY C_VerifyRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignature, CK_ULONG ulSignatureLen, CK_BYTE_PTR pData, CK_ULONG_PTR pulDataLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutArray(pData,pulDataLen)
 	checkInBuffer(pSignature,ulSignatureLen)
@@ -1433,7 +1434,7 @@ CK_RV CK_ENTRY C_VerifyRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignatur
 CK_RV CK_ENTRY C_VerifyInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInPtr(pMechanism)
 
@@ -1467,7 +1468,7 @@ CK_RV CK_ENTRY C_VerifyInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechan
 CK_RV CK_ENTRY C_Verify(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ulDataLen, CK_BYTE_PTR pSignature, CK_ULONG ulSignatureLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pData,ulDataLen)
 	checkInBuffer(pSignature,ulSignatureLen)
@@ -1494,7 +1495,7 @@ CK_RV CK_ENTRY C_Verify(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG 
 CK_RV CK_ENTRY C_VerifyUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ulDataLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pData,ulDataLen)
 
@@ -1523,7 +1524,7 @@ CK_RV CK_ENTRY C_VerifyUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_
 CK_RV CK_ENTRY C_VerifyFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignature, CK_ULONG ulSignatureLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pSignature,ulSignatureLen)
 
@@ -1552,7 +1553,7 @@ CK_RV CK_ENTRY C_VerifyFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignature,
 CK_RV CK_ENTRY C_Encrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ulDataLen, CK_BYTE_PTR pEncryptedData, CK_ULONG_PTR pulEncryptedDataLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pData,ulDataLen)
 	checkOutArray(pEncryptedData,pulEncryptedDataLen)
@@ -1581,7 +1582,7 @@ CK_RV CK_ENTRY C_Encrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG
 CK_RV CK_ENTRY C_EncryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pEncryptedData,CK_ULONG_PTR pulEncryptedDataLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutArray(pEncryptedData,pulEncryptedDataLen)
 
@@ -1612,7 +1613,7 @@ CK_RV CK_ENTRY C_EncryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pEncryptedD
 CK_RV CK_ENTRY C_EncryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInPtr(pMechanism)
 
@@ -1646,7 +1647,7 @@ CK_RV CK_ENTRY C_EncryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 CK_RV CK_ENTRY C_EncryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_ULONG ulPartLen, CK_BYTE_PTR pEncryptedPart, CK_ULONG_PTR pulEncryptedPartLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pPart,ulPartLen)
 	checkOutArray(pEncryptedPart,pulEncryptedPartLen)
@@ -1679,7 +1680,7 @@ CK_RV CK_ENTRY C_EncryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK
 CK_RV CK_ENTRY C_Decrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncryptedData, CK_ULONG ulEncryptedDataLen, CK_BYTE_PTR pData, CK_ULONG_PTR pulDataLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pEncryptedData,ulEncryptedDataLen)
 	checkOutArray(pData,pulDataLen)
@@ -1708,7 +1709,7 @@ CK_RV CK_ENTRY C_Decrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncryptedData,
 CK_RV CK_ENTRY C_DecryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pData,CK_ULONG_PTR pulDataLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutArray(pData,pulDataLen)
 
@@ -1739,7 +1740,7 @@ CK_RV CK_ENTRY C_DecryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pData,CK_UL
 CK_RV CK_ENTRY C_DecryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInPtr(pMechanism)
 
@@ -1773,7 +1774,7 @@ CK_RV CK_ENTRY C_DecryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 CK_RV CK_ENTRY C_DecryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncryptedPart, CK_ULONG ulEncryptedPartLen, CK_BYTE_PTR pPart, CK_ULONG_PTR pulPartLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pEncryptedPart,ulEncryptedPartLen)
 	checkOutArray(pPart,pulPartLen)
@@ -1823,7 +1824,7 @@ CK_RV CK_ENTRY C_WaitForSlotEvent(CK_FLAGS flags, CK_SLOT_ID_PTR pSlot, CK_VOID_
 		_return(CKR_CRYPTOKI_NOT_INITIALIZED)
 
 	if (flags & CKF_DONT_BLOCK) {
-		CSyncroLocker lock(p11Mutex);
+		std::unique_lock<std::mutex> lock(p11Mutex);
 		//CSyncroLocker lock(p11EventMutex);
 		SlotMap::iterator it=CSlot::g_mSlots.begin();
 		while (it!=CSlot::g_mSlots.end()) {
@@ -1838,7 +1839,7 @@ CK_RV CK_ENTRY C_WaitForSlotEvent(CK_FLAGS flags, CK_SLOT_ID_PTR pSlot, CK_VOID_
 	}
 
 	while (1) {
-		p11slotEvent.Wait();
+		p11slotEvent.wait();
 		//CSyncroLocker lock(p11EventMutex);
 		if (!bP11Initialized) {
 			*pSlot=0;
@@ -1874,7 +1875,7 @@ CK_RV CK_ENTRY C_SeedRandom(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSeed, CK_UL
 CK_RV CK_ENTRY C_GenerateRandom(CK_SESSION_HANDLE hSession, CK_BYTE_PTR RandomData, CK_ULONG ulRandomLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutBuffer(RandomData,ulRandomLen)
 
@@ -1899,7 +1900,7 @@ CK_RV CK_ENTRY C_GenerateRandom(CK_SESSION_HANDLE hSession, CK_BYTE_PTR RandomDa
 CK_RV CK_ENTRY C_InitPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pPin,CK_ULONG ulPinLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pPin,ulPinLen);
 
@@ -1924,7 +1925,7 @@ CK_RV CK_ENTRY C_InitPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pPin,CK_ULONG ul
 CK_RV CK_ENTRY C_SetPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pOldPin,CK_ULONG ulOldLen,CK_CHAR_PTR pNewPin,CK_ULONG ulNewLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pOldPin,ulOldLen);
 	checkInBuffer(pNewPin,ulNewLen);
@@ -1951,7 +1952,7 @@ CK_RV CK_ENTRY C_SetPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pOldPin,CK_ULONG 
 CK_RV CK_ENTRY C_GetObjectSize(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObject,CK_ULONG_PTR pulSize) 
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutPtr(pulSize);
 
@@ -1977,7 +1978,7 @@ CK_RV CK_ENTRY C_GetObjectSize(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObj
 CK_RV CK_ENTRY C_GetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOperationState,CK_ULONG_PTR pulOperationStateLen)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkOutArray(pOperationState,pulOperationStateLen)
 
@@ -2004,7 +2005,7 @@ CK_RV CK_ENTRY C_GetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOpera
 CK_RV CK_ENTRY C_SetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOperationState,CK_ULONG ulOperationStateLen,CK_OBJECT_HANDLE hEncryptionKey,CK_OBJECT_HANDLE hAuthenticationKey)
 {
 	init_main_func
-	CSyncroLocker lock(p11Mutex);
+	std::unique_lock<std::mutex> lock(p11Mutex);
 
 	checkInBuffer(pOperationState,ulOperationStateLen)
 

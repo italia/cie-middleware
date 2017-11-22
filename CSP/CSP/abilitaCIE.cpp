@@ -140,18 +140,17 @@ DWORD WINAPI _abilitaCIE(
 							if (IdServizi != ByteArray((uint8_t*)PAN, strnlen(PAN, 20)))
 								continue;
 
-							DWORD id;
+							//DWORD id;
 							HWND progWin = nullptr;
 							struct threadData th;
 							th.progWin = &progWin;
 							th.hDesk = (HDESK)(*desk);
-							CreateThread(nullptr, 0, [](LPVOID lpThreadParameter) -> DWORD {
-								struct threadData *th = (struct threadData*)lpThreadParameter;
-								SetThreadDesktop(th->hDesk);
-								CVerifica ver(th->progWin);
+							std::thread([&th]() -> DWORD {
+								SetThreadDesktop(th.hDesk);
+								CVerifica ver(th.progWin);
 								ver.DoModal();
 								return 0;
-							}, &th, 0, &id);
+							}).detach();
 
 							ias->Callback = [](int prog, char *desc, void *data) {
 								HWND progWin = *(HWND*)data;
@@ -285,15 +284,9 @@ extern "C" int CALLBACK AbilitaCIE(
 		ODS("Already running AbilitaCIE");
 		return 0;
 	}
-	DWORD id;
-	HANDLE thread = CreateThread(nullptr, 0, _abilitaCIE, lpCmdLine, 0, &id);
-	if (thread == NULL) {
-		ODS("Errore in creazione thread su AbilitaCIE");
-		return 0;
-	}
-
-	WaitForSingleObject(thread, INFINITE);
-	CloseHandle(thread);
+	//std::thread thread(_abilitaCIE, lpCmdLine);
+	//thread.join();
+	_abilitaCIE(lpCmdLine);
 	ODS("End AbilitaCIE");
 	return 0;
 }

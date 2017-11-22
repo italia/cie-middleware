@@ -20,8 +20,7 @@ extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD d
 #pragma comment(linker, "/export:CambioPIN=_CambioPIN@16")
 #endif
 
-DWORD WINAPI _cambioPIN(
-	LPVOID lpThreadParameter) {
+DWORD WINAPI _cambioPIN() {
 	init_main_func
 
 	SCARDCONTEXT hSC;
@@ -237,15 +236,8 @@ extern "C" int CALLBACK CambioPIN(
 
 	ODS("Start CambioPIN");
 
-	DWORD id;
-	HANDLE thread = CreateThread(nullptr, 0, _cambioPIN, lpCmdLine, 0, &id);
-	if (thread == NULL) {
-		ODS("Errore in creazione thread su CambioPIN");
-		return 0;
-	}
+	_cambioPIN();
 
-	WaitForSingleObject(thread, INFINITE);
-	CloseHandle(thread);
 	ODS("End CambioPIN");
 	return 0;
 }

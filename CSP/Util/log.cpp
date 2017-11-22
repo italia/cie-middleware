@@ -9,6 +9,7 @@
 #include "UtilException.h"
 #include "thread.h"
 #include "IniSettings.h"
+#include <thread>
 
 
 static char *szCompiledFile=__FILE__;
@@ -229,7 +230,7 @@ DWORD CLog::write(const char *format,...) {
 		sprintf_s(pbtDate,sizeof(pbtDate),"%05u:[%02d:%02d:%02d.%03d]", *Num, stTime.wHour, stTime.wMinute, stTime.wSecond, stTime.wMilliseconds);	
 	 
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
-		DWORD dwThreadID=CThread::getID();
+		auto dwThreadID = std::this_thread::get_id().hash();
 		if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
 			std::stringstream th;
 			th << std::setiosflags(std::ios::hex | std::ios::uppercase);
@@ -292,7 +293,7 @@ void CLog::writePure(const char *format,...) {
 		}
 
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
-		DWORD dwThreadID=CThread::getID();
+		auto dwThreadID = std::this_thread::get_id().hash();
 		if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
 			std::stringstream th;
 			th << std::setiosflags(std::ios::hex | std::ios::uppercase);
@@ -339,7 +340,7 @@ void CLog::writeBinData(BYTE *data, size_t datalen) {
 	char pbtDate[0x800]={NULL};
 
 	// se siamo in LM_thread devo scrivere il thread nel nome del file
-	DWORD dwThreadID=CThread::getID();
+	auto dwThreadID = std::this_thread::get_id().hash();
 	if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
 		std::stringstream th;
 		th << std::setiosflags(std::ios::hex | std::ios::uppercase);

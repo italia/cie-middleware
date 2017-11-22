@@ -7,7 +7,6 @@
 
 static char *szCompiledFile = __FILE__;
 
-
 namespace {
 
 	template<class T>
@@ -94,12 +93,12 @@ namespace p11 {
 			P11ER_CALL(GetNewSessionID(pSession->hSessionHandle),
 			ERR_GET_NEW_SESSION)
 
-			g_mSessions.insert(std::make_pair(pSession->hSessionHandle, std::move(pSession)));
 		hSession = pSession->hSessionHandle;
 		P11ER_CALL(pSession->pSlot->pTemplate->FunctionList.templateInitSession(pSession->pSlot->pTemplateData),
 			ERR_INIT_SESSION)
 
 			pSession->pSlot->dwSessionCount++;
+		g_mSessions.insert(std::make_pair(pSession->hSessionHandle, std::move(pSession)));
 
 		_return(OK)
 			exit_func
@@ -330,7 +329,7 @@ namespace p11 {
 		init_func
 			for (unsigned int i = 0; i<ulCount; i++) {
 				if (pTemplate[i].type == type) {
-					val= ByteArray((uint8_t*)pTemplate[i].pValue, pTemplate[i].ulValueLen);
+					val = ByteArray((uint8_t*)pTemplate[i].pValue, pTemplate[i].ulValueLen);
 					_return(OK)
 				}
 			}
@@ -526,18 +525,18 @@ namespace p11 {
 	{
 		init_func
 
-		CK_ULONG ulReqLen = 0;
+			CK_ULONG ulReqLen = 0;
 		P11ER_CALL(pDigestMechanism->DigestLength(&ulReqLen),
 			ERR_CANT_GET_MECHANISM_LENGTH)
 
-		if (!Digest.isNull() && Digest.size() < ulReqLen)
-			_return(CKR_BUFFER_TOO_SMALL)
+			if (!Digest.isNull() && Digest.size() < ulReqLen)
+				_return(CKR_BUFFER_TOO_SMALL)
 
-		Digest = Digest.left(ulReqLen);
+				Digest = Digest.left(ulReqLen);
 		if (Digest.isNull())
 			_return(OK)
 
-		CK_RV result = DigestUpdate(Data);
+			CK_RV result = DigestUpdate(Data);
 		if (result != OK)
 			_return(result)
 
