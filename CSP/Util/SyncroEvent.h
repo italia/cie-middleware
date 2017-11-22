@@ -1,25 +1,22 @@
 #pragma once
 
-class CSyncroEvent
+#include <mutex>
+#include <condition_variable>
+
+
+class auto_reset_event
 {
-#ifdef WIN32
-	HANDLE hEvent;
-#endif
 public:
-	CSyncroEvent(void);
-	CSyncroEvent(const char *name);
-	~CSyncroEvent(void);
+	auto_reset_event(bool signaled = false)
+		: signaled_(signaled)
+	{
+	}
 
-	void Signal();
-	void Wait();
-};
+	void set();
+	void wait();
 
-class CSyncroSignaler
-{
-	CSyncroEvent *pEvent;
-public:
-	CSyncroSignaler(CSyncroEvent &event);
-	~CSyncroSignaler();
-
-	void detach();
+private:
+	std::mutex m_;
+	std::condition_variable cv_;
+	bool signaled_;
 };

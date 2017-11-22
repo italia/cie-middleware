@@ -132,12 +132,6 @@
     <ClCompile Include="Util\SyncroEvent.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
-    <ClCompile Include="Util\SyncroMutex.cpp">
-      <Filter>Source Files\Util</Filter>
-    </ClCompile>
-    <ClCompile Include="Util\Thread.cpp">
-      <Filter>Source Files\Util</Filter>
-    </ClCompile>
     <ClCompile Include="Util\util.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
@@ -252,12 +246,6 @@
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="Util\SyncroEvent.h">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Util\SyncroMutex.h">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Util\Thread.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="Util\util.h">

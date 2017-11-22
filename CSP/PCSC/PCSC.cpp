@@ -97,7 +97,7 @@ readerMonitor::readerMonitor(void(*eventHandler)(std::string &reader, bool inser
 		auto loadReaderList = [&]() -> void {
 			char *readers = nullptr;
 			DWORD len = SCARD_AUTOALLOCATE;
-			if (SCardListReaders(rm->hContext, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS || readers==nullptr) {
+			if (SCardListReaders(rm->hContext, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS || readers == nullptr) {
 				throw CStringException("Nessun lettore installato");
 			}
 			char *curReader = readers;
@@ -112,7 +112,7 @@ readerMonitor::readerMonitor(void(*eventHandler)(std::string &reader, bool inser
 			}
 			auto &PnP = states[(DWORD)readerList.size()];
 			PnP.szReader = "\\\\?PnP?\\Notification";
-			PnP.pvUserData = (void*)PnP.szReader;		
+			PnP.pvUserData = (void*)PnP.szReader;
 
 			SCardGetStatusChange(rm->hContext, 0, states.data(), states.size());
 			for (DWORD i = 0; i < states.size(); i++)

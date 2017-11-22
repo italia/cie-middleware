@@ -10,6 +10,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <thread>
 
 namespace p11 {
 
@@ -108,10 +109,10 @@ public:
 								// i dati specifici del template della carta,
 								// gestiti dalla DLL manager
 
-	static CThread Thread;		// thread monitor degli eventi
+	static std::thread Thread;		// thread monitor degli eventi
 	static CCardContext *ThreadContext; // context del monitor degli eventi
 
-	CSyncroMutex slotMutex;		// mutex per il lock alla carta
+	//CSyncroMutex slotMutex;		// mutex per il lock alla carta
 	SlotEvent lastEvent;
 
 	CK_RV GetInfo(CK_SLOT_INFO_PTR pInfo);
