@@ -15,11 +15,11 @@ DWORD CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, 
 	BN_set_word(BNpubexp, 65537);
 	RSA_generate_key_ex(keyPriv, size, BNpubexp, nullptr);
 	module.resize(BN_num_bytes(keyPriv->n));
-	BN_bn2bin(keyPriv->n, module.lock());
+	BN_bn2bin(keyPriv->n, module.data());
 	privexp.resize(BN_num_bytes(keyPriv->d));
-	BN_bn2bin(keyPriv->d, privexp.lock());
+	BN_bn2bin(keyPriv->d, privexp.data());
 	pubexp.resize(BN_num_bytes(keyPriv->e));
-	BN_bn2bin(keyPriv->e, pubexp.lock());
+	BN_bn2bin(keyPriv->e, pubexp.data());
 
 	_return(OK)
 	exit_func
@@ -27,14 +27,12 @@ DWORD CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, 
 }
 CRSA::CRSA(ByteArray &mod,ByteArray &exp)
 {
-	init_func_internal
 	keyPriv = RSA_new();
-	keyPriv->n = BN_bin2bn(mod.lock(),mod.size(), keyPriv->n); 
+	keyPriv->n = BN_bin2bn(mod.data(), (int)mod.size(), keyPriv->n);
 	keyPriv->d = BN_new(); 
-	keyPriv->e = BN_bin2bn(exp.lock(),exp.size(), keyPriv->e); 
+	keyPriv->e = BN_bin2bn(exp.data(), (int)exp.size(), keyPriv->e);
 
 	dwKeySize=mod.size();
-	exit_func_internal
 }
 
 CRSA::~CRSA(void)
@@ -43,15 +41,12 @@ CRSA::~CRSA(void)
 		RSA_free(keyPriv);
 }
 
-RESULT CRSA::RSA_PURE(ByteArray &data,ByteDynArray &resp)
+ByteDynArray CRSA::RSA_PURE(ByteArray &data )
 {
-	init_func
-	resp.resize(RSA_size(keyPriv));
-	int iSignSize=RSA_public_encrypt(data.size(), data.lock(), resp.lock(), keyPriv, RSA_NO_PADDING);
+	ByteDynArray resp(RSA_size(keyPriv));
+	int iSignSize = RSA_public_encrypt((int)data.size(), data.data(), resp.data(), keyPriv, RSA_NO_PADDING);
 
-	ER_ASSERT(iSignSize==dwKeySize,"Errore nella lunghezza dei dati per operazione RSA")
+	ER_ASSERT(iSignSize == dwKeySize, "Errore nella lunghezza dei dati per operazione RSA")
 
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	return resp;
 }

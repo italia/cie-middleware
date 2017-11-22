@@ -16,7 +16,7 @@ class CCardLocker;
 class CToken
 {
 public:
-	typedef int(*TokenTransmitCallback)(void *data, BYTE *apdu, DWORD apduSize, BYTE *resp, DWORD *respSize);
+	typedef int(*TokenTransmitCallback)(void *data, uint8_t *apdu, DWORD apduSize, uint8_t *resp, DWORD *respSize);
 
 private:
 	TokenTransmitCallback transmitCallback;
@@ -26,9 +26,8 @@ public:
 	~CToken();
 
 	RESULT Connect(char * reader);
-	RESULT Select(BYTE *id,DWORD *size=NULL);
 	RESULT SelectMF();
-	RESULT BinaryRead(ByteDynArray &data,WORD start,BYTE size);
+	RESULT BinaryRead(ByteDynArray &data, uint16_t start, uint8_t size);
 	RESULT Reset(bool unpower = false);
 
 	RESULT setTransmitCallback(TokenTransmitCallback func,void *data);

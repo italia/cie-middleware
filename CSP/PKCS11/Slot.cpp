@@ -384,13 +384,13 @@ CK_RV CSlot::GetInfo(CK_SLOT_INFO_PTR pInfo)
 		pInfo->flags |= CKF_TOKEN_PRESENT;
 
 	memset(pInfo->slotDescription,' ',64);
-	int iSDLen=min(64,szName.size()-1);
-	memcpy_s(pInfo->slotDescription,64,szName.c_str(),iSDLen);
+	size_t SDLen=min(64,szName.size()-1);
+	memcpy_s(pInfo->slotDescription,64,szName.c_str(),SDLen);
 
 	memset(pInfo->manufacturerID,' ',32);
 	// non so esattamente perchè, ma nella R1 il manufacturerID sono i primi 32 dello slotDescription
-	int iMIDLen=min(32,szName.size());
-	memcpy_s(pInfo->manufacturerID, 32, szName.c_str(), iMIDLen);
+	size_t MIDLen = min(32, szName.size());
+	memcpy_s(pInfo->manufacturerID, 32, szName.c_str(), MIDLen);
 
 	pInfo->hardwareVersion.major = 0;
 	pInfo->hardwareVersion.minor = 0;
@@ -422,11 +422,11 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 	memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
 
 	char *manifacturer;
-
-	if (baATR.IndexOf(baNXP_ATR) >= 0)
+	size_t position;
+	if (baATR.indexOf(baNXP_ATR,position))
 		manifacturer = "NXP";
-	else if ((baATR.IndexOf(baGemalto_ATR) >= 0) ||
-		(baATR.IndexOf(baGemalto2_ATR) >= 0))
+	else if ((baATR.indexOf(baGemalto_ATR, position)) ||
+		(baATR.indexOf(baGemalto2_ATR, position)))
 		manifacturer = "Gemalto";
 	else
 		throw CStringException("CIE non riconosciuta");
@@ -444,10 +444,10 @@ CK_RV CSlot::GetTokenInfo(CK_TOKEN_INFO_PTR pInfo)
 		ERR_READ_MODEL)
 
 	memset(pInfo->serialNumber,' ',sizeof(pInfo->serialNumber));
-	int UIDsize=min(sizeof(pInfo->serialNumber),baSerial.size());
-	memcpy_s(pInfo->serialNumber,16,baSerial.lock(UIDsize),UIDsize);
+	size_t UIDsize = min(sizeof(pInfo->serialNumber), baSerial.size());
+	memcpy_s(pInfo->serialNumber,16,baSerial.data(),UIDsize);
 
-	memcpy_s((char*)pInfo->label + pTemplate->szName.length() + 1, sizeof(pInfo->label) - pTemplate->szName.length() - 1, baSerial.lock(), baSerial.size());
+	memcpy_s((char*)pInfo->label + pTemplate->szName.length() + 1, sizeof(pInfo->label) - pTemplate->szName.length() - 1, baSerial.data(), baSerial.size());
 
 	memset(pInfo->model,' ',sizeof(pInfo->model));
 	memcpy_s(pInfo->model,16,model.c_str(),min(model.length(),sizeof(pInfo->model)));	
@@ -562,7 +562,7 @@ void CSlot::Final()
 	}
 }
 
-RESULT CSlot::FindP11Object(CK_OBJECT_CLASS objClass,CK_ATTRIBUTE_TYPE attr,BYTE *val,int valLen,std::shared_ptr<CP11Object>&pObject)
+RESULT CSlot::FindP11Object(CK_OBJECT_CLASS objClass,CK_ATTRIBUTE_TYPE attr,CK_BYTE *val,int valLen,std::shared_ptr<CP11Object>&pObject)
 {
 	init_func
 	pObject=nullptr;
@@ -573,7 +573,7 @@ RESULT CSlot::FindP11Object(CK_OBJECT_CLASS objClass,CK_ATTRIBUTE_TYPE attr,BYTE
 			ByteArray *attrVal=NULL;
 			obj->getAttribute(attr, attrVal);
 			if (attrVal && attrVal->size()==valLen) {
-				if (memcmp(attrVal->lock(valLen),val,valLen)==0) {
+				if (memcmp(attrVal->data(),val,valLen)==0) {
 					pObject=obj;
 					_return(OK)
 				}
@@ -770,11 +770,11 @@ RESULT CSlot::GetATR(ByteDynArray &ATR)
 		DWORD dwATRLen = 0;
 	WIN_R_CALL(SCardGetAttrib(hCard, SCARD_ATTR_ATR_STRING, NULL, &dwATRLen),SCARD_S_SUCCESS)
 
-		ATR.resize(dwATRLen);
-	WIN_R_CALL(SCardGetAttrib(hCard, SCARD_ATTR_ATR_STRING, ATR.lock(), &dwATRLen), SCARD_S_SUCCESS)
+	ATR.resize(dwATRLen);
+	WIN_R_CALL(SCardGetAttrib(hCard, SCARD_ATTR_ATR_STRING, ATR.data(), &dwATRLen), SCARD_S_SUCCESS)
 
 		Log.write("ATR Letto:");
-	Log.writeBinData(ATR.lock(), ATR.size());
+	Log.writeBinData(ATR.data(), ATR.size());
 	_return(OK)
 		exit_func
 		_return(FAIL)

@@ -214,6 +214,7 @@
     <ClCompile Include="PCSC\CardLocker.cpp" />
     <ClCompile Include="CSP\CSP.cpp" />
     <ClCompile Include="crypto\DES3.cpp" />
+    <ClCompile Include="Util\Array.cpp" />
     <ClCompile Include="Util\funccallinfo.cpp" />
     <ClCompile Include="CSP\IAS.cpp" />
     <ClCompile Include="Util\IniSettings.cpp" />
@@ -259,7 +260,6 @@
     <ClInclude Include="Crypto\RSA.h" />
     <ClInclude Include="Crypto\SHA1.h" />
     <ClInclude Include="Crypto\sha256.h" />
-    <ClInclude Include="Util\Allocator.h" />
     <ClInclude Include="PCSC\APDU.h" />
     <ClInclude Include="Util\Array.h" />
     <ClInclude Include="PCSC\CardLocker.h" />

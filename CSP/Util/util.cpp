@@ -33,14 +33,14 @@ bool ishexdigit(char c) {
 	return false;
 }
 
-DWORD countHexData(const char *data)
+size_t countHexData(const char *data)
 {
-	DWORD cnt=0;
+	size_t cnt = 0;
 	size_t slen=strlen(data);
 	for (size_t i=0;i<slen;i++) {
 		if (isspace(data[i]) || data[i]==',') continue;
 		if (!isxdigit(data[i])) {
-			throw  CStringException("%s","Carattere non valido");
+			throw  std::runtime_error("Carattere non valido");
 		}
 
 		if ((i<slen-3) && data[i]=='0' && data[i+3]=='h')
@@ -58,7 +58,7 @@ DWORD countHexData(const char *data)
 				v|=hex2byte(data[i]);
 			}
 			else if (!isspace(data[i]))
-				throw  CStringException("%s","richiesto spazio");
+				throw  std::runtime_error("richiesto spazio");
 		}
 		cnt++;
 
@@ -68,14 +68,14 @@ DWORD countHexData(const char *data)
 	return cnt;
 }
 
-DWORD setHexData(const char *data,BYTE *buf)
+size_t setHexData(const char *data, uint8_t *buf)
 {
-	DWORD cnt=0;
+	size_t cnt = 0;
 	size_t slen=strlen(data);
 	for (size_t i=0;i<slen;i++) {
 		if (isspace(data[i]) || data[i]==',') continue;
 		if (!isxdigit(data[i])) {
-			throw  CStringException("%s","Carattere non valido");
+			throw  std::runtime_error("Carattere non valido");
 		}
 
 		if ((i<slen-3) && data[i]=='0' && data[i+3]=='h')
@@ -93,7 +93,7 @@ DWORD setHexData(const char *data,BYTE *buf)
 				v|=hex2byte(data[i]);
 			}
 			else if (!isspace(data[i]))
-				throw  CStringException("%s","richiesto spazio");
+				throw  std::runtime_error("richiesto spazio");
 		}
 		buf[0]=v;
 		buf++;
@@ -107,14 +107,14 @@ DWORD setHexData(const char *data,BYTE *buf)
 
 void readHexData(const char *data,ByteDynArray &ba)
 {
-	std::vector<BYTE> dt;
+	std::vector<uint8_t> dt;
 
 
 	size_t slen=strlen(data);
 	for (size_t i=0;i<slen;i++) {
 		if (isspace(data[i]) || data[i]==',') continue;
 		if (!isxdigit(data[i])) {
-			throw  CStringException("%s","Carattere non valido");
+			throw  std::runtime_error("Carattere non valido");
 		}
 
 		if ((i<slen-3) && data[i]=='0' && data[i+3]=='h')
@@ -132,7 +132,7 @@ void readHexData(const char *data,ByteDynArray &ba)
 				v|=hex2byte(data[i]);
 			}
 			else if (!isspace(data[i]))
-				throw  CStringException("%s","richiesto spazio");
+				throw  std::runtime_error("richiesto spazio");
 		}
 		dt.push_back(v);
 
@@ -140,13 +140,13 @@ void readHexData(const char *data,ByteDynArray &ba)
 			i++;
 	}
 
-	if (dt.size())
-		ba.alloc_copy(&dt[0],(DWORD)dt.size());
+	if (dt.size()>0)
+		ba = ByteArray(&dt[0], dt.size());
 	else 
 		ba.clear();
 }
 
-std::string HexByte(BYTE data, bool uppercase) {
+std::string HexByte(uint8_t data, bool uppercase) {
 	std::stringstream dmp;
 	dmp << std::hex << std::setfill('0');
 	if (uppercase)
@@ -167,7 +167,7 @@ std::string &dumpHexData(ByteArray &data, std::string &dump, bool withSpace, boo
 	dmp << std::hex << std::setfill('0');
 	if (uppercase)
 		dmp << std::uppercase;
-	for (DWORD i = 0; i<data.size(); i++) {
+	for (size_t i = 0; i<data.size(); i++) {
 		dmp << std::setw(2) << static_cast<unsigned>(data[i]);
 		if (withSpace)
 			dmp << " ";
@@ -187,23 +187,23 @@ std::string &dumpHexDataLowerCase(ByteArray &data, std::string &dump)
 	return dumpHexData(data, dump, false, false);
 }
 
-void PutPaddingBT0(ByteArray &ba,DWORD dwLen)
+void PutPaddingBT0(ByteArray &ba, size_t dwLen)
 {
 	init_func
 
 	if (dwLen>ba.size())
-		throw CStringException("Lunghezza del padding errata");
+		throw std::runtime_error("Lunghezza del padding errata");
 
 	ba.left(ba.size()-dwLen).fill(0);
 	exit_func
 }
 
 
-void PutPaddingBT1(ByteArray &ba,DWORD dwLen)
+void PutPaddingBT1(ByteArray &ba, size_t dwLen)
 {
 	init_func
 	if (dwLen>ba.size()-3)
-		throw CStringException("Lunghezza del padding errata");
+		throw std::runtime_error("Lunghezza del padding errata");
 
 	ba[0]=0;
 	ba[1]=1;
@@ -212,89 +212,84 @@ void PutPaddingBT1(ByteArray &ba,DWORD dwLen)
 	exit_func
 }
 
-void PutPaddingBT2(ByteArray &ba,DWORD dwLen)
+void PutPaddingBT2(ByteArray &ba, size_t dwLen)
 {
 	init_func
 	if (dwLen>ba.size()-3)
-		throw CStringException("Lunghezza del padding errata");
+		throw std::runtime_error("Lunghezza del padding errata");
 
 	ba[0]=0;
 	ba[1]=2;
-	for (DWORD i=2;i<ba.size()-dwLen;i++) {
-		BYTE b=0;
-		while (b==0)
-			b=rand()%0x100;
-		ba[i]=b;
-	}
-	ba[ba.size()-dwLen-1]=0;
+	ba.mid(2, ba.size() - dwLen - 3).random();
+	ba[ba.size() - dwLen - 1] = 0;
 	exit_func
 }
 
-DWORD RemoveSha1(ByteArray &paddedData) {
-	static BYTE SHA1Algo[] = { 0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02, 0x1a, 0x05, 0x00, 0x04, 0x14 };
+size_t RemoveSha1(ByteArray &paddedData) {
+	static uint8_t SHA1Algo[] = { 0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02, 0x1a, 0x05, 0x00, 0x04, 0x14 };
 	if (paddedData.left(sizeof(SHA1Algo)) == VarToByteArray(SHA1Algo))
 		return sizeof(SHA1Algo);
-	throw CStringException("OID Algoritmo SHA1 non presente");
+	throw std::runtime_error("OID Algoritmo SHA1 non presente");
 }
 
-DWORD RemoveSha256(ByteArray &paddedData) {
-	static BYTE SHA256Algo[] = { 0x30, 0x31, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20 };
+size_t RemoveSha256(ByteArray &paddedData) {
+	static uint8_t SHA256Algo[] = { 0x30, 0x31, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20 };
 	if (paddedData.left(sizeof(SHA256Algo)) == VarToByteArray(SHA256Algo))
 		return sizeof(SHA256Algo);
-	throw CStringException("OID Algoritmo SHA256 non presente");
+	throw std::runtime_error("OID Algoritmo SHA256 non presente");
 }
 
-DWORD RemovePaddingBT1(ByteArray &paddedData)
+size_t RemovePaddingBT1(ByteArray &paddedData)
 {
 	init_func
 	if (paddedData[0]!=0)
-		throw CStringException("Errore nel padding");
+		throw std::runtime_error("Errore nel padding");
 	if (paddedData[1]!=1)
-		throw CStringException("Errore nel padding");
-	for (DWORD i=2;i<paddedData.size();i++) {
+		throw std::runtime_error("Errore nel padding");
+	for (size_t i = 2; i<paddedData.size(); i++) {
 		if (paddedData[i]==0) {
 			return i+1;
 		}
 		if (paddedData[i]!=0xff)
-			throw CStringException("Errore nel padding");
+			throw std::runtime_error("Errore nel padding");
 	}
-	throw CStringException("Errore nel padding");
+	throw std::runtime_error("Errore nel padding");
 	exit_func
 }
 
-DWORD RemovePaddingBT2(ByteArray &paddedData)
+size_t RemovePaddingBT2(ByteArray &paddedData)
 {
 	init_func
 	if (paddedData[0]!=0)
-		throw CStringException("Errore nel padding");
+		throw std::runtime_error("Errore nel padding");
 	if (paddedData[1]!=2)
-		throw CStringException("Errore nel padding");
-	for (DWORD i=2;i<paddedData.size();i++)
+		throw std::runtime_error("Errore nel padding");
+	for (size_t i = 2; i<paddedData.size(); i++)
 		if (paddedData[i]==0) {
 			return i+1;
 		}
-	throw CStringException("Errore nel padding");
+	throw std::runtime_error("Errore nel padding");
 	exit_func
 }
 
-DWORD RemoveISOPad(ByteArray &paddedData)
+size_t RemoveISOPad(ByteArray &paddedData)
 {
 	init_func
-	for (int i=paddedData.size()-1;i>=0;i--) {
+		for (size_t i = paddedData.size() - 1; i >= 0; i--) {
 		if (paddedData[i]!=0) {
 			if (paddedData[i]!=0x80) {
-				throw CStringException("Errore nel padding");
+				throw std::runtime_error("Errore nel padding");
 			}
 			else {
 				return i;
 			}
 		}
 	}
-	throw CStringException("Errore nel padding");
+	throw std::runtime_error("Errore nel padding");
 	exit_func
 }
 
-DWORD ANSIPadLen(DWORD Len)
+size_t ANSIPadLen(size_t Len)
 {
 	if ((Len & 0x7) == 0)
 		return(Len);
@@ -302,7 +297,7 @@ DWORD ANSIPadLen(DWORD Len)
 		return(Len - (Len & 0x7) + 0x08);
 }
 
-void ANSIPad(ByteArray &Data,DWORD DataLen)
+void ANSIPad(ByteArray &Data, size_t DataLen)
 {
 	init_func
 	Data.mid(DataLen).fill(0);
@@ -310,7 +305,7 @@ void ANSIPad(ByteArray &Data,DWORD DataLen)
 
 }
 
-DWORD ISOPadLen16(DWORD Len)
+size_t ISOPadLen16(size_t Len)
 {
 	if ((Len & 0x10f) == 0)
 		return(Len + 16);
@@ -318,7 +313,7 @@ DWORD ISOPadLen16(DWORD Len)
 		return(Len - (Len & 0x0f) + 0x10);
 }
 
-DWORD ISOPadLen(DWORD Len)
+size_t ISOPadLen(size_t Len)
 {
 	if ((Len & 0x7) == 0)
 		return(Len+8);
@@ -326,7 +321,7 @@ DWORD ISOPadLen(DWORD Len)
 		return(Len - (Len & 0x7) + 0x08);
 }
 
-void ISOPad(const ByteArray &Data,DWORD DataLen)
+void ISOPad(const ByteArray &Data, size_t DataLen)
 {
 	init_func
 	Data.mid(DataLen).fill(0);
@@ -334,35 +329,29 @@ void ISOPad(const ByteArray &Data,DWORD DataLen)
 	exit_func
 }
 
-const ByteDynArray& ISOPad16(const ByteArray &data, ByteDynArray &resp) {
+const ByteDynArray ISOPad16(const ByteArray &data) {
 	init_func
-		resp.resize(ISOPadLen16(data.size()));
+	ByteDynArray resp(ISOPadLen16(data.size()));
 	resp.copy(data);
 	ISOPad(resp, data.size());
 	_return(resp);
 	exit_func
 }
 
-const ByteDynArray& ISOPad(const ByteArray &data,ByteDynArray &resp) {
+const ByteDynArray ISOPad(const ByteArray &data) {
 	init_func
-	resp.resize(ISOPadLen(data.size()));
+	ByteDynArray resp(ISOPadLen(data.size()));
 	resp.copy(data);
 	ISOPad(resp,data.size());
 	_return (resp);
 	exit_func
 }
 
-void randomize(ByteArray &ba) 
-{
-	for (DWORD i=0;i<ba.dwSize;i++)
-		ba.pbtData[i]=rand()%0x100;
-}
-
-DWORD ByteArrayToInt(ByteArray &ba)
+long ByteArrayToInt(ByteArray &ba)
 {
 	init_func
 	long val=0;
-	for (DWORD i=0;i<ba.size();i++) {
+	for (size_t i = 0; i<ba.size(); i++) {
 		val<<=8;
 		val|=ba[i];
 	}
@@ -371,22 +360,10 @@ DWORD ByteArrayToInt(ByteArray &ba)
 }
 
 
-static char szWinErrBuffer[300];
-char * WinErr(HRESULT err) {
-	FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS|FORMAT_MESSAGE_FROM_SYSTEM,NULL,err,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),szWinErrBuffer,300,NULL);
-	return(szWinErrBuffer);
-}
-
-char _strErrorString[1000];
-char _strAppoErrorString[1000];
-
-char *err_string(const char *format,...) {
-	va_list params;
-	va_start (params, format);
-	vsprintf_s(_strAppoErrorString,1000, format, params);
-	va_end(params);
-	strcpy_s(_strErrorString,_strAppoErrorString);
-	return(_strErrorString);
+std::string WinErr(HRESULT err) {
+	char szWinErrBuffer[300];
+	FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), szWinErrBuffer, 300, NULL);
+	return std::string(szWinErrBuffer);
 }
 
 char *  CardErr(DWORD dwSW) {
@@ -473,12 +450,12 @@ char *SystemErr(DWORD dwExcept){
 	}
 }
 
-ByteDynArray& setASN1Tag(ByteDynArray& result,DWORD tag,ByteArray &content) {
-	content.setASN1Tag(tag,result);
+ByteDynArray ASN1Tag(DWORD tag,ByteArray &content) {
+	ByteDynArray result = content.getASN1Tag(tag);
 	return result;
 }
 
-int ASN1TLength(DWORD tag) {
+size_t ASN1TLength(unsigned int tag) {
 	int tLen=0;
 	while (tag!=0) {
 		tLen++;
@@ -486,10 +463,10 @@ int ASN1TLength(DWORD tag) {
 	}
 	return tLen;
 }
-void putASN1Tag(DWORD tag,ByteArray &data) {
+void putASN1Tag(unsigned int tag, ByteArray &data) {
 	int tPos=0;
 	while (tag!=0) {
-		BYTE b=tag >> 24;
+		uint8_t b = tag >> 24;
 		if (b!=0) {
 			data[tPos]=b;
 			tPos++;
@@ -498,7 +475,7 @@ void putASN1Tag(DWORD tag,ByteArray &data) {
 	}
 }
 
-int ASN1LLength(LONG len) {
+size_t ASN1LLength(size_t len) {
 	if (len<0x80)
 		return 1;
 	else {
@@ -512,35 +489,35 @@ int ASN1LLength(LONG len) {
 		else if (len<=0xffffffff)
 			return 5;
 	}
-	throw CStringException("Lunghezza ASN1 non valida");
+	throw std::runtime_error("Lunghezza ASN1 non valida");
 }
 
-void putASN1Length(LONG len,ByteArray &data) {
-	if (len<0x80) {
-		data[0]=(BYTE)len;
+void putASN1Length(size_t len, ByteArray &data) {
+	if (len < 0x80) {
+		data[0] = (uint8_t)len;
 	}
 	else {
-		if (len<=0xff) {
-			data[0]=(0x81);
-			data[1] = (BYTE)(len);
+		if (len <= 0xff) {
+			data[0] = (0x81);
+			data[1] = (uint8_t)(len);
 		}
-		else if (len<=0xffff) {
-			data[0]=(0x82);
-			data[1] = (BYTE)(len >> 8);
-			data[2]=(len & 0xff);
+		else if (len <= 0xffff) {
+			data[0] = (0x82);
+			data[1] = (uint8_t)(len >> 8);
+			data[2] = (len & 0xff);
 		}
-		else if (len<=0xffffff) {
-			data[0]=(0x83);
-			data[1] = (BYTE)(len >> 16);
-			data[2]=((len >> 8) & 0xff);
-			data[3]=(len & 0xff);
+		else if (len <= 0xffffff) {
+			data[0] = (0x83);
+			data[1] = (uint8_t)(len >> 16);
+			data[2] = ((len >> 8) & 0xff);
+			data[3] = (len & 0xff);
 		}
-		else if (len<=0xffffffff) {
-			data[0]=(0x84);
-			data[1]=(len >> 24);
-			data[2]=((len >> 16) & 0xff);
-			data[3]=((len >> 8) & 0xff);
-			data[4]=(len & 0xff);
+		else if (len <= 0xffffffff) {
+			data[0] = (0x84);
+			data[1] = (uint8_t)(len >> 24);
+			data[2] = ((len >> 16) & 0xff);
+			data[3] = ((len >> 8) & 0xff);
+			data[4] = (len & 0xff);
 		}
 	}
 }
@@ -549,7 +526,7 @@ BYTE checkdigit(ByteArray &data) {
 	int weight[3] = {7,3,1};
 	int tot=0;
 	int curval=0;
-	for(DWORD i = 0;i<data.size();i++) {
+	for (size_t i = 0; i<data.size(); i++) {
 		char ch=toupper(data[i]);
 		if (ch >= 'A' && ch <= 'Z')
             curval = ch - 'A' + 10;
@@ -560,7 +537,7 @@ BYTE checkdigit(ByteArray &data) {
 				if (ch == '<')
                     curval = 0;
                 else
-                    throw CStringException("errore nel calcolo della check digit");
+					throw std::runtime_error("errore nel calcolo della check digit");
 			}
 		}
         tot += curval * weight[i % 3];
@@ -578,4 +555,16 @@ void ICAODate(SYSTEMTIME &time,ByteDynArray &result) {
 
 	result[4]=(time.wDay % 100) /10;
 	result[5]=time.wDay % 10;
+}
+
+
+std::string stdPrintf(const char *format, ...) {
+	std::string result;
+	va_list args;
+	va_start(args, format);
+	int size = _vscprintf(format, args) + 1;
+	result.resize(size);
+	vsprintf_s(&result[0], size, format, args);
+	va_end(args);
+	return result;
 }

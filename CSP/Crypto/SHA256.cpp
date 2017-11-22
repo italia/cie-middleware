@@ -3,22 +3,10 @@
 
 static char *szCompiledFile=__FILE__;
 
-CSHA256::CSHA256()
+ByteDynArray CSHA256::Digest(ByteArray &data)
 {
-}
-
-CSHA256::~CSHA256(void)
-{
-}
-
-RESULT CSHA256::Digest(ByteArray &data,ByteDynArray &resp)
-{
-	init_func
-	resp.resize(SHA256_DIGEST_LENGTH);
+	ByteDynArray resp(SHA256_DIGEST_LENGTH);
 	
-	ER_ASSERT(SHA256(data.lock(),data.size(),resp.lock())!=NULL,"Errore nel calcolo dello SHA256")
-
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	ER_ASSERT(SHA256(data.data(), data.size(), resp.data()) != NULL, "Errore nel calcolo dello SHA256")
+	return resp;
 }

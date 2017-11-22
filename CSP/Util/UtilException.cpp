@@ -74,7 +74,7 @@ void CBaseException::DumpTree(std::string &dump)
 		if (!exc->fileName.empty())
 			pos = exc->fileName.append("(").append(std::to_string(exc->line)).append(")");
 		const char *exName=exc->ExceptionName();
-		int sz=dump.size()-1;
+		size_t sz=dump.size()-1;
 		dump = pos.append(" : ").append(exName).append(desc).append("\n");
 		exc=exc->innerException.get();
 	}

@@ -241,11 +241,12 @@ ByteArray baGemalto_ATR(Gemalto_ATR, sizeof(Gemalto_ATR));
 ByteArray baGemalto2_ATR(Gemalto2_ATR, sizeof(Gemalto2_ATR));
 
 void IAS::ReadCIEType() {	
-	if (ATR.IndexOf(baNXP_ATR) >= 0)
+	size_t position;
+	if (ATR.indexOf(baNXP_ATR,position))
 		type = CIE_Type::CIE_NXP;
-	else if (ATR.IndexOf(baGemalto_ATR) >= 0)
+	else if (ATR.indexOf(baGemalto_ATR, position))
 		type = CIE_Type::CIE_Gemalto;
-	else if (ATR.IndexOf(baGemalto2_ATR) >= 0)
+	else if (ATR.indexOf(baGemalto2_ATR, position))
 		type = CIE_Type::CIE_Gemalto;
 	else
 		throw CStringException("CIE non riconosciuta");
@@ -290,12 +291,14 @@ void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 
 	CASNParser parser;
 	parser.Parse(DappKey);
-	DappModule = parser.tags[0]->tags[0]->content;
-	while (DappModule[0] == 0)
-		DappModule = DappModule.mid(1);
-	DappPubKey = parser.tags[0]->tags[1]->content;
-	while (DappPubKey[0] == 0)
-		DappPubKey = DappPubKey.mid(1);
+	ByteArray module = parser.tags[0]->tags[0]->content;
+	while (module[0] == 0)
+		module = module.mid(1);
+	DappModule = module;
+	ByteArray pubKey = parser.tags[0]->tags[1]->content;
+	while (pubKey[0] == 0)
+		pubKey = pubKey.mid(1);
+	DappPubKey = pubKey;
 	exit_func
 }
 
@@ -340,15 +343,14 @@ void IAS::DAPP() {
 	ByteDynArray endEntityCert;
 	endEntityCert.set(CPI, &CA_CAR, &CHR, &CHA, &OID, &module, &pubexp);
 
-	ByteDynArray certSign, toSign, d1;
-	sha256.Digest(endEntityCert, d1);
+	ByteDynArray certSign, toSign;
 	BYTE ValBC = 0xBC;
-	toSign.set(0x6A, &(endEntityCert.left(CA_module.size() - shaSize - 2)), &d1, 0xbc);
+	toSign.set(0x6A, &(endEntityCert.left(CA_module.size() - shaSize - 2)), &(sha256.Digest(endEntityCert)), 0xbc);
 	CRSA caKey(CA_module, CA_privexp);
-	caKey.RSA_PURE(toSign, certSign);
+	certSign = caKey.RSA_PURE(toSign);
 	ByteDynArray certVerif;
 	CRSA caPubKey(CA_module, CA_pubexp);
-	caPubKey.RSA_PURE(certSign, certVerif);
+	certVerif = caPubKey.RSA_PURE(certSign);
 	ER_ASSERT(certVerif == toSign, "Errore in verifica firma!")
 
 	ByteDynArray PkRem;
@@ -373,15 +375,15 @@ void IAS::DAPP() {
 	CARD_R_CALL(SendAPDU_SM(VarToByteArray(GetChallenge), ByteArray(), challenge, &chLen))
 
 	ByteDynArray toHash;
-	DWORD padSize = module.size() - shaSize - 2;
-	ByteDynArray PRND;
-	PRND.random(padSize);
+	size_t padSize = module.size() - shaSize - 2;
+	ByteDynArray PRND(padSize);
+	PRND.random();
 	toHash.set(&PRND, &dh_pubKey, &VarToByteArray(snIFD), &challenge, &dh_ICCpubKey, &dh_g, &dh_p, &dh_q);
-	sha256.Digest(toHash,d1);
-	toSign.set(0x6a, &PRND, &d1, 0xBC);
-	ByteDynArray signResp;
+	
+	toSign.set(0x6a, &PRND, &(sha256.Digest(toHash)), 0xBC);
+	
 	CRSA certKey(module, privexp);
-	certKey.RSA_PURE(toSign, signResp);
+	ByteDynArray signResp = certKey.RSA_PURE(toSign);
 	ByteDynArray chResponse;
 	chResponse.set(&VarToByteArray(snIFD), &signResp);
 
@@ -393,22 +395,22 @@ void IAS::DAPP() {
 	BYTE Val82 = 0x82;
 	CARD_R_CALL(SendAPDU_SM(VarToByteArray(IntAuth), ASN1Tag(0x84, VarToByteArray(Val82)).append(ASN1Tag(0x80, VarToByteArray(PKdScheme))), resp))
 
-	ByteDynArray rndIFD;
-	rndIFD.random(8);
+	ByteDynArray rndIFD(8);
+	rndIFD.random();
 	BYTE GiveRandom[] = { 0x00, 0x88, 0x00, 0x00 };
 	CARD_R_CALL(SendAPDU_SM(VarToByteArray(GiveRandom), rndIFD, resp, 0))
 
 	ByteDynArray SN_ICC = resp.mid(0, 8);
-	ByteDynArray intAuthResp;
+	
 	CRSA intAuthKey(DappModule, DappPubKey);
-	intAuthKey.RSA_PURE(resp.mid(8), intAuthResp);
+	ByteDynArray intAuthResp = intAuthKey.RSA_PURE(resp.mid(8));
 	ER_ASSERT(intAuthResp[0] == 0x6a, "Errore nell'autenticazione del chip");
 	ByteArray PRND2 = intAuthResp.mid(1, intAuthResp.size() - 32 - 2);
 	ByteArray hashICC = intAuthResp.mid(PRND2.size() + 1, 32);
 
-	ByteDynArray toHashIFD, calcHashIFD;
+	ByteDynArray toHashIFD;
 	toHashIFD.set(&PRND2, &dh_ICCpubKey, &SN_ICC, &rndIFD, &dh_pubKey, &dh_g, &dh_p, &dh_q);
-	sha256.Digest(toHashIFD, calcHashIFD);
+	ByteDynArray calcHashIFD = sha256.Digest(toHashIFD);
 	ER_ASSERT(calcHashIFD == hashICC, "Errore nell'autenticazione del chip")
 	ER_ASSERT(intAuthResp.right(1)[0] == 0xbc, "Errore nell'autenticazione del chip");
 
@@ -421,15 +423,15 @@ void IAS::DHKeyExchange() {
 	CASNParser asn1;
 	ByteDynArray dh_prKey, secret, resp,d1;
 	do {
-		dh_prKey.random(dh_q.size());
+		dh_prKey.resize(dh_q.size());
+		dh_prKey.random();
 	} while (dh_q[0] < dh_prKey[0]);
-
 
 	ByteDynArray dhg(dh_g.size());
 	dhg.fill(0);
 	dhg.rightcopy(dh_g);
 	CRSA rsa(dh_p, dh_prKey);
-	rsa.RSA_PURE(dhg, dh_pubKey);
+	dh_pubKey = rsa.RSA_PURE(dhg);
 
 	BYTE algo = 0x9b;
 	BYTE keyId = CIE_KEY_DH_ID;
@@ -444,14 +446,14 @@ void IAS::DHKeyExchange() {
 	asn1.Parse(resp);
 	dh_ICCpubKey = asn1.tags[0]->tags[0]->content;
 
-	rsa.RSA_PURE(dh_ICCpubKey, secret);
+	secret = rsa.RSA_PURE(dh_ICCpubKey);
 
 	CSHA256 sha256;
 	
 	BYTE diffENC[] = { 0x00, 0x00, 0x00, 0x01 };
 	BYTE diffMAC[] = { 0x00, 0x00, 0x00, 0x02 };
-	sha256.Digest(ByteDynArray(secret).append(VarToByteArray(diffENC)), d1); sessENC = d1.left(16);
-	sha256.Digest(ByteDynArray(secret).append(VarToByteArray(diffMAC)), d1); sessMAC = d1.left(16);
+	sessENC = sha256.Digest(ByteDynArray(secret).append(VarToByteArray(diffENC))).left(16);
+	sessMAC = sha256.Digest(ByteDynArray(secret).append(VarToByteArray(diffMAC))).left(16);
 	sessSSC.resize(8); 
 	sessSSC.fill(0);
 	sessSSC[7] = 1;
@@ -459,10 +461,10 @@ void IAS::DHKeyExchange() {
 }
 
 void IAS::increment(ByteArray &seq) {
-	for (int i = seq.size() - 1; i >= 0; i--) {
+	for (size_t i = seq.size() - 1; i >= 0; i--) {
 		if (seq[i] < 255) {
 			seq[i]++;
-			for (DWORD j = i + 1; j < seq.size(); j++)
+			for (size_t j = i + 1; j < seq.size(); j++)
 				seq[j] = 0;
 			return;
 		}
@@ -474,10 +476,10 @@ DWORD IAS::SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &
 	init_func
 
 	increment(seq);
-	ByteDynArray calcMac, smMac, smHead, d1;
+	ByteDynArray smHead;
 	smHead = apdu.left(4);
 	smHead[0] |= 0x0C;
-	ISOPad(ByteDynArray(seq).append(smHead), calcMac);
+	auto calcMac = ISOPad(ByteDynArray(seq).append(smHead));
 	CDES3 encDes(keyEnc);
 	CMAC sigMac(keySig);
 	BYTE Val01 = 1;
@@ -485,9 +487,8 @@ DWORD IAS::SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &
 
 	ByteDynArray datafield, doob;
 	if (apdu[4] != 0 && apdu.size() > 5) {
-		ByteDynArray enc;
-		ISOPad(apdu.mid(5, apdu[4]), d1);
-		encDes.RawEncode(d1, enc);
+		
+		ByteDynArray enc = encDes.RawEncode(ISOPad(apdu.mid(5, apdu[4])));
 		if ((apdu[1] & 1) == 0)
 			doob.setASN1Tag(0x87, VarToByteDynArray(Val01).append(enc));
 		else
@@ -502,11 +503,9 @@ DWORD IAS::SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &
 		calcMac.append(doob);
 		datafield.append(doob);
 	}
-	ISOPad(calcMac, d1);
-	sigMac.Mac(d1, smMac);
-	datafield.append(ASN1Tag(0x8e, smMac));
+	datafield.append(ASN1Tag(0x8e, sigMac.Mac(ISOPad(calcMac))));
 
-	elabResp.set(&smHead, datafield.size(), &datafield, 0x00);
+	elabResp.set(&smHead, (uint8_t)datafield.size(), &datafield, (uint8_t)0x00);
 	return OK;
 	exit_func
 }
@@ -580,13 +579,11 @@ DWORD IAS::respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &resp, ByteArr
 			throw CStringException("Tag non riconosciuto nella risposta in Secure Messaging");
 	} while (index < resp.size());
 
-	ByteDynArray smMac,d1;
-	ISOPad(calcMac, d1);
-	sigMac.Mac(d1, smMac);
+	auto smMac = sigMac.Mac(ISOPad(calcMac));
 	ER_ASSERT(smMac == respMac,"Errore nel checksum della risposta del chip")
 
 	if (!encData.isEmpty()) {
-		encDes.RawDecode(encData, elabResp);
+		elabResp=encDes.RawDecode(encData);
 		elabResp.resize(RemoveISOPad(elabResp),true);
 	}
 	else
@@ -670,7 +667,7 @@ DWORD IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYT
 	ByteDynArray s, curresp;
 	DWORD sw;
 	if (data.size() < 0xE7) {
-		smApdu.set(&head, data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+		smApdu.set(&head, (uint8_t)data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
 
 		ODS(std::string().append("Clear APDU:").append(dumpHexData(smApdu, std::string())).append("\n").c_str());
 		SM(sessENC, sessMAC, smApdu, sessSSC, smApdu);
@@ -681,9 +678,9 @@ DWORD IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYT
 		return sw;
 	}
 	else {
-		DWORD ds = data.size();
-		DWORD i = 0;
-		BYTE cla = head[0];
+		size_t ds = data.size();
+		size_t i = 0;
+		uint8_t cla = head[0];
 		while (true) {
 			s = data.mid(i, min(0xE7, data.size() - i));
 			i += s.size();
@@ -696,7 +693,7 @@ DWORD IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYT
 			else
 				smApdu.set(&head, (le == nullptr || i<data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
 
-      ODS(std::string("Clear APDU:").append(dumpHexData(smApdu, std::string())).append("\n").c_str());
+		    ODS(std::string("Clear APDU:").append(dumpHexData(smApdu, std::string())).append("\n").c_str());
 			SM(sessENC, sessMAC, smApdu, sessSSC, smApdu);
 			sw = token.Transmit(smApdu, &curresp);
 			sw = getResp_SM(curresp, sw, resp);
@@ -717,8 +714,8 @@ DWORD IAS::SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, BYTE *
 	auto ds = data.size();
 
 	if (ds > 255) {
-		DWORD i = 0;
-		BYTE cla = head[0];
+		size_t i = 0;
+		uint8_t cla = head[0];
 		while (true) {
 			auto s = data.mid(i, min(data.size()-i,255));
 			i += s.size();
@@ -859,17 +856,15 @@ void IAS::InitEncKey() {
 	}
 
 	CSHA256 sha256;
-	ByteDynArray keySha;
-	sha256.Digest(resp, keySha);
-	CardEncKey = keySha.left(32);
+	CardEncKey = sha256.Digest(resp).left(32);
 }
 
 void IAS::SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN) {
 	ByteDynArray encCert, encPIN;
 	CAES enc(CardEncKey);
-	enc.Encode(certificate, encCert);
-	enc.Encode(FirstPIN, encPIN);
-	CacheSetData(PAN, encCert.lock(), encCert.size(), encPIN.lock(), encPIN.size());
+	encCert=enc.Encode(certificate);
+	encPIN=enc.Encode(FirstPIN);
+	CacheSetData(PAN, encCert.data(), (int)encCert.size(), encPIN.data(), (int)encPIN.size());
 }
 
 BOOL IsUserInteractive()
@@ -898,7 +893,7 @@ void IAS::IconaSbloccoPIN() {
 		WORD getHandle = 0xfffd;
 		ByteDynArray resp;
 		token.Transmit(VarToByteArray(getHandle), &resp);
-		SCARDHANDLE hCard = *(SCARDHANDLE*)resp.lock();
+		SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
 		if (!CreateProcess(nullptr, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",SbloccoPIN ICON").c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
 			throw CStringException("Errore in creazione processo SbloccoPIN");
 		else {
@@ -915,7 +910,7 @@ void IAS::GetFirstPIN(ByteDynArray &PIN) {
 	CacheGetPIN(PANStr.c_str(), EncPINBuf);
 
 	CAES enc(CardEncKey);
-	enc.Decode(ByteArray(EncPINBuf.data(), EncPINBuf.size()), PIN);
+	PIN = enc.Decode(ByteArray(EncPINBuf.data(), EncPINBuf.size()));
 }
 
 bool IAS::IsEnrolled() {
@@ -942,7 +937,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			WORD getHandle = 0xfffd;
 			ByteDynArray resp;
 			token.Transmit(VarToByteArray(getHandle), &resp);
-			SCARDHANDLE hCard = *(SCARDHANDLE*)resp.lock();
+			SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
 
 			SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
 			if (!CreateProcess(nullptr, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",AbilitaCIE ").append(dumpHexData(PAN.mid(5, 6), std::string(), false)).c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
@@ -964,7 +959,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 	CacheGetCertificate(PANStr.c_str(), certEncBuf);
 
 	CAES enc(CardEncKey);	
-	enc.Decode(ByteArray(certEncBuf.data(), certEncBuf.size()), certificate);
+	certificate = enc.Decode(ByteArray(certEncBuf.data(), certEncBuf.size()));
 	Certificate = certificate;
 }
 
@@ -1029,13 +1024,12 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	CASNTag &signature = temp3.Child(5, 04);
 	
 	CSHA256 sha256;
-	ByteDynArray calcDigest;
-	sha256.Digest(ttData.mid((int)signedData.startPos, (int)(signedData.endPos - signedData.startPos)), calcDigest);
+	ByteDynArray calcDigest=sha256.Digest(ttData.mid((int)signedData.startPos, (int)(signedData.endPos - signedData.startPos)));
 	if (calcDigest!=digest.content)
 		throw CStringException("Digest del SOD non corrispondente ai dati");
 
 	ByteArray certRaw = SOD.mid((int)signerCert.startPos, (int)(signerCert.endPos - signerCert.startPos));
-	PCCERT_CONTEXT certDS =CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.lock(), certRaw.size());
+	PCCERT_CONTEXT certDS =CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
 
 	ByteArray pubKeyData(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData);
 	CASNParser pubKeyParser;
@@ -1054,20 +1048,19 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 
 	CRSA rsa(mod, exp);
 
-	ByteDynArray decryptedSignature;
-	rsa.RSA_PURE(signatureData, decryptedSignature);
+	ByteDynArray decryptedSignature = rsa.RSA_PURE(signatureData);
 	decryptedSignature = decryptedSignature.mid(RemovePaddingBT1(decryptedSignature));
 	ByteArray toSign = SOD.mid((int)signerInfo.tags[0]->startPos, (int)(signerInfo.tags[signerInfo.tags.size()- 1]->endPos - signerInfo.tags[0]->startPos));
 	ByteDynArray digestSignature;
 	if (isSHA1) {
 		CSHA1 sha1;
 		decryptedSignature = decryptedSignature.mid(RemoveSha1(decryptedSignature));
-		sha1.Digest(toSign.setASN1Tag(0x31, ByteDynArray()), digestSignature);
+		digestSignature = sha1.Digest(toSign.getASN1Tag(0x31));
 	}
 	if (isSHA256) {
 		CSHA256 sha256;
 		decryptedSignature = decryptedSignature.mid(RemoveSha256(decryptedSignature));
-		sha256.Digest(toSign.setASN1Tag(0x31, ByteDynArray()), digestSignature);
+		digestSignature = sha256.Digest(toSign.getASN1Tag(0x31));
 	}
 	if (digestSignature!=decryptedSignature)
 		throw CStringException("Firma del SOD non valida");
@@ -1087,7 +1080,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 		certElem.tags[1]->Verify(SODElem.tags[1]->content);
 	}
 
-	ByteDynArray certSerial(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData);
+	ByteDynArray certSerial=ByteArray(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData);
 	if (certSerial.reverse() != signerCertSerialNumber.content)
 		throw CStringException("Serial Number del certificato non corrispondente");
 

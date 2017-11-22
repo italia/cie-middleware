@@ -2,8 +2,8 @@
 #include "Array.h"
 #include <map>
 
-typedef std::map<BYTE,ByteArray> tlvMap;
-typedef std::map<BYTE, ByteDynArray> tlvCreateMap;
+typedef std::map<uint8_t, ByteArray> tlvMap;
+typedef std::map<uint8_t, ByteDynArray> tlvCreateMap;
 
 class  CTLV
 {
@@ -11,8 +11,8 @@ class  CTLV
 public:
 	CTLV(ByteArray &data);
 	~CTLV(void);
-	RESULT getValue(BYTE Tag,ByteArray &Value);
-	RESULT getTAG(BYTE Tag,ByteArray *&Value);
+	RESULT getValue(uint8_t Tag, ByteArray &Value);
+	RESULT getTAG(uint8_t Tag, ByteArray *&Value);
 };
 
 class  CTLVCreate
@@ -22,8 +22,8 @@ public:
 
 	CTLVCreate(void);
 	~CTLVCreate(void);
-	RESULT addValue(BYTE Tag,ByteDynArray *&Value);
-	RESULT getValue(BYTE Tag,ByteDynArray *&Value);
-	RESULT setValue(BYTE Tag,ByteArray &Value);
+	RESULT addValue(uint8_t Tag, ByteDynArray *&Value);
+	RESULT getValue(uint8_t Tag, ByteDynArray *&Value);
+	RESULT setValue(uint8_t Tag, ByteArray &Value);
 	RESULT getBuffer(ByteDynArray &Value);
 };
