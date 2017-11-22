@@ -231,7 +231,7 @@ DWORD CLog::write(const char *format,...) {
 	 
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
 		std::hash<std::thread::id> hasher;
-		auto dwThreadID = hasher(std::this_thread::get_id);
+		auto dwThreadID = hasher(std::this_thread::get_id());
 		if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
 			std::stringstream th;
 			th << std::setiosflags(std::ios::hex | std::ios::uppercase);
@@ -295,7 +295,7 @@ void CLog::writePure(const char *format,...) {
 
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
 		std::hash<std::thread::id> hasher;
-		auto dwThreadID = hasher(std::this_thread::get_id);
+		auto dwThreadID = hasher(std::this_thread::get_id());
 		if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
 			std::stringstream th;
 			th << std::setiosflags(std::ios::hex | std::ios::uppercase);
@@ -343,7 +343,7 @@ void CLog::writeBinData(BYTE *data, size_t datalen) {
 
 	// se siamo in LM_thread devo scrivere il thread nel nome del file
 	std::hash<std::thread::id> hasher;
-	auto dwThreadID = hasher(std::this_thread::get_id);
+	auto dwThreadID = hasher(std::this_thread::get_id());
 	if (LogMode == LM_Thread || LogMode == LM_Module_Thread) {
 		std::stringstream th;
 		th << std::setiosflags(std::ios::hex | std::ios::uppercase);
