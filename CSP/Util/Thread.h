@@ -5,7 +5,7 @@
 
 class CThread
 {
-public:
+//public:
 	CThread(void);
 	~CThread(void);
 #ifdef WIN32

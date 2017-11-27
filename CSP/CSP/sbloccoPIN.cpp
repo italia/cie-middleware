@@ -21,7 +21,7 @@ extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD d
 #endif
 
 DWORD WINAPI _sbloccoPIN(
-	LPVOID lpThreadParameter) {
+	DWORD threadId) {
 	init_main_func
 
 		try {
@@ -109,8 +109,8 @@ DWORD WINAPI _sbloccoPIN(
 									num.c_str(),
 									"prima di bloccare il PUK");
 								msg.DoModal();
-								if (lpThreadParameter != nullptr)
-									PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 1, 0);
+								if (threadId != 0)
+									PostThreadMessage(threadId, WM_COMMAND, 1, 0);
 
 								break;
 							}
@@ -119,8 +119,8 @@ DWORD WINAPI _sbloccoPIN(
 									"Sblocco PIN",
 									"Il PUK è bloccato. La CIE non può più essere sbloccata");
 								msg.DoModal();
-								if (lpThreadParameter != nullptr)
-									PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 0, 0);
+								if (threadId != 0)
+									PostThreadMessage(threadId, WM_COMMAND, 0, 0);
 								break;
 							}
 							else if (ris != 0)
@@ -129,8 +129,8 @@ DWORD WINAPI _sbloccoPIN(
 							CMessage msg(MB_OK, "Sblocco PIN",
 								"Il PIN è stato sbloccato correttamente");
 							msg.DoModal();
-							if (lpThreadParameter != nullptr)
-								PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 0, 0);
+							if (threadId != 0)
+								PostThreadMessage(threadId, WM_COMMAND, 0, 0);
 
 						}
 						catch (CBaseException &ex) {
@@ -139,18 +139,18 @@ DWORD WINAPI _sbloccoPIN(
 							CMessage msg(MB_OK, "Sblocco PIN",
 								"Si è verificato un errore nella verifica del PUK");
 							msg.DoModal();
-							if (lpThreadParameter != nullptr)
-								PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 0, 0);
+							if (threadId != 0)
+								PostThreadMessage(threadId, WM_COMMAND, 0, 0);
 							break;
 						}
 					}
 					else
-						if (lpThreadParameter != nullptr)
-							PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 1, 0);
+						if (threadId != 0)
+							PostThreadMessage(threadId, WM_COMMAND, 1, 0);
 				}
 				else
-					if (lpThreadParameter != nullptr)
-						PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 1, 0);
+					if (threadId != 0)
+						PostThreadMessage(threadId, WM_COMMAND, 1, 0);
 				break;
 			}
 		}
@@ -161,8 +161,8 @@ DWORD WINAPI _sbloccoPIN(
 				"Impossibile trovare una CIE",
 				"nei lettori di smart card");
 			msg.DoModal();
-			if (lpThreadParameter != nullptr)
-				PostThreadMessage(PtrToUlong(lpThreadParameter), WM_COMMAND, 0, 0);
+			if (threadId != 0)
+				PostThreadMessage(threadId, WM_COMMAND, 0, 0);
 		}
 		SCardFreeMemory(hSC, readers);
 	}
@@ -179,8 +179,8 @@ DWORD WINAPI _sbloccoPIN(
 
 void TrayNotification(CSystemTray* tray, WPARAM uID, LPARAM lEvent) {
 	if (lEvent == WM_LBUTTONUP || lEvent== 0x405) {
-		DWORD id;
-		HANDLE thread = CreateThread(nullptr, 0, _sbloccoPIN, UlongToPtr(GetCurrentThreadId()), 0, &id);
+		std::thread thread(_sbloccoPIN, GetCurrentThreadId());
+		thread.detach();
 		tray->HideIcon();
 	}
 }
@@ -232,13 +232,10 @@ extern "C" int CALLBACK SbloccoPIN(
 		}
 	}
 	else {
-		DWORD id;
-		HANDLE thread = CreateThread(nullptr, 0, _sbloccoPIN, lpCmdLine, 0, &id);
-		if (thread == nullptr) {
-			ODS("Errore in CreateThread");
-			return 0;
-		}
-		WaitForSingleObject(thread, INFINITE);
+		//std::thread thread(_sbloccoPIN, 0);
+		//thread.join();
+		_sbloccoPIN(0);
+
 		ODS("End SbloccoPIN");
 		return 0;
 	}

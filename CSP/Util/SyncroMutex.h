@@ -6,8 +6,9 @@ class CSyncroMutex
 {
 	HANDLE hMutex;
 public:
-	CSyncroMutex(void);
 	void Create(void);
+
+	CSyncroMutex(void);
 	void Create(const char *name);
 	~CSyncroMutex(void);
 

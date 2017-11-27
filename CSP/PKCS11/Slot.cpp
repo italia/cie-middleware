@@ -6,13 +6,12 @@
 #include "CardTemplate.h"
 #include "../util/util.h"
 #include "../util/syncroevent.h"
-
-#include <vector>
+#include <mutex>
 
 static char *szCompiledFile=__FILE__;
 //extern CSyncroMutex p11EventMutex;
-extern CSyncroMutex p11Mutex;
-extern CSyncroEvent p11slotEvent;
+extern std::mutex p11Mutex;
+extern auto_reset_event p11slotEvent;
 extern bool bP11Terminate;
 extern bool bP11Initialized;
 
@@ -20,7 +19,7 @@ namespace p11 {
 
 DWORD CSlot::dwSlotCnt=1;
 SlotMap CSlot::g_mSlots;
-CThread CSlot::Thread;
+std::thread CSlot::Thread;
 CCardContext *CSlot::ThreadContext=NULL;
 bool CSlot::bMonitorUpdate=false;
 static char szMutexName[200]="p11mutex_";
@@ -41,7 +40,7 @@ CSlot::CSlot(const char *szReader) {
 	dwP11ObjCnt=1;
 	dwSessionCount=0;
 	pTemplate=NULL;
-	slotMutex.Create(mutexName(szReader));
+	//slotMutex.Create(mutexName(szReader));
 	pSerialTemplate=NULL;
 	hCard = NULL;
 }
@@ -63,25 +62,25 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 {
 	while (true) {
 		CCardContext Context;
-		CSlot::ThreadContext=&Context;
+		CSlot::ThreadContext = &Context;
 		size_t dwSlotNum = pSlotMap->size();
 		std::vector<SCARD_READERSTATE> state(dwSlotNum);
 		std::vector<std::shared_ptr<CSlot>> slot(dwSlotNum);
 		size_t i = 0;
 		DWORD ris;
 		{
-			CSyncroLocker lock(p11Mutex);
-			for (SlotMap::const_iterator it=pSlotMap->begin();it!=pSlotMap->end();it++,i++) {
+			std::unique_lock<std::mutex> lock(p11Mutex);
+			for (SlotMap::const_iterator it = pSlotMap->begin(); it != pSlotMap->end(); it++, i++) {
 				if (!bP11Initialized) {
 					CSlot::ThreadContext = NULL;
 					return 0;
 				}
 
 				state[i].szReader = it->second->szName.c_str();
-				slot[i]=it->second;
-				if (ris=SCardGetStatusChange(Context,0,&state[i],1)!=S_OK) {
-					if (ris!=SCARD_E_TIMEOUT) {
-						Log.write("Errore nella SCardGetStatusChange - %08X",ris);
+				slot[i] = it->second;
+				if (ris = SCardGetStatusChange(Context, 0, &state[i], 1) != S_OK) {
+					if (ris != SCARD_E_TIMEOUT) {
+						Log.write("Errore nella SCardGetStatusChange - %08X", ris);
 						// non uso la ExitThread!!!
 						// altrimenti non chiamo i distruttori, e mi rimane tutto appeso
 						// SOPRATTUTTO il p11Mutex
@@ -89,36 +88,36 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 						return 1;
 					}
 				}
-				state[i].dwCurrentState=state[i].dwEventState & (~SCARD_STATE_CHANGED);
+				state[i].dwCurrentState = state[i].dwEventState & (~SCARD_STATE_CHANGED);
 			}
 		}
-		CSlot::bMonitorUpdate=false;
+		CSlot::bMonitorUpdate = false;
 		while (true) {
 			Context.validate();
-			ris=SCardGetStatusChange(Context,1000,state.data(),(DWORD)dwSlotNum);
-			if (ris!=S_OK) {
-				if (CSlot::bMonitorUpdate || ris==SCARD_E_SYSTEM_CANCELLED || ris==SCARD_E_SERVICE_STOPPED || ris==SCARD_E_INVALID_HANDLE || ris==ERROR_INVALID_HANDLE) {
+			ris = SCardGetStatusChange(Context, 1000, state.data(), (DWORD)dwSlotNum);
+			if (ris != S_OK) {
+				if (CSlot::bMonitorUpdate || ris == SCARD_E_SYSTEM_CANCELLED || ris == SCARD_E_SERVICE_STOPPED || ris == SCARD_E_INVALID_HANDLE || ris == ERROR_INVALID_HANDLE) {
 					Log.write("Monitor Update");
 					break;
 				}
-				if (ris==SCARD_E_CANCELLED || bP11Terminate || !bP11Initialized) {
-					Log.write("Terminate");					
-					p11slotEvent.Signal();
+				if (ris == SCARD_E_CANCELLED || bP11Terminate || !bP11Initialized) {
+					Log.write("Terminate");
+					p11slotEvent.set();
 					CSlot::ThreadContext = NULL;
 					// no exitThread, vedi sopra;
 					return 0;
 				}
-				if (ris!=SCARD_E_TIMEOUT && ris!=SCARD_E_NO_READERS_AVAILABLE) {
-					Log.write("Errore nella SCardGetStatusChange - %08X",ris);
-					p11slotEvent.Signal();
+				if (ris != SCARD_E_TIMEOUT && ris != SCARD_E_NO_READERS_AVAILABLE) {
+					Log.write("Errore nella SCardGetStatusChange - %08X", ris);
+					p11slotEvent.set();
 					CSlot::ThreadContext = NULL;
 					// no exitThread, vedi sopra;
 					return 1;
 				}
 			}
-			for (size_t i = 0; i<dwSlotNum; i++) {
+			for (size_t i = 0; i < dwSlotNum; i++) {
 				if ((state[i].dwCurrentState & SCARD_STATE_PRESENT) &&
-					((state[i].dwEventState & SCARD_STATE_EMPTY) || 
+					((state[i].dwEventState & SCARD_STATE_EMPTY) ||
 					(state[i].dwEventState & SCARD_STATE_UNAVAILABLE))) {
 					// una carta è stata estratta!!
 					// sincronizzo sul mutex principale p11
@@ -126,34 +125,34 @@ static DWORD slotMonitor(SlotMap *pSlotMap)
 					// carta falliranno miseramente, ma se levi la carta
 					// mentre sto firmado mica è colpa mia!
 
-					CSyncroLocker lock(p11Mutex);
+					std::unique_lock<std::mutex> lock(p11Mutex);
 
-					slot[i]->lastEvent=SE_Removed;
+					slot[i]->lastEvent = SE_Removed;
 					slot[i]->Final();
 					slot[i]->baATR.clear();
-					p11slotEvent.Signal();
+					p11slotEvent.set();
 				}
 				if (((state[i].dwCurrentState & SCARD_STATE_UNAVAILABLE) ||
 					(state[i].dwCurrentState & SCARD_STATE_EMPTY)) &&
 					(state[i].dwEventState & SCARD_STATE_PRESENT)) {
 					// una carta è stata inserita!!
-					CSyncroLocker lock(p11Mutex);
+					std::unique_lock<std::mutex> lock(p11Mutex);
 
-					slot[i]->lastEvent=SE_Inserted;
+					slot[i]->lastEvent = SE_Inserted;
 					ByteArray ba;
 					slot[i]->GetATR(ba);
-					p11slotEvent.Signal();
+					p11slotEvent.set();
 				}
-				state[i].dwCurrentState=state[i].dwEventState & (~SCARD_STATE_CHANGED);
+				state[i].dwCurrentState = state[i].dwEventState & (~SCARD_STATE_CHANGED);
 			}
-			if (ris==SCARD_E_NO_READERS_AVAILABLE) {
-				Log.write("Nessun lettore connesso - %08X",ris);
+			if (ris == SCARD_E_NO_READERS_AVAILABLE) {
+				Log.write("Nessun lettore connesso - %08X", ris);
 				CSlot::ThreadContext = NULL;
 				// no exitThread, vedi sopra;
 				return 1;
 			}
 		}
-		CSlot::ThreadContext=NULL;
+		CSlot::ThreadContext = NULL;
 	}
 	// no exitThread, vedi sopra;
 	return 0;
@@ -179,7 +178,7 @@ RESULT CSlot::DeleteSlot(CK_SLOT_ID hSlotId)
 	std::shared_ptr<CSlot> pSlot;
 	P11ER_CALL(GetSlotFromID(hSlotId, pSlot),
 		ERR_CANT_GET_SLOT);
-
+ 
 	if (!pSlot) _return(CKR_SLOT_ID_INVALID);
 
 	pSlot->CloseAllSessions();
@@ -228,8 +227,13 @@ RESULT CSlot::DeleteSlotList()
 
 	int i=0;
 
-	while (i<5) {
-		if (Thread.joinThread(1000)==OK)
+	if (Thread.joinable())
+		Thread.join();
+
+	// TODO: verificare se è il caso di usare un thread con join a tempo
+
+	/*while (i<5) {
+		if (Thread.join(1000)==OK)
 			break;
 		i=i+1;
 		if (CSlot::ThreadContext!=NULL)
@@ -237,7 +241,7 @@ RESULT CSlot::DeleteSlotList()
 	}
 	if (i==5) {
 		Thread.terminateThread();
-	}
+	}*/
 
 	SlotMap::iterator it=CSlot::g_mSlots.begin();
 	while (it!=CSlot::g_mSlots.end()) { 
@@ -322,9 +326,8 @@ RESULT CSlot::InitSlotList()
 	if (!bP11Initialized)
 		return 0;
 
-	if (Thread.dwThreadID==0) {
-		Thread.createThread(slotMonitor, &g_mSlots);
-	}
+	if (!Thread.joinable())
+		Thread=std::thread(slotMonitor, &g_mSlots);
 
 	_return(OK)
 	exit_func
@@ -588,8 +591,8 @@ RESULT CSlot::FindP11Object(CK_OBJECT_CLASS objClass,CK_ATTRIBUTE_TYPE attr,CK_B
 RESULT CSlot::AddP11Object(std::shared_ptr<CP11Object> p11obj)
 {
 	init_func
+	p11obj->pSlot = this;
 	P11Objects.emplace_back(std::move(p11obj));
-	p11obj->pSlot=this;
 	_return(OK)
 	exit_func
 	_return(NULL)
@@ -764,20 +767,23 @@ RESULT CSlot::Connect() {
 RESULT CSlot::GetATR(ByteDynArray &ATR)
 {
 	init_func
-		ER_ASSERT(hCard, ERR_CARD_NOT_CONNECTED)
 
-
-		DWORD dwATRLen = 0;
-	WIN_R_CALL(SCardGetAttrib(hCard, SCARD_ATTR_ATR_STRING, NULL, &dwATRLen),SCARD_S_SUCCESS)
-
-	ATR.resize(dwATRLen);
-	WIN_R_CALL(SCardGetAttrib(hCard, SCARD_ATTR_ATR_STRING, ATR.data(), &dwATRLen), SCARD_S_SUCCESS)
-
+	SCARD_READERSTATE state;
+	state.szReader = this->szName.data();
+	SCardGetStatusChange(CSlot::Context, 0, &state, 1);
+	if (state.cbAtr > 0) {
+		ATR = ByteArray(state.rgbAtr, state.cbAtr);
 		Log.write("ATR Letto:");
-	Log.writeBinData(ATR.data(), ATR.size());
+		Log.writeBinData(ATR.data(), ATR.size());
+	}
+	else {
+		ATR.clear();
+		Log.write("ATR Letto: -nessuna carta inserita-");
+	}
+
 	_return(OK)
-		exit_func
-		_return(FAIL)
+	exit_func
+	_return(FAIL)
 }
 
 RESULT CSlot::GetATR(ByteArray &ATR) {
@@ -786,17 +792,8 @@ RESULT CSlot::GetATR(ByteArray &ATR) {
 		ATR=baATR;
 		_return(OK)
 	}
-	auto appo = hCard;
-	if (hCard == NULL)
-		P11ER_CALL(Connect(), "Errore nella connessione al token");
 	GetATR(baATR);
 	ATR=baATR;
-
-	if (appo == NULL) {
-		SCardDisconnect(hCard, SCARD_LEAVE_CARD);
-		hCard = NULL;
-	}
-
 
 	_return(OK)
 	exit_func
