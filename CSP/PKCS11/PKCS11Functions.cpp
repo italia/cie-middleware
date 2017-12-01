@@ -70,6 +70,7 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 		if (bP11Initialized) {
 			Log.write("%s","Forzatura C_Finalize");
 			C_Finalize(NULL);
+			bP11Initialized = false;
 		}
 		//xmlCleanup();
 		bModuleInit=false;

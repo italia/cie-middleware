@@ -1,8 +1,18 @@
 #include "..\stdafx.h"
 #include ".\des3.h"
-#include <openssl/rand.h>
 
-static char *szCompiledFile=__FILE__;
+static char *szCompiledFile = __FILE__;
+
+class init_3des {
+public:
+	BCRYPT_ALG_HANDLE algo;
+	init_3des() {
+		BCryptOpenAlgorithmProvider(&algo, BCRYPT_3DES_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0);
+	}
+	~init_3des() {
+		BCryptCloseAlgorithmProvider(algo, 0);
+	}
+} algo_3des;
 
 CDES3::CDES3() {
 }
@@ -47,62 +57,103 @@ void CDES3::Init(const ByteArray &key)
 	des_set_key(keyVal2, k2);
 	des_set_key(keyVal3, k3);
 
+
+
+	ByteDynArray BCrytpKey;
+	switch (dwKeySize) {
+	case 8:
+		BCrytpKey.set(&key, &key, &key);
+		break;
+	case 16:
+		BCrytpKey.set(&key, &key.left(8));
+		break;
+	case 24:
+		BCrytpKey = key;
+		break;
+	case 32:
+		BCrytpKey = key.left(24);
+		break;
+	}
+
+	BCryptGenerateSymmetricKey(algo_3des.algo, &this->key, nullptr, 0, BCrytpKey.data(), (ULONG)BCrytpKey.size(), 0);
+
 	exit_func
 }
 
 CDES3::~CDES3(void)
 {
+	BCryptDestroyKey(key);
 }
 
 ByteDynArray CDES3::Encode(const ByteArray &data)
 {
 	init_func
-	ByteDynArray result;
-	ER_CALL(Des3(ISOPad(data),result,DES_ENCRYPT),"Errore della cifratura DES");
-	_return (result)
-	exit_func
+		ByteDynArray result;
+	ER_CALL(Des3(ISOPad(data), result, DES_ENCRYPT), "Errore della cifratura DES");
+	_return(result)
+		exit_func
 }
 
 ByteDynArray CDES3::RawEncode(const ByteArray &data)
 {
 	init_func
-	ByteDynArray result;
-	ER_ASSERT((data.size()%8)==0,"La dimensione dei dati da cifrare deve essere multipla di 8")
-	ER_CALL(Des3(data,result,DES_ENCRYPT),"Errore della cifratura DES");
-	_return (result)
-	exit_func
+		ByteDynArray result;
+	ER_ASSERT((data.size() % 8) == 0, "La dimensione dei dati da cifrare deve essere multipla di 8")
+		ER_CALL(Des3(data, result, DES_ENCRYPT), "Errore della cifratura DES");
+	_return(result)
+		exit_func
 }
 
 ByteDynArray CDES3::Decode(const ByteArray &data)
 {
 	init_func
-	ByteDynArray result;
-	ER_CALL(Des3(data,result,DES_DECRYPT),"Errore della decifratura DES");
-	result.resize(RemoveISOPad(result),true);
-	_return (result)
-	exit_func
+		ByteDynArray result;
+	ER_CALL(Des3(data, result, DES_DECRYPT), "Errore della decifratura DES");
+	result.resize(RemoveISOPad(result), true);
+	_return(result)
+		exit_func
 }
 
 ByteDynArray CDES3::RawDecode(const ByteArray &data)
 {
 	init_func
-	ByteDynArray result;
-	ER_ASSERT((data.size()%8)==0,"La dimensione dei dati da cifrare deve essere multipla di 8")
-	ER_CALL(Des3(data,result,DES_DECRYPT),"Errore della decifratura DES");
-	_return (result)
-	exit_func
+		ByteDynArray result;
+	ER_ASSERT((data.size() % 8) == 0, "La dimensione dei dati da cifrare deve essere multipla di 8")
+		ER_CALL(Des3(data, result, DES_DECRYPT), "Errore della decifratura DES");
+	_return(result)
+		exit_func
 }
 
-DWORD CDES3::Des3(const ByteArray &data,ByteDynArray &resp,int encOp)
+DWORD CDES3::Des3(const ByteArray &data, ByteDynArray &resp, int encOp)
 {
 	init_func
 
-	des_cblock iv;
+		des_cblock iv;
 	memcpy_s(iv, sizeof(des_cblock), initVec, sizeof(initVec));
-	size_t dwAppSize=data.size()-1;
-	resp.resize(dwAppSize-(dwAppSize % 8)+8);
-	des_ede3_cbc_encrypt(data.data(),resp.data(),(long)data.size(),k1,k2,k3,&iv,encOp);
+	size_t dwAppSize = data.size() - 1;
+	resp.resize(dwAppSize - (dwAppSize % 8) + 8);
+	des_ede3_cbc_encrypt(data.data(), resp.data(), (long)data.size(), k1, k2, k3, &iv, encOp);
+
+	ByteDynArray iv2(8), resp2(resp.size());
+	iv2.fill(0);
+	ULONG result = (ULONG)resp2.size();
+	if (encOp == DES_ENCRYPT) {
+		BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp2.data(), (ULONG)resp2.size(), &result, 0);
+		if (resp != resp2) {
+			ODS("Crypt Err");
+			return OK;
+		}
+	}
+
+	if (encOp == DES_DECRYPT) {
+		BCryptDecrypt(key, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp2.data(), (ULONG)resp2.size(), &result, 0);
+		if (resp != resp2) {
+			ODS("Crypt Err");
+			return OK;
+		}
+	}
+
 	_return(OK)
-	exit_func
-	_return(FAIL)
+		exit_func
+		_return(FAIL)
 }

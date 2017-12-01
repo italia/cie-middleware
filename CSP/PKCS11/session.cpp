@@ -7,6 +7,8 @@
 
 static char *szCompiledFile = __FILE__;
 
+#define noexcept throw()
+
 namespace {
 
 	template<class T>
@@ -24,7 +26,7 @@ namespace {
 		friend resetter<std::unique_ptr<T>> make_resetter<std::unique_ptr<T>>(std::unique_ptr<T>& p) noexcept;
 		resetter(std::unique_ptr<T>& p) noexcept : m_p(&p) {}
 
-		void reset() noexcept(noexcept(m_p->reset()))
+		void reset() //noexcept(noexcept(m_p->reset()))
 		{
 			if (m_p)
 				m_p->reset();
@@ -38,14 +40,14 @@ namespace {
 
 		resetter& operator=(const resetter&) = delete;
 
-		resetter& operator=(resetter&& other) noexcept(noexcept(reset()))
+		resetter& operator=(resetter&& other) //noexcept(noexcept(reset()))
 		{
 			reset();
 			m_p = std::exchange(other.m_p, nullptr);
 			return *this;
 		}
 
-		~resetter() noexcept(noexcept(reset())) 
+		~resetter() //noexcept(noexcept(reset())) 
 		{
 			reset();
 		}
@@ -93,7 +95,7 @@ namespace p11 {
 			P11ER_CALL(GetNewSessionID(pSession->hSessionHandle),
 			ERR_GET_NEW_SESSION)
 
-		hSession = pSession->hSessionHandle;
+			hSession = pSession->hSessionHandle;
 		P11ER_CALL(pSession->pSlot->pTemplate->FunctionList.templateInitSession(pSession->pSlot->pTemplateData),
 			ERR_INIT_SESSION)
 

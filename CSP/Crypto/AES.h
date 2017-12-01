@@ -12,6 +12,8 @@ class CAES
 	ByteDynArray key;
 	ByteDynArray iv;
 
+	BCRYPT_KEY_HANDLE BCryptKey;
+
 public:
 	CAES();
 	CAES(const ByteArray &key);

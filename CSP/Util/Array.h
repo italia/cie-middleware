@@ -114,7 +114,7 @@ private:
 		return 1;
 	}
 
-	size_t internalSet(ByteArray* ba, ByteArray *data) {
+	size_t internalSet(ByteArray* ba, const ByteArray *data) {
 		if (ba != nullptr)
 			ba->copy(*data);
 		return data->size();
