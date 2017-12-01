@@ -4,6 +4,17 @@
 
 static char *szCompiledFile=__FILE__;
 
+class init_mac {
+public:
+	BCRYPT_ALG_HANDLE algo;
+	init_mac() {
+		BCryptOpenAlgorithmProvider(&algo, BCRYPT_3DES_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0);
+	}
+	~init_mac() {
+		BCryptCloseAlgorithmProvider(algo, 0);
+	}
+} algo_mac;
+
 CMAC::CMAC() {
 }
 
@@ -46,11 +57,36 @@ void CMAC::Init(ByteArray &key)
 	des_set_key(keyVal1,k1);
 	des_set_key(keyVal2,k2);
 	des_set_key(keyVal3,k3);
+
+	ByteDynArray BCrytpKey;
+	switch (dwKeySize) {
+	case 8:
+		BCrytpKey.set(&key, &key, &key);
+		break;
+	case 16:
+		BCrytpKey.set(&key, &key.left(8));
+		break;
+	case 24:
+		BCrytpKey = key;
+		break;
+	case 32:
+		BCrytpKey = key.left(24);
+		break;
+	}
+
+	ByteDynArray k1;
+	k1.set(&key.left(8), &key.left(8), &key.left(8));
+
+	BCryptGenerateSymmetricKey(algo_mac.algo, &this->key1, nullptr, 0, k1.data(), (ULONG)k1.size(), 0);
+	BCryptGenerateSymmetricKey(algo_mac.algo, &this->key2, nullptr, 0, BCrytpKey.data(), (ULONG)BCrytpKey.size(), 0);
+
 	exit_func
 }
 
 CMAC::~CMAC(void)
 {
+	BCryptDestroyKey(key1);
+	BCryptDestroyKey(key2);
 }
 
 ByteDynArray CMAC::Mac(const ByteArray &data)
@@ -70,13 +106,32 @@ DWORD CMAC::_Mac(const ByteArray &data,ByteDynArray &resp)
 	memcpy_s(iv, sizeof(des_cblock), initVec, sizeof(initVec));
 
 	size_t dwANSILen=ANSIPadLen(data.size());
+	ByteDynArray iv2(8);
 	if (data.size()>8) {
 		ByteDynArray baOutTmp(dwANSILen-8);
 		des_ncbc_encrypt(data.data(), baOutTmp.data(), (long)dwANSILen - 8, k1, &iv, DES_ENCRYPT);
+
+		iv2.fill(0);
+		ByteDynArray baOutTmp2(dwANSILen - 8);
+		ULONG result = (ULONG)baOutTmp2.size();
+		BCryptEncrypt(key1, data.data(), (long)dwANSILen - 8, nullptr, iv2.data(), (ULONG)iv2.size(), baOutTmp2.data(), (ULONG)baOutTmp2.size(), &result, 0);
+		if (baOutTmp != baOutTmp2) {
+			ODS("Crypt Err");
+			return OK;
+		}
 	}
 	uint8_t dest[8];
 	des_ede3_cbc_encrypt(data.mid(dwANSILen - 8).data(), dest, (long)(data.size() - dwANSILen) + 8, k1, k2, k3, &iv, DES_ENCRYPT);
 	resp = ByteArray(dest, 8);
+
+	ByteDynArray resp2(8);
+	ULONG result = (ULONG)resp2.size();
+	BCryptEncrypt(key2, data.mid(dwANSILen - 8).data(), (long)(data.size() - dwANSILen) + 8, nullptr, iv2.data(), (ULONG)iv2.size(), resp2.data(), (ULONG)resp2.size(), &result, 0);
+
+	if (resp != resp2) {
+		ODS("Crypt Err");
+		return OK;
+	}
 
 	_return(OK)
 	exit_func
