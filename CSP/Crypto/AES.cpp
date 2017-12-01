@@ -3,6 +3,17 @@
 
 static char *szCompiledFile=__FILE__;
 
+class init_aes {
+public:
+	BCRYPT_ALG_HANDLE algo;
+	init_aes() {
+		BCryptOpenAlgorithmProvider(&algo, BCRYPT_AES_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0);
+	}
+	~init_aes() {
+		BCryptCloseAlgorithmProvider(algo, 0);
+	}
+} algo_aes;
+
 CAES::CAES() {
 }
 
@@ -15,11 +26,15 @@ void CAES::Init(const ByteArray &key)
 	init_func
 	iv.resize(16, false);
 	this->key = key;
+
+	BCryptGenerateSymmetricKey(algo_aes.algo, &BCryptKey, nullptr, 0, key.data(), (ULONG)key.size(), 0);
+
 	exit_func
 }
 
 CAES::~CAES(void)
 {
+	BCryptDestroyKey(BCryptKey);
 }
 
 ByteDynArray CAES::Encode(const ByteArray &data)
@@ -75,7 +90,26 @@ DWORD CAES::AES(const ByteArray &data,ByteDynArray &resp,int encOp)
 	size_t dwAppSize = data.size() - 1;
 	resp.resize(dwAppSize - (dwAppSize % 16) + 16);
 	AES_cbc_encrypt(data.data(), resp.data(), data.size(), &aesKey, iv.data(), encOp);
-	
+
+	ByteDynArray iv2(iv), resp2(resp.size());
+	iv2.fill(0);
+	ULONG result = (ULONG)resp2.size();
+	if (encOp == AES_ENCRYPT) {
+		BCryptEncrypt(BCryptKey, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp2.data(), (ULONG)resp2.size(), &result, 0);
+		if (resp != resp2) {
+			ODS("Crypt Err");
+			return OK;
+		}
+	}
+
+	if (encOp == AES_DECRYPT) {
+		BCryptDecrypt(BCryptKey, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp2.data(), (ULONG)resp2.size(), &result, 0);
+		if (resp != resp2) {
+			ODS("Crypt Err");
+			return OK;
+		}
+	}
+
 	_return(OK)
 	exit_func
 	_return(FAIL)

@@ -8,9 +8,11 @@
 
 class CDES3
 {
-	DWORD Des3(const ByteArray &data,ByteDynArray &resp,int encOp);
-	des_key_schedule k1,k2,k3;
+	DWORD Des3(const ByteArray &data, ByteDynArray &resp, int encOp);
+	des_key_schedule k1, k2, k3;
 	des_cblock initVec;
+
+	BCRYPT_KEY_HANDLE key;
 
 public:
 	CDES3();
