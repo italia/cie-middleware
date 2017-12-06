@@ -1,35 +1,87 @@
 #include "../stdafx.h"
 #include "SHA1.h"
-#include "../util/util.h"
 
 static char *szCompiledFile=__FILE__;
+
+#ifdef WIN32
 
 class init_sha1 {
 public:
 	BCRYPT_ALG_HANDLE algo;
 	init_sha1() {
-		BCryptOpenAlgorithmProvider(&algo, BCRYPT_SHA1_ALGORITHM, MS_PRIMITIVE_PROVIDER, BCRYPT_HASH_REUSABLE_FLAG);
+		if (BCryptOpenAlgorithmProvider(&algo, BCRYPT_SHA1_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0) != 0)
+			throw std::runtime_error("Errore nell'inizializzazione dell'algoritmo SHA1");
 	}
 	~init_sha1() {
 		BCryptCloseAlgorithmProvider(algo, 0);
 	}
 } algo_sha1;
 
+CSHA1::CSHA1() : hash(nullptr) {
+}
+
+CSHA1::~CSHA1() {
+	if (hash!=nullptr)
+		BCryptDestroyHash(hash);
+}
+void CSHA1::Init() {
+	if (hash != nullptr)
+		throw std::runtime_error("Un'operazione di hash è già in corso");
+	if (BCryptCreateHash(algo_sha1.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
+		throw std::runtime_error("Errore nella creazione dell'hash SHA1");
+}
+void CSHA1::Update(ByteArray data) {
+	if (hash == nullptr)
+		throw std::runtime_error("Hash non inizializzato");
+	if (BCryptHashData(hash, data.data(), (ULONG)data.size(), 0) != 0)
+		throw std::runtime_error("Errore nell'hash dei dati SHA1");
+}
+ByteDynArray CSHA1::Final() {
+	if (hash == nullptr)
+		throw std::runtime_error("Hash non inizializzato");
+	ByteDynArray resp(SHA_DIGEST_LENGTH);
+	if (BCryptFinishHash(hash, resp.data(), (ULONG)resp.size(), 0) != 0)
+		throw std::runtime_error("Errore nel calcolo dell'hash SHA1");
+
+	BCryptDestroyHash(hash);
+	hash = nullptr;
+
+	return resp;
+}
+
+#else
+
+CSHA1::CSHA1() : isInit(false) {
+}
+
+CSHA1::~CSHA1() {
+}
+
+void CSHA1::Init() {
+	if (isInit)
+		throw std::runtime_error("Un'operazione di hash è già in corso");
+	SHA1_Init(&ctx);
+	isInit = true;
+}
+void CSHA1::Update(ByteArray data) {
+	if (!isInit)
+		throw std::runtime_error("Hash non inizializzato");
+	SHA1_Update(&ctx, data.data(), data.size());
+}
+ByteDynArray CSHA1::Final() {
+	if (!isInit)
+		throw std::runtime_error("Hash non inizializzato");
+	ByteDynArray resp(SHA_DIGEST_LENGTH);
+	SHA1_Final(resp.data(), &ctx);
+	isInit = false;
+
+	return resp;
+}
+#endif
+
 ByteDynArray CSHA1::Digest(ByteArray data)
 {
-	ByteDynArray digest(SHA_DIGEST_LENGTH);
-	SHA1(data.data(), data.size(), digest.data());
-
-	BCRYPT_HASH_HANDLE hash;
-	BCryptCreateHash(algo_sha1.algo, &hash, nullptr, 0, nullptr, 0, BCRYPT_HASH_REUSABLE_FLAG);
-	ByteDynArray resp2(SHA_DIGEST_LENGTH);
-	BCryptHashData(hash, data.data(), (ULONG)data.size(), 0);
-	BCryptFinishHash(hash, resp2.data(), (ULONG)resp2.size(), 0);
-	BCryptDestroyHash(hash);
-
-	if (digest != resp2) {
-		ODS("Crypt Err");
-	}
-
-	return digest;
+	Init();
+	Update(data);
+	return Final();
 }

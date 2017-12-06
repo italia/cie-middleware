@@ -10,15 +10,6 @@ static char *szCompiledFile=__FILE__;
 DWORD ERR_ATTRIBUTE_IS_SENSITIVE = 0x40000008;
 DWORD ERR_OBJECT_HASNT_ATTRIBUTE = 0x40000009;
 
-class initRand {
-public:
-	initRand() {
-		SYSTEMTIME tm;
-		GetSystemTime(&tm);
-		RAND_seed(&tm, sizeof(SYSTEMTIME));
-	}
-} _initRand;
-
 BYTE hex2byte(char h) {
 	if (h>='0' && h<='9') return(h-'0');
 	if (h>='A' && h<='F') return(h+10-'A');

@@ -3,34 +3,99 @@
 
 static char *szCompiledFile = __FILE__;
 
+#ifdef WIN32
+
 class init_3des {
 public:
 	BCRYPT_ALG_HANDLE algo;
 	init_3des() {
-		BCryptOpenAlgorithmProvider(&algo, BCRYPT_3DES_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0);
+		if (BCryptOpenAlgorithmProvider(&algo, BCRYPT_3DES_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0) != 0)
+			throw std::runtime_error("Errore nell'inizializzazione dell'algoritmo DES");
 	}
 	~init_3des() {
 		BCryptCloseAlgorithmProvider(algo, 0);
 	}
 } algo_3des;
 
-CDES3::CDES3() {
+void CDES3::Init(const ByteArray &key)
+{
+	init_func
+	size_t KeySize = key.size();
+	ER_ASSERT((KeySize % 8) == 0, "Errore nella lunghezza della chiave DES (non divisibile per 8)")
+
+	ER_ASSERT(KeySize >= 8 && KeySize <= 32, "Errore nella lunghezza della chiave DES (<8 o >32)")
+
+	ByteDynArray BCrytpKey;
+	iv.resize(8);
+	iv.fill(0);
+	switch (KeySize) {
+	case 8:
+		BCrytpKey.set(&key, &key, &key);
+		break;
+	case 16:
+		BCrytpKey.set(&key, &key.left(8));
+		break;
+	case 24:
+		BCrytpKey = key;
+		break;
+	case 32:
+		BCrytpKey = key.left(24);
+		iv = key.right(8);
+		break;
+	}
+
+	if (BCryptGenerateSymmetricKey(algo_3des.algo, &this->key, nullptr, 0, BCrytpKey.data(), (ULONG)BCrytpKey.size(), 0) != 0)
+		throw std::runtime_error("Errore nella creazione della chiave DES");
+
+	exit_func
 }
 
-CDES3::CDES3(const ByteArray &key) {
-	Init(key);
+CDES3::~CDES3(void)
+{
+	if (key!=nullptr)
+		BCryptDestroyKey(key);
 }
+
+CDES3::CDES3(void) : key(nullptr)
+{
+}
+
+DWORD CDES3::Des3(const ByteArray &data, ByteDynArray &resp, int encOp)
+{
+	init_func
+
+	size_t AppSize = data.size() - 1;
+	resp.resize(AppSize - (AppSize % 8) + 8);
+
+	NTSTATUS rs;
+	ByteDynArray iv2 = iv;
+	ULONG result = (ULONG)resp.size();
+	if (encOp == DES_ENCRYPT) 
+		rs = BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp.data(), (ULONG)resp.size(), &result, 0);	
+
+	if (encOp == DES_DECRYPT) 
+		rs = BCryptDecrypt(key, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp.data(), (ULONG)resp.size(), &result, 0);	
+
+	if (rs != 0)
+		throw std::runtime_error("Errore nella cifratura DES");
+
+	_return(OK)
+	exit_func
+	_return(FAIL)
+}
+
+#else
 
 void CDES3::Init(const ByteArray &key)
 {
 	init_func
-		size_t dwKeySize = key.size();
-	ER_ASSERT((dwKeySize % 8) == 0, "Errore nella lunghezza della chiave DES (non divisibile per 8)")
+	size_t KeySize = key.size();
+	ER_ASSERT((KeySize % 8) == 0, "Errore nella lunghezza della chiave DES (non divisibile per 8)")
 
-		ER_ASSERT(dwKeySize >= 8 && dwKeySize <= 32, "Errore nella lunghezza della chiave DES (<8 o >32)")
+		ER_ASSERT(KeySize >= 8 && KeySize <= 32, "Errore nella lunghezza della chiave DES (<8 o >32)")
 		des_cblock *keyVal1 = nullptr, *keyVal2 = nullptr, *keyVal3 = nullptr;
 
-	switch (dwKeySize) {
+	switch (KeySize) {
 	case 8:
 		memset(initVec, 0, 8);
 		keyVal1 = keyVal2 = keyVal3 = (des_cblock *)key.data();
@@ -57,57 +122,60 @@ void CDES3::Init(const ByteArray &key)
 	des_set_key(keyVal2, k2);
 	des_set_key(keyVal3, k3);
 
-
-
-	ByteDynArray BCrytpKey;
-	switch (dwKeySize) {
-	case 8:
-		BCrytpKey.set(&key, &key, &key);
-		break;
-	case 16:
-		BCrytpKey.set(&key, &key.left(8));
-		break;
-	case 24:
-		BCrytpKey = key;
-		break;
-	case 32:
-		BCrytpKey = key.left(24);
-		break;
-	}
-
-	BCryptGenerateSymmetricKey(algo_3des.algo, &this->key, nullptr, 0, BCrytpKey.data(), (ULONG)BCrytpKey.size(), 0);
-
 	exit_func
 }
 
 CDES3::~CDES3(void)
 {
-	BCryptDestroyKey(key);
+}
+
+CDES3::CDES3() 
+{
+}
+
+DWORD CDES3::Des3(const ByteArray &data, ByteDynArray &resp, int encOp)
+{
+	init_func
+
+	des_cblock iv;
+	memcpy_s(iv, sizeof(des_cblock), initVec, sizeof(initVec));
+	size_t AppSize = data.size() - 1;
+	resp.resize(AppSize - (AppSize % 8) + 8);
+	des_ede3_cbc_encrypt(data.data(), resp.data(), (long)data.size(), k1, k2, k3, &iv, encOp);
+
+	_return(OK)
+	exit_func
+	_return(FAIL)
+}
+#endif
+
+CDES3::CDES3(const ByteArray &key) {
+	Init(key);
 }
 
 ByteDynArray CDES3::Encode(const ByteArray &data)
 {
 	init_func
-		ByteDynArray result;
+	ByteDynArray result;
 	ER_CALL(Des3(ISOPad(data), result, DES_ENCRYPT), "Errore della cifratura DES");
 	_return(result)
-		exit_func
+	exit_func
 }
 
 ByteDynArray CDES3::RawEncode(const ByteArray &data)
 {
 	init_func
-		ByteDynArray result;
+	ByteDynArray result;
 	ER_ASSERT((data.size() % 8) == 0, "La dimensione dei dati da cifrare deve essere multipla di 8")
-		ER_CALL(Des3(data, result, DES_ENCRYPT), "Errore della cifratura DES");
+	ER_CALL(Des3(data, result, DES_ENCRYPT), "Errore della cifratura DES");
 	_return(result)
-		exit_func
+	exit_func
 }
 
 ByteDynArray CDES3::Decode(const ByteArray &data)
 {
 	init_func
-		ByteDynArray result;
+	ByteDynArray result;
 	ER_CALL(Des3(data, result, DES_DECRYPT), "Errore della decifratura DES");
 	result.resize(RemoveISOPad(result), true);
 	_return(result)
@@ -117,43 +185,9 @@ ByteDynArray CDES3::Decode(const ByteArray &data)
 ByteDynArray CDES3::RawDecode(const ByteArray &data)
 {
 	init_func
-		ByteDynArray result;
+	ByteDynArray result;
 	ER_ASSERT((data.size() % 8) == 0, "La dimensione dei dati da cifrare deve essere multipla di 8")
-		ER_CALL(Des3(data, result, DES_DECRYPT), "Errore della decifratura DES");
+	ER_CALL(Des3(data, result, DES_DECRYPT), "Errore della decifratura DES");
 	_return(result)
-		exit_func
-}
-
-DWORD CDES3::Des3(const ByteArray &data, ByteDynArray &resp, int encOp)
-{
-	init_func
-
-		des_cblock iv;
-	memcpy_s(iv, sizeof(des_cblock), initVec, sizeof(initVec));
-	size_t dwAppSize = data.size() - 1;
-	resp.resize(dwAppSize - (dwAppSize % 8) + 8);
-	des_ede3_cbc_encrypt(data.data(), resp.data(), (long)data.size(), k1, k2, k3, &iv, encOp);
-
-	ByteDynArray iv2(8), resp2(resp.size());
-	iv2.fill(0);
-	ULONG result = (ULONG)resp2.size();
-	if (encOp == DES_ENCRYPT) {
-		BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp2.data(), (ULONG)resp2.size(), &result, 0);
-		if (resp != resp2) {
-			ODS("Crypt Err");
-			return OK;
-		}
-	}
-
-	if (encOp == DES_DECRYPT) {
-		BCryptDecrypt(key, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp2.data(), (ULONG)resp2.size(), &result, 0);
-		if (resp != resp2) {
-			ODS("Crypt Err");
-			return OK;
-		}
-	}
-
-	_return(OK)
-		exit_func
-		_return(FAIL)
+	exit_func
 }

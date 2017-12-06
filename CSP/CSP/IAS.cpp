@@ -427,6 +427,9 @@ void IAS::DHKeyExchange() {
 		dh_prKey.random();
 	} while (dh_q[0] < dh_prKey[0]);
 
+	// dh_prKey deve essere dispari
+	dh_prKey.right(1)[0] |= 1;
+
 	ByteDynArray dhg(dh_g.size());
 	dhg.fill(0);
 	dhg.rightcopy(dh_g);

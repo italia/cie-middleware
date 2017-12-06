@@ -3,39 +3,106 @@
 
 static char *szCompiledFile=__FILE__;
 
+#ifdef WIN32
+
 class init_aes {
 public:
 	BCRYPT_ALG_HANDLE algo;
 	init_aes() {
-		BCryptOpenAlgorithmProvider(&algo, BCRYPT_AES_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0);
+		if (BCryptOpenAlgorithmProvider(&algo, BCRYPT_AES_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0) != 0)
+			throw std::runtime_error("Errore nell'inizializzazione dell'algoritmo AES");
 	}
 	~init_aes() {
 		BCryptCloseAlgorithmProvider(algo, 0);
 	}
 } algo_aes;
 
-CAES::CAES() {
+void CAES::Init(const ByteArray &key)
+{
+	init_func
+	iv.resize(16, false);
+
+	if (BCryptGenerateSymmetricKey(algo_aes.algo, &this->key, nullptr, 0, key.data(), (ULONG)key.size(), 0) != 0)
+		throw std::runtime_error("Errore nella creazione della chiave AES");
+
+	exit_func
 }
 
-CAES::CAES(const ByteArray &key) {
-	Init(key);
+CAES::CAES() : key(nullptr) 
+{
 }
 
+CAES::~CAES(void)
+{
+	if (key!=nullptr)
+		BCryptDestroyKey(key);
+}
+
+DWORD CAES::AES(const ByteArray &data,ByteDynArray &resp,int encOp)
+{
+	init_func
+
+	iv.fill(0);
+	size_t AppSize = data.size() - 1;
+	resp.resize(AppSize - (AppSize % 16) + 16);
+
+	NTSTATUS rs;
+	ULONG result = (ULONG)resp.size();
+	if (encOp == AES_ENCRYPT)
+		rs = BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, iv.data(), (ULONG)iv.size(), resp.data(), (ULONG)resp.size(), &result, 0);
+	
+	if (encOp == AES_DECRYPT)
+		rs = BCryptDecrypt(key, data.data(), (ULONG)data.size(), nullptr, iv.data(), (ULONG)iv.size(), resp.data(), (ULONG)resp.size(), &result, 0);
+	
+	if (rs != 0)
+		throw std::runtime_error("Errore nella cifratura AES");
+
+	_return(OK)
+	exit_func
+	_return(FAIL)
+}
+#else
+
+DWORD CAES::AES(const ByteArray &data,ByteDynArray &resp,int encOp)
+{
+	init_func
+
+		iv.fill(0);
+
+	AES_KEY aesKey;
+	if (encOp == AES_ENCRYPT)
+		AES_set_encrypt_key(key.data(), (int)key.size() * 8, &aesKey);
+	else
+		AES_set_decrypt_key(key.data(), (int)key.size() * 8, &aesKey);
+	size_t AppSize = data.size() - 1;
+	resp.resize(AppSize - (AppSize % 16) + 16);
+	AES_cbc_encrypt(data.data(), resp.data(), data.size(), &aesKey, iv.data(), encOp);
+
+	_return(OK)
+		exit_func
+		_return(FAIL)
+}
 void CAES::Init(const ByteArray &key)
 {
 	init_func
 	iv.resize(16, false);
 	this->key = key;
 
-	BCryptGenerateSymmetricKey(algo_aes.algo, &BCryptKey, nullptr, 0, key.data(), (ULONG)key.size(), 0);
-
 	exit_func
+}
+
+CAES::CAES() {
 }
 
 CAES::~CAES(void)
 {
-	BCryptDestroyKey(BCryptKey);
 }
+#endif
+
+CAES::CAES(const ByteArray &key) {
+	Init(key);
+}
+
 
 ByteDynArray CAES::Encode(const ByteArray &data)
 {
@@ -74,43 +141,4 @@ ByteDynArray CAES::RawDecode(const ByteArray &data)
 	ER_CALL(AES(data, result, AES_DECRYPT), "Errore della decifratura DES");
 	_return (result)
 	exit_func
-}
-
-DWORD CAES::AES(const ByteArray &data,ByteDynArray &resp,int encOp)
-{
-	init_func
-
-	iv.fill(0);
-
-	AES_KEY aesKey;
-	if (encOp == AES_ENCRYPT)
-		AES_set_encrypt_key(key.data(), (int)key.size() * 8, &aesKey);
-	else
-		AES_set_decrypt_key(key.data(), (int)key.size() * 8, &aesKey);
-	size_t dwAppSize = data.size() - 1;
-	resp.resize(dwAppSize - (dwAppSize % 16) + 16);
-	AES_cbc_encrypt(data.data(), resp.data(), data.size(), &aesKey, iv.data(), encOp);
-
-	ByteDynArray iv2(iv), resp2(resp.size());
-	iv2.fill(0);
-	ULONG result = (ULONG)resp2.size();
-	if (encOp == AES_ENCRYPT) {
-		BCryptEncrypt(BCryptKey, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp2.data(), (ULONG)resp2.size(), &result, 0);
-		if (resp != resp2) {
-			ODS("Crypt Err");
-			return OK;
-		}
-	}
-
-	if (encOp == AES_DECRYPT) {
-		BCryptDecrypt(BCryptKey, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp2.data(), (ULONG)resp2.size(), &result, 0);
-		if (resp != resp2) {
-			ODS("Crypt Err");
-			return OK;
-		}
-	}
-
-	_return(OK)
-	exit_func
-	_return(FAIL)
 }
