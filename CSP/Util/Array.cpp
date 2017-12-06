@@ -98,10 +98,38 @@ ByteArray &ByteArray::fill(const uint8_t value) {
 	return *this;
 }
 
+#ifdef WIN32
+class init_rnd {
+public:
+	BCRYPT_ALG_HANDLE algo;
+	init_rnd() {
+		if (BCryptOpenAlgorithmProvider(&algo, BCRYPT_RNG_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0) != 0)
+			throw std::runtime_error("Errore nell'inizializzazione dell'algoritmo Random");
+	}
+	~init_rnd() {
+		BCryptCloseAlgorithmProvider(algo, 0);
+	}
+} algo_rnd;
+
+ByteArray &ByteArray::random() {
+	BCryptGenRandom(algo_rnd.algo, _data, (ULONG)_size, 0);
+	return *this;
+}
+#else
+class init_rnd {
+public:
+	initRand() {
+		SYSTEMTIME tm;
+		GetSystemTime(&tm);
+		RAND_seed(&tm, sizeof(SYSTEMTIME));
+	}
+} _initRand;
+
 ByteArray &ByteArray::random() {
 	RAND_bytes(_data, (int)_size);
 	return *this;
 }
+#endif
 
 ByteArray &ByteArray::reverse() {
 	size_t dwHalfSize = _size >> 1;

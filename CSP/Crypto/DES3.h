@@ -1,6 +1,13 @@
 #pragma once
 #include "../stdafx.h"
+#ifdef WIN32
+#include <bcrypt.h>
+
+#define DES_ENCRYPT 0
+#define DES_DECRYPT 1
+#else
 #include <openssl\des.h>
+#endif
 #include "../util/util.h"
 #include "../util/utilexception.h"
 
@@ -9,10 +16,13 @@
 class CDES3
 {
 	DWORD Des3(const ByteArray &data, ByteDynArray &resp, int encOp);
+#ifdef WIN32
+	BCRYPT_KEY_HANDLE key;
+	ByteDynArray iv;
+#else
 	des_key_schedule k1, k2, k3;
 	des_cblock initVec;
-
-	BCRYPT_KEY_HANDLE key;
+#endif
 
 public:
 	CDES3();

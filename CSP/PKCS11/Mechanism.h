@@ -1,6 +1,6 @@
 #pragma once
-#include <openssl\sha.h>
-#include <openssl\md5.h>
+#include "../Crypto/SHA1.h"
+#include "../Crypto/MD5.h"
 #pragma pack(1)
 #include "pkcs11.h"
 #pragma pack()
@@ -216,13 +216,13 @@ public:
 	RESULT DecryptSetOperationState(ByteArray &OperationState);
 };
 
-class CSHA : public CDigest
+class CDigestSHA : public CDigest
 {
 public:
-	CSHA(std::shared_ptr<CSession> Session);
-	virtual ~CSHA();
+	CDigestSHA(std::shared_ptr<CSession> Session);
+	virtual ~CDigestSHA();
 
-	SHA_CTX Sha1Context;
+	CSHA1 sha1;
 
 	RESULT DigestInit();
 	RESULT DigestUpdate(ByteArray &Part);
@@ -233,13 +233,13 @@ public:
 	RESULT DigestSetOperationState(ByteArray &OperationState);
 };
 
-class CMD5 : public CDigest
+class CDigestMD5 : public CDigest
 {
 public:
-	CMD5(std::shared_ptr<CSession> Session);
-	virtual ~CMD5();
+	CDigestMD5(std::shared_ptr<CSession> Session);
+	virtual ~CDigestMD5();
 
-	MD5_CTX	MD5Context;
+	CMD5 md5;
 
 	RESULT DigestInit();
 	RESULT DigestUpdate(ByteArray &Part);
@@ -359,7 +359,7 @@ public:
 	CRSAwithMD5(std::shared_ptr<CSession> Session);
 	virtual ~CRSAwithMD5();
 
-	CMD5 md5;
+	CDigestMD5 md5;
 };
 
 class CRSAwithSHA1 : public CSignRSAwithDigest,public CVerifyRSAwithDigest
@@ -368,7 +368,7 @@ public:
 	CRSAwithSHA1(std::shared_ptr<CSession> Session);
 	virtual ~CRSAwithSHA1();
 
-	CSHA sha1;
+	CDigestSHA sha1;
 };
 
 }

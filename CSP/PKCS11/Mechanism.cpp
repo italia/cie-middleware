@@ -70,34 +70,34 @@ CDecrypt::~CDecrypt() {}
 /* ******************** */
 /*		   SHA1	        */
 /* ******************** */
-CSHA::CSHA(std::shared_ptr<CSession> Session) : CDigest (CKM_SHA_1,std::move(Session)) {}
-CSHA::~CSHA() {}
+CDigestSHA::CDigestSHA(std::shared_ptr<CSession> Session) : CDigest(CKM_SHA_1, std::move(Session)) {}
+CDigestSHA::~CDigestSHA() {}
 
-RESULT CSHA::DigestInit() {
+RESULT CDigestSHA::DigestInit() {
 	init_func
-	SHA1_Init(&Sha1Context);
+	sha1.Init();
 	_return(OK)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CSHA::DigestUpdate(ByteArray &Part) {
+RESULT CDigestSHA::DigestUpdate(ByteArray &Part) {
 	init_func
-	SHA1_Update(&Sha1Context,Part.data(),Part.size());
+	sha1.Update(Part);
 	_return(OK)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CSHA::DigestFinal(ByteArray &Digest) {
+RESULT CDigestSHA::DigestFinal(ByteArray &Digest) {
 	init_func
-		SHA1_Final(Digest.data(), &Sha1Context);
+	Digest=sha1.Final();
 	_return(OK)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CSHA::DigestLength(CK_ULONG_PTR pulDigestLen) {
+RESULT CDigestSHA::DigestLength(CK_ULONG_PTR pulDigestLen) {
 	init_func
 	*pulDigestLen=SHA_DIGEST_LENGTH;
 	_return(OK)
@@ -105,7 +105,7 @@ RESULT CSHA::DigestLength(CK_ULONG_PTR pulDigestLen) {
 	_return(FAIL)
 }
 
-RESULT CSHA::DigestInfo(ByteArray *&pbaDigestInfo) {
+RESULT CDigestSHA::DigestInfo(ByteArray *&pbaDigestInfo) {
 	init_func
 	pbaDigestInfo=&baSHA1DigestInfo;
 	_return(OK)
@@ -113,23 +113,18 @@ RESULT CSHA::DigestInfo(ByteArray *&pbaDigestInfo) {
 	_return(FAIL)
 }
 
-RESULT CSHA::DigestGetOperationState(ByteDynArray &OperationState)
+RESULT CDigestSHA::DigestGetOperationState(ByteDynArray &OperationState)
 {
 	init_func
-	OperationState.resize(sizeof(Sha1Context));
-	OperationState.copy(ByteArray((BYTE*)&Sha1Context,sizeof(Sha1Context)));
-	_return(OK)
+	_return(CKR_FUNCTION_NOT_SUPPORTED)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CSHA::DigestSetOperationState(ByteArray &OperationState)
+RESULT CDigestSHA::DigestSetOperationState(ByteArray &OperationState)
 {
 	init_func
-	if (OperationState.size()!=sizeof(Sha1Context))
-		_return(CKR_SAVED_STATE_INVALID)
-		memcpy_s(&Sha1Context, sizeof(SHA_CTX), OperationState.data(), sizeof(Sha1Context));
-	_return(OK)
+	_return(CKR_FUNCTION_NOT_SUPPORTED)
 	exit_func
 	_return(FAIL)
 }
@@ -137,34 +132,34 @@ RESULT CSHA::DigestSetOperationState(ByteArray &OperationState)
 /* ******************** */
 /*		   MD5	        */
 /* ******************** */
-CMD5::CMD5(std::shared_ptr<CSession> Session) : CDigest (CKM_MD5,std::move(Session)) {}
-CMD5::~CMD5() {}
+CDigestMD5::CDigestMD5(std::shared_ptr<CSession> Session) : CDigest(CKM_MD5, std::move(Session)) {}
+CDigestMD5::~CDigestMD5() {}
 
-RESULT CMD5::DigestInit() {
+RESULT CDigestMD5::DigestInit() {
 	init_func
-	MD5_Init(&MD5Context);
+	md5.Init();
 	_return(OK)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CMD5::DigestUpdate(ByteArray &Part) {
+RESULT CDigestMD5::DigestUpdate(ByteArray &Part) {
 	init_func
-		MD5_Update(&MD5Context, Part.data(), Part.size());
+	md5.Update(Part);
 	_return(OK)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CMD5::DigestFinal(ByteArray &Digest) {
+RESULT CDigestMD5::DigestFinal(ByteArray &Digest) {
 	init_func
-		MD5_Final(Digest.data(), &MD5Context);
+	Digest = md5.Final();
 	_return(OK)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CMD5::DigestLength(CK_ULONG_PTR pulDigestLen) {
+RESULT CDigestMD5::DigestLength(CK_ULONG_PTR pulDigestLen) {
 	init_func
 	*pulDigestLen=MD5_DIGEST_LENGTH;
 	_return(OK)
@@ -172,7 +167,7 @@ RESULT CMD5::DigestLength(CK_ULONG_PTR pulDigestLen) {
 	_return(FAIL)
 }
 
-RESULT CMD5::DigestInfo(ByteArray *&pbaDigestInfo) {
+RESULT CDigestMD5::DigestInfo(ByteArray *&pbaDigestInfo) {
 	init_func
 	pbaDigestInfo=&baMD5DigestInfo;
 	_return(OK)
@@ -180,22 +175,18 @@ RESULT CMD5::DigestInfo(ByteArray *&pbaDigestInfo) {
 	_return(FAIL)
 }
 
-RESULT CMD5::DigestGetOperationState(ByteDynArray &OperationState)
+RESULT CDigestMD5::DigestGetOperationState(ByteDynArray &OperationState)
 {
 	init_func
-	OperationState= VarToByteArray(MD5Context);
-	_return(OK)
+	_return(CKR_FUNCTION_NOT_SUPPORTED)
 	exit_func
 	_return(FAIL)
 }
 
-RESULT CMD5::DigestSetOperationState(ByteArray &OperationState)
+RESULT CDigestMD5::DigestSetOperationState(ByteArray &OperationState)
 {
 	init_func
-	if (OperationState.size()!=sizeof(MD5Context))
-		_return(CKR_SAVED_STATE_INVALID)
-		memcpy_s(&MD5Context, sizeof(MD5_CTX), OperationState.data(), sizeof(MD5Context));
-	_return(OK)
+	_return(CKR_FUNCTION_NOT_SUPPORTED)
 	exit_func
 	_return(FAIL)
 }

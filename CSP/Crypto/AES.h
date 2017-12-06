@@ -1,6 +1,15 @@
 #pragma once
 #include "../stdafx.h"
+#ifdef WIN32
+
+#include <bcrypt.h>
+#define AES_ENCRYPT 0
+#define AES_DECRYPT 1
+#define AES_BLOCK_SIZE 16
+
+#else
 #include <openssl\aes.h>
+#endif
 #include "../util/util.h"
 #include "../util/utilexception.h"
 
@@ -8,11 +17,14 @@
 
 class CAES
 {
-	DWORD AES(const ByteArray &data,ByteDynArray &resp,int encOp);
+#ifdef WIN32
+	BCRYPT_KEY_HANDLE key;
+#else
 	ByteDynArray key;
-	ByteDynArray iv;
+#endif
 
-	BCRYPT_KEY_HANDLE BCryptKey;
+	DWORD AES(const ByteArray &data, ByteDynArray &resp, int encOp);
+	ByteDynArray iv;
 
 public:
 	CAES();

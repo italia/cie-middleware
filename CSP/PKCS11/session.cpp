@@ -498,7 +498,7 @@ namespace p11 {
 				switch (pMechanism->mechanism) {
 				case CKM_SHA_1:
 				{
-					auto mech = std::unique_ptr<CSHA>(new CSHA(shared_from_this()));
+					auto mech = std::unique_ptr<CDigestSHA>(new CDigestSHA(shared_from_this()));
 					P11ER_CALL(mech->DigestInit(),
 						ERR_CANT_INITIALIZE_MECHANISM)
 
@@ -507,7 +507,7 @@ namespace p11 {
 				}
 				case CKM_MD5:
 				{
-					auto mech = std::unique_ptr<CMD5>(new CMD5(shared_from_this()));
+					auto mech = std::unique_ptr<CDigestMD5>(new CDigestMD5(shared_from_this()));
 					P11ER_CALL(mech->DigestInit(),
 						ERR_CANT_INITIALIZE_MECHANISM)
 

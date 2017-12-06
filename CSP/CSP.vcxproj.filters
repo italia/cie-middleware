@@ -189,6 +189,9 @@
     <ClCompile Include="Util\Array.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
+    <ClCompile Include="Crypto\MD5.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
@@ -328,6 +331,9 @@
     </ClInclude>
     <ClInclude Include="UI\SystemTray.h">
       <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\MD5.h">
+      <Filter>Header Files\Crypto</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
