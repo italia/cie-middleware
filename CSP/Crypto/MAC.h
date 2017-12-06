@@ -1,8 +1,11 @@
 #pragma once
+#ifdef WIN32
+#include <bcrypt.h>
+#else
 #include <openssl\des.h>
+#endif
 #include "../util/util.h"
 #include "../util/utilexception.h"
-#include <bcrypt.h>
 
 class CMAC
 {
