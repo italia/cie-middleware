@@ -1,5 +1,7 @@
 #include "array.h"
 #include <fstream>
+#include <windows.h>
+#include <bcrypt.h>
 
 
 ByteArray::ByteArray() {
