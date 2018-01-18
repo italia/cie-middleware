@@ -101,14 +101,15 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include;$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
       <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>bcrypt.lib;Comctl32.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)OpenSSL1.0.2k\lib\$(PlatformName)\$(Configuration);$(SolutionDir)OpenSSL1.0.2k\lib\VC</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -134,14 +135,15 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include;$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
       <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>bcrypt.lib;Comctl32.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)OpenSSL1.0.2k\lib\$(PlatformName)\$(Configuration);$(SolutionDir)OpenSSL1.0.2k\lib\VC</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
@@ -162,7 +164,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include;$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -170,7 +172,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>bcrypt.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)OpenSSL1.0.2k\lib\$(PlatformName)\$(Configuration);$(SolutionDir)OpenSSL1.0.2k\lib\VC</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
@@ -187,7 +190,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include;$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -195,7 +198,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>bcrypt.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)OpenSSL1.0.2k\lib\$(PlatformName)\$(Configuration);$(SolutionDir)OpenSSL1.0.2k\lib\VC</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
