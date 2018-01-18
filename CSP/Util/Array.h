@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
-#include <openssl/rand.h>
 #include <type_traits>
 #include <stdexcept>
 #include <string>
