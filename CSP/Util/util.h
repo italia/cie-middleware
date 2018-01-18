@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../stdafx.h"
+#include <string>
+#include "Array.h"
 
 #define ERR_BAD_POINTER "Puntatore non valido"
 #define ERR_CANT_CREATE_MUTEX "Impossibile creare il mutex"
@@ -205,36 +207,36 @@ extern DWORD ERR_OBJECT_HASNT_ATTRIBUTE;
 
 #define checkOutPtr(ptr) \
 	if (IsBadWritePtr((ptr),sizeof(*(ptr)))) { \
-		_return(CKR_ARGUMENTS_BAD) \
+		return CKR_ARGUMENTS_BAD; \
 		}
 
 #define checkInPtr(ptr) \
 	if (IsBadReadPtr((ptr),sizeof(*(ptr)))) { \
-		_return(CKR_ARGUMENTS_BAD) \
+		return CKR_ARGUMENTS_BAD; \
 		}
 
 //#define checkOutBuffer(ptr,size)
 #define checkOutBuffer(ptr,size) \
 	if (IsBadWritePtr((ptr),(size))) { \
-		_return(CKR_ARGUMENTS_BAD) \
+		return CKR_ARGUMENTS_BAD; \
 		}
 
 #define checkInBuffer(ptr,size) \
 	if (IsBadReadPtr((ptr),(size))) { \
-		_return(CKR_ARGUMENTS_BAD) \
+		return CKR_ARGUMENTS_BAD; \
 		}
 
 #define checkInArray(ptr,size) \
 	if (IsBadReadPtr((ptr),(size)*sizeof(*(ptr)))) { \
-		_return(CKR_ARGUMENTS_BAD) \
+		return CKR_ARGUMENTS_BAD; \
 		}
 
 #define checkOutArray(ptr,size) \
 	if (IsBadWritePtr((size),sizeof(*(size)))) { \
-		_return(CKR_ARGUMENTS_BAD) \
+		return CKR_ARGUMENTS_BAD; \
 		} \
 	if ((ptr)!=NULL && IsBadWritePtr((ptr),(*(size))*sizeof(*(ptr)))) { \
-		_return(CKR_ARGUMENTS_BAD) \
+		return CKR_ARGUMENTS_BAD; \
 		}
 
 
@@ -268,12 +270,23 @@ const ByteDynArray ISOPad16(const ByteArray &data);
  char * CardErr(DWORD dwSW);
  char * SystemErr(DWORD dwExcept);
  
- void exceptionTranslator( unsigned int u, _EXCEPTION_POINTERS* pExp );
- void StackWalkThread(std::string &stack);
-
  void Debug(ByteArray ba);
  ByteDynArray ASN1Tag(DWORD tag,ByteArray &content);
- uint8_t checkdigit(ByteArray &data);
- void ICAODate(SYSTEMTIME &time,ByteDynArray &result);
 
  std::string stdPrintf(const char *format, ...);
+
+
+ template<typename T>
+ class scopeExitClass {
+	 T m_func;
+ public:
+	 explicit scopeExitClass(T func) : m_func(std::forward<T>(func)) {}
+	 ~scopeExitClass() {
+		 m_func();
+	 }
+ };
+
+ template<typename T>
+ scopeExitClass<T> scopeExit(T func) {
+	 return scopeExitClass<T>(std::forward<T>(func));
+ }

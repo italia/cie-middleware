@@ -9,5 +9,5 @@ public:
 	~CBase64();
 
 	std::string &Encode(ByteArray &data, std::string &encodedData);
-	ByteDynArray &Decode(const char *encodedData,ByteDynArray &data);
+	ByteDynArray &Decode(const char *encodedData, ByteDynArray &data);
 };

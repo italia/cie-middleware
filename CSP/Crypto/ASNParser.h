@@ -2,7 +2,7 @@
 #include <vector>
 #include <memory>
 
-DWORD GetASN1DataLenght(ByteArray &data);
+size_t GetASN1DataLenght(ByteArray &data);
 
 class CASNTag ;
 typedef std::vector<std::unique_ptr<CASNTag>> CASNTagArray;
@@ -13,17 +13,17 @@ public:
 	ByteDynArray content;
 	CASNTagArray tags;
 	bool isSequence();
-	RESULT Encode(ByteArray &data, DWORD &len);
-	DWORD EncodeLen();
-	DWORD ContentLen();
-	DWORD Reparse();
-	DWORD tagInt();
+	void Encode(ByteArray &data, size_t &len);
+	size_t EncodeLen();
+	size_t ContentLen();
+	void Reparse();
+	size_t tagInt();
 
-	CASNTag &Child(std::size_t num, BYTE tag);
+	CASNTag &Child(std::size_t num, uint8_t tag);
 	void Verify(ByteArray &content);
-	CASNTag &CheckTag(BYTE tag);
+	CASNTag &CheckTag(uint8_t tag);
 
-	int startPos, endPos;
+	size_t startPos, endPos;
 private:
 	bool forcedSequence;
 };
@@ -32,11 +32,11 @@ class CASNParser
 {
 public:
 	CASNParser(void);
-	RESULT Encode(ByteArray &data, CASNTagArray &tags);
-	RESULT Encode(ByteDynArray &data);
-	RESULT Parse(ByteArray &data);
-	RESULT Parse(ByteArray &data, CASNTagArray &tags, int startseq);
+	void Encode(ByteArray &data, CASNTagArray &tags);
+	void Encode(ByteDynArray &data);
+	void Parse(ByteArray &data);
+	void Parse(ByteArray &data, CASNTagArray &tags, size_t  startseq);
 	CASNTagArray tags;
 
-	DWORD CalcLen();
+	size_t CalcLen();
 };

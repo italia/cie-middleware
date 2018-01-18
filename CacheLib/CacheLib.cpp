@@ -4,6 +4,10 @@
 #include <Shlobj.h>
 #include <stdio.h>
 #include <vector>
+#include <fstream>
+#include "sddl.h"
+#include "Aclapi.h"
+#include <VersionHelpers.h>
 
 #include "..\CSP\Util\util.h"
 
@@ -15,15 +19,24 @@
 
 char commonData[MAX_PATH] = "";
 
-void GetCardPath(const char *PAN, char szPath[MAX_PATH]) {
-	if (commonData[0]==0)
-		if (SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath) != S_OK)
-			throw CStringException("Errore in GetFolderPath per COMMONDATA");
+void GetCardDir(char szPath[MAX_PATH]) {
 
-	PathAppend(szPath, "CIEPKI");
+	if (commonData[0] == 0) {
+		ExpandEnvironmentStrings("%PROGRAMDATA%\\CIEPKI", szPath, MAX_PATH);
+		strcpy_s(commonData, szPath);
+	}
+	else {
+		strcpy_s(szPath, MAX_PATH, commonData);
+	}
+}
+
+void GetCardPath(const char *PAN, char szPath[MAX_PATH]) {
+	GetCardDir(szPath);
+
 	std::string s(PAN);
-	s+= ".cache";
+	s += ".cache";
 	PathAppend(szPath, s.c_str());
+	OutputDebugString(szPath);
 }
 
 bool CacheExists(const char *PAN) {
@@ -35,32 +48,34 @@ bool CacheExists(const char *PAN) {
 void CacheGetCertificate(const char *PAN, std::vector<uint8_t>&certificate)
 {
 	if (PAN == nullptr)
-		throw CStringException("Il PAN è necessario");
+		throw logged_error("Il PAN è necessario");
 
 	char szPath[MAX_PATH];
 	GetCardPath(PAN, szPath);
 
 	if (PathFileExists(szPath)) {
 
-		ByteDynArray data,Cert;
+		ByteDynArray data, Cert;
 		data.load(szPath);
 		uint8_t *ptr = data.data();
-		int len = *(int*)ptr; ptr += sizeof(int);
+		uint32_t len = *(uint32_t*)ptr; ptr += sizeof(uint32_t);
 		// salto il PIN
 		ptr += len;
-		len = *(int*)ptr; ptr += sizeof(int);
+		len = *(uint32_t*)ptr; ptr += sizeof(uint32_t);
 		Cert.resize(len); Cert.copy(ByteArray(ptr, len));
 
 		certificate.resize(Cert.size());
 		ByteArray(certificate.data(), certificate.size()).copy(Cert);
 	}
 	else
-		throw CStringException("CIE non abilitata");
+	{
+		throw logged_error("CIE non abilitata");
+	}
 }
 
 void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 	if (PAN == nullptr)
-		throw CStringException("Il PAN è necessario");
+		throw logged_error("Il PAN è necessario");
 
 	char szPath[MAX_PATH];
 	GetCardPath(PAN, szPath);
@@ -69,7 +84,7 @@ void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 		ByteDynArray data, ClearPIN;
 		data.load(szPath);
 		uint8_t *ptr = data.data();
-		int len = *(int*)ptr; ptr += sizeof(int);
+		uint32_t len = *(uint32_t*)ptr; ptr += sizeof(uint32_t);
 		ClearPIN.resize(len); ClearPIN.copy(ByteArray(ptr, len));
 
 		PIN.resize(ClearPIN.size());
@@ -77,7 +92,7 @@ void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 
 	}
 	else
-		throw CStringException("CIE non abilitata");
+		throw logged_error("CIE non abilitata");
 		
 }
 
@@ -85,31 +100,74 @@ void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 
 void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, uint8_t *FirstPIN, int FirstPINSize) {
 	if (PAN == nullptr)
-		throw CStringException("Il PAN è necessario");
+		throw logged_error("Il PAN è necessario");
 
 	char szPath[MAX_PATH];
-	if (SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath) != S_OK)
-		throw CStringException("Errore in GetFolderPath per COMMONDATA");
-	PathAppend(szPath, "\\CIEPKI");
-	if (!PathFileExists(szPath))
+	GetCardDir(szPath);
+
+	if (!PathFileExists(szPath)) {
+		
+		//creo la directory dando l'accesso a Edge (utente Packege).
+		//Edge gira in low integrity quindi non potrà scrivere (enrollare) ma solo leggere il certificato
+		bool done = false;
 		CreateDirectory(szPath, nullptr);
-	PathAppend(szPath, std::string("\\").append(PAN).append(".cache").c_str());
+
+		if (IsWindows8OrGreater()) {
+			PACL pOldDACL = nullptr, pNewDACL = nullptr;
+			PSECURITY_DESCRIPTOR pSD = nullptr;
+			EXPLICIT_ACCESS ea;
+			SECURITY_INFORMATION si = DACL_SECURITY_INFORMATION;
+
+			DWORD dwRes = GetNamedSecurityInfo(szPath, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &pOldDACL, NULL, &pSD);
+
+			PSID TheSID = nullptr;
+			DWORD SidSize = SECURITY_MAX_SID_SIZE;
+			if (!(TheSID = LocalAlloc(LMEM_FIXED, SidSize)))
+				goto Cleanup;
+
+			if (!CreateWellKnownSid(WinBuiltinAnyPackageSid, NULL, TheSID, &SidSize))
+				goto Cleanup;
+
+			ZeroMemory(&ea, sizeof(EXPLICIT_ACCESS));
+			ea.grfAccessPermissions = GENERIC_READ;
+			ea.grfAccessMode = SET_ACCESS;
+			ea.grfInheritance = SUB_CONTAINERS_AND_OBJECTS_INHERIT;
+			ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+			ea.Trustee.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
+			ea.Trustee.ptstrName = (LPSTR)TheSID;
+
+			if (SetEntriesInAcl(1, &ea, pOldDACL, &pNewDACL) != ERROR_SUCCESS)
+				goto Cleanup;
+
+			if (SetNamedSecurityInfo(szPath, SE_FILE_OBJECT, si, NULL, NULL, pNewDACL, NULL) != ERROR_SUCCESS)
+				goto Cleanup;
+			done = true;
+
+		Cleanup:
+			if (pSD != NULL)
+				LocalFree((HLOCAL)pSD);
+			if (pNewDACL != NULL)
+				LocalFree((HLOCAL)pNewDACL);
+			if (TheSID != NULL)
+				LocalFree((HLOCAL)TheSID);
+
+			if (!done)
+				throw logged_error("Impossibile attivare la CIE nel processo corrente");
+		}
+
+	}
+	GetCardPath(PAN, szPath);
 
 	ByteArray baCertificate(certificate, certificateSize);
 	ByteArray baFirstPIN(FirstPIN, FirstPINSize);
 
-	FILE *f = nullptr;
-	fopen_s(&f, szPath, "wb");
-	if (f == nullptr)
-		throw CStringException("Errore in scrittura file cache del certificato");
+	std::ofstream file(szPath, std::ofstream::out | std::ofstream::binary);
 
-	size_t len = baFirstPIN.size();
-	fwrite(&len, sizeof(len), 1, f);
-	fwrite(baFirstPIN.data(), len, 1, f);
+	uint32_t len = (uint32_t)baFirstPIN.size();
+	file.write((char*)&len, sizeof(len));
+	file.write((char*)baFirstPIN.data(), len);
 
-	len = baCertificate.size();
-	fwrite(&len, sizeof(len), 1, f);
-	fwrite(baCertificate.data(), len, 1, f);
-
-	fclose(f);
+	len = (uint32_t)baCertificate.size();
+	file.write((char*)&len, sizeof(len));
+	file.write((char*)baCertificate.data(), len);
 }

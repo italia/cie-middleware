@@ -84,7 +84,7 @@ readerMonitor::~readerMonitor() {
 readerMonitor::readerMonitor(void(*eventHandler)(std::string &reader, bool insert, void *appData), void *appData) : appData(appData) {
 	LONG _call_ris;
 	if ((_call_ris = (SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &hContext))) != S_OK) {
-		throw CWinException();
+		throw windows_error(_call_ris);
 	}
 	stopMonitor = false;
 	readerEvent = eventHandler;
@@ -98,7 +98,7 @@ readerMonitor::readerMonitor(void(*eventHandler)(std::string &reader, bool inser
 			char *readers = nullptr;
 			DWORD len = SCARD_AUTOALLOCATE;
 			if (SCardListReaders(rm->hContext, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS || readers == nullptr) {
-				throw CStringException("Nessun lettore installato");
+				throw logged_error("Nessun lettore installato");
 			}
 			char *curReader = readers;
 			readerList.clear();

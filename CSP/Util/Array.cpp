@@ -1,4 +1,5 @@
 #include "array.h"
+#include <fstream>
 
 
 ByteArray::ByteArray() {
@@ -20,14 +21,14 @@ ByteDynArray::ByteDynArray(ByteDynArray &&src) {
 
 ByteArray::ByteArray(const ByteArray& ba, size_t start) {
 	if (start>ba.size())
-		throw std::runtime_error("Array derivato troppo grande");
+		throw logged_error("Array derivato troppo grande");
 	_size = ba.size() - start;
 	_data = ba._data + start;
 }
 
 ByteArray::ByteArray(const ByteArray& ba, size_t start, size_t size) {
 	if (start + size>ba.size())
-		throw std::runtime_error("Array derivato troppo grande");
+		throw logged_error("Array derivato troppo grande");
 	_size = size;
 	_data = ba._data + start;
 }
@@ -82,13 +83,13 @@ bool ByteArray::operator!=(const ByteArray &src) const {
 
 void ByteArray::copy(const ByteArray &src, size_t start) {
 	if (src._size + start>_size)
-		throw std::runtime_error(stdPrintf("Dimensione array da copiare %i troppo grande; dimensione massima %i", src._size + start, _size));
+		throw logged_error(stdPrintf("Dimensione array da copiare %i troppo grande; dimensione massima %i", src._size + start, _size));
 	::memcpy_s(_data + start, _size - (start), src._data, src._size);
 }
 
 void ByteArray::rightcopy(const ByteArray &src, size_t end) {
 	if (src._size + end>_size)
-		throw std::runtime_error(stdPrintf("Dimensione array da copiare %i troppo grande; dimensione massima %i", src._size + end, _size));
+		throw logged_error(stdPrintf("Dimensione array da copiare %i troppo grande; dimensione massima %i", src._size + end, _size));
 	::memcpy_s(_data + _size - end - src._size, (end + src._size), src._data, src._size);
 }
 
@@ -104,7 +105,7 @@ public:
 	BCRYPT_ALG_HANDLE algo;
 	init_rnd() {
 		if (BCryptOpenAlgorithmProvider(&algo, BCRYPT_RNG_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0) != 0)
-			throw std::runtime_error("Errore nell'inizializzazione dell'algoritmo Random");
+			throw logged_error("Errore nell'inizializzazione dell'algoritmo Random");
 	}
 	~init_rnd() {
 		BCryptCloseAlgorithmProvider(algo, 0);
@@ -145,7 +146,7 @@ ByteArray &ByteArray::reverse() {
 ByteArray ByteArray::right(size_t size) const {
 
 	if (size>_size)
-		throw std::runtime_error("Array derivato troppo grande");
+		throw logged_error("Array derivato troppo grande");
 	return(ByteArray(*this, _size - size, size ));
 
 }
@@ -153,32 +154,32 @@ ByteArray ByteArray::right(size_t size) const {
 ByteArray ByteArray::left(size_t size) const {
 
 	if (size>_size)
-		throw std::runtime_error("Array derivato troppo grande");
+		throw logged_error("Array derivato troppo grande");
 	return(ByteArray(*this, 0, size));
 
 }
 
 ByteArray ByteArray::mid(size_t start) const {
 	if (start >_size)
-		throw std::runtime_error("Array derivato troppo grande");
+		throw logged_error("Array derivato troppo grande");
 	return(ByteArray(*this, start, _size - start));
 }
 
 ByteArray ByteArray::mid(size_t start, size_t size) const {
 	if (start + size>_size)
-		throw std::runtime_error("Array derivato troppo grande");
+		throw logged_error("Array derivato troppo grande");
 	return(ByteArray(*this, start, size ));
 }
 
 ByteArray ByteArray::revmid(size_t toend) const {
 	if (toend >_size)
-		throw std::runtime_error("Array derivato troppo grande");
+		throw logged_error("Array derivato troppo grande");
 	return(ByteArray(*this, 0, _size - toend));
 }
 
 ByteArray ByteArray::revmid(size_t toend, size_t size) const {
 	if (toend + size>_size)
-		throw std::runtime_error("Array derivato troppo grande");
+		throw logged_error("Array derivato troppo grande");
 	return(ByteArray(*this, _size - toend - size, size ));
 }
 
@@ -300,4 +301,22 @@ bool ByteArray::indexOf(ByteArray &data,size_t &position) const {
 		}
 	}
 	return false;
+}
+
+ByteDynArray &ByteDynArray::setASN1Tag(unsigned int tag, ByteArray &content) {
+	size_t tl = ASN1TLength(tag);
+	size_t ll = ASN1LLength(content.size());
+	resize(tl + ll + content.size());
+	putASN1Tag(tag, *this);
+	putASN1Length(content.size(), mid(tl));
+	mid(tl + ll).copy(content);
+	return *this;
+}
+void ByteDynArray::load(const char *fname) {
+	std::ifstream file(fname,std::ios::in | std::ios::binary);
+	file.seekg(0, file.end);
+	auto fsize = file.tellg();
+	file.seekg(0, file.beg);
+	resize((size_t)fsize, false);
+	file.read((char*)_data, fsize);
 }
