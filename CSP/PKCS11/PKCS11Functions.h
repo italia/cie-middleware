@@ -16,27 +16,24 @@
 #define PIN_LEN 8
 #define USER_PIN_ID 0x10
 
-#define R_CALL(call) \
-if ((_call_ris=(call))!=OK) { \
-	_return(_call_ris) \
-}
+#define init_p11_func \
+	CFuncCallInfo info(__FUNCTION__, Log); \
+	try {
 
-#define EDF_CALL(call,err) \
-if ((_call_ris=(call))!=OK) { \
-	if (_call_ris==FAIL) { \
-		_return(CKR_GENERAL_ERROR) \
-		} \
-	_return(_call_ris) \
-}
-
-#define DF_CALL(call) \
-if ((_call_ris=(call))!=OK) { \
-	if (_call_ris==FAIL) { \
-		_return(CKR_GENERAL_ERROR) \
-		} \
-	_return(_call_ris) \
-}
-
+#define exit_p11_func } \
+	catch (p11_error &p11Err) { \
+		OutputDebugString("EXCLOG->"); \
+		OutputDebugString(p11Err.what()); \
+		OutputDebugString("<-EXCLOG");\
+		return p11Err.getP11ErrorCode(); \
+	} \
+	catch (std::exception &err) { \
+		OutputDebugString("EXCLOG->"); \
+		OutputDebugString(err.what()); \
+		OutputDebugString("<-EXCLOG");\
+		return CKR_GENERAL_ERROR; \
+	} \
+catch (...) { return CKR_GENERAL_ERROR; }
 
 extern "C" {
 	CK_RV CK_ENTRY C_UpdateSlotList();

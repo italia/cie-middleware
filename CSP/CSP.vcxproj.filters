@@ -233,9 +233,6 @@
     <ClInclude Include="Util\defines.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
-    <ClInclude Include="Util\defines_err.h">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
     <ClInclude Include="Util\funccallinfo.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
@@ -334,6 +331,9 @@
     </ClInclude>
     <ClInclude Include="Crypto\MD5.h">
       <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="CSP\CSP.h">
+      <Filter>Header Files\CSP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

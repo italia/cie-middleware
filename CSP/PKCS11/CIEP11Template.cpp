@@ -21,28 +21,36 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 		else if (code == 0xfffe) {
 			DWORD protocol = 0;
 			ODS("UNPOWER CARD");
-			auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
-			if (sw == SCARD_S_SUCCESS)
+			auto ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
+			if (ris == SCARD_S_SUCCESS) {
 				SCardBeginTransaction(data->hCard);
-			return sw;
+				*respSize = 2;
+				resp[0] = 0x90;
+				resp[1] = 0x00;
+			}
+			return ris;
 		}
 		else if (code == 0xffff) {
 			DWORD protocol = 0;
-			auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
-			if (sw == SCARD_S_SUCCESS)
+			auto ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
+			if (ris == SCARD_S_SUCCESS) {
 				SCardBeginTransaction(data->hCard);
+				*respSize = 2;
+				resp[0] = 0x90;
+				resp[1] = 0x00;
+			}
 			ODS("RESET CARD");
-			return sw;
+			return ris;
 		}
 	}
 	//ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
-	auto sw = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
-	if (sw!=SCARD_S_SUCCESS)
+	auto ris = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
+	if (ris !=SCARD_S_SUCCESS)
 		ODS("Errore trasmissione APDU");
 	//else 
 		//ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
 	
-	return sw;
+	return ris;
 }
 
 class CIEData {
@@ -66,16 +74,13 @@ public:
 	ByteDynArray SessionPIN;
 };
 
-RESULT CIEtemplateInitLibrary(class CCardTemplate &Template, void *templateData){ return FAIL; }
-RESULT CIEtemplateInitCard(void *&pTemplateData, CSlot &pSlot){ 
+void CIEtemplateInitLibrary(class CCardTemplate &Template, void *templateData){ return; }
+void CIEtemplateInitCard(void *&pTemplateData, CSlot &pSlot){
 	init_func
 	ByteArray ATR;
 	pSlot.GetATR(ATR);
 
 	pTemplateData = new CIEData(&pSlot, ATR);
-	_return(OK)
-	exit_func
-	_return(FAIL)
 }
 void CIEtemplateFinalCard(void *pTemplateData){ 
 	if (pTemplateData)
@@ -91,7 +96,7 @@ ByteArray SkipZero(ByteArray &ba) {
 }
 
 BYTE label[] = { 'C','I','E','0' };
-RESULT CIEtemplateInitSession(void *pTemplateData){ 
+void CIEtemplateInitSession(void *pTemplateData){ 
 	CIEData* cie=(CIEData*)pTemplateData;
 
 	if (!cie->init) {
@@ -111,8 +116,10 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 		CK_BBOOL vtrue = TRUE;
 		CK_BBOOL vfalse = FALSE;
 
-		PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), certRaw.size());
+		PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
 		if (certDS != nullptr) {
+			auto _1 = scopeExit([&] {CertFreeCertificateContext(certDS); });
+
 			cie->pubKey = std::make_shared<CP11PublicKey>(cie);
 			cie->privKey = std::make_shared<CP11PrivateKey>(cie);
 			cie->cert = std::make_shared<CP11Certificate>(cie);
@@ -121,7 +128,7 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 			keyParser.Parse(ByteArray(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData));
 			auto Module = SkipZero(keyParser.tags[0]->tags[0]->content);
 			auto Exponent = SkipZero(keyParser.tags[0]->tags[1]->content);
-			CK_LONG keySizeBits = Module.size() * 8;
+			CK_LONG keySizeBits = (CK_LONG)Module.size() * 8;
 			cie->pubKey->addAttribute(CKA_LABEL, VarToByteArray(label));
 			cie->pubKey->addAttribute(CKA_ID, VarToByteArray(label));
 			cie->pubKey->addAttribute(CKA_PRIVATE, VarToByteArray(vfalse));
@@ -158,9 +165,9 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 			SYSTEMTIME sFrom, sTo;
 			char temp[10];
 			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotBefore, &sFrom))
-				return FAIL;
+				throw logged_error("Errore nella data di inizio validita' certificato");
 			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotAfter, &sTo))
-				return FAIL;
+				throw logged_error("Errore nella data di fine validita' certificato");
 			sprintf_s(temp, "%04i", sFrom.wYear); VarToByteArray(start.year).copy(ByteArray((BYTE*)temp, 4));
 			sprintf_s(temp, "%02i", sFrom.wMonth); VarToByteArray(start.month).copy(ByteArray((BYTE*)temp, 2));
 			sprintf_s(temp, "%02i", sFrom.wDay); VarToByteArray(start.day).copy(ByteArray((BYTE*)temp, 2));
@@ -174,14 +181,12 @@ RESULT CIEtemplateInitSession(void *pTemplateData){
 		}
 		cie->init = true;
 	}
-	return OK;
 }
-RESULT CIEtemplateFinalSession(void *pTemplateData){ 
+void CIEtemplateFinalSession(void *pTemplateData){ 
 	//delete (CIEData*)pTemplateData;
-	return OK; 
 }
 
-RESULT CIEtemplateMatchCard(bool &bMatched, CSlot &pSlot){ 
+bool CIEtemplateMatchCard(CSlot &pSlot){
 	init_func
 	CToken token;
 
@@ -197,14 +202,11 @@ RESULT CIEtemplateMatchCard(bool &bMatched, CSlot &pSlot){
 			safeTransaction trans(faseConn,SCARD_LEAVE_CARD);
 			ias.ReadPAN();
 		}
-		bMatched = true;
-		_return(OK);
+		return true;
 	}
-	exit_func
-	_return(FAIL)
 }
 
-RESULT CIEtemplateGetSerial(CSlot &pSlot, ByteDynArray &baSerial){
+ByteDynArray  CIEtemplateGetSerial(CSlot &pSlot) {
 	init_func
 		CToken token;
 
@@ -219,22 +221,17 @@ RESULT CIEtemplateGetSerial(CSlot &pSlot, ByteDynArray &baSerial){
 		ias.ReadPAN();
 		std::string numSerial;
 		dumpHexData(ias.PAN.mid(5, 6), numSerial, false);
-		baSerial = ByteArray((BYTE*)numSerial.c_str(),numSerial.length());
-		_return(OK);
+		return ByteArray((BYTE*)numSerial.c_str(),numSerial.length());
 	}
-	exit_func
-		_return(FAIL)
 }
-RESULT CIEtemplateGetModel(CSlot &pSlot, std::string &szModel){ 
+void CIEtemplateGetModel(CSlot &pSlot, std::string &szModel){ 
 	szModel = ""; 
-	return OK;
 }
-RESULT CIEtemplateGetTokenFlags(CSlot &pSlot, DWORD &dwFlags){ 
+void CIEtemplateGetTokenFlags(CSlot &pSlot, DWORD &dwFlags){
 	dwFlags = CKF_LOGIN_REQUIRED | CKF_USER_PIN_INITIALIZED | CKF_TOKEN_INITIALIZED | CKF_REMOVABLE_DEVICE;
-	return OK;
 }
 
-RESULT CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &Pin) {
+void CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &Pin) {
 	init_func
 	CToken token;
 	CIEData* cie = (CIEData*)pTemplateData;
@@ -267,7 +264,7 @@ RESULT CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &P
 			cie->ias.Callback(2, "DAPP", cie->ias.CallbackData);
 		cie->ias.DAPP();
 		// verifica PIN
-		DWORD sw;
+		StatusWord sw;
 		if (cie->ias.Callback != nullptr)
 			cie->ias.Callback(3, "Verify PIN", cie->ias.CallbackData);
 		if (userType == CKU_USER) {
@@ -280,43 +277,38 @@ RESULT CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &P
 			sw = cie->ias.VerifyPUK(Pin);
 		}
 		else
-			return CKR_ARGUMENTS_BAD;
+			throw p11_error(CKR_ARGUMENTS_BAD);
 
 		if (sw == 0x6983) {
 			if (userType == CKU_USER)
 				cie->ias.IconaSbloccoPIN();
-			return CKR_PIN_LOCKED;
+			throw p11_error(CKR_PIN_LOCKED);
 		}
 		if (sw >= 0x63C0 && sw <= 0x63CF) {
 			//*pcAttemptsRemaining = sw - 0x63C0;
-			return CKR_PIN_INCORRECT;
+			throw p11_error(CKR_PIN_INCORRECT);
 		}
 		if (sw == 0x6700) {
-			return CKR_PIN_INCORRECT;
+			throw p11_error(CKR_PIN_INCORRECT);
 		}
 		if (sw == 0x6300)
-			return CKR_PIN_INCORRECT;
+			throw p11_error(CKR_PIN_INCORRECT);
 		if (sw != 0x9000) {
-			throw CSCardException((WORD)sw);
+			throw scard_error(sw);
 		}
 
 		cie->SessionPIN = cie->aesKey.Encode(Pin);
 		cie->userType = userType;
-		_return(OK);
 	}
-	exit_func
-		_return(FAIL)
 }
-RESULT CIEtemplateLogout(void *pTemplateData, CK_USER_TYPE userType){ 
+void CIEtemplateLogout(void *pTemplateData, CK_USER_TYPE userType){
 	CIEData* cie = (CIEData*)pTemplateData;
 	cie->userType = -1;
 	cie->SessionPIN.clear();
-	return OK; 
 }
-RESULT CIEtemplateReadObjectAttributes(void *pCardTemplateData, CP11Object *pObject){ 
-	return OK; 
+void CIEtemplateReadObjectAttributes(void *pCardTemplateData, CP11Object *pObject){
 }
-RESULT CIEtemplateSign(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteArray &baSignBuffer, ByteDynArray &baSignature, CK_MECHANISM_TYPE mechanism, bool bSilent){ 
+void CIEtemplateSign(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteArray &baSignBuffer, ByteDynArray &baSignature, CK_MECHANISM_TYPE mechanism, bool bSilent){
 	init_func
 	CToken token;
 	CIEData* cie = (CIEData*)pCardTemplateData;
@@ -337,16 +329,14 @@ RESULT CIEtemplateSign(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteAr
 			ByteDynArray FullPIN;
 			cie->ias.GetFirstPIN(FullPIN);
 			FullPIN.append(Pin);
-			CARD_R_CALL(cie->ias.VerifyPIN(FullPIN));
+			if (cie->ias.VerifyPIN(FullPIN) != 0x9000)
+				throw p11_error(CKR_PIN_INCORRECT);
 			cie->ias.Sign(baSignBuffer, baSignature);
 		}
 	}
-	_return(OK);
-	exit_func
-	_return(FAIL)
 }
 
-RESULT CIEtemplateInitPIN(void *pCardTemplateData, ByteArray &baPin){ 
+void CIEtemplateInitPIN(void *pCardTemplateData, ByteArray &baPin){ 
 	init_func
 	CToken token;
 	CIEData* cie = (CIEData*)pCardTemplateData;
@@ -365,24 +355,25 @@ RESULT CIEtemplateInitPIN(void *pCardTemplateData, ByteArray &baPin){
 
 			cie->ias.DHKeyExchange();
 			cie->ias.DAPP();
-			CARD_R_CALL(cie->ias.VerifyPUK(Pin))
-			CARD_R_CALL(cie->ias.UnblockPIN())
+			if (cie->ias.VerifyPUK(Pin)!=0x9000)
+				throw p11_error(CKR_PIN_INCORRECT);
+
+			if(cie->ias.UnblockPIN()!=0x9000)
+				throw p11_error(CKR_GENERAL_ERROR);
 
 			ByteDynArray changePIN;
 			cie->ias.GetFirstPIN(changePIN);
 			changePIN.append(baPin);
 
-			CARD_R_CALL(cie->ias.ChangePIN(changePIN))
+			if (cie->ias.ChangePIN(changePIN)!=0x9000)
+				throw p11_error(CKR_GENERAL_ERROR);
 		}
 	}
 	else
-		return CKR_FUNCTION_NOT_SUPPORTED;
-	_return(OK);
-	exit_func
-		_return(FAIL)
+		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 }
 
-RESULT CIEtemplateSetPIN(void *pCardTemplateData, ByteArray &baOldPin, ByteArray &baNewPin, CK_USER_TYPE User)
+void CIEtemplateSetPIN(void *pCardTemplateData, ByteArray &baOldPin, ByteArray &baNewPin, CK_USER_TYPE User)
 {
 	init_func
 	CToken token;
@@ -409,30 +400,29 @@ RESULT CIEtemplateSetPIN(void *pCardTemplateData, ByteArray &baOldPin, ByteArray
 
 			cie->ias.DHKeyExchange();
 			cie->ias.DAPP();
-			ByteDynArray oldPIN,newPIN;
+			ByteDynArray oldPIN, newPIN;
 			cie->ias.GetFirstPIN(oldPIN);
 			newPIN = oldPIN;
 			oldPIN.append(baOldPin);
 			newPIN.append(baNewPin);
 
-			CARD_R_CALL(cie->ias.VerifyPIN(oldPIN))
-			CARD_R_CALL(cie->ias.ChangePIN(oldPIN,newPIN))
+			if (cie->ias.VerifyPIN(oldPIN) != 0x9000)
+				throw p11_error(CKR_PIN_INCORRECT);
+			if (cie->ias.ChangePIN(oldPIN, newPIN) != 0x9000)
+				throw p11_error(CKR_GENERAL_ERROR);
 		}
 	}
 	else
-		return CKR_FUNCTION_NOT_SUPPORTED;
-	_return(OK);
-	exit_func
-	_return(FAIL)
+		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 }
 
-RESULT CIEtemplateSignRecover(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteArray &baSignBuffer, ByteDynArray &baSignature, CK_MECHANISM_TYPE mechanism, bool bSilent){ return FAIL; }
-RESULT CIEtemplateDecrypt(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteArray &baEncryptedData, ByteDynArray &baData, CK_MECHANISM_TYPE mechanism, bool bSilent){ return FAIL; }
-RESULT CIEtemplateGenerateRandom(void *pCardTemplateData, ByteArray &baRandomData){ return FAIL; }
-RESULT CIEtemplateGetObjectSize(void *pCardTemplateData, CP11Object *pObject, CK_ULONG_PTR pulSize){ return FAIL; }
-RESULT CIEtemplateSetKeyPIN(void *pTemplateData, CP11Object *pObject, ByteArray &Pin){ return FAIL; }
-RESULT CIEtemplateSetAttribute(void *pTemplateData, CP11Object *pObject, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount){ return FAIL; }
-RESULT CIEtemplateCreateObject(void *pTemplateData, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, std::shared_ptr<CP11Object>&pObject){ return FAIL; }
-RESULT CIEtemplateDestroyObject(void *pTemplateData, CP11Object &Object){ return FAIL; }
-RESULT CIEtemplateGenerateKey(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount, std::shared_ptr<CP11Object>&pObject){ return FAIL; }
-RESULT CIEtemplateGenerateKeyPair(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, std::shared_ptr<CP11Object>&pPublicKey, std::shared_ptr<CP11Object>&pPrivateKey){ return FAIL; }
+void CIEtemplateSignRecover(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteArray &baSignBuffer, ByteDynArray &baSignature, CK_MECHANISM_TYPE mechanism, bool bSilent){ throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }
+void CIEtemplateDecrypt(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteArray &baEncryptedData, ByteDynArray &baData, CK_MECHANISM_TYPE mechanism, bool bSilent){ throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }
+void CIEtemplateGenerateRandom(void *pCardTemplateData, ByteArray &baRandomData){ throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }
+CK_ULONG CIEtemplateGetObjectSize(void *pCardTemplateData, CP11Object *pObject) { throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }
+void CIEtemplateSetKeyPIN(void *pTemplateData, CP11Object *pObject, ByteArray &Pin){ throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }
+void CIEtemplateSetAttribute(void *pTemplateData, CP11Object *pObject, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount){ throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }
+std::shared_ptr<CP11Object> CIEtemplateCreateObject(void *pTemplateData, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount) { throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }
+void CIEtemplateDestroyObject(void *pTemplateData, CP11Object &Object){ throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }
+std::shared_ptr<CP11Object> CIEtemplateGenerateKey(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount) { throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }
+void CIEtemplateGenerateKeyPair(void *pCardTemplateData, CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, std::shared_ptr<CP11Object>&pPublicKey, std::shared_ptr<CP11Object>&pPrivateKey) { throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); }

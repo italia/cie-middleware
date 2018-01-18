@@ -1,5 +1,6 @@
 #pragma once
 #include "defines.h"
+#include "utilexception.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -52,7 +53,7 @@ public:
 	}
 
 	inline uint8_t & operator[] (size_t pos) const{
-		if (pos >= _size) throw std::runtime_error(stdPrintf("Accesso all'array alla posizione %i non consentito; dimensione massima %i", pos, _size));
+		if (pos >= _size) throw logged_error(stdPrintf("Accesso all'array alla posizione %i non consentito; dimensione massima %i", pos, _size));
 		return _data[pos];
 	}
 
@@ -147,30 +148,10 @@ public:
 		return *this;
 	}
 
-	ByteDynArray &setASN1Tag(unsigned int tag, ByteArray &content) {
-		size_t tl = ASN1TLength(tag);
-		size_t ll = ASN1LLength(content.size());
-		resize(tl + ll + content.size());
-		putASN1Tag(tag, *this);
-		putASN1Length(content.size(), mid(tl));
-		mid(tl + ll).copy(content);
-		return *this;
-	}
-	void load(const char *fname) {
-		FILE *fl = nullptr;
-		fopen_s(&fl, fname, "rb");
-		if (fl == nullptr)
-			throw std::runtime_error("Il file non esiste");
-		fseek(fl, 0, SEEK_END);
-		resize(ftell(fl), false);
-		fseek(fl, 0, SEEK_SET);
-		fread_s(_data, _size, 1, _size, fl);
-		fclose(fl);
-	}
+	ByteDynArray &setASN1Tag(unsigned int tag, ByteArray &content);
+	void load(const char *fname);
 };
 
-#define StringToByteArray(a) (ByteArray((uint8_t*)(a),sizeof(a)-1))
-#define S2B(a) (ByteArray((uint8_t*)(a),sizeof(a)-1))
 #define VarToByteArray(a) (ByteArray((uint8_t*)&(a),sizeof(a)))
 #define VarToByteDynArray(a) (ByteDynArray(VarToByteArray(a)))
 #define ByteArrayToVar(a,b) (*(b*)(a).data())

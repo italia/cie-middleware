@@ -5,17 +5,13 @@ static char *szCompiledFile=__FILE__;
 
 CCardLocker::CCardLocker(SCARDHANDLE card)
 {
-	init_func_internal
 	hCard=card;
 	Lock();
-	exit_func_internal
 }
 
 CCardLocker::~CCardLocker(void)
 {
-	init_func_internal
 	Unlock();
-	exit_func_internal
 }
 
 void CCardLocker::Lock()

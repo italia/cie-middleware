@@ -10,7 +10,7 @@ public:
 	BCRYPT_ALG_HANDLE algo;
 	init_rsa() {
 		if (BCryptOpenAlgorithmProvider(&algo, BCRYPT_RSA_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0) != 0)
-			throw std::runtime_error("Errore nell'inizializzazione dell'algoritmo RSA");
+			throw logged_error("Errore nell'inizializzazione dell'algoritmo RSA");
 	}
 	~init_rsa() {
 		BCryptCloseAlgorithmProvider(algo, 0);
@@ -23,9 +23,9 @@ CRSA::CRSA(ByteArray &mod, ByteArray &exp)
 	ByteDynArray KeyData(sizeof(BCRYPT_RSAKEY_BLOB) + mod.size() + exp.size());
 	BCRYPT_RSAKEY_BLOB *rsaImpKey = (BCRYPT_RSAKEY_BLOB *)KeyData.data();
 	rsaImpKey->Magic = BCRYPT_RSAPUBLIC_MAGIC;
-	rsaImpKey->BitLength = KeySize << 3;
-	rsaImpKey->cbModulus = KeySize;
-	rsaImpKey->cbPublicExp = exp.size();
+	rsaImpKey->BitLength = (ULONG)(KeySize << 3);
+	rsaImpKey->cbModulus = (ULONG)KeySize;
+	rsaImpKey->cbPublicExp = (ULONG)exp.size();
 	rsaImpKey->cbPrime1 = 0;
 	rsaImpKey->cbPrime2 = 0;
 
@@ -33,17 +33,14 @@ CRSA::CRSA(ByteArray &mod, ByteArray &exp)
 	KeyData.rightcopy(mod);
 
 	this->key = nullptr;
-	if (BCryptImportKeyPair(algo_rsa.algo, nullptr, BCRYPT_RSAPUBLIC_BLOB, &this->key, KeyData.data(), KeyData.size(), BCRYPT_NO_KEY_VALIDATION) != 0)
-		throw std::runtime_error("Errore nella creazione della chiave RSA");
+	if (BCryptImportKeyPair(algo_rsa.algo, nullptr, BCRYPT_RSAPUBLIC_BLOB, &this->key, KeyData.data(), (ULONG)KeyData.size(), BCRYPT_NO_KEY_VALIDATION) != 0)
+		throw logged_error("Errore nella creazione della chiave RSA");
 }
 
-DWORD CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, ByteDynArray &privexp)
+void CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, ByteDynArray &privexp)
 {
 	init_func
-	throw std::runtime_error("Non supportato");
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	throw logged_error("Non supportato");
 }
 
 CRSA::~CRSA(void)
@@ -55,11 +52,11 @@ CRSA::~CRSA(void)
 ByteDynArray CRSA::RSA_PURE(ByteArray &data)
 {
 	ULONG size = 0;
-	if (BCryptEncrypt(key, data.data(), data.size(), nullptr, nullptr, 0, nullptr, 0, &size, 0) != 0)
-		throw std::runtime_error("Errore nella cifratura RSA");
+	if (BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, nullptr, 0, nullptr, 0, &size, 0) != 0)
+		throw logged_error("Errore nella cifratura RSA");
 	ByteDynArray resp(size);
-	if (BCryptEncrypt(key, data.data(), data.size(), nullptr, nullptr, 0, resp.data(), resp.size(), &size, 0) != 0)
-		throw std::runtime_error("Errore nella cifratura RSA");
+	if (BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, nullptr, 0, resp.data(), (ULONG)resp.size(), &size, 0) != 0)
+		throw logged_error("Errore nella cifratura RSA");
 
 	ER_ASSERT(size == KeySize, "Errore nella lunghezza dei dati per operazione RSA")
 	return resp;

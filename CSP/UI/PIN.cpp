@@ -44,7 +44,7 @@ LRESULT CPin::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandl
 	CenterWindow();
 	SetIcon(LoadIcon((HINSTANCE)moduleInfo.getModule(), MAKEINTRESOURCE(IDI_CIE)));
 
-	edit = GetDlgItem(IDC_PIN);
+	edit = GetDlgItem(IDC_PIN1);
 	edit2 = GetDlgItem(IDC_PIN2);
 	tit = GetDlgItem(IDC_TITLE);
 

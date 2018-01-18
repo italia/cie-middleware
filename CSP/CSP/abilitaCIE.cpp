@@ -1,5 +1,6 @@
 #include "../stdafx.h"
 #include "IAS.h"
+#include "CSP.h"
 #include "../util/ModuleInfo.h"
 #include "../UI/Message.h"
 #include "../UI/Pin.h"
@@ -28,7 +29,7 @@ struct threadData {
 
 DWORD WINAPI _abilitaCIE(
 	LPVOID lpThreadParameter) {
-	init_main_func
+	init_CSP_func
 	const char *PAN = (char *)lpThreadParameter;
 
 	std::string container ("CIE-");
@@ -187,7 +188,7 @@ DWORD WINAPI _abilitaCIE(
 								break;
 							}
 							else if (rs != SCARD_S_SUCCESS)
-								throw CStringException("Autenticazione fallita");
+								throw logged_error("Autenticazione fallita");
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 4, (LPARAM)"Lettura certificato");
@@ -220,9 +221,9 @@ DWORD WINAPI _abilitaCIE(
 								"La CIE è abilitata all'uso");
 							msg.DoModal();
 						}
-						catch (CBaseException &ex) {
+						catch (std::exception &ex) {
 							std::string dump;
-							ex.DumpTree(dump);
+							OutputDebugString(ex.what());
 							CMessage msg(MB_OK,
 								"Abilitazione CIE",
 								"Si è verificato un errore nella verifica di",
@@ -249,14 +250,13 @@ DWORD WINAPI _abilitaCIE(
 		}
 		SCardFreeMemory(hSC, readers);
 	}
-	catch (CBaseException &ex) {
-		std::string dump;
-		ex.DumpTree(dump);
-		MessageBox(nullptr, stdPrintf("Si è verificato un errore nella verifica di autenticità del documento :%s",dump.c_str()).c_str(), "CIE", MB_OK);
+	catch (std::exception &ex) {
+		OutputDebugString(ex.what());
+		MessageBox(nullptr, "Si è verificato un errore nella verifica di autenticità del documento", "CIE", MB_OK);
 	}
 
-	return 0;
-	exit_main_func
+	return SCARD_S_SUCCESS;
+	exit_CSP_func
 	return E_UNEXPECTED;
 }
 

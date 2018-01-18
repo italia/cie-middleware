@@ -8,15 +8,17 @@ CTLV::CTLV(ByteArray &data)
 	init_func
 	uint32_t dwPtr=0;
 	while (dwPtr<data.size()) {
-		BYTE btLen=data[dwPtr+1];
+		uint8_t btLen=data[dwPtr+1];
 		if (btLen<255) {
-			if (dwPtr+btLen+2>data.size()) _returnVoid
+			if (dwPtr + btLen + 2 > data.size()) 
+				return;
 			map[data[dwPtr]]=ByteArray(data.mid(dwPtr,btLen+2));
 			dwPtr+=btLen+2;
 		}
 		else {
 			uint32_t dwLen = ByteArrayToVar(data.mid(dwPtr + 2),uint32_t);
-			if (dwPtr + dwLen + 2 + sizeof(uint32_t)>data.size()) _returnVoid
+			if (dwPtr + dwLen + 2 + sizeof(uint32_t) > data.size())
+				return;
 			map[data[dwPtr]] = ByteArray(data.mid(dwPtr, dwLen + 2 + sizeof(uint32_t)));
 			dwPtr += dwLen + 2 + sizeof(uint32_t);
 		}
@@ -28,34 +30,28 @@ CTLV::~CTLV(void)
 {
 }
 
-RESULT CTLV::getTAG(BYTE Tag,ByteArray *&Value)
+ByteArray *CTLV::getTAG(uint8_t Tag)
 {
 	init_func
 	tlvMap::iterator it=map.find(Tag);
 	if (it!=map.end())
-		Value=&it->second;
+		return &it->second;
 	else
-		Value=NULL;
-	_return(OK)
-	exit_func
-	_return(FAIL)
+		return nullptr;
 }
 
-RESULT CTLV::getValue(BYTE Tag,ByteArray &Value)
+ByteArray CTLV::getValue(uint8_t Tag)
 {
 	init_func
 	tlvMap::iterator it=map.find(Tag);
-	if (it!=map.end()) {
-		if (it->second[0]<0x255)
-			Value=it->second.mid(2);
+	if (it != map.end()) {
+		if (it->second[0] < 0x255)
+			return it->second.mid(2);
 		else
-			Value=it->second.mid(6);
+			return it->second.mid(6);
 	}
-	else 
-		_return(OK)
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	else
+		return ByteArray();
 }
 
 CTLVCreate::CTLVCreate()
@@ -66,39 +62,30 @@ CTLVCreate::~CTLVCreate(void)
 {
 }
 
-RESULT CTLVCreate::getValue(BYTE Tag,ByteDynArray *&Value)
+ByteDynArray * CTLVCreate::getValue(uint8_t Tag)
 {
 	init_func
 	tlvCreateMap::iterator it=map.find(Tag);
 	if (it!=map.end())
-		Value=&it->second;
+		return &it->second;
 	else
-		Value=NULL;
-	_return(OK)
-	exit_func
-	_return(FAIL)
+		return nullptr;
 }
 
-RESULT CTLVCreate::addValue(BYTE Tag,ByteDynArray *&Value)
+ByteDynArray * CTLVCreate::addValue(uint8_t Tag)
 {
 	init_func
 	map[Tag].clear();
-	Value=&map[Tag];
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	return &map[Tag];
 }
 
-RESULT CTLVCreate::setValue(BYTE Tag,ByteArray &Value)
+void CTLVCreate::setValue(uint8_t Tag,ByteArray &Value)
 {
 	init_func
 	map[Tag] = Value;
-	_return(OK)
-	exit_func
-	_return(FAIL)
 }
 
-RESULT CTLVCreate::getBuffer(ByteDynArray &Value)
+ByteDynArray CTLVCreate::getBuffer()
 {
 	init_func
 	uint32_t dwSize=0;
@@ -110,7 +97,7 @@ RESULT CTLVCreate::getBuffer(ByteDynArray &Value)
 			dwSize += (uint32_t)it->second.size() + 2 + sizeof(uint32_t);
 		it++;
 	}
-	Value.resize(dwSize);
+	ByteDynArray Value(dwSize);
 	uint32_t dwPtr = 0;
 	it=map.begin();
 	while (it!=map.end()) {
@@ -132,7 +119,5 @@ RESULT CTLVCreate::getBuffer(ByteDynArray &Value)
 		dwPtr += (uint32_t)it->second.size();
 		it++;
 	}
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	return Value;
 }

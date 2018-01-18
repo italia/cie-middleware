@@ -6,8 +6,6 @@ static char *szCompiledFile=__FILE__;
 
 namespace p11 {
 
-DWORD CP11Object::dwP11ObjectCnt=0;
-
 CP11Object::CP11Object(CK_OBJECT_CLASS objClass,void *TemplateData)
 {
 	ObjClass=objClass;
@@ -15,117 +13,86 @@ CP11Object::CP11Object(CK_OBJECT_CLASS objClass,void *TemplateData)
 	addAttribute(CKA_CLASS,ByteArray((BYTE*)&ObjClass,sizeof(CK_OBJECT_CLASS)));
 }
 
-RESULT CP11Object::addAttribute(CK_ATTRIBUTE_TYPE type,ByteArray &data)
+void CP11Object::addAttribute(CK_ATTRIBUTE_TYPE type,ByteArray &data)
 {
 	init_func
 	attributes[type] = data;
-	_return(OK)
-	exit_func
-	_return(FAIL)
 }
 
-RESULT CP11Object::getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue)
+ByteArray* CP11Object::getAttribute(CK_ATTRIBUTE_TYPE type)
 {
 	init_func
 	AttributeMap::const_iterator pPair;
 	pPair=attributes.find(type);
 	if (pPair==attributes.end()) {
-		pValue=NULL;
-		_return(OK)
+		return nullptr;
 	}
-	pValue=(ByteArray *)&pPair->second;
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	return (ByteArray*)&pPair->second;
 }
 
-CK_RV CP11Object::GetAttributeValue(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
+void CP11Object::GetAttributeValue(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 {
 	init_func
-	CK_RV response=CKR_OK;	
-	for (unsigned int i=0;i<ulCount;i++) {
-		ByteArray *attr=NULL;
-		RESULT ris;
+
+		for (unsigned int i=0;i<ulCount;i++) {
 
 		CK_ULONG ulValLen=pTemplate[i].ulValueLen;
 		pTemplate[i].ulValueLen=-1;
 
-		if (ris=getAttribute(pTemplate[i].type,attr)) {
-			if (ris==ERR_ATTRIBUTE_IS_SENSITIVE) {
-				_return(response = CKR_ATTRIBUTE_TYPE_INVALID);
-			}
-		}
-		if (attr) {
-			if (pTemplate[i].pValue==NULL)
-				pTemplate[i].ulValueLen=attr->size();
+		ByteArray *attr=getAttribute(pTemplate[i].type);
+		if (attr != nullptr) {
+			if (pTemplate[i].pValue == NULL)
+				pTemplate[i].ulValueLen = (CK_ULONG)attr->size();
 			else {
-				if (attr->size()>ulValLen)
-					_return(CKR_BUFFER_TOO_SMALL)
-					memcpy_s(pTemplate[i].pValue, attr->size(), attr->data(), attr->size());
-				pTemplate[i].ulValueLen=attr->size();
+				if (attr->size() > ulValLen)
+					throw p11_error(CKR_BUFFER_TOO_SMALL);
+				ByteArray((uint8_t*)pTemplate[i].pValue, attr->size()).copy(*attr);
+				pTemplate[i].ulValueLen = (CK_ULONG)attr->size();
 			}
 		}
 		else
-			_return(CKR_ATTRIBUTE_TYPE_INVALID);
+			throw p11_error(CKR_ATTRIBUTE_TYPE_INVALID);
 	}
-	_return(response)
-	exit_func
-	_return(CKR_GENERAL_ERROR)
 }
 
-RESULT CP11Object::GetObjectSize(CK_ULONG_PTR pulSize)
+CK_ULONG CP11Object::GetObjectSize()
 {
 	init_func
 	// devo almeno leggerlo dalla carta per sapere che dimensioni ha
 	if (!bReadValue) {
-		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
-			ERR_CANT_READ_FROM_CARD)
+		pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData, this);
 	}
-	DWORD ret=pSlot->pTemplate->FunctionList.templateGetObjectSize(pSlot->pTemplateData,this,pulSize);
-	_return(ret);
-	exit_func
-	_return(FAIL)
+	return pSlot->pTemplate->FunctionList.templateGetObjectSize(pSlot->pTemplateData,this);
 }
 
-RESULT CP11Object::SetAttributes(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
+void CP11Object::SetAttributes(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 {
 	init_func
 	for (DWORD i=0;i<ulCount;i++) {
 		addAttribute(pTemplate[i].type,ByteArray((BYTE*)pTemplate[i].pValue,pTemplate[i].ulValueLen));
 	}
-	_return(OK)
-	exit_func
-	_return(FAIL)
 }
 CP11Certificate::CP11Certificate(void *TemplateData) : CP11Object(CKO_CERTIFICATE,TemplateData)
 {
 	bReadValue=false;
 }
 
-RESULT CP11Certificate::SetAttributes(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount) 
+void CP11Certificate::SetAttributes(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount) 
 {
 	init_func
-	RESULT ris=CP11Object::SetAttributes(pTemplate,ulCount);
-	if (!ris)
-		bReadValue=true;
-	_return(ris)
-	exit_func
-	_return(FAIL)
+	CP11Object::SetAttributes(pTemplate,ulCount);
+	bReadValue=true;
 }
 
-RESULT CP11Certificate::getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue) {
+ByteArray* CP11Certificate::getAttribute(CK_ATTRIBUTE_TYPE type) {
 	init_func
 
 	AttributeMap::iterator it=attributes.find(type);
 	if (it==attributes.end() && !bReadValue) {
-		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
-			ERR_CANT_READ_FROM_CARD)
+		pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData, this);
 	}
 
-	DWORD ret=CP11Object::getAttribute(type,pValue);
-	_return(ret)
-	exit_func
-	_return(FAIL)
+	return CP11Object::getAttribute(type);
 }
 
 CP11Data::CP11Data(void *TemplateData) : CP11Object(CKO_DATA,TemplateData)
@@ -133,50 +100,33 @@ CP11Data::CP11Data(void *TemplateData) : CP11Object(CKO_DATA,TemplateData)
 	bReadValue=false;
 }
 
-RESULT CP11Data::getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue) {
+ByteArray* CP11Data::getAttribute(CK_ATTRIBUTE_TYPE type) {
 	init_func
 	AttributeMap::iterator it=attributes.find(type);
 	if (it==attributes.end() && !bReadValue) {
-		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
-			ERR_CANT_READ_FROM_CARD)
+		pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData, this);
 	}
 
-	DWORD ret=CP11Object::getAttribute(type,pValue);
-	_return(ret)
-	exit_func
-	_return(FAIL)
+	return CP11Object::getAttribute(type);
 }
 
-RESULT CP11Data::SetAttributes(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount) 
+void CP11Data::SetAttributes(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount) 
 {
 	init_func
-	RESULT ris=CP11Object::SetAttributes(pTemplate,ulCount);
-	if (!ris)
-		bReadValue=true;
-	_return(ris)
-	exit_func
-	_return(FAIL)
+	CP11Object::SetAttributes(pTemplate, ulCount);
+	bReadValue = true;
 }
 
-RESULT CP11Object::IsPrivate(bool &bPrivate)
+bool CP11Object::IsPrivate()
 {
 	init_func	
-	bPrivate=false;
-	ByteArray *baVal=NULL;
-	P11ER_CALL(getAttribute(CKA_PRIVATE,baVal),
-		ERR_GET_ATTRIBUTE)
+	bool bPrivate=false;
+	ByteArray* baVal = getAttribute(CKA_PRIVATE);
 
-	if (baVal==NULL)
-		_return(OK)
-	else {
-		if (ByteArrayToVar(*baVal,CK_BBOOL)==FALSE)
-			_return(OK)
-		else
-			bPrivate=true;
-	}
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	if (baVal==nullptr)
+		return false;
+	else
+		return (ByteArrayToVar(*baVal, CK_BBOOL) == TRUE);
 }
 
 CP11PrivateKey::CP11PrivateKey(void *TemplateData) : CP11Object(CKO_PRIVATE_KEY,TemplateData)
@@ -184,28 +134,23 @@ CP11PrivateKey::CP11PrivateKey(void *TemplateData) : CP11Object(CKO_PRIVATE_KEY,
 	bReadValue=false;
 }
 
-RESULT CP11PrivateKey::getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue) {
+ByteArray* CP11PrivateKey::getAttribute(CK_ATTRIBUTE_TYPE type) {
 	init_func
 
-	if (type==CKR_ATTRIBUTE_SENSITIVE || 
-		type==CKA_PRIME_1 ||
+	if (type==CKA_PRIME_1 ||
 		type==CKA_PRIME_2 ||
 		type==CKA_EXPONENT_1 ||
 		type==CKA_EXPONENT_2 ||
 		type==CKA_COEFFICIENT ||
 		type==CKA_PRIME_1)
-		_return(ERR_ATTRIBUTE_IS_SENSITIVE)
+			throw p11_error(CKR_ATTRIBUTE_SENSITIVE);
 
 	AttributeMap::iterator it=attributes.find(type);
 	if (it==attributes.end() && !bReadValue) {
-		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
-			ERR_CANT_READ_FROM_CARD)
+		pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData, this);
 	}
 
-	DWORD ret=CP11Object::getAttribute(type,pValue);
-	_return(ret)
-	exit_func
-	_return(FAIL)
+	return CP11Object::getAttribute(type);
 }
 
 CP11PublicKey::CP11PublicKey(void *TemplateData) : CP11Object(CKO_PUBLIC_KEY,TemplateData)
@@ -213,19 +158,15 @@ CP11PublicKey::CP11PublicKey(void *TemplateData) : CP11Object(CKO_PUBLIC_KEY,Tem
 	bReadValue=false;
 }
 
-RESULT CP11PublicKey::getAttribute(CK_ATTRIBUTE_TYPE type,ByteArray *&pValue) {
+ByteArray* CP11PublicKey::getAttribute(CK_ATTRIBUTE_TYPE type) {
 	init_func
 
 	AttributeMap::iterator it=attributes.find(type);
 	if (it==attributes.end() && !bReadValue) {
-		P11ER_CALL(pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData,this),
-			ERR_CANT_READ_FROM_CARD)
+		pSlot->pTemplate->FunctionList.templateReadObjectAttributes(pSlot->pTemplateData, this);
 	}
 
-	DWORD ret=CP11Object::getAttribute(type,pValue);
-	_return(ret)
-	exit_func
-	_return(FAIL)
+	return CP11Object::getAttribute(type);
 }
 
 }

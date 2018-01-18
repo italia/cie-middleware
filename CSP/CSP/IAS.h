@@ -24,6 +24,7 @@ enum CIE_Type {
 	CIE_Gemalto,
 	CIE_NXP
 };
+
 class IAS
 {
 	CIE_Type type = CIE_Type::CIE_Unknown;
@@ -36,13 +37,13 @@ class IAS
 	ByteDynArray ATR;
 	ByteDynArray Certificate;
 	ByteDynArray CardEncKey;
-	DWORD SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
-	DWORD SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
-	DWORD getResp(ByteDynArray &Cardresp, DWORD sw, ByteDynArray &resp);
-	DWORD getResp_SM(ByteArray &Cardresp, DWORD sw, ByteDynArray &resp);
+	StatusWord SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
+	StatusWord SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
+	StatusWord getResp(ByteDynArray &Cardresp, StatusWord sw, ByteDynArray &resp);
+	StatusWord getResp_SM(ByteArray &Cardresp, StatusWord sw, ByteDynArray &resp);
 
-	DWORD SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &seq, ByteDynArray &elabResp);
-	DWORD respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &seq, ByteDynArray &elabResp);
+	ByteDynArray SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &seq);
+	StatusWord respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &seq, ByteDynArray &elabResp);
 
 	void readfile_SM(uint16_t id, ByteDynArray &content);
 	void readfile(uint16_t id, ByteDynArray &content);
@@ -79,11 +80,11 @@ public:
 	void InitExtAuthKeyParam();
 	void DHKeyExchange();
 	void DAPP();
-	DWORD VerifyPIN(ByteArray &PIN);
-	DWORD VerifyPUK(ByteArray &PUK);
-	DWORD UnblockPIN();
-	DWORD ChangePIN(ByteArray &oldPIN, ByteArray &newPIN);
-	DWORD ChangePIN(ByteArray &newPIN);
+	StatusWord VerifyPIN(ByteArray &PIN);
+	StatusWord VerifyPUK(ByteArray &PUK);
+	StatusWord UnblockPIN();
+	StatusWord ChangePIN(ByteArray &oldPIN, ByteArray &newPIN);
+	StatusWord ChangePIN(ByteArray &newPIN);
 	void Sign(ByteArray &data, ByteDynArray &signedData);
 	void Deauthenticate();
 	void GetCertificate(ByteDynArray &certificate, bool askEnable = true);

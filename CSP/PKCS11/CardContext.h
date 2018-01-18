@@ -12,9 +12,9 @@ public:
 
 	operator SCARDCONTEXT();
 	void validate();
-	RESULT renew();
+	void renew();
 
 private:
-	RESULT getContext();
+	void getContext();
 
 };

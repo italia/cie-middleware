@@ -23,6 +23,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CSP</RootNamespace>
     <ProjectName>CIEPKI</ProjectName>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -101,6 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include;$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,6 +135,7 @@
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)OpenSSL1.0.2k\Include;$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -246,7 +249,9 @@
     <ClCompile Include="Util\TLV.cpp" />
     <ClCompile Include="PCSC\Token.cpp" />
     <ClCompile Include="Util\util.cpp" />
-    <ClCompile Include="Util\UtilException.cpp" />
+    <ClCompile Include="Util\UtilException.cpp">
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ShowIncludes>
+    </ClCompile>
     <ClCompile Include="UI\Verifica.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -260,11 +265,11 @@
     <ClInclude Include="Crypto\RSA.h" />
     <ClInclude Include="Crypto\SHA1.h" />
     <ClInclude Include="Crypto\sha256.h" />
+    <ClInclude Include="CSP\CSP.h" />
     <ClInclude Include="PCSC\APDU.h" />
     <ClInclude Include="Util\Array.h" />
     <ClInclude Include="PCSC\CardLocker.h" />
     <ClInclude Include="Util\defines.h" />
-    <ClInclude Include="Util\defines_err.h" />
     <ClInclude Include="Util\funccallinfo.h" />
     <ClInclude Include="Util\IniSettings.h" />
     <ClInclude Include="Util\log.h" />

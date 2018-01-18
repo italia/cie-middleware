@@ -4,15 +4,6 @@
 #include "defines.h"
 #include <string>
 
-
-struct _ATL_SYMBOL_INFO
-{
-	ULONG_PTR dwAddress;
-	ULONG_PTR dwOffset;
-	CHAR	szModule[260];
-	CHAR	szSymbol[1024];
-};
-
 class CLog {
 public:
 	unsigned int LogCount;
@@ -41,17 +32,7 @@ public:
 	void writeModuleInfo();
 	void dumpErr();
 
-
-	void ___dumpStack(LPVOID param);
-	void __dumpStack();
-	static LPVOID __stdcall FunctionTableAccess(HANDLE hProcess, ULONG_PTR dwPCAddress);
-	static BOOL ResolveSymbol(HANDLE hProcess, UINT_PTR dwAddress,_ATL_SYMBOL_INFO &siSymbol);
-	static ULONG_PTR __stdcall GetModuleBase(HANDLE hProcess, ULONG_PTR dwRetAddress);
-
 };
 
 void initLog(const char *iniFile,const char *version);
 extern CLog Log;
-
-#define _return(a) {info.logRet(a,__LINE__); return a;}
-#define _returnVoid {info.logRet(__LINE__);return;}

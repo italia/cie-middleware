@@ -39,7 +39,6 @@ bool MainInit=false;
 bool MainEnable=false;
 
 void initLog(const char *iniFile,const char *version) {
-	init_func_internal
 
 	if (MainInit)
 		return;
@@ -105,17 +104,17 @@ void initLog(const char *iniFile,const char *version) {
 		OutputDebugString("Nessun LogModule definito. Impostare le sezioni [LogModule1]...[LogModuleN] con i valori:\n");
 		OutputDebugString("Name,LogEnable,LogDir,LogFile,FunctionLog,ParamLog\n");
 	}
-	exit_func_internal
+	
 }
 
 CLog::CLog() {
-	init_func_internal
+	
 	FirstLog=false;
 	Initialized=false;
 	Enabled=false;
 	LogParam=false;
 	LogCount=0;
-	exit_func_internal
+	
 }
 
 CLog::~CLog() {
@@ -124,7 +123,7 @@ CLog::~CLog() {
 }
 
 void CLog::initParam(CLog &log) {
-	init_func_internal
+	
 	Enabled=log.Enabled;
 	LogParam=log.LogParam;
 
@@ -174,11 +173,11 @@ void CLog::initParam(CLog &log) {
 	Initialized=true;
 
 	if (LogMode!=LM_Module && LogMode!=LM_Module_Thread && Enabled) writePure("Module %02i: %s",ModuleNum,logName.c_str());
-	exit_func_internal
+	
 }
 
 void CLog::initModule(const char *name, const char *version) {
-	init_func_internal
+	
 	
 	logName=name;
 	logVersion=version;
@@ -194,7 +193,7 @@ void CLog::initModule(const char *name, const char *version) {
 			}
 		}
 	}
-	exit_func_internal
+	
 }
 
 DWORD CLog::write(const char *format,...) {
@@ -370,19 +369,4 @@ void CLog::writeModuleInfo() {
 	HANDLE mainModule = module.getApplicationModule();
 	module.init(mainModule);
 	write("Applicazione chiamante: %s",module.szModuleName.c_str());
-}
-
-void CLog::__dumpStack() {
-#ifdef _DUMP_STACK
- //#ifdef _DEBUG
-	_threadData thData;
-	DuplicateHandle (GetCurrentProcess(),GetCurrentThread(),GetCurrentProcess(),&thData.hHandle,0,TRUE,DUPLICATE_SAME_ACCESS);
-	thData.dwId=GetCurrentThreadId();
-	CThread dumpThread;
-	dumpThread.createThread(___dumpStack,&thData);
-	stackSem.Wait();
-	CloseHandle(thData.hHandle);
-	dumpThread.joinThread(0);
- //#endif
-#endif
 }

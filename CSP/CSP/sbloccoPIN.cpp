@@ -1,5 +1,6 @@
 #include "../stdafx.h"
 #include "IAS.h"
+#include "CSP.h"
 #include "../util/ModuleInfo.h"
 #include "../UI/Message.h"
 #include "../UI/Pin.h"
@@ -22,7 +23,7 @@ extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD d
 
 DWORD WINAPI _sbloccoPIN(
 	DWORD threadId) {
-	init_main_func
+	init_func
 
 		try {
 		DWORD len = 0;
@@ -124,7 +125,7 @@ DWORD WINAPI _sbloccoPIN(
 								break;
 							}
 							else if (ris != 0)
-								throw CStringException("Autenticazione fallita");
+								throw logged_error("Autenticazione fallita");
 
 							CMessage msg(MB_OK, "Sblocco PIN",
 								"Il PIN è stato sbloccato correttamente");
@@ -133,9 +134,9 @@ DWORD WINAPI _sbloccoPIN(
 								PostThreadMessage(threadId, WM_COMMAND, 0, 0);
 
 						}
-						catch (CBaseException &ex) {
+						catch (std::exception &ex) {
 							std::string dump;
-							ex.DumpTree(dump);
+							OutputDebugString(ex.what());
 							CMessage msg(MB_OK, "Sblocco PIN",
 								"Si è verificato un errore nella verifica del PUK");
 							msg.DoModal();
@@ -166,14 +167,12 @@ DWORD WINAPI _sbloccoPIN(
 		}
 		SCardFreeMemory(hSC, readers);
 	}
-	catch (CBaseException &ex) {
-		std::string dump;
-		ex.DumpTree(dump);
-		MessageBox(nullptr, stdPrintf("Si è verificato un errore nella verifica di autenticità del documento :%s",dump.c_str()).c_str(), "CIE", MB_OK);
+	catch (std::exception &ex) {		
+		MessageBox(nullptr, "Si è verificato un errore nella verifica di autenticità del documento", "CIE", MB_OK);
 	}
 
 	return 0;
-	exit_main_func
+	exit_func
 	return E_UNEXPECTED;
 }
 
@@ -192,6 +191,7 @@ extern "C" int CALLBACK SbloccoPIN(
 	_In_ int       nCmdShow
 	)
 {
+	init_CSP_func
 	if (_AtlWinModule.cbSize != sizeof(_ATL_WIN_MODULE)) {
 		_AtlWinModule.cbSize = sizeof(_ATL_WIN_MODULE);
 		AtlWinModuleInit(&_AtlWinModule);
@@ -239,5 +239,6 @@ extern "C" int CALLBACK SbloccoPIN(
 		ODS("End SbloccoPIN");
 		return 0;
 	}
+	exit_CSP_func
 	return 0;
 }

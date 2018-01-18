@@ -11,8 +11,8 @@ class  CTLV
 public:
 	CTLV(ByteArray &data);
 	~CTLV(void);
-	RESULT getValue(uint8_t Tag, ByteArray &Value);
-	RESULT getTAG(uint8_t Tag, ByteArray *&Value);
+	ByteArray getValue(uint8_t Tag);
+	ByteArray *getTAG(uint8_t Tag);
 };
 
 class  CTLVCreate
@@ -22,8 +22,8 @@ public:
 
 	CTLVCreate(void);
 	~CTLVCreate(void);
-	RESULT addValue(uint8_t Tag, ByteDynArray *&Value);
-	RESULT getValue(uint8_t Tag, ByteDynArray *&Value);
-	RESULT setValue(uint8_t Tag, ByteArray &Value);
-	RESULT getBuffer(ByteDynArray &Value);
+	ByteDynArray* addValue(uint8_t Tag);
+	ByteDynArray* getValue(uint8_t Tag);
+	void setValue(uint8_t Tag, ByteArray &Value);
+	ByteDynArray getBuffer();
 };

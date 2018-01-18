@@ -18,7 +18,7 @@ typedef std::map<CK_SLOT_ID,std::shared_ptr<class CSlot>> SlotMap;
 typedef std::map<CK_OBJECT_HANDLE,std::shared_ptr<class CP11Object>> HandleObjMap;
 typedef std::map<std::shared_ptr<class CP11Object>,CK_OBJECT_HANDLE> ObjHandleMap;
 
-typedef std::vector<std::shared_ptr<class CP11Object>> P11ObjectVector;
+typedef std::vector<std::shared_ptr<class CP11Object> > P11ObjectVector;
 
 // lo slot contiene la mappa degli oggetti della carta che ci
 // sta dentro; quindi ogni sessione su quella carta condivide
@@ -40,12 +40,11 @@ class CSlot
 {
 private:
 	static DWORD dwSlotCnt; //counter degli slot (ID P11)
-	static char *mutexName(const char *szName);
-	RESULT GetATR(ByteDynArray &ATR);
+	ByteDynArray GetATR();
 
 public:
 	SCARDHANDLE hCard;
-	RESULT Connect();
+	void Connect();
 	DWORD dwSessionCount; // numero di session aperte su questo slot
 
 	static SlotMap g_mSlots; //mappa globale degli slot
@@ -62,7 +61,7 @@ public:
 	std::shared_ptr<CCardTemplate> pSerialTemplate;
 
 	ByteDynArray baATR;
-	RESULT GetATR(ByteArray &ATR);
+	void GetATR(ByteArray &ATR);
 	
 	DWORD dwP11ObjCnt;			//counter degli oggetti (ID P11)
 	HandleObjMap HandleP11Map;	// mi servono due mappe per gestire correttamente
@@ -71,34 +70,34 @@ public:
 								// un'altra per sapere se un oggetto restituito
 								// ha già un ID o meno
 
-	RESULT GetNewObjectID(CK_OBJECT_HANDLE &hObject);
-	RESULT GetIDFromObject(const std::shared_ptr<CP11Object>& pObject,CK_OBJECT_HANDLE &hObject);
+	CK_OBJECT_HANDLE GetNewObjectID();
+	CK_OBJECT_HANDLE GetIDFromObject(const std::shared_ptr<CP11Object>& pObject);
 								// restituisce l'handle di sessione dell'oggetto corrispondente
 								// pObject, e lo crea se non esiste
-	RESULT DelObjectHandle(const std::shared_ptr<CP11Object>& pObject);
+	void DelObjectHandle(const std::shared_ptr<CP11Object>& pObject);
 								// cancella l'handle dell'oggetto pObject
-	RESULT GetObjectFromID(CK_OBJECT_HANDLE hObjectHandle,std::shared_ptr<CP11Object>&pObject);
+	std::shared_ptr<CP11Object> GetObjectFromID(CK_OBJECT_HANDLE hObjectHandle);
 
 
 	CK_USER_TYPE User; 
 
 	CSlot(const char *szName);
 	~CSlot();
-	static RESULT GetNewSlotID(CK_SLOT_ID *pSlotID);
-	static RESULT InitSlotList();
-	static RESULT DeleteSlotList();
-	static RESULT GetSlotFromID(CK_SLOT_ID hSlotId,std::shared_ptr<CSlot>&ppSlot);
-	static RESULT GetSlotFromReaderName(const char *name,std::shared_ptr<CSlot>&ppSlot);
-	static RESULT AddSlot(std::shared_ptr<CSlot> pSlot,CK_SLOT_ID *pSlotID);
-	static RESULT DeleteSlot(CK_SLOT_ID hSlotId);
-	RESULT Init();
+	static CK_SLOT_ID GetNewSlotID();
+	static void InitSlotList();
+	static void DeleteSlotList();
+	static std::shared_ptr<CSlot> GetSlotFromID(CK_SLOT_ID hSlotId);
+	static std::shared_ptr<CSlot> GetSlotFromReaderName(const char *name);
+	static CK_SLOT_ID AddSlot(std::shared_ptr<CSlot> pSlot);
+	static void DeleteSlot(CK_SLOT_ID hSlotId);
+	void Init();
 	void Final();
 
-	RESULT AddP11Object(std::shared_ptr<CP11Object> object);
-	RESULT FindP11Object(CK_OBJECT_CLASS objClass, CK_ATTRIBUTE_TYPE attr, CK_BYTE *val, int valLen, std::shared_ptr<CP11Object>&ppObject);
-	RESULT DelP11Object(const std::shared_ptr<CP11Object>& pObject);
-	RESULT ClearP11Objects();
-	RESULT IsTokenPresent(bool *bPresent);
+	void AddP11Object(std::shared_ptr<CP11Object> object);
+	std::shared_ptr<CP11Object> FindP11Object(CK_OBJECT_CLASS objClass, CK_ATTRIBUTE_TYPE attr, CK_BYTE *val, int valLen);
+	void DelP11Object(const std::shared_ptr<CP11Object>& pObject);
+	void ClearP11Objects();
+	bool IsTokenPresent();
 
 	P11ObjectVector P11Objects; // vettore degli oggetti
 
@@ -115,12 +114,12 @@ public:
 	//CSyncroMutex slotMutex;		// mutex per il lock alla carta
 	SlotEvent lastEvent;
 
-	CK_RV GetInfo(CK_SLOT_INFO_PTR pInfo);
-	CK_RV GetTokenInfo(CK_TOKEN_INFO_PTR pInfo);
-	CK_RV CloseAllSessions();
+	void GetInfo(CK_SLOT_INFO_PTR pInfo);
+	void GetTokenInfo(CK_TOKEN_INFO_PTR pInfo);
+	void CloseAllSessions();
 
-	RESULT SessionCount(DWORD &dwSessCount);
-	RESULT RWSessionCount(DWORD &dwRWSessCount);
+	size_t  SessionCount();
+	size_t  RWSessionCount();
 
 	CCardContext Context;
 };

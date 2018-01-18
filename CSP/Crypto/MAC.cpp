@@ -10,7 +10,7 @@ public:
 	BCRYPT_ALG_HANDLE algo;
 	init_mac() {
 		if (BCryptOpenAlgorithmProvider(&algo, BCRYPT_3DES_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0) != 0)
-			throw std::runtime_error("Errore nell'inizializzazione dell'algoritmo MAC");
+			throw logged_error("Errore nell'inizializzazione dell'algoritmo MAC");
 	}
 	~init_mac() {
 		BCryptCloseAlgorithmProvider(algo, 0);
@@ -47,10 +47,10 @@ void CMAC::Init(ByteArray &key)
 	k1.set(&key.left(8), &key.left(8), &key.left(8));
 
 	if (BCryptGenerateSymmetricKey(algo_mac.algo, &this->key1, nullptr, 0, k1.data(), (ULONG)k1.size(), 0) != 0)
-		throw std::runtime_error("Errore nella creazione della chiave MAC");
+		throw logged_error("Errore nella creazione della chiave MAC");
 
 	if (BCryptGenerateSymmetricKey(algo_mac.algo, &this->key2, nullptr, 0, BCrytpKey.data(), (ULONG)BCrytpKey.size(), 0) != 0)
-		throw std::runtime_error("Errore nella creazione della chiave MAC");
+		throw logged_error("Errore nella creazione della chiave MAC");
 
 	exit_func
 }
@@ -66,7 +66,7 @@ CMAC::~CMAC(void)
 		BCryptDestroyKey(key2);
 }
 
-DWORD CMAC::_Mac(const ByteArray &data,ByteDynArray &resp)
+ByteDynArray CMAC::Mac(const ByteArray &data)
 {
 	init_func
 
@@ -77,17 +77,15 @@ DWORD CMAC::_Mac(const ByteArray &data,ByteDynArray &resp)
 		ByteDynArray OutTmp(ANSILen - 8);
 		ULONG result = (ULONG)OutTmp.size();
 		if (BCryptEncrypt(key1, data.data(), (long)ANSILen - 8, nullptr, iv.data(), (ULONG)iv.size(), OutTmp.data(), (ULONG)OutTmp.size(), &result, 0) != 0)
-			throw std::runtime_error("Errore nel calcolo del MAC");
+			throw logged_error("Errore nel calcolo del MAC");
 	}
 
-	resp.resize(8);
+	ByteDynArray resp(8);
 	ULONG result = (ULONG)resp.size();
 	if (BCryptEncrypt(key2, data.mid(ANSILen - 8).data(), (long)(data.size() - ANSILen) + 8, nullptr, iv.data(), (ULONG)iv.size(), resp.data(), (ULONG)resp.size(), &result, 0) != 0)
-		throw std::runtime_error("Errore nel calcolo del MAC");
+		throw logged_error("Errore nel calcolo del MAC");
 
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	return resp;
 }
 #else
 
@@ -133,7 +131,7 @@ void CMAC::Init(ByteArray &key)
 CMAC::~CMAC(void)
 {
 }
-DWORD CMAC::_Mac(const ByteArray &data, ByteDynArray &resp)
+DWORD CMAC::Mac(const ByteArray &data, ByteDynArray &resp)
 {
 	init_func
 
@@ -163,11 +161,3 @@ CMAC::CMAC(ByteArray &key) {
 	Init(key);
 }
 
-ByteDynArray CMAC::Mac(const ByteArray &data)
-{
-	init_func
-	ByteDynArray result;
-	ER_CALL(_Mac(data,result),"Errore nel calcolo del MAC");
-	_return (result)
-	exit_func
-}
