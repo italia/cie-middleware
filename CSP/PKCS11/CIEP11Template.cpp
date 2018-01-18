@@ -118,7 +118,7 @@ void CIEtemplateInitSession(void *pTemplateData){
 
 		PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
 		if (certDS != nullptr) {
-			auto _1 = scopeExit([&] {CertFreeCertificateContext(certDS); });
+			auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
 
 			cie->pubKey = std::make_shared<CP11PublicKey>(cie);
 			cie->privKey = std::make_shared<CP11PrivateKey>(cie);

@@ -143,7 +143,7 @@ DWORD WINAPI CardReadFile(
 				PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());
 				if (cer == nullptr)
 					throw logged_error(stdPrintf("Errore nella lettura del certificato:%08x", GetLastError()));
-				auto _1 = scopeExit([&] {CertFreeCertificateContext(cer); });
+				auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(cer); });
 
 				keylen = CertGetPublicKeyLength(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, &cer->pCertInfo->SubjectPublicKeyInfo);
 				if (keylen == 0)
@@ -364,7 +364,7 @@ void GetContainerInfo(CONTAINER_INFO &value, PCARD_DATA  pCardData) {
 	PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());
 	if (cer == nullptr)
 		throw logged_error(stdPrintf("Errore nella lettura del certificato:%08x", GetLastError()));
-	auto _1 = scopeExit([&] {CertFreeCertificateContext(cer); });
+	auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(cer); });
 
 	PCERT_PUBLIC_KEY_INFO pinf = &(cer->pCertInfo->SubjectPublicKeyInfo);
 	DWORD PubKeyLen = 0;

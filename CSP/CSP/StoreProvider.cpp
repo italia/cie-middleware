@@ -52,14 +52,18 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 			if (cer == nullptr)
 				continue;
 			
-			auto _1 = scopeExit([&] {CertFreeCertificateContext(cer); });
+			auto _1 = scopeExit([&]() noexcept {
+				CertFreeCertificateContext(cer);
+			});
 
 			PCCERT_CONTEXT storeCert = nullptr;
 			CertAddCertificateContextToStore(hCertStore, cer, CERT_STORE_ADD_REPLACE_EXISTING, &storeCert);
 			if (storeCert == nullptr)
 				continue;		
 
-			auto _2 = scopeExit([&] {CertFreeCertificateContext(storeCert); });
+			auto _2 = scopeExit([&]() noexcept {
+				CertFreeCertificateContext(storeCert); 
+			});
 
 
 			CRYPT_KEY_PROV_INFO KeyProvInfo;
