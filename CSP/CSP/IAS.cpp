@@ -1162,7 +1162,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	if (certDS == nullptr)
 		throw logged_error("Certificato DS non valido");
 
-	auto _1 = scopeExit([&] {CertFreeCertificateContext(certDS); });
+	auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
 
 	ByteArray pubKeyData(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData);
 	CASNParser pubKeyParser;

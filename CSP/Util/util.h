@@ -276,17 +276,22 @@ const ByteDynArray ISOPad16(const ByteArray &data);
  std::string stdPrintf(const char *format, ...);
 
 
- template<typename T>
+ template< typename t >
  class scopeExitClass {
-	 T m_func;
+	 t o;
+	 bool toDelete = true;
  public:
-	 explicit scopeExitClass(T func) : m_func(std::forward<T>(func)) {}
-	 ~scopeExitClass() {
-		 m_func();
+	 scopeExitClass(t in_o) : o(std::move(in_o)) {}
+
+	 scopeExitClass(scopeExitClass &&se) : o(se.o) { se.toDelete = false; };
+	 scopeExitClass(scopeExitClass const &) = delete;
+
+	 ~scopeExitClass() noexcept {
+		 static_assert(noexcept(o()), "lambda as noexcept.");
+		 if (toDelete)
+			 o();
 	 }
  };
 
- template<typename T>
- scopeExitClass<T> scopeExit(T func) {
-	 return scopeExitClass<T>(std::forward<T>(func));
- }
+ template< typename t >
+ scopeExitClass< t > scopeExit(t o) { return { std::move(o) }; }
