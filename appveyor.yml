@@ -1,6 +1,6 @@
 version: '1.0.{build}'
 
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 platform: 
   - Win32
@@ -15,21 +15,6 @@ configuration:
 init:
   - cmd: git config --global core.autocrlf true
   - cmd: msbuild /version
-
-# We need to use devenv.exe instead of the built-in call for MSBuild
-# because our .sln file contains a .vdproj
-# See: http://help.appveyor.com/discussions/problems/626-added-a-visual-studio-install-project-and-now-and-getting-errors-during-build
-# build:
-#   -  project: ./Middleware CIE.sln
-
-build_script:
-  # Use the system-provided OpenSSL build which is compatible with VS2015
-  - ps: Remove-Item "C:\projects\cie-middleware\OpenSSL1.0.2k" -Recurse
-  - ps: $openssl_path = If ($env:platform -eq "Win32") {"C:\OpenSSL-Win32"} Else {"C:\OpenSSL-Win64"}
-  - ps: Copy-Item -Path $openssl_path -Destination "$env:APPVEYOR_BUILD_FOLDER\OpenSSL1.0.2k" -Container -Recurse
-  - cmd: nuget restore "Middleware CIE.sln"
-  - cmd: set DEVENV="C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.com"
-  - cmd: "%DEVENV% /build \"%CONFIGURATION%|%PLATFORM%\" \"Middleware CIE.sln\""
 
 test: off
 deploy: off
