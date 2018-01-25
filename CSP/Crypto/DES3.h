@@ -15,7 +15,7 @@
 
 class CDES3
 {
-	DWORD Des3(const ByteArray &data, ByteDynArray &resp, int encOp);
+	ByteDynArray Des3(const ByteArray &data, int encOp);
 #ifdef WIN32
 	BCRYPT_KEY_HANDLE key;
 	ByteDynArray iv;

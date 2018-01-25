@@ -2,6 +2,7 @@
 #include <Wincrypt.h>
 #include <stdio.h>
 #include "../util/moduleinfo.h"
+#include "csp.h"
 #include <vector>
 
 #ifdef _WIN64
@@ -24,7 +25,7 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 	_In_          HCERTSTORE            hCertStore,
 	_Inout_       PCERT_STORE_PROV_INFO pStoreProvInfo
 	) {
-	init_main_func
+	init_CSP_func
 	HCRYPTPROV prov=0;
 	CryptAcquireContext(&prov, nullptr, MS_SCARD_PROV, PROV_RSA_FULL, CRYPT_SILENT);
 	if (prov == 0) {
@@ -48,6 +49,23 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 			WCHAR containerW[100];
 			swprintf_s(containerW, L"%S", containerName);
 			PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert, certSize);
+			if (cer == nullptr)
+				continue;
+			
+			auto _1 = scopeExit([&]() noexcept {
+				CertFreeCertificateContext(cer);
+			});
+
+			PCCERT_CONTEXT storeCert = nullptr;
+			CertAddCertificateContextToStore(hCertStore, cer, CERT_STORE_ADD_REPLACE_EXISTING, &storeCert);
+			if (storeCert == nullptr)
+				continue;		
+
+			auto _2 = scopeExit([&]() noexcept {
+				CertFreeCertificateContext(storeCert); 
+			});
+
+
 			CRYPT_KEY_PROV_INFO KeyProvInfo;
 			ZeroMem(KeyProvInfo);
 			KeyProvInfo.pwszProvName = MS_SCARD_PROV_W;
@@ -55,20 +73,18 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 			KeyProvInfo.dwKeySpec = keySpecs[i];
 			KeyProvInfo.dwProvType = PROV_RSA_FULL;
 
-			CertSetCertificateContextProperty(cer, CERT_KEY_PROV_INFO_PROP_ID, 0, &KeyProvInfo);
-			PCCERT_CONTEXT storeCert;
-			CertAddCertificateContextToStore(hCertStore, cer, CERT_STORE_ADD_REPLACE_EXISTING, &storeCert);
+			CertSetCertificateContextProperty(storeCert, CERT_KEY_PROV_INFO_PROP_ID, 0, &KeyProvInfo);
 		}
 	}
 	CryptReleaseContext(prov, 0);
 
 	return TRUE;
-	exit_main_func
+	exit_CSP_func
 	return FALSE;
 }
 
 extern "C" HRESULT __stdcall DllUnregisterServer(void) {
-	init_main_func
+	init_CSP_func
 	SCARDCONTEXT hSC;
 	SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &hSC);
 	SCardForgetCardType(hSC, "CIE_1");
@@ -79,17 +95,18 @@ extern "C" HRESULT __stdcall DllUnregisterServer(void) {
 	CertUnregisterPhysicalStore(L"MY", CERT_SYSTEM_STORE_CURRENT_USER, L"CIEStore");
 	CryptUnregisterOIDFunction(0, CRYPT_OID_OPEN_STORE_PROV_FUNC, "CIECertProvider");
 	return S_OK;
-	exit_main_func
+	exit_CSP_func
 	return E_UNEXPECTED;
 }
 
 LONG RegisterCard(SCARDCONTEXT hSC, const char *name, BYTE* ATR, int ATRLen) {
+	init_func
 	ByteDynArray ATRMask;
 	LONG ris;
 	SCardForgetCardType(hSC, name);
 	ATRMask.resize(ATRLen);
 	ATRMask.fill(0xff);
-	if ((ris = SCardIntroduceCardType(hSC, name, nullptr, nullptr, 0, ATR, ATRMask.data(), ATRMask.size()) != SCARD_S_SUCCESS))
+	if ((ris = SCardIntroduceCardType(hSC, name, nullptr, nullptr, 0, ATR, ATRMask.data(), (DWORD)ATRMask.size()) != SCARD_S_SUCCESS))
 	{
 		return E_UNEXPECTED;
 	}
@@ -113,10 +130,11 @@ LONG RegisterCard(SCARDCONTEXT hSC, const char *name, BYTE* ATR, int ATRLen) {
 	char pinLabel[] = "it-IT,Immettere le ultime 4 cifre del PIN";
 	RegSetKeyValueA(scardKey, NULL, "80000100", REG_SZ, pinLabel, sizeof(pinLabel));
 	return S_OK;
+	exit_func
 }
 
 extern "C" HRESULT __stdcall DllRegisterServer(void) {
-	init_main_func
+	init_CSP_func
 	SCARDCONTEXT hSC;
 	SCardEstablishContext(SCARD_SCOPE_SYSTEM,NULL,NULL,&hSC);
 	BYTE ATR[] = { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00, 0x73 };
@@ -133,8 +151,8 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 	SCardReleaseContext(hSC);
 
 	{
-		auto modName = std::vector<WCHAR>(moduleInfo.szModuleName.size() + 10);
-		swprintf_s(modName.data(), modName.size(), L"%S.dll", moduleInfo.szModuleName.c_str());
+		auto modName = std::vector<WCHAR>(moduleInfo.szModuleFullPath.size() + 10);
+		swprintf_s(modName.data(), modName.size(), L"%S", moduleInfo.szModuleFullPath.c_str());
 		if (!CryptRegisterOIDFunction(0, CRYPT_OID_OPEN_STORE_PROV_FUNC, "CIECertProvider", modName.data(), CRYPT_OID_OPEN_STORE_PROV_FUNC))
 			return E_UNEXPECTED;
 	}
@@ -161,6 +179,6 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 		return E_UNEXPECTED;
 	}
 	return S_OK;
-	exit_main_func
+	exit_CSP_func
 	return E_UNEXPECTED;
 }

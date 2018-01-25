@@ -1,5 +1,4 @@
 #pragma once
-#include <winscard.h>
 #include <functional>
 
 class CToken;

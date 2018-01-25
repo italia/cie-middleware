@@ -1,1 +1,0 @@
-var shell = new ActiveXObject("WScript.Shell");shell.Run("msiexec.exe /x " + WScript.arguments(0),1,false);

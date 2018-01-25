@@ -13,7 +13,7 @@ class CThread
 	DWORD dwThreadID;
 #endif
 	void createThread(void *threadFunc,void *threadData);
-	RESULT joinThread(DWORD timeout);
+	DWORD joinThread(DWORD timeout);
 	void terminateThread();
 	void exitThread(DWORD dwCode);
 	void close();

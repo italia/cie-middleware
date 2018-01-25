@@ -1,5 +1,4 @@
 #pragma once
-#include <openssl\sha.h>
 #include "../util/array.h"
 
 #define SHA256_DIGEST_LENGTH 32

@@ -23,7 +23,7 @@ class CAES
 	ByteDynArray key;
 #endif
 
-	DWORD AES(const ByteArray &data, ByteDynArray &resp, int encOp);
+	ByteDynArray AES(const ByteArray &data, int encOp);
 	ByteDynArray iv;
 
 public:

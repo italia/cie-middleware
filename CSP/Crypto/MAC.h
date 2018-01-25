@@ -17,7 +17,6 @@ class CMAC
 	des_key_schedule k1,k2,k3;
 	des_cblock initVec;
 #endif
-	DWORD _Mac(const ByteArray &data, ByteDynArray &resp);
 public:
 	CMAC();
 	CMAC(ByteArray &key);

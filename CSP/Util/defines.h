@@ -1,8 +1,6 @@
 #pragma once
 
-#define OK 0
-#define FAIL ((DWORD)0xFFFFFFFF)
-typedef unsigned long RESULT;
+#define StatusWord uint16_t
 
 #define ERR_CARD_FILE_DEACTIVATED		0x6283
 #define ERR_CARD_FILE_TERMINATED		0x6285
@@ -50,90 +48,15 @@ typedef unsigned long RESULT;
 #define CARD_OK_SECOND_TRIAL			0x9001
 #define ERR_CARD_OVERFLOW_UNDERFLOW		0x9850
 
+#define logParam(p)
+#define logParamBuf(p,l)
+#define logParamBufHide(p,l)
 
-#define init_func_internal \
-	DWORD _call_ris=0; \
-	int _this_func_checkpoint=__LINE__; \
-	char *_this_func_name=__FUNCTION__; \
-	try {
-#define exit_func_internal \
-	} \
-	catch(const char *ex) { \
-		throw std::runtime_error(stdPrintf("Eccezione in %s:%s",_this_func_name,ex)); \
-	} \
-	catch(...) { \
-		throw std::runtime_error(stdPrintf("Errore in %s",_this_func_name)); \
-	}
+#define init_func \
+  	CFuncCallInfo info(__FUNCTION__,Log);
 
-
-
-
-//da spostare in define_err
-/*
-
-#define init_func_catch \
-	DWORD _call_ris=0; \
-	int _this_func_checkpoint=__LINE__; \
-	char *_this_func_name=__FUNCTION__; \
-	CFuncCallInfo info(_this_func_name,Log); \
-	try {
-
-#define init_main_func_catch \
-	DWORD _call_ris=0; \
-	int _this_func_checkpoint=__LINE__; \
-	char *_this_func_name=__FUNCTION__; \
-	CFuncCallInfo::startCall(); \
-	CFuncCallInfo info(_this_func_name,Log); \
-	try {
-
-#define exit_func_catch \
-	} \
-	catch(CBaseException &ex) { \
-		throw CStringException(ex,"Eccezione in %s",_this_func_name); \
-	} \
-	catch(...) { \
-		throw CStringException("Errore in %s",_this_func_name); \
-	}
-
-#define exit_main_func_catch \
-	} \
-	catch(CBaseException &ex) { \
-		String dump; \
-		ex.DumpTree(dump); \
-		Log.write((char*)dump.lock()); \
-	} \
-	catch(...) { \
-		Log.write("Errore in %s",_this_func_name); \
-	}
-
-#define exit_main_func exit_main_func_catch
-#define exit_func exit_func_catch
-#define init_main_func init_main_func_catch
-#define init_func init_func_catch
-
-#define WIN_R_CALL(call) \
-if ((_call_ris=(call))!=S_OK) { \
-	throw CWinException(_call_ris); \
-}
-
-#define ER_CALL(call,err) \
-if ((_call_ris=(call))==FAIL) { \
-	throw CStringException(err); \
-}
-
-#define TRY_CALL(call,err) \
-try { if ((_call_ris=(call))==FAIL) { \
-	throw CStringException(err); } \
-} catch (CBaseException &ex) { throw CStringException(ex,err); }
-
-#define CARD_R_CALL(call) \
-if ((_call_ris=(call))!=CARD_OK) { \
-	throw CSCardException(_call_ris); \
-}
+#define exit_func
 
 #define ER_ASSERT(a,b) \
-	if (!(a)) throw CStringException(b);
-
-#define _return(a) {info.logRet(a,__LINE__);return a;}
-#define _returnVoid {info.logRet(__LINE__);return;}
-*/
+	if (!(a)) \
+		throw logged_error(stdPrintf("Eccezione nel file %s, linea %i: %s",__FILE__,__LINE__,b));

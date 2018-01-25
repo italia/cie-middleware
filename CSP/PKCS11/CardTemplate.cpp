@@ -29,27 +29,21 @@ CCardTemplate::~CCardTemplate(void)
 		FreeLibrary(hLibrary);
 }
 
-RESULT CCardTemplate::AddTemplate(std::shared_ptr<CCardTemplate> pTemplate) {
+void CCardTemplate::AddTemplate(std::shared_ptr<CCardTemplate> pTemplate) {
 	init_func
 	g_mCardTemplates.emplace_back(std::move(pTemplate));
-	_return(OK)
-	exit_func
-	_return(FAIL)
 }
 
-RESULT CCardTemplate::DeleteTemplateList() {
+void CCardTemplate::DeleteTemplateList() {
 	init_func
 	g_mCardTemplates.clear();
-	_return(OK)
-	exit_func
-	_return(FAIL)
 }
 
-RESULT CCardTemplate::InitTemplateList()
+void CCardTemplate::InitTemplateList()
 {
 	init_func
 
-		auto pTemplate = std::unique_ptr<CCardTemplate>(new CCardTemplate());
+	auto pTemplate = std::unique_ptr<CCardTemplate>(new CCardTemplate());
 	pTemplate->szName = "CIE";// "Carta d'Identità Elettronica";
 	pTemplate->szManifacturer = "";
 	pTemplate->FunctionList.templateInitLibrary = CIEtemplateInitLibrary;
@@ -78,32 +72,21 @@ RESULT CCardTemplate::InitTemplateList()
 	pTemplate->FunctionList.templateGenerateKey = CIEtemplateGenerateKey;
 	pTemplate->FunctionList.templateGenerateKeyPair = CIEtemplateGenerateKeyPair;
 
-	if (AddTemplate(std::move(pTemplate))) {
-		throw CStringException(ERR_CANT_ADD_SLOT);
-	}
-
-	_return(OK)
-		exit_func
-		_return(FAIL)
+	AddTemplate(std::move(pTemplate));
 }
 
-RESULT CCardTemplate::GetTemplate(CSlot &pSlot,std::shared_ptr<CCardTemplate>&pTemplate)
+std::shared_ptr<CCardTemplate> CCardTemplate::GetTemplate(CSlot &pSlot)
 {
 	init_func
 	for (DWORD i=0;i<g_mCardTemplates.size();i++) {
-		bool bMatched;
-		if (g_mCardTemplates[i]->FunctionList.templateMatchCard(bMatched,pSlot)) {
-			continue;
+		try {
+			if (g_mCardTemplates[i]->FunctionList.templateMatchCard(pSlot)) {
+				return g_mCardTemplates[i];
+			}
 		}
-		if (bMatched) {
-			pTemplate=g_mCardTemplates[i];
-			_return(OK)
-		}
+		catch(...) { }
 	}
-	pTemplate=nullptr;
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	return nullptr;
 }
 
 //RESULT CCardTemplate::InitLibrary(const char *szPath,void *templateData)
