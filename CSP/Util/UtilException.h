@@ -1,14 +1,32 @@
 #pragma once
 
-#include "util.h"
 #include <memory>
+#include <stdexcept>
 
-#define UTILEX_BASE			0
-#define UTILEX_STRING		1
-#define UTILEX_SYSTEM		2
-#define UTILEX_WIN			3
-#define UTILEX_SCARD		4
+//#define UTILEX_BASE			0
+//#define UTILEX_STRING		1
+//#define UTILEX_SYSTEM		2
+//#define UTILEX_WIN			3
+//#define UTILEX_SCARD		4
 
+
+class logged_error : public std::runtime_error {
+public:
+	logged_error(std::string &&message) : logged_error(message.c_str()) {}
+	logged_error(const char *message);
+};
+
+class scard_error : public logged_error {
+public:
+	scard_error(StatusWord sw);
+};
+
+class windows_error : logged_error {
+public:
+	windows_error(long  ris);
+};
+
+/*
 class CBaseException
 {
 protected:
@@ -101,3 +119,4 @@ public:
 	std::string stackWalk;
 	virtual void DumpError(std::string & dump);
 };
+*/

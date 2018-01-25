@@ -32,6 +32,6 @@ ByteDynArray &CBase64::Decode(const char *encodedData,ByteDynArray &data) {
 	data.resize(dwDataSize);
 	CryptStringToBinary(encodedData, 0, CRYPT_STRING_BASE64, data.data(), &dwDataSize, NULL, NULL);
 	
-	_return(data)
+	return data;
 	exit_func
 }

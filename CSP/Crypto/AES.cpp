@@ -10,7 +10,7 @@ public:
 	BCRYPT_ALG_HANDLE algo;
 	init_aes() {
 		if (BCryptOpenAlgorithmProvider(&algo, BCRYPT_AES_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0) != 0)
-			throw std::runtime_error("Errore nell'inizializzazione dell'algoritmo AES");
+			throw logged_error("Errore nell'inizializzazione dell'algoritmo AES");
 	}
 	~init_aes() {
 		BCryptCloseAlgorithmProvider(algo, 0);
@@ -21,9 +21,9 @@ void CAES::Init(const ByteArray &key)
 {
 	init_func
 	iv.resize(16, false);
-
-	if (BCryptGenerateSymmetricKey(algo_aes.algo, &this->key, nullptr, 0, key.data(), (ULONG)key.size(), 0) != 0)
-		throw std::runtime_error("Errore nella creazione della chiave AES");
+	NTSTATUS ris;
+	if ((ris=BCryptGenerateSymmetricKey(algo_aes.algo, &this->key, nullptr, 0, key.data(), (ULONG)key.size(), 0)) != 0)
+		throw logged_error(stdPrintf("Errore nella creazione della chiave AES: %i %08x %08x", key.size(), algo_aes.algo, ris).c_str());
 
 	exit_func
 }
@@ -38,13 +38,13 @@ CAES::~CAES(void)
 		BCryptDestroyKey(key);
 }
 
-DWORD CAES::AES(const ByteArray &data,ByteDynArray &resp,int encOp)
+ByteDynArray CAES::AES(const ByteArray &data,int encOp)
 {
 	init_func
 
 	iv.fill(0);
 	size_t AppSize = data.size() - 1;
-	resp.resize(AppSize - (AppSize % 16) + 16);
+	ByteDynArray resp(AppSize - (AppSize % 16) + 16);
 
 	NTSTATUS rs;
 	ULONG result = (ULONG)resp.size();
@@ -55,19 +55,17 @@ DWORD CAES::AES(const ByteArray &data,ByteDynArray &resp,int encOp)
 		rs = BCryptDecrypt(key, data.data(), (ULONG)data.size(), nullptr, iv.data(), (ULONG)iv.size(), resp.data(), (ULONG)resp.size(), &result, 0);
 	
 	if (rs != 0)
-		throw std::runtime_error("Errore nella cifratura AES");
+		throw logged_error("Errore nella cifratura AES");
 
-	_return(OK)
-	exit_func
-	_return(FAIL)
+	return resp;
 }
 #else
 
-DWORD CAES::AES(const ByteArray &data,ByteDynArray &resp,int encOp)
+ByteDynArray CAES::AES(const ByteArray &data,int encOp)
 {
 	init_func
 
-		iv.fill(0);
+	iv.fill(0);
 
 	AES_KEY aesKey;
 	if (encOp == AES_ENCRYPT)
@@ -75,12 +73,10 @@ DWORD CAES::AES(const ByteArray &data,ByteDynArray &resp,int encOp)
 	else
 		AES_set_decrypt_key(key.data(), (int)key.size() * 8, &aesKey);
 	size_t AppSize = data.size() - 1;
-	resp.resize(AppSize - (AppSize % 16) + 16);
+	ByteDynArray resp(AppSize - (AppSize % 16) + 16);
 	AES_cbc_encrypt(data.data(), resp.data(), data.size(), &aesKey, iv.data(), encOp);
 
-	_return(OK)
-		exit_func
-		_return(FAIL)
+	return resp;
 }
 void CAES::Init(const ByteArray &key)
 {
@@ -107,38 +103,27 @@ CAES::CAES(const ByteArray &key) {
 ByteDynArray CAES::Encode(const ByteArray &data)
 {
 	init_func
-	ByteDynArray result;
-	ER_CALL(AES(ISOPad16(data), result, AES_ENCRYPT), "Errore della cifratura AES");
-	_return (result)
-	exit_func
+	return AES(ISOPad16(data), AES_ENCRYPT);
 }
 
 ByteDynArray CAES::RawEncode(const ByteArray &data)
 {
 	init_func
-	ByteDynArray result;
-	ER_ASSERT((data.size() % AES_BLOCK_SIZE) == 0, "La dimensione dei dati da cifrare deve essere multipla di 16")
-	ER_CALL(AES(data,result,AES_ENCRYPT),"Errore della cifratura AES");
-	_return (result)
-	exit_func
+	ER_ASSERT((data.size() % AES_BLOCK_SIZE) == 0, "La dimensione dei dati da cifrare deve essere multipla di 16");
+	return AES(data, AES_ENCRYPT);
 }
 
 ByteDynArray CAES::Decode(const ByteArray &data)
 {
 	init_func
-	ByteDynArray result;
-	ER_CALL(AES(data, result, AES_DECRYPT), "Errore della decifratura AES");
+	ByteDynArray result=AES(data, AES_DECRYPT);
 	result.resize(RemoveISOPad(result),true);
-	_return (result)
-	exit_func
+	return result;
 }
 
 ByteDynArray CAES::RawDecode(const ByteArray &data)
 {
 	init_func
-	ByteDynArray result;
-	ER_ASSERT((data.size() % AES_BLOCK_SIZE) == 0, "La dimensione dei dati da cifrare deve essere multipla di 16")
-	ER_CALL(AES(data, result, AES_DECRYPT), "Errore della decifratura DES");
-	_return (result)
-	exit_func
+	ER_ASSERT((data.size() % AES_BLOCK_SIZE) == 0, "La dimensione dei dati da cifrare deve essere multipla di 16");
+	return AES(data, AES_DECRYPT);
 }

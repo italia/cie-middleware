@@ -10,7 +10,7 @@ public:
 	BCRYPT_ALG_HANDLE algo;
 	init_sha1() {
 		if (BCryptOpenAlgorithmProvider(&algo, BCRYPT_SHA1_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0) != 0)
-			throw std::runtime_error("Errore nell'inizializzazione dell'algoritmo SHA1");
+			throw logged_error("Errore nell'inizializzazione dell'algoritmo SHA1");
 	}
 	~init_sha1() {
 		BCryptCloseAlgorithmProvider(algo, 0);
@@ -26,22 +26,22 @@ CSHA1::~CSHA1() {
 }
 void CSHA1::Init() {
 	if (hash != nullptr)
-		throw std::runtime_error("Un'operazione di hash è già in corso");
+		throw logged_error("Un'operazione di hash è già in corso");
 	if (BCryptCreateHash(algo_sha1.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
-		throw std::runtime_error("Errore nella creazione dell'hash SHA1");
+		throw logged_error("Errore nella creazione dell'hash SHA1");
 }
 void CSHA1::Update(ByteArray data) {
 	if (hash == nullptr)
-		throw std::runtime_error("Hash non inizializzato");
+		throw logged_error("Hash non inizializzato");
 	if (BCryptHashData(hash, data.data(), (ULONG)data.size(), 0) != 0)
-		throw std::runtime_error("Errore nell'hash dei dati SHA1");
+		throw logged_error("Errore nell'hash dei dati SHA1");
 }
 ByteDynArray CSHA1::Final() {
 	if (hash == nullptr)
-		throw std::runtime_error("Hash non inizializzato");
+		throw logged_error("Hash non inizializzato");
 	ByteDynArray resp(SHA_DIGEST_LENGTH);
 	if (BCryptFinishHash(hash, resp.data(), (ULONG)resp.size(), 0) != 0)
-		throw std::runtime_error("Errore nel calcolo dell'hash SHA1");
+		throw logged_error("Errore nel calcolo dell'hash SHA1");
 
 	BCryptDestroyHash(hash);
 	hash = nullptr;
@@ -59,18 +59,18 @@ CSHA1::~CSHA1() {
 
 void CSHA1::Init() {
 	if (isInit)
-		throw std::runtime_error("Un'operazione di hash è già in corso");
+		throw logged_error("Un'operazione di hash è già in corso");
 	SHA1_Init(&ctx);
 	isInit = true;
 }
 void CSHA1::Update(ByteArray data) {
 	if (!isInit)
-		throw std::runtime_error("Hash non inizializzato");
+		throw logged_error("Hash non inizializzato");
 	SHA1_Update(&ctx, data.data(), data.size());
 }
 ByteDynArray CSHA1::Final() {
 	if (!isInit)
-		throw std::runtime_error("Hash non inizializzato");
+		throw logged_error("Hash non inizializzato");
 	ByteDynArray resp(SHA_DIGEST_LENGTH);
 	SHA1_Final(resp.data(), &ctx);
 	isInit = false;

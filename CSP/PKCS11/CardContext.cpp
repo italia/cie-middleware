@@ -3,7 +3,7 @@
 
 static char *szCompiledFile=__FILE__;
 
-RESULT CCardContext::getContext() {
+void CCardContext::getContext() {
 	init_func
 	HANDLE hSCardSystemEvent=SCardAccessStartedEvent();
 	if (hSCardSystemEvent) {
@@ -13,19 +13,14 @@ RESULT CCardContext::getContext() {
 
 	LONG _call_ris;
 	if ((_call_ris=(SCardEstablishContext(SCARD_SCOPE_SYSTEM,NULL,NULL,&hContext)))!=S_OK) {
-		throw CWinException();
+		throw windows_error(_call_ris);
 	}
-
-	_return(OK)
-	exit_func
-	_return(FAIL)
 }
 
 CCardContext::CCardContext(void)
 {
 	hContext=NULL;
-	if (getContext()!=OK)
-		throw;
+	getContext();
 }
 
 CCardContext::~CCardContext(void)
@@ -52,22 +47,19 @@ void CCardContext::validate() {
 			hContext=NULL;
 
 	if (hContext==NULL) {
-		if (getContext()!=OK)
-			throw;
+		getContext();
 	}
 }
 
-RESULT CCardContext::renew() {
+void CCardContext::renew() {
 	init_func
-
+	
+	LONG ris;
 	if (hContext)
-		WIN_R_CALL(SCardReleaseContext(hContext), SCARD_S_SUCCESS);
+		if ((ris=SCardReleaseContext(hContext)) != SCARD_S_SUCCESS)
+			throw windows_error(ris);
 	hContext=NULL;
 
-	P11ER_CALL(getContext(),
-		ERR_CANT_ESTABLISH_CONTEXT)
+	getContext();
 
-	_return(OK)
-	exit_func
-	_return(FAIL)
 }

@@ -1,5 +1,6 @@
 #include "../stdafx.h"
 #include "IAS.h"
+#include "CSP.h"
 #include "../util/ModuleInfo.h"
 #include "../UI/Message.h"
 #include "../UI/Pin.h"
@@ -21,7 +22,7 @@ extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD d
 #endif
 
 DWORD WINAPI _cambioPIN() {
-	init_main_func
+	init_func
 
 	SCARDCONTEXT hSC;
 
@@ -212,7 +213,7 @@ DWORD WINAPI _cambioPIN() {
 	}
 
 	return 0;
-	exit_main_func
+	exit_func
 	return E_UNEXPECTED;
 }
 
@@ -223,6 +224,7 @@ extern "C" int CALLBACK CambioPIN(
 	_In_ int       nCmdShow
 	)
 {
+	init_CSP_func
 	if (_AtlWinModule.cbSize != sizeof(_ATL_WIN_MODULE)) {
 		_AtlWinModule.cbSize = sizeof(_ATL_WIN_MODULE);
 		AtlWinModuleInit(&_AtlWinModule);
@@ -239,5 +241,6 @@ extern "C" int CALLBACK CambioPIN(
 	_cambioPIN();
 
 	ODS("End CambioPIN");
+	exit_CSP_func
 	return 0;
 }
