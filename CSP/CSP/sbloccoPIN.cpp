@@ -80,14 +80,10 @@ DWORD WINAPI _sbloccoPIN(
 
 				CPin puk(8, "Inserire le 8 cifre del PUK della CIE", "", "", "Sblocco PIN");
 				if (puk.DoModal() == IDOK) {
-					int numCifre = 4;
+					int numCifre = 8;
 					std::string msg;
-					if (!isEnrolled) {
-						msg = "Inserire le 8 cifre del nuovo PIN";
-						numCifre = 8;
-					}
-					else
-						msg = "Inserire le ultime 4 cifre del nuovo PIN";
+					msg = "Inserire le 8 cifre del nuovo PIN";
+
 					CPin newPin(numCifre, msg.c_str(), "", "", "Sblocco PIN", true);
 					if (newPin.DoModal() == IDOK) {
 						try {
