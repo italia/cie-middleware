@@ -41,9 +41,9 @@ DWORD WINAPI _cambioPIN() {
 	bool foundCIE = false;
 
 	auto changePIN = [](CARD_DATA &cData,DWORD &attempts) -> DWORD {
-		CPin oldPin(4, "Inserire le ultime 4 cifre del PIN della CIE", "", "", "Cambio PIN");
+		CPin oldPin(8, "Inserire le 8 cifre del PIN della CIE", "", "", "Cambio PIN");
 		if (oldPin.DoModal() == IDOK) {
-			CPin newPin(4, "Inserire le ultime 4 cifre del nuovo PIN", "", "", "Cambio PIN", true);
+			CPin newPin(8, "Inserire le 8 cifre del nuovo PIN", "", "", "Cambio PIN", true);
 			if (newPin.DoModal() == IDOK) {
 
 				safeConnection sc(cData.hScard);
@@ -135,23 +135,23 @@ DWORD WINAPI _cambioPIN() {
 		CARD_DATA cData;
 		DWORD attempts = 0;
 		bool isCIE = false;
-		bool isEnrolled = false;
+		//bool isEnrolled = false;
 		{
 			safeTransaction checkTran(conn, SCARD_LEAVE_CARD);
 			if (!checkTran.isLocked())
 				continue;
 
 			isCIE = checkCIE(conn.hCard, hSC, cData);
-			if (isCIE)
-				isEnrolled = ((IAS*)cData.pvVendorSpecific)->IsEnrolled();
+			//if (isCIE)
+			//	isEnrolled = ((IAS*)cData.pvVendorSpecific)->IsEnrolled();
 
 		}
 		if (isCIE) {
-			if (!isEnrolled) {
-				CMessage msg(MB_OK, "Cambio PIN", "La CIE deve essere abilitata per cambiare PIN");
-				msg.DoModal();
-				return 0;
-			}
+			//if (!isEnrolled) {
+			//	CMessage msg(MB_OK, "Cambio PIN", "La CIE deve essere abilitata per cambiare PIN");
+			//	msg.DoModal();
+			//	return 0;
+			//}
 			showMessage(changePIN(cData, attempts), attempts);
 			return 0;
 		}		

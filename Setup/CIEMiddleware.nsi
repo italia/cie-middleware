@@ -7,7 +7,7 @@
 
   ;Name and file
   Name "CIE-Middleware"
-  OutFile "CIE-Middleware.exe"
+  OutFile "${Config}\CIE-Middleware.exe"
 
   !define MUI_ICON "..\CSP\res\CIE.ico"
   !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -52,14 +52,15 @@ Section "Install"
 
   SetOutPath $SYSDIR
     
+  RMDir /r "$%PROGRAMDATA%\CIEPKI"
  
   ${If} ${RunningX64}	
     !define LIBRARY_X64
-    !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\x64\Release\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
+    !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\x64\${Config}\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
     !undef LIBRARY_X64
-    !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\Win32\Release\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
+    !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\Win32\${Config}\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
   ${Else}
-    !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\Win32\Release\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
+    !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\Win32\${Config}\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
   ${EndIf}
 
  

@@ -25,6 +25,18 @@ enum CIE_Type {
 	CIE_NXP
 };
 
+enum CIE_DF {
+	DF_Root,
+	DF_IAS,
+	DF_CIE
+};
+
+enum CIE_RequestedSM {
+	CIE_SM,
+	CIE_NoSM,
+	CIE_AnySM
+};
+
 class IAS
 {
 	CIE_Type type = CIE_Type::CIE_Unknown;
@@ -100,5 +112,10 @@ public:
 
 	// usato da CardUnblockPin per comunicare i tentativi di verifica del PUK rimasti
 	int attemptsRemaining;
+
+	bool ActiveSM;
+	CIE_DF ActiveDF;
+
+	
 };
 
