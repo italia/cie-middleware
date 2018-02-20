@@ -106,8 +106,11 @@ void CIEtemplateInitSession(void *pTemplateData){
 			safeConnection faseConn(cie->slot.hCard);
 			CCardLocker lockCard(cie->slot.hCard);
 			cie->ias.SetCardContext(&cie->slot);
+			cie->ias.SelectAID_IAS();
 			cie->ias.ReadPAN();
+			
 			ByteDynArray resp;
+			cie->ias.SelectAID_CIE();
 			cie->ias.ReadDappPubKey(resp);
 			cie->ias.InitEncKey();
 			cie->ias.GetCertificate(certRaw, true);
@@ -200,6 +203,7 @@ bool CIEtemplateMatchCard(CSlot &pSlot){
 		ias.SetCardContext(&pSlot);
 		{
 			safeTransaction trans(faseConn,SCARD_LEAVE_CARD);
+			ias.SelectAID_IAS();
 			ias.ReadPAN();
 		}
 		return true;
@@ -218,6 +222,7 @@ ByteDynArray  CIEtemplateGetSerial(CSlot &pSlot) {
 		pSlot.GetATR(ATR);
 		IAS ias((CToken::TokenTransmitCallback)TokenTransmitCallback, ATR);
 		ias.SetCardContext(&pSlot);
+		ias.SelectAID_IAS();
 		ias.ReadPAN();
 		std::string numSerial;
 		dumpHexData(ias.PAN.mid(5, 6), numSerial, false);
@@ -247,10 +252,11 @@ void CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &Pin
 		CCardLocker lockCard(cie->slot.hCard);
 
 		cie->ias.SelectAID_IAS();
+		cie->ias.SelectAID_CIE();
 		cie->ias.InitDHParam();
 
 		if (cie->ias.DappPubKey.isEmpty()) {
-			ByteDynArray DappKey;
+			ByteDynArray DappKey;			
 			cie->ias.ReadDappPubKey(DappKey);
 		}
 
