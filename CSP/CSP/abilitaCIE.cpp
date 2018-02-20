@@ -109,30 +109,36 @@ DWORD WINAPI _abilitaCIE(
 								continue;
 
 							len = 0;
-							CardReadFile(&cData, DirCIE, EfIdServizi, 0, &data, &len);
+							DWORD ris;
+							if ((ris = CardReadFile(&cData, DirCIE, EfIdServizi, 0, &data, &len)) != SCARD_S_SUCCESS)
+								throw windows_error(ris);
 							IdServizi = ByteArray(data, len);
 							cData.pfnCspFree(data);
 							hashSet[0xa1] = sha256.Digest(IdServizi.left(12));
 
 							len = 0;
-							CardReadFile(&cData, DirCIE, EfSOD, 0, &data, &len);
+							if ((ris = CardReadFile(&cData, DirCIE, EfSOD, 0, &data, &len)) != SCARD_S_SUCCESS)
+								throw windows_error(ris);
 							SOD = ByteArray(data, len);
 							cData.pfnCspFree(data);
 
 							ByteDynArray IntAuth; len = 0;
-							CardReadFile(&cData, DirCIE, EfIntAuth, 0, &data, &len);
+							if ((ris = CardReadFile(&cData, DirCIE, EfIntAuth, 0, &data, &len)) != SCARD_S_SUCCESS)
+								throw windows_error(ris);
 							IntAuth = ByteArray(data, len);
 							cData.pfnCspFree(data);
 							hashSet[0xa4] = sha256.Digest(IntAuth.left(GetASN1DataLenght(IntAuth)));
 
 							ByteDynArray IntAuthServizi; len = 0;
-							CardReadFile(&cData, DirCIE, EfIntAuthServizi, 0, &data, &len);
+							if ((ris = CardReadFile(&cData, DirCIE, EfIntAuthServizi, 0, &data, &len)) != SCARD_S_SUCCESS)
+								throw windows_error(ris);
 							IntAuthServizi = ByteArray(data, len);
 							cData.pfnCspFree(data);
 							hashSet[0xa5] = sha256.Digest(IntAuthServizi.left(GetASN1DataLenght(IntAuthServizi)));
 
 							ByteDynArray DH; len = 0;
-							CardReadFile(&cData, DirCIE, EfDH, 0, &data, &len);
+							if ((ris = CardReadFile(&cData, DirCIE, EfDH, 0, &data, &len)) != SCARD_S_SUCCESS)
+								throw windows_error(ris);
 							DH = ByteArray(data, len);
 							cData.pfnCspFree(data);
 
@@ -194,12 +200,15 @@ DWORD WINAPI _abilitaCIE(
 								SendMessage(progWin, WM_COMMAND, 100 + 4, (LPARAM)"Lettura certificato");
 
 							ByteDynArray Serial; len = 0;
-							CardReadFile(&cData, DirCIE, EfSerial, 0, &data, &len);
+
+							if ((ris = CardReadFile(&cData, DirCIE, EfSerial, 0, &data, &len)) != SCARD_S_SUCCESS)
+								throw windows_error(ris);
 							Serial = ByteArray(data, len);
 							cData.pfnCspFree(data);
 							hashSet[0xa2] = sha256.Digest(Serial.left(9));
 							len = 0;
-							CardReadFile(&cData, DirCIE, EfCertCIE, 0, &data, &len);
+							if ((ris = CardReadFile(&cData, DirCIE, EfCertCIE, 0, &data, &len)) != SCARD_S_SUCCESS)
+								throw windows_error(ris);
 							CertCIE = ByteArray(data, len);
 							cData.pfnCspFree(data);
 							hashSet[0xa3] = sha256.Digest(CertCIE.left(GetASN1DataLenght(CertCIE)));

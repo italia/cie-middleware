@@ -113,22 +113,29 @@ DWORD WINAPI CardReadFile(
 		if (ias == nullptr)
 			throw logged_error("IAS non inizializzato");
 		ias->SetCardContext(pCardData);
-		if (lstrcmp(pszFileName, EfCertCIE) == 0)
-			ias->ReadCertCIE(response);
-		else if (lstrcmp(pszFileName, EfSOD) == 0)
-			ias->ReadSOD(response);
-		else if (lstrcmp(pszFileName, EfIdServizi) == 0)
-			ias->ReadIdServizi(response);
-		else if (lstrcmp(pszFileName, EfIntAuth) == 0)
-			ias->ReadDappPubKey(response);
-		else if (lstrcmp(pszFileName, EfIntAuthServizi) == 0)
-			ias->ReadServiziPubKey(response);
-		else if (lstrcmp(pszFileName, EfSerial) == 0)
+
+		if (lstrcmp(pszFileName, EfSerial) == 0)
 			ias->ReadSerialeCIE(response);
-		else if (lstrcmp(pszFileName, EfDH) == 0)
-			ias->ReadDH(response);
-		else
-			throw CSP_error(SCARD_E_FILE_NOT_FOUND);
+		else if (lstrcmp(pszFileName, EfCertCIE) == 0)
+			ias->ReadCertCIE(response);
+		else {
+			ias->SelectAID_IAS();
+			if (lstrcmp(pszFileName, EfDH) == 0)
+				ias->ReadDH(response);
+			else {
+				ias->SelectAID_CIE();
+				if (lstrcmp(pszFileName, EfSOD) == 0)
+					ias->ReadSOD(response);
+				else if (lstrcmp(pszFileName, EfIdServizi) == 0)
+					ias->ReadIdServizi(response);
+				else if (lstrcmp(pszFileName, EfIntAuth) == 0)
+					ias->ReadDappPubKey(response);
+				else if (lstrcmp(pszFileName, EfIntAuthServizi) == 0)
+					ias->ReadServiziPubKey(response);
+				else
+					throw CSP_error(SCARD_E_FILE_NOT_FOUND);
+			}
+		}
 	}
 	else if (lstrcmp(pszDirectoryName, szBASE_CSP_DIR) == 0) {
 		if (lstrcmp(pszFileName, szCONTAINER_MAP_FILE) == 0) {
@@ -294,6 +301,9 @@ DWORD WINAPI CardAuthenticateEx(
 	if (ias == nullptr)
 		throw logged_error("IAS non inizializzato");
 	ias->SetCardContext(pCardData);
+
+	ias->SelectAID_IAS();
+	ias->SelectAID_CIE();
 
 	// leggo i parametri di dominio DH e della chiave di extauth
 	if (ias->Callback != nullptr)
@@ -579,7 +589,7 @@ __out_opt                               PDWORD      pcAttemptsRemaining) {
 	if (dwTargetPinId != ROLE_USER)
 		throw CSP_error(SCARD_E_INVALID_PARAMETER);
 
-	if (cbTargetData != 4)
+	if (cbTargetData != 8)
 		throw CSP_error(SCARD_E_INVALID_PARAMETER);
 
 	if (dwFlags == PIN_CHANGE_FLAG_UNBLOCK) {
@@ -595,7 +605,7 @@ __out_opt                               PDWORD      pcAttemptsRemaining) {
 		if (dwAuthenticatingPinId != ROLE_USER)
 			throw CSP_error(SCARD_E_INVALID_PARAMETER);
 
-		if (cbAuthenticatingPinData != 4)
+		if (cbAuthenticatingPinData != 8)
 			throw CSP_error(SCARD_W_WRONG_CHV);
 
 		auto ias = (IAS*)pCardData->pvVendorSpecific;
@@ -603,6 +613,9 @@ __out_opt                               PDWORD      pcAttemptsRemaining) {
 			throw logged_error("IAS non inizializzato");
 		ias->SetCardContext(pCardData);
 		ias->attemptsRemaining = -1;
+
+		ias->SelectAID_IAS();
+		ias->SelectAID_CIE();
 
 		// leggo i parametri di dominio DH e della chiave di extauth
 		if (ias->Callback != nullptr)
@@ -622,13 +635,12 @@ __out_opt                               PDWORD      pcAttemptsRemaining) {
 		if (ias->Callback != nullptr)
 			ias->Callback(3, "Verify PIN", ias->CallbackData);
 
-		ByteDynArray PIN, veriPIN;
 		if (dwAuthenticatingPinId == ROLE_USER) {
 
-			ias->GetFirstPIN(PIN);
-			veriPIN = PIN;
-			veriPIN.append(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
-			sw = ias->VerifyPIN(veriPIN);
+			//ias->GetFirstPIN(PIN);
+			//veriPIN = PIN;
+			//veriPIN.append(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
+			sw = ias->VerifyPIN(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
 		}
 
 		if (sw >= 0x63C0 && sw <= 0x63CF) {
@@ -650,11 +662,22 @@ __out_opt                               PDWORD      pcAttemptsRemaining) {
 		if (sw != 0x9000)
 			throw scard_error(sw);
 
-		ByteDynArray newPIN = PIN;
-		newPIN.append(ByteArray(pbTargetData, cbTargetData));
-		sw = ias->ChangePIN(veriPIN, newPIN);
+		ByteDynArray cert;
+		ByteArray newPin(pbTargetData, cbTargetData);
+
+		bool isEnrolled = ias->IsEnrolled();
+
+		if (isEnrolled)
+			ias->GetCertificate(cert, false);
+		sw = ias->ChangePIN(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData), newPin);
 		if (sw != 0x9000)
 			throw scard_error(sw);
+
+		if (isEnrolled) {
+			std::string PANStr;
+			dumpHexData(ias->PAN.mid(5, 6), PANStr, false);
+			ias->SetCache(PANStr.c_str(), cert, newPin.left(4));
+		}
 		return SCARD_S_SUCCESS;
 	}
 	else
@@ -691,13 +714,14 @@ __in                               DWORD       dwFlags) {
 		throw logged_error("IAS non inizializzato");
 	bool enrolled = ias->IsEnrolled();
 
-	if (enrolled && cbNewPinData != 4)
-		throw CSP_error(SCARD_E_INVALID_PARAMETER);
-	if (!enrolled && cbNewPinData != 8)
+	if (cbNewPinData != 8)
 		throw CSP_error(SCARD_E_INVALID_PARAMETER);
 
 	ias->SetCardContext(pCardData);
 	ias->attemptsRemaining = -1;
+
+	ias->SelectAID_IAS();
+	ias->SelectAID_CIE();
 
 	// leggo i parametri di dominio DH e della chiave di extauth
 	if (ias->Callback != nullptr)
@@ -740,13 +764,20 @@ __in                               DWORD       dwFlags) {
 
 	if ((sw = ias->UnblockPIN()) != 0x9000)
 		throw scard_error(sw);
-	ByteDynArray changePIN;
-	if (ias->IsEnrolled())
-		ias->GetFirstPIN(changePIN);
+	ByteDynArray cert;
+	if (enrolled)
+		ias->GetCertificate(cert);
 	
-	changePIN.append(ByteArray(pbNewPinData, cbNewPinData));
-	if ((sw = ias->ChangePIN(changePIN)) != 0x9000)
+	ByteArray newPin(pbNewPinData, cbNewPinData);
+	if ((sw = ias->ChangePIN(newPin)) != 0x9000)
 		throw scard_error(sw);
+
+	if (enrolled) {
+		std::string PANStr;
+		dumpHexData(ias->PAN.mid(5, 6), PANStr, false);
+		ias->SetCache(PANStr.c_str(), cert, newPin.left(4));
+	}
+
 	return SCARD_S_SUCCESS;
 	exit_CSP_func
 	return E_UNEXPECTED;
@@ -799,9 +830,11 @@ extern "C" DWORD WINAPI CardAcquireContext(
 	OutputDebugString(stdPrintf("Process: %i %08x %s", pid, pid, info.szModuleName.c_str()).c_str());
 
 	ByteDynArray data;
+	ias->SelectAID_IAS();
 	ias->ReadPAN();
 
 	ByteDynArray resp;
+	ias->SelectAID_CIE();
 	ias->InitEncKey();
 
 	//if ((dwFlags & USE_NON_ENROLLED_CIE) != USE_NON_ENROLLED_CIE) {
