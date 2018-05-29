@@ -380,7 +380,7 @@ namespace p11 {
 		memcpy_s((char*)pInfo->label, 32, pTemplate->szName.c_str(), min(pTemplate->szName.length(), sizeof(pInfo->label)));
 		memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
 
-		char *manifacturer;
+		std::string manifacturer;
 		size_t position;
 		if (baATR.indexOf(baNXP_ATR, position))
 			manifacturer = "NXP";
@@ -390,7 +390,7 @@ namespace p11 {
 		else
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
 
-		memcpy_s((char*)pInfo->manufacturerID, 32, manifacturer, strlen(manifacturer));
+		memcpy_s((char*)pInfo->manufacturerID, 32, manifacturer.c_str(), manifacturer.size());
 
 		if (baSerial.isEmpty() || pSerialTemplate != pTemplate) {
 			pSerialTemplate = pTemplate;

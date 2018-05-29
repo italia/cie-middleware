@@ -4,6 +4,7 @@
 #include "../crypto/RSA.h"
 #include "../crypto/AES.h"
 #include "../crypto/SHA256.h"
+#include "../crypto/SHA512.h"
 #include "../crypto/SHA1.h"
 #include "../crypto/DES3.h"
 #include "../crypto/MAC.h"
@@ -20,16 +21,15 @@
 #define CIE_PUK_ID 0x82
 #define CIE_KEY_Sign_ID 0x81
 
-#define PP_AUTHCALLBACK 0xf0000001
-
-// dllmain.h : Declaration of module class.
-
 extern CModuleInfo moduleInfo;
 extern ByteArray SkipZero(ByteArray &ba);
+extern DWORD WINAPI _abilitaCIE(LPVOID lpThreadParameter);
+
 
 IAS::IAS(CToken::TokenTransmitCallback transmit,ByteArray ATR)
 {
 	init_func
+
 	Callback = nullptr;
 	this->ATR = ATR;
 	uint8_t gemaltoAID[] = { 0xA0, 0x00, 0x00, 0x00, 0x30, 0x80, 0x00, 0x00, 0x00, 0x09, 0x81, 0x60, 0x01 };
@@ -520,8 +520,10 @@ ByteDynArray IAS::SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, Byte
 	smHead = apdu.left(4);
 	smHead[0] |= 0x0C;
 	auto calcMac = ISOPad(ByteDynArray(seq).append(smHead));
-	CDES3 encDes(keyEnc);
-	CMAC sigMac(keySig);
+	ByteDynArray iv(8);
+	iv.fill(0); // IV for APDU encryption and signature should be 0. Please refer to IAS specification §7.1.9 Secure messaging – Command APDU protection
+	CDES3 encDes(keyEnc, iv);
+	CMAC sigMac(keySig, iv);
 	uint8_t Val01 = 1;
 	uint8_t Val00 = 0;
 
@@ -575,8 +577,10 @@ StatusWord IAS::respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &resp, By
 	StatusWord sw = 0xffff;
 	ByteDynArray encData;
 	ByteDynArray respMac, calcMac;
-	CDES3 encDes(keyEnc);
-	CMAC sigMac(keySig);
+	ByteDynArray iv(8);
+	iv.fill(0); // IV for APDU encryption should be 0. Please refer to IAS specification §7.1.9 Secure messaging – Command APDU protection
+	CDES3 encDes(keyEnc, iv);
+	CMAC sigMac(keySig, iv);
 
 	calcMac = seq;
 	index = 0;
@@ -930,14 +934,16 @@ void IAS::InitEncKey() {
 		throw scard_error(sw);
 	}
 
-	CSHA256 sha256;
-	CardEncKey = sha256.Digest(resp).left(32);
+	CSHA512 sha512;
+	auto cardSeed = sha512.Digest(resp);
+	CardEncKey = cardSeed.left(32);
+	CardEncIv= cardSeed.mid(32).left(16);
 }
 
 void IAS::SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN) {
 	init_func
-		ByteDynArray encCert, encPIN;
-	CAES enc(CardEncKey);
+	ByteDynArray encCert, encPIN;
+	CAES enc(CardEncKey, CardEncIv);
 	encCert=enc.Encode(certificate);
 	encPIN=enc.Encode(FirstPIN);
 	CacheSetData(PAN, encCert.data(), (int)encCert.size(), encPIN.data(), (int)encPIN.size());
@@ -1025,12 +1031,25 @@ void IAS::IconaSbloccoPIN() {
 		ByteDynArray resp;
 		token.Transmit(VarToByteArray(getHandle), &resp);
 		SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
-		if (!CreateProcess(nullptr, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",SbloccoPIN ICON").c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
-			throw logged_error("Errore in creazione processo SbloccoPIN");
+
+		char runDll32Path[MAX_PATH];
+		GetSystemDirectory(runDll32Path, MAX_PATH);
+		strcat_s(runDll32Path, "\\");
+		strcat_s(runDll32Path, "rundll32.exe");
+
+		// check impersonation
+		HANDLE token = NULL;
+		OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
+
+		if (token == NULL) {
+			if (CreateProcess(runDll32Path, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",SbloccoPIN ICON").c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
+				CloseHandle(pi.hThread);
+				CloseHandle(pi.hProcess);
+			}
+		}
 		else {
-			CloseHandle(pi.hThread);
-			CloseHandle(pi.hProcess);
-		}		
+			CloseHandle(token);
+		}
 	}
 }
 
@@ -1041,7 +1060,7 @@ void IAS::GetFirstPIN(ByteDynArray &PIN) {
 	std::vector<BYTE> EncPINBuf;
 	CacheGetPIN(PANStr.c_str(), EncPINBuf);
 
-	CAES enc(CardEncKey);
+	CAES enc(CardEncKey, CardEncIv);
 	PIN = enc.Decode(ByteArray(EncPINBuf.data(), EncPINBuf.size()));
 }
 
@@ -1074,12 +1093,27 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
 
 			SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
-			if (!CreateProcess(nullptr, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",AbilitaCIE ").append(dumpHexData(PAN.mid(5, 6), std::string(), false)).c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
-				throw logged_error("Errore in creazione processo AbilitaCIE");
-			else
-				CloseHandle(pi.hThread);
-			WaitForSingleObject(pi.hProcess, INFINITE);
-			CloseHandle(pi.hProcess);
+
+			// check impersonation
+			HANDLE token=NULL;
+			OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
+
+			if (token == NULL) {
+				char runDll32Path[MAX_PATH];
+				GetSystemDirectory(runDll32Path, MAX_PATH);
+				strcat_s(runDll32Path, "\\");
+				strcat_s(runDll32Path, "rundll32.exe");
+
+				if (!CreateProcess(runDll32Path, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",AbilitaCIE ").append(dumpHexData(PAN.mid(5, 6), std::string(), false)).c_str(), NULL, NULL, FALSE, 0, nullptr, nullptr, &si, &pi))
+					throw logged_error("Errore in creazione processo AbilitaCIE");
+				else
+					CloseHandle(pi.hThread);
+				WaitForSingleObject(pi.hProcess, INFINITE);
+				CloseHandle(pi.hProcess);
+			}
+			else {
+				CloseHandle(token);
+			}
 			SCardBeginTransaction(hCard);
 		}
 		else {
@@ -1092,7 +1126,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 	std::vector<BYTE> certEncBuf;
 	CacheGetCertificate(PANStr.c_str(), certEncBuf);
 
-	CAES enc(CardEncKey);	
+	CAES enc(CardEncKey, CardEncIv);
 	certificate = enc.Decode(ByteArray(certEncBuf.data(), certEncBuf.size()));
 	Certificate = certificate;
 }
@@ -1270,4 +1304,3 @@ BOOL CheckOneInstance(char *nome)
 	}
 	return TRUE;
 }
-

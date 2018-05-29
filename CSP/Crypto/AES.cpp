@@ -17,10 +17,11 @@ public:
 	}
 } algo_aes;
 
-void CAES::Init(const ByteArray &key)
+void CAES::Init(const ByteArray &key, const ByteArray &iv)
 {
 	init_func
-	iv.resize(16, false);
+	ER_ASSERT(iv.size() == 16, "Errore nella lunghezza dell'Initial Vector")
+	this->iv = iv;
 	NTSTATUS ris;
 	if ((ris=BCryptGenerateSymmetricKey(algo_aes.algo, &this->key, nullptr, 0, key.data(), (ULONG)key.size(), 0)) != 0)
 		throw logged_error(stdPrintf("Errore nella creazione della chiave AES: %i %08x %08x", key.size(), algo_aes.algo, ris).c_str());
@@ -42,17 +43,17 @@ ByteDynArray CAES::AES(const ByteArray &data,int encOp)
 {
 	init_func
 
-	iv.fill(0);
+	ByteDynArray iv2 = iv;
 	size_t AppSize = data.size() - 1;
 	ByteDynArray resp(AppSize - (AppSize % 16) + 16);
 
 	NTSTATUS rs;
 	ULONG result = (ULONG)resp.size();
 	if (encOp == AES_ENCRYPT)
-		rs = BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, iv.data(), (ULONG)iv.size(), resp.data(), (ULONG)resp.size(), &result, 0);
+		rs = BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp.data(), (ULONG)resp.size(), &result, 0);
 	
 	if (encOp == AES_DECRYPT)
-		rs = BCryptDecrypt(key, data.data(), (ULONG)data.size(), nullptr, iv.data(), (ULONG)iv.size(), resp.data(), (ULONG)resp.size(), &result, 0);
+		rs = BCryptDecrypt(key, data.data(), (ULONG)data.size(), nullptr, iv2.data(), (ULONG)iv2.size(), resp.data(), (ULONG)resp.size(), &result, 0);
 	
 	if (rs != 0)
 		throw logged_error("Errore nella cifratura AES");
@@ -65,7 +66,7 @@ ByteDynArray CAES::AES(const ByteArray &data,int encOp)
 {
 	init_func
 
-	iv.fill(0);
+	ByteDynArray iv2 = iv;
 
 	AES_KEY aesKey;
 	if (encOp == AES_ENCRYPT)
@@ -74,14 +75,14 @@ ByteDynArray CAES::AES(const ByteArray &data,int encOp)
 		AES_set_decrypt_key(key.data(), (int)key.size() * 8, &aesKey);
 	size_t AppSize = data.size() - 1;
 	ByteDynArray resp(AppSize - (AppSize % 16) + 16);
-	AES_cbc_encrypt(data.data(), resp.data(), data.size(), &aesKey, iv.data(), encOp);
+	AES_cbc_encrypt(data.data(), resp.data(), data.size(), &aesKey, iv2.data(), encOp);
 
 	return resp;
 }
-void CAES::Init(const ByteArray &key)
+void CAES::Init(const ByteArray &key, const ByteArray &iv)
 {
 	init_func
-	iv.resize(16, false);
+	this->iv = iv;
 	this->key = key;
 
 	exit_func
@@ -95,8 +96,8 @@ CAES::~CAES(void)
 }
 #endif
 
-CAES::CAES(const ByteArray &key) {
-	Init(key);
+CAES::CAES(const ByteArray &key, const ByteArray &iv) {
+	Init(key, iv);
 }
 
 
