@@ -81,9 +81,9 @@ public:
 	virtual ~ByteArray();
 };
 
-void readHexData(const char *data, ByteDynArray &ba);
-size_t countHexData(const char *data);
-size_t setHexData(const char *data, uint8_t *buf);
+void readHexData(const std::string &data, ByteDynArray &ba);
+size_t countHexData(const std::string &data);
+size_t setHexData(const std::string &data, uint8_t *buf);
 
 class ByteDynArray : public ByteArray
 {
@@ -94,7 +94,7 @@ public:
 	ByteDynArray(const ByteArray &src);
 	ByteDynArray(const ByteDynArray &src);
 	ByteDynArray(size_t size);
-	ByteDynArray(const char *hexData);
+	ByteDynArray(const std::string &hexdata);
 	ByteDynArray(ByteDynArray &&src);
 
 	~ByteDynArray();
@@ -120,7 +120,7 @@ private:
 		return data->size();
 	}
 
-	size_t internalSet(ByteArray* ba, const char *data) {
+	size_t internalSet(ByteArray* ba, const std::string &data) {
 		if (ba != nullptr)
 			return setHexData(data, ba->data());
 		return countHexData(data);

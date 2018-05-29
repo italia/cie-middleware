@@ -26,10 +26,10 @@ class CDES3
 
 public:
 	CDES3();
-	CDES3(const ByteArray &key);
+	CDES3(const ByteArray &key, const ByteArray &iv);
 	~CDES3(void);
 
-	void Init(const ByteArray &key);
+	void Init(const ByteArray &key, const ByteArray &iv);
 	ByteDynArray Encode(const ByteArray &data);
 	ByteDynArray Decode(const ByteArray &data);
 	ByteDynArray RawEncode(const ByteArray &data);
