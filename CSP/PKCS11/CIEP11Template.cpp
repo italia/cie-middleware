@@ -46,8 +46,9 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 	}
 	//ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
 	auto ris = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
-	if (ris !=SCARD_S_SUCCESS)
+	if (ris != SCARD_S_SUCCESS) {
 		ODS("Errore trasmissione APDU");
+	}
 	//else 
 		//ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
 	
