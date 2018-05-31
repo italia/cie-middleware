@@ -1,11 +1,11 @@
-#include "StdAfx.h"
+#include "..\StdAfx.h"
 #include <Winhttp.h>
-#include "Util\tinyxml2.h"
-#include "util/ModuleInfo.h"
-#include "UI/SystemTray.h"
+#include "..\Util\tinyxml2.h"
+#include "..\util/ModuleInfo.h"
+#include "..\UI\SystemTray.h"
 #include <vector>
-#include "res\resource.h"
-#include "CSP\CSP.h"
+#include "..\res\resource.h"
+#include "CSP.h"
 
 extern CModuleInfo moduleInfo;
 std::string latestVersionURL = "";

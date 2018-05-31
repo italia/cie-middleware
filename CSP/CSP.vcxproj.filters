@@ -192,14 +192,14 @@
     <ClCompile Include="Crypto\MD5.cpp">
       <Filter>Source Files\Crypto</Filter>
     </ClCompile>
-    <ClCompile Include="update.cpp">
-      <Filter>Source Files\CSP</Filter>
-    </ClCompile>
     <ClCompile Include="Crypto\SHA512.cpp">
       <Filter>Source Files\Crypto</Filter>
     </ClCompile>
     <ClCompile Include="Util\tinyxml2.cpp">
       <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\update.cpp">
+      <Filter>Source Files\CSP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
