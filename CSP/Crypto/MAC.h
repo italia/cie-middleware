@@ -19,9 +19,9 @@ class CMAC
 #endif
 public:
 	CMAC();
-	CMAC(ByteArray &key);
+	CMAC(const ByteArray &key, const ByteArray &iv);
 	~CMAC(void);
 
-	void Init(ByteArray &key);
+	void Init(const ByteArray &key, const ByteArray &iv);
 	ByteDynArray Mac(const ByteArray &data);
 };

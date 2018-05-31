@@ -24,10 +24,10 @@ bool ishexdigit(char c) {
 	return false;
 }
 
-size_t countHexData(const char *data)
+size_t countHexData(const std::string &data)
 {
 	size_t cnt = 0;
-	size_t slen=strlen(data);
+	size_t slen= data.size();
 	for (size_t i=0;i<slen;i++) {
 		if (isspace(data[i]) || data[i]==',') continue;
 		if (!isxdigit(data[i])) {
@@ -59,10 +59,10 @@ size_t countHexData(const char *data)
 	return cnt;
 }
 
-size_t setHexData(const char *data, uint8_t *buf)
+size_t setHexData(const std::string &data, uint8_t *buf)
 {
 	size_t cnt = 0;
-	size_t slen=strlen(data);
+	size_t slen=data.size();
 	for (size_t i=0;i<slen;i++) {
 		if (isspace(data[i]) || data[i]==',') continue;
 		if (!isxdigit(data[i])) {
@@ -96,12 +96,12 @@ size_t setHexData(const char *data, uint8_t *buf)
 	return cnt;
 }
 
-void readHexData(const char *data,ByteDynArray &ba)
+void readHexData(const std::string &data,ByteDynArray &ba)
 {
 	std::vector<uint8_t> dt;
 
 
-	size_t slen=strlen(data);
+	size_t slen=data.size();
 	for (size_t i=0;i<slen;i++) {
 		if (isspace(data[i]) || data[i]==',') continue;
 		if (!isxdigit(data[i])) {

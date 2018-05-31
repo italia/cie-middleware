@@ -92,6 +92,9 @@
   <ItemGroup>
     <None Include="CIEMiddleware.nsi" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="UpdateTask.xml" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

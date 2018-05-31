@@ -222,8 +222,8 @@ ByteDynArray::ByteDynArray(const ByteArray &src) : ByteDynArray() {
 	alloc_copy(src);
 };
 
-ByteDynArray::ByteDynArray(const char *data) : ByteDynArray() {
-	readHexData(data, *this);
+ByteDynArray::ByteDynArray(const std::string &hexdata) : ByteDynArray() {
+	readHexData(hexdata, *this);
 }
 
 ByteDynArray::ByteDynArray(size_t size) {

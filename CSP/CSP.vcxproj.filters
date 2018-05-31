@@ -192,6 +192,15 @@
     <ClCompile Include="Crypto\MD5.cpp">
       <Filter>Source Files\Crypto</Filter>
     </ClCompile>
+    <ClCompile Include="Crypto\SHA512.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\tinyxml2.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\update.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
@@ -334,6 +343,12 @@
     </ClInclude>
     <ClInclude Include="CSP\CSP.h">
       <Filter>Header Files\CSP</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\sha512.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\tinyxml2.h">
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
