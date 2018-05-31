@@ -11,8 +11,9 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 	if (apduSize == 2) {
 		WORD code = *(WORD*)apdu;
 		if (code == 0xfffd) {
+			int bufLen = *respSize;
 			*respSize = sizeof(data->hCard)+2;
-			memcpy(resp, &data->hCard, sizeof(data->hCard));
+			memcpy_s(resp, bufLen, &data->hCard, sizeof(data->hCard));
 			resp[sizeof(data->hCard)] = 0;
 			resp[sizeof(data->hCard) + 1] = 0;
 
@@ -61,7 +62,8 @@ public:
 	bool init;
 	CIEData(CSlot *slot,ByteArray atr) : ias((CToken::TokenTransmitCallback)TokenTransmitCallback,atr), slot(*slot) {
 		ByteDynArray key(32);
-		aesKey.Init(key.random());
+		ByteDynArray iv(16);
+		aesKey.Init(key.random(),iv.random());
 		token.setTransmitCallbackData(slot);
 		userType = -1;
 		init = false;

@@ -28,10 +28,10 @@ class CAES
 
 public:
 	CAES();
-	CAES(const ByteArray &key);
+	CAES(const ByteArray &key, const ByteArray &iv);
 	~CAES(void);
 
-	void Init(const ByteArray &key);
+	void Init(const ByteArray &key, const ByteArray &iv);
 	ByteDynArray Encode(const ByteArray &data);
 	ByteDynArray Decode(const ByteArray &data);
 	ByteDynArray RawEncode(const ByteArray &data);

@@ -77,7 +77,8 @@ public:
 public:
     // Default handler for tray notification message
 	void(*TrayNotification)(CSystemTray* tray ,WPARAM uID, LPARAM lEvent);
-    virtual LRESULT OnTrayNotification(WPARAM uID, LPARAM lEvent);
+	void(*TrayBaloonTimeout)(CSystemTray* tray);
+	virtual LRESULT OnTrayNotification(WPARAM uID, LPARAM lEvent);
 
 // Overrides
     // ClassWizard generated virtual function overrides

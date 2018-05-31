@@ -356,7 +356,7 @@ void CLog::writeBinData(BYTE *data, size_t datalen) {
 	fopen_s(&lf,logPath.c_str(), "a+t");
 	if (lf) {
 		if (datalen>100) datalen=100;
-		for (int i=0;i<datalen;i++)
+		for (size_t i=0;i<datalen;i++)
 			fprintf(lf, "%02x ", data[i]);
 		fprintf(lf, "\n");
 		fclose(lf);

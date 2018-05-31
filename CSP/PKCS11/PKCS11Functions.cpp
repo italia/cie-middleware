@@ -112,7 +112,7 @@ CK_RV CK_ENTRY C_GetSlotList(CK_BBOOL tokenPresent, CK_SLOT_ID_PTR pSlotList, CK
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutArray(pSlotList, pulCount)
+//	checkOutArray(pSlotList, pulCount)
 
 		logParam(tokenPresent)
 		logParam(pSlotList)
@@ -270,7 +270,7 @@ CK_RV CK_ENTRY C_OpenSession(CK_SLOT_ID slotID, CK_FLAGS flags, CK_VOID_PTR pApp
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutPtr(phSession)
+//	checkOutPtr(phSession)
 
 		logParam(slotID)
 		logParam(flags)
@@ -330,7 +330,7 @@ CK_RV CK_ENTRY C_GetTokenInfo(CK_SLOT_ID slotID, CK_TOKEN_INFO_PTR pInfo)
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutPtr(pInfo)
+//	checkOutPtr(pInfo)
 
 		logParam(slotID)
 		logParam(pInfo)
@@ -406,7 +406,7 @@ CK_RV CK_ENTRY C_GetSlotInfo(CK_SLOT_ID slotID, CK_SLOT_INFO_PTR pInfo)
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutPtr(pInfo)
+//	checkOutPtr(pInfo)
 
 		logParam(slotID)
 		logParam(pInfo)
@@ -433,7 +433,7 @@ CK_RV CK_ENTRY C_GetInfo(CK_INFO_PTR pInfo /* location that receives information
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutPtr(pInfo)
+//	checkOutPtr(pInfo)
 
 		logParam(pInfo)
 
@@ -462,7 +462,7 @@ CK_RV CK_ENTRY C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR ppFunctionList)
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutPtr(ppFunctionList)
+//	checkOutPtr(ppFunctionList)
 
 		logParam(ppFunctionList)
 
@@ -557,7 +557,7 @@ CK_RV CK_ENTRY C_CreateObject(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pTemp
 	std::unique_lock<std::mutex> lock(p11Mutex);
 	
 
-	checkOutPtr(phObject)
+//	checkOutPtr(phObject)
 
 	logParam(hSession)
 	logParam(pTemplate)
@@ -585,8 +585,8 @@ CK_RV CK_ENTRY C_GenerateKey(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 	init_p11_func
 		std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInPtr(pMechanism)
-		checkOutPtr(phKey)
+//	checkInPtr(pMechanism)
+//		checkOutPtr(phKey)
 
 		logParam(hSession)
 		logParam(pMechanism)
@@ -615,9 +615,9 @@ CK_RV CK_ENTRY C_GenerateKeyPair(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pM
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 	
-	checkInPtr(pMechanism)
-		checkOutPtr(phPublicKey)
-		checkOutPtr(phPrivateKey)
+//	checkInPtr(pMechanism)
+//		checkOutPtr(phPublicKey)
+//		checkOutPtr(phPrivateKey)
 
 		logParam(hSession)
 		logParam(pMechanism)
@@ -673,7 +673,7 @@ CK_RV CK_ENTRY C_DigestInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechan
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInPtr(pMechanism)
+//	checkInPtr(pMechanism)
 
 		logParam(hSession)
 		logParam(pMechanism)
@@ -699,8 +699,8 @@ CK_RV CK_ENTRY C_Digest(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG 
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pData, ulDataLen)
-		checkOutArray(pDigest, pulDigestLen)
+//	checkInBuffer(pData, ulDataLen)
+//		checkOutArray(pDigest, pulDigestLen)
 
 		logParam(hSession)
 		logParamBuf(pData, ulDataLen)
@@ -728,7 +728,7 @@ CK_RV CK_ENTRY C_DigestFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pDigest, CK
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutArray(pDigest, pulDigestLen)
+//	checkOutArray(pDigest, pulDigestLen)
 
 		logParam(hSession)
 		logParamBuf(pDigest, pulDigestLen)
@@ -755,7 +755,7 @@ CK_RV CK_ENTRY C_DigestUpdate (CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pPart, ulPartLen)
+//	checkInBuffer(pPart, ulPartLen)
 
 		logParam(hSession)
 		logParamBuf(pPart, ulPartLen)
@@ -778,7 +778,7 @@ CK_RV CK_ENTRY C_FindObjects(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE_PTR phO
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutBuffer(phObject, sizeof(CK_OBJECT_HANDLE)*ulMaxObjectCount)
+//	checkOutBuffer(phObject, sizeof(CK_OBJECT_HANDLE)*ulMaxObjectCount)
 
 		logParam(hSession)
 		logParam(phObject)
@@ -825,7 +825,7 @@ CK_RV CK_ENTRY C_FindObjectsInit(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pT
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInArray(pTemplate,ulCount)
+//	checkInArray(pTemplate,ulCount)
 
 	logParam(hSession)
 	logParam(pTemplate)
@@ -859,7 +859,7 @@ CK_RV CK_ENTRY C_GetAttributeValue(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE 
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInArray(pTemplate, ulCount)
+//	checkInArray(pTemplate, ulCount)
 
 		logParam(hSession)
 		logParam(hObject)
@@ -884,7 +884,7 @@ CK_RV CK_ENTRY C_GetMechanismList(CK_SLOT_ID slotID, CK_MECHANISM_TYPE_PTR pMech
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutArray(pMechanismList,pulCount)
+//	checkOutArray(pMechanismList,pulCount)
 
 	logParam(slotID)
 	logParam(pMechanismList)
@@ -977,7 +977,7 @@ CK_RV CK_ENTRY C_GetSessionInfo(CK_SESSION_HANDLE hSession, CK_SESSION_INFO_PTR 
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutPtr(pInfo)
+//	checkOutPtr(pInfo)
 
 		logParam(hSession)
 		logParam(pInfo)
@@ -1027,7 +1027,7 @@ CK_RV CK_ENTRY C_Login(CK_SESSION_HANDLE hSession, CK_USER_TYPE userType, CK_CHA
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pPin, ulPinLen)
+//	checkInBuffer(pPin, ulPinLen)
 
 		logParam(hSession)
 		logParam(userType)
@@ -1103,10 +1103,10 @@ CK_RV CK_ENTRY C_Sign(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ul
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pData, ulDataLen)
-		checkOutArray(pSignature, pulSignatureLen)
-		checkInBuffer(pData, ulDataLen)
-		checkOutArray(pSignature, pulSignatureLen)
+//	checkInBuffer(pData, ulDataLen)
+//		checkOutArray(pSignature, pulSignatureLen)
+//		checkInBuffer(pData, ulDataLen)
+//		checkOutArray(pSignature, pulSignatureLen)
 
 		logParam(hSession)
 		logParamBuf(pData, ulDataLen)
@@ -1133,7 +1133,7 @@ CK_RV CK_ENTRY C_SignFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pSignature,CK_
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutArray(pSignature, pulSignatureLen)
+//	checkOutArray(pSignature, pulSignatureLen)
 
 		logParam(hSession)
 		logParamBuf(pSignature, pulSignatureLen)
@@ -1163,7 +1163,7 @@ CK_RV CK_ENTRY C_SignInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanis
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInPtr(pMechanism)
+//	checkInPtr(pMechanism)
 
 		logParam(hSession)
 		logParam(pMechanism)
@@ -1192,7 +1192,7 @@ CK_RV CK_ENTRY C_SignUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_UL
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pPart, ulPartLen)
+//	checkInBuffer(pPart, ulPartLen)
 
 		logParam(hSession)
 		logParamBuf(pPart, ulPartLen)
@@ -1220,7 +1220,7 @@ CK_RV CK_ENTRY C_SignRecoverInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pM
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInPtr(pMechanism)
+//	checkInPtr(pMechanism)
 
 		logParam(hSession)
 		logParam(pMechanism)
@@ -1249,8 +1249,8 @@ CK_RV CK_ENTRY C_SignRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_U
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pData, ulDataLen)
-		checkOutArray(pSignature, pulSignatureLen)
+//	checkInBuffer(pData, ulDataLen)
+//		checkOutArray(pSignature, pulSignatureLen)
 
 		logParam(hSession)
 		logParamBuf(pData, ulDataLen)
@@ -1278,7 +1278,7 @@ CK_RV CK_ENTRY C_VerifyRecoverInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR 
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInPtr(pMechanism)
+//	checkInPtr(pMechanism)
 
 		logParam(hSession)
 		logParam(pMechanism)
@@ -1308,8 +1308,8 @@ CK_RV CK_ENTRY C_VerifyRecover(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignatur
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutArray(pData, pulDataLen)
-		checkInBuffer(pSignature, ulSignatureLen)
+//	checkOutArray(pData, pulDataLen)
+//		checkInBuffer(pSignature, ulSignatureLen)
 
 		logParam(hSession)
 		logParamBuf(pSignature, ulSignatureLen)
@@ -1337,7 +1337,7 @@ CK_RV CK_ENTRY C_VerifyInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechan
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInPtr(pMechanism)
+//	checkInPtr(pMechanism)
 
 		logParam(hSession)
 		logParam(pMechanism)
@@ -1366,8 +1366,8 @@ CK_RV CK_ENTRY C_Verify(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG 
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pData, ulDataLen)
-		checkInBuffer(pSignature, ulSignatureLen)
+//	checkInBuffer(pData, ulDataLen)
+//		checkInBuffer(pSignature, ulSignatureLen)
 
 		logParam(hSession)
 		logParamBuf(pData, ulDataLen)
@@ -1393,7 +1393,7 @@ CK_RV CK_ENTRY C_VerifyUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pData, ulDataLen)
+//	checkInBuffer(pData, ulDataLen)
 
 		logParam(hSession)
 		logParamBuf(pData, ulDataLen)
@@ -1421,7 +1421,7 @@ CK_RV CK_ENTRY C_VerifyFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignature,
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pSignature, ulSignatureLen)
+//	checkInBuffer(pSignature, ulSignatureLen)
 
 		logParam(hSession)
 		logParamBuf(pSignature, ulSignatureLen)
@@ -1449,8 +1449,8 @@ CK_RV CK_ENTRY C_Encrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pData, ulDataLen)
-		checkOutArray(pEncryptedData, pulEncryptedDataLen)
+//	checkInBuffer(pData, ulDataLen)
+//		checkOutArray(pEncryptedData, pulEncryptedDataLen)
 
 		logParam(hSession)
 		logParamBuf(pData, ulDataLen)
@@ -1478,7 +1478,7 @@ CK_RV CK_ENTRY C_EncryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pEncryptedD
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutArray(pEncryptedData, pulEncryptedDataLen)
+//	checkOutArray(pEncryptedData, pulEncryptedDataLen)
 
 		logParam(hSession)
 		logParamBuf(pEncryptedData, pulEncryptedDataLen)
@@ -1508,7 +1508,7 @@ CK_RV CK_ENTRY C_EncryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInPtr(pMechanism)
+//	checkInPtr(pMechanism)
 
 		logParam(hSession)
 		logParam(pMechanism)
@@ -1537,8 +1537,8 @@ CK_RV CK_ENTRY C_EncryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pPart, ulPartLen)
-		checkOutArray(pEncryptedPart, pulEncryptedPartLen)
+//	checkInBuffer(pPart, ulPartLen)
+//		checkOutArray(pEncryptedPart, pulEncryptedPartLen)
 
 		logParam(hSession)
 		logParamBuf(pPart, ulPartLen)
@@ -1569,8 +1569,8 @@ CK_RV CK_ENTRY C_Decrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncryptedData,
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pEncryptedData, ulEncryptedDataLen)
-		checkOutArray(pData, pulDataLen)
+//	checkInBuffer(pEncryptedData, ulEncryptedDataLen)
+//		checkOutArray(pData, pulDataLen)
 
 		logParam(hSession)
 		logParamBuf(pEncryptedData, ulEncryptedDataLen)
@@ -1598,7 +1598,7 @@ CK_RV CK_ENTRY C_DecryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pData,CK_UL
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutArray(pData, pulDataLen)
+//	checkOutArray(pData, pulDataLen)
 
 		logParam(hSession)
 		logParamBuf(pData, pulDataLen)
@@ -1628,7 +1628,7 @@ CK_RV CK_ENTRY C_DecryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInPtr(pMechanism)
+//	checkInPtr(pMechanism)
 
 		logParam(hSession)
 		logParam(pMechanism)
@@ -1658,8 +1658,8 @@ CK_RV CK_ENTRY C_DecryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncrypte
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pEncryptedPart, ulEncryptedPartLen)
-		checkOutArray(pPart, pulPartLen)
+//	checkInBuffer(pEncryptedPart, ulEncryptedPartLen)
+//		checkOutArray(pPart, pulPartLen)
 
 		logParam(hSession)
 		logParamBuf(pEncryptedPart, ulEncryptedPartLen)
@@ -1689,7 +1689,7 @@ CK_RV CK_ENTRY C_WaitForSlotEvent(CK_FLAGS flags, CK_SLOT_ID_PTR pSlot, CK_VOID_
 {
 	init_p11_func
 
-		checkOutPtr(pSlot)
+//		checkOutPtr(pSlot)
 
 		logParam(flags)
 		logParam(pSlot)
@@ -1758,7 +1758,7 @@ CK_RV CK_ENTRY C_GenerateRandom(CK_SESSION_HANDLE hSession, CK_BYTE_PTR RandomDa
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutBuffer(RandomData, ulRandomLen)
+//	checkOutBuffer(RandomData, ulRandomLen)
 
 		logParam(hSession)
 		logParamBuf(RandomData, ulRandomLen)
@@ -1783,7 +1783,7 @@ CK_RV CK_ENTRY C_InitPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pPin,CK_ULONG ul
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pPin,ulPinLen);
+//	checkInBuffer(pPin,ulPinLen);
 
 	logParam(hSession)
 		logParamBufHide(pPin, ulPinLen)
@@ -1808,8 +1808,8 @@ CK_RV CK_ENTRY C_SetPIN(CK_SESSION_HANDLE hSession,CK_CHAR_PTR pOldPin,CK_ULONG 
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pOldPin,ulOldLen);
-	checkInBuffer(pNewPin,ulNewLen);
+//	checkInBuffer(pOldPin,ulOldLen);
+//	checkInBuffer(pNewPin,ulNewLen);
 
 	logParam(hSession)
 		logParamBufHide(pOldPin, ulOldLen)
@@ -1835,7 +1835,7 @@ CK_RV CK_ENTRY C_GetObjectSize(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObj
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutPtr(pulSize);
+//	checkOutPtr(pulSize);
 
 	logParam(hSession)
 		logParam(hObject)
@@ -1861,7 +1861,7 @@ CK_RV CK_ENTRY C_GetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOpera
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkOutArray(pOperationState, pulOperationStateLen)
+//	checkOutArray(pOperationState, pulOperationStateLen)
 
 		logParam(hSession)
 		logParamBuf(pOperationState, pulOperationStateLen)
@@ -1888,7 +1888,7 @@ CK_RV CK_ENTRY C_SetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOpera
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	checkInBuffer(pOperationState, ulOperationStateLen)
+//	checkInBuffer(pOperationState, ulOperationStateLen)
 
 		logParam(hSession)
 		logParamBuf(pOperationState, ulOperationStateLen)

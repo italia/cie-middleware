@@ -68,6 +68,8 @@ void CSystemTray::Initialise()
 
 	m_hTargetWnd = NULL;
 	m_uCreationFlags = 0;
+	TrayNotification = NULL;
+	TrayBaloonTimeout = NULL;
 }
 
 ATOM CSystemTray::RegisterClass(HINSTANCE hInstance)
@@ -131,13 +133,13 @@ BOOL CSystemTray::Create(HINSTANCE hInst, HWND hParent, UINT uCallbackMessage,
 #if _MSC_VER < 0x1000
         // The balloon tooltip text can be up to 255 chars long.
 //        ASSERT(AfxIsValidString(szBalloonTip)); 
-        ASSERT(lstrlen(szBalloonTip) < 256);
+        ASSERT(strnlen_s(szBalloonTip,257) < 256);
 #endif
 
         // The balloon title text can be up to 63 chars long.
         if (szBalloonTitle)
         {
-            ASSERT(lstrlen(szBalloonTitle) < 64);
+            ASSERT(strnlen_s(szBalloonTitle,65) < 64);
         }
 
         ASSERT(NIIF_NONE == dwBalloonIcon    || NIIF_INFO == dwBalloonIcon ||
@@ -364,11 +366,11 @@ BOOL CSystemTray::ShowBalloon(LPCTSTR szText,
                             DWORD   dwIcon   /*=NIIF_NONE*/,
                             UINT    uTimeout /*=10*/ )
 {
-    ASSERT(lstrlen(szText) < 256);
+    ASSERT(strnlen_s(szText,257) < 256);
 
     if (szTitle)
     {
-        ASSERT(lstrlen(szTitle) < 64);
+        ASSERT(strnlen_s(szTitle,65) < 64);
     }
 
     ASSERT(NIIF_NONE == dwIcon    || NIIF_INFO == dwIcon ||
@@ -477,6 +479,10 @@ LRESULT CSystemTray::OnTrayNotification(WPARAM wParam, LPARAM lParam)
 		return 0L;
 	}
 	else {
+		if (lParam == NIN_BALLOONTIMEOUT) {
+			if (TrayBaloonTimeout != NULL)
+				TrayBaloonTimeout(this);
+		}
 		if (TrayNotification!=NULL)
 			TrayNotification(this,wParam,lParam);
 	}

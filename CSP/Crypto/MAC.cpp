@@ -17,18 +17,18 @@ public:
 	}
 } algo_mac;
 
-void CMAC::Init(ByteArray &key)
+void CMAC::Init(const ByteArray &key, const ByteArray &iv)
 {
 	init_func
 	size_t KeySize = key.size();
 	ER_ASSERT((KeySize % 8) == 0, "Errore nella lunghezza della chiave MAC (non divisibile per 8)")
-
-	ER_ASSERT(KeySize >= 8 && KeySize <= 32, "Errore nella lunghezza della chiave MAC (<8 o >32)")
+	ER_ASSERT(iv.size() == 8, "Errore nella lunghezza dell'Initial Vector")
+	ER_ASSERT(KeySize >= 8 && KeySize <= 24, "Errore nella lunghezza della chiave MAC (<8 o >24)")
 	ByteDynArray BCrytpKey;
-	iv.resize(8);
-	iv.fill(0);
+	this->iv = iv;	
 	switch (KeySize) {
 	case 8:
+
 		BCrytpKey.set(&key, &key, &key);
 		break;
 	case 16:
@@ -36,10 +36,6 @@ void CMAC::Init(ByteArray &key)
 		break;
 	case 24:
 		BCrytpKey = key;
-		break;
-	case 32:
-		BCrytpKey = key.left(24);
-		iv = key.right(8);
 		break;
 	}
 
@@ -94,31 +90,25 @@ void CMAC::Init(ByteArray &key)
 	init_func
 	size_t KeySize = key.size();
 	ER_ASSERT((KeySize % 8) == 0, "Errore nella lunghezza della chiave MAC (non divisibile per 8)")
+	ER_ASSERT(iv.size() == 8, "Errore nella lunghezza dell'Initial Vector")
 
-		ER_ASSERT(KeySize >= 8 && KeySize <= 32, "Errore nella lunghezza della chiave MAC (<8 o >32)")
-		des_cblock *keyVal1 = nullptr, *keyVal2 = nullptr, *keyVal3 = nullptr;
+	ER_ASSERT(KeySize >= 8 && KeySize <= 24, "Errore nella lunghezza della chiave MAC (<8 o >24)")
+	des_cblock *keyVal1 = nullptr, *keyVal2 = nullptr, *keyVal3 = nullptr;
+	memcpy_s(initVec, sizeof(des_cblock), iv.data(), 8);
 
 	switch (KeySize) {
 	case 8:
-		memset(initVec, 0, 8);
 		keyVal1 = keyVal2 = keyVal3 = (des_cblock *)key.data();
 		break;
 	case 16:
-		memset(initVec, 0, 8);
 		keyVal1 = keyVal3 = (des_cblock *)key.data();
 		keyVal2 = (des_cblock *)key.mid(8).data();
 		break;
 	case 24:
-		memset(initVec, 0, 8);
 		keyVal1 = (des_cblock *)key.data();
 		keyVal2 = (des_cblock *)key.mid(8).data();
 		keyVal3 = (des_cblock *)key.mid(16).data();
 		break;
-	case 32:
-		memcpy_s(initVec, sizeof(des_cblock), key.mid(24).data(), 8);
-		keyVal1 = (des_cblock *)key.data();
-		keyVal2 = (des_cblock *)key.mid(8).data();
-		keyVal3 = (des_cblock *)key.mid(16).data();
 	}
 
 	des_set_key(keyVal1, k1);
@@ -157,7 +147,7 @@ CMAC::CMAC() {
 #endif
 
 
-CMAC::CMAC(ByteArray &key) {
-	Init(key);
+CMAC::CMAC(const ByteArray &key, const ByteArray &iv) {
+	Init(key,iv);
 }
 

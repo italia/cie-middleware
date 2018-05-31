@@ -26,6 +26,7 @@
 
 #include <commctrl.h>
 
+#define _ATL_NO_COM
 extern CComModule _AtlModule;
 
 namespace ATLControls
@@ -418,26 +419,6 @@ public:
     ATLASSERT(::IsWindow(m_hWnd));
     return (int)::SendMessage(m_hWnd, LB_GETTEXT, nIndex, (LPARAM)lpszBuffer);
   }
-#ifndef _ATL_NO_COM
-  BOOL GetTextBSTR(int nIndex, BSTR& bstrText) const
-  {
-    USES_CONVERSION;
-    ATLASSERT(::IsWindow(m_hWnd));
-    ATLASSERT(bstrText == NULL);
-
-    int nLen = GetTextLen(nIndex);
-    if(nLen == LB_ERR)
-      return FALSE;
-
-    LPTSTR lpszText = (LPTSTR)_alloca((nLen + 1) * sizeof(TCHAR));
-
-    if(GetText(nIndex, lpszText) == LB_ERR)
-      return FALSE;
-
-    bstrText = ::SysAllocString(T2OLE(lpszText));
-    return (bstrText != NULL) ? TRUE : FALSE;
-  }
-#endif //!_ATL_NO_COM
   int GetTextLen(int nIndex) const
   {
     ATLASSERT(::IsWindow(m_hWnd));
@@ -679,26 +660,6 @@ public:
     ATLASSERT(::IsWindow(m_hWnd));
     return (int)::SendMessage(m_hWnd, CB_GETLBTEXT, nIndex, (LPARAM)lpszText);
   }
-#ifndef _ATL_NO_COM
-  BOOL GetLBTextBSTR(int nIndex, BSTR& bstrText) const
-  {
-    USES_CONVERSION;
-    ATLASSERT(::IsWindow(m_hWnd));
-    ATLASSERT(bstrText == NULL);
-
-    int nLen = GetLBTextLen(nIndex);
-    if(nLen == CB_ERR)
-      return FALSE;
-
-    LPTSTR lpszText = (LPTSTR)_alloca((nLen + 1) * sizeof(TCHAR));
-
-    if(GetLBText(nIndex, lpszText) == CB_ERR)
-      return FALSE;
-
-    bstrText = ::SysAllocString(T2OLE(lpszText));
-    return (bstrText != NULL) ? TRUE : FALSE;
-  }
-#endif //!_ATL_NO_COM
   int GetLBTextLen(int nIndex) const
   {
     ATLASSERT(::IsWindow(m_hWnd));
@@ -1738,44 +1699,6 @@ public:
     return (BOOL)::SendMessage(m_hWnd, LVM_SETITEM, 0, (LPARAM)&lvi);
   }
 
-#ifndef _ATL_NO_COM
-  BOOL GetItemText(int nItem, int nSubItem, BSTR& bstrText) const
-  {
-    USES_CONVERSION;
-    ATLASSERT(::IsWindow(m_hWnd));
-    ATLASSERT(bstrText == NULL);
-    LV_ITEM lvi;
-    memset(&lvi, 0, sizeof(LV_ITEM));
-    lvi.iSubItem = nSubItem;
-
-    LPTSTR lpstrText = NULL;
-    int nLen = 128;
-    int nRes;
-    do
-    {
-      nLen *= 2;
-      lvi.cchTextMax = nLen;
-      if(lpstrText != NULL)
-      {
-        delete [] lpstrText;
-        lpstrText = NULL;
-      }
-      ATLTRY(lpstrText = new TCHAR[nLen]);
-      if(lpstrText == NULL)
-        break;
-      lpstrText[0] = NULL;
-      lvi.pszText = lpstrText;
-      nRes  = (int)::SendMessage(m_hWnd, LVM_GETITEMTEXT, (WPARAM)nItem,
-        (LPARAM)&lvi);
-    } while (nRes == nLen-1);
-
-    bstrText = ::SysAllocString(T2OLE(lpstrText));
-    delete [] lpstrText;
-
-    return (bstrText != NULL) ? TRUE : FALSE;
-  }
-#endif //!_ATL_NO_COM
-
   int GetItemText(int nItem, int nSubItem, LPTSTR lpszText, int nLen) const
   {
     ATLASSERT(::IsWindow(m_hWnd));
@@ -2252,49 +2175,6 @@ public:
     return (BOOL)::SendMessage(m_hWnd, TVM_GETITEMRECT, (WPARAM)bTextOnly, (LPARAM)lpRect);
   }
 
-#define myT2OLE(lpa,maxSize) myA2W(lpa,maxSize)
-
-#define myA2W(lpa,maxSize) (\
-	((_lpa = lpa) == NULL) ? NULL : (\
-		_convert = (static_cast<int>(strnlen(_lpa,maxSize))+1),\
-		(INT_MAX/2<_convert)? NULL :  \
-		ATLA2WHELPER((LPWSTR) _malloca(_convert*sizeof(WCHAR)), _lpa, _convert, _acp)))
-
-#ifndef _ATL_NO_COM
-  BOOL GetItemText(HTREEITEM hItem, BSTR& bstrText) const
-  {
-    USES_CONVERSION;
-    ATLASSERT(::IsWindow(m_hWnd));
-    ATLASSERT(bstrText == NULL);
-    TV_ITEM item;
-    item.hItem = hItem;
-    item.mask = TVIF_TEXT;
-    LPTSTR lpstrText = NULL;
-    int nLen = 128;
-    do
-    {
-      nLen *= 2;
-      LPTSTR lpstrTemp;
-      lpstrTemp = (LPTSTR)realloc(lpstrText, nLen * sizeof(TCHAR));
-      if(lpstrTemp == NULL)
-      {
-        free(lpstrText);
-        return FALSE;
-      }
-      lpstrText = lpstrTemp;
-      item.pszText = lpstrText;
-      item.cchTextMax = nLen;
-      ::SendMessage(m_hWnd, TVM_GETITEM, 0, (LPARAM)&item);
-    }
-    while (lstrlen(item.pszText) == (nLen-1));
-
-	bstrText = ::SysAllocString(myT2OLE(lpstrText,128));
-    free(lpstrText);
-
-    return (bstrText != NULL) ? TRUE : FALSE;
-  }
-#endif //!_ATL_NO_COM
-
   BOOL GetItemImage(HTREEITEM hItem, int& nImage, int& nSelectedImage) const
   {
     ATLASSERT(::IsWindow(m_hWnd));
@@ -2457,9 +2337,6 @@ public:
   BOOL IsNull() const { return m_hTreeItem == NULL; }
 
   BOOL GetRect(LPRECT lpRect, BOOL bTextOnly);
-#ifndef _ATL_NO_COM
-  BOOL GetText(BSTR& bstrText);
-#endif //!_ATL_NO_COM
   BOOL GetImage(int& nImage, int& nSelectedImage);
   UINT GetState(UINT nStateMask);
   DWORD GetData();
@@ -2708,13 +2585,6 @@ inline CTreeItem CTreeItem::GetRoot()
   ATLASSERT(m_pTreeView != NULL);
   return m_pTreeView->GetRootItem();
 }
-#ifndef _ATL_NO_COM
-inline BOOL CTreeItem::GetText(BSTR& bstrText)
-{
-  ATLASSERT(m_pTreeView != NULL);
-  return m_pTreeView->GetItemText(m_hTreeItem, bstrText);
-}
-#endif //!_ATL_NO_COM
 inline BOOL CTreeItem::GetImage(int& nImage, int& nSelectedImage)
 {
   ATLASSERT(m_pTreeView != NULL);
@@ -3391,25 +3261,6 @@ public:
       *pType = HIWORD(dw);
     return LOWORD(dw);
   }
-#ifndef _ATL_NO_COM
-  BOOL GetTextBSTR(int nPane, BSTR& bstrText, int* pType = NULL) const
-  {
-    USES_CONVERSION;
-    ATLASSERT(::IsWindow(m_hWnd));
-    ATLASSERT(nPane < 256);
-    ATLASSERT(bstrText == NULL);
-    int nLength = LOWORD(::SendMessage(m_hWnd, SB_GETTEXTLENGTH, (WPARAM)nPane, 0L));
-    if(nLength == 0)
-      return FALSE;
-
-    LPSTR lpszText = (LPSTR)_alloca((nLength + 1) * sizeof(char));
-    if(!GetText(nPane, lpszText, pType))
-      return FALSE;
-
-    bstrText = ::SysAllocString(A2W(lpszText));
-    return (bstrText != NULL) ? TRUE : FALSE;
-  }
-#endif //!_ATL_NO_COM
   int GetTextLength(int nPane, int* pType = NULL) const
   {
     ATLASSERT(::IsWindow(m_hWnd));
@@ -4691,25 +4542,6 @@ public:
     ATLASSERT(::IsWindow(m_hWnd));
     return (long)::SendMessage(m_hWnd, EM_GETSELTEXT, 0, (LPARAM)lpBuf);
   }
-#ifndef _ATL_NO_COM
-  BOOL GetSelTextBSTR(BSTR& bstrText) const
-  {
-    USES_CONVERSION;
-    ATLASSERT(::IsWindow(m_hWnd));
-    ATLASSERT(bstrText == NULL);
-
-    CHARRANGE cr;
-    cr.cpMin = cr.cpMax = 0;
-    ::SendMessage(m_hWnd, EM_EXGETSEL, 0, (LPARAM)&cr);
-    LPSTR lpstrText = (char*)_alloca((cr.cpMax - cr.cpMin + 1) * 2);
-    lpstrText[0] = 0;
-    if(::SendMessage(m_hWnd, EM_GETSELTEXT, 0, (LPARAM)lpstrText) == 0)
-      return FALSE;
-
-    bstrText = ::SysAllocString(A2W(lpstrText));
-    return (bstrText != NULL) ? TRUE : FALSE;
-  }
-#endif //!_ATL_NO_COM
   WORD GetSelectionType() const
   {
     ATLASSERT(::IsWindow(m_hWnd));

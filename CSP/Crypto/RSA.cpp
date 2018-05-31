@@ -68,7 +68,7 @@ DWORD CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, 
 {
 	init_func
 	keyPriv = RSA_new();
-	auto BNpubexp = BN_new();
+	auto BNpubexp = BN_secure_new();
 	BN_set_word(BNpubexp, 65537);
 	RSA_generate_key_ex(keyPriv, size, BNpubexp, nullptr);
 	module.resize(BN_num_bytes(keyPriv->n));
@@ -87,7 +87,7 @@ CRSA::CRSA(ByteArray &mod,ByteArray &exp)
 	KeySize = mod.size();
 	keyPriv = RSA_new();
 	keyPriv->n = BN_bin2bn(mod.data(), (int)mod.size(), keyPriv->n);
-	keyPriv->d = BN_new(); 
+	keyPriv->d = BN_secure_new(); 
 	keyPriv->e = BN_bin2bn(exp.data(), (int)exp.size(), keyPriv->e);
 }
 

@@ -51,7 +51,7 @@
 Section "Install"
 
   SetOutPath $SYSDIR
-    
+      
   RMDir /r "$%PROGRAMDATA%\CIEPKI"
  
   ${If} ${RunningX64}	
@@ -77,8 +77,10 @@ Section "Install"
   SetOutPath $SYSDIR
 	createShortCut "$SMPROGRAMS\CIE Middleware\Cambio PIN.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll CambioPIN" "$SYSDIR\CIEPKI.dll" 0
 	createShortCut "$SMPROGRAMS\CIE Middleware\Sblocco PIN.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll SbloccoPIN" "$SYSDIR\CIEPKI.dll" 0
+	createShortCut "$SMPROGRAMS\CIE Middleware\Verifica aggiornamenti.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll Update Display" "$SYSDIR\CIEPKI.dll" 0
 
   SetOutPath $INSTDIR
+  File UpdateTask.xml 
 	
   ${If} ${RunningX64}	
 	SetRegView 64
@@ -91,7 +93,8 @@ Section "Install"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMajor" "0"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMinor" "1"
   SetRegView default
-  
+
+  ExecWait 'schtasks.exe /create /xml "$INSTDIR\UpdateTask.xml" /tn "CIE Middleware Update" /f'
   
   IfRebootFlag 0 noreboot
   MessageBox MB_YESNO "Per completare l'installazione e' necessario il riavvio del computer. Riavviare adesso?" IDNO noreboot
@@ -134,6 +137,8 @@ Section "Uninstall"
 
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\CIE Middleware"
+
+  ExecWait 'schtasks.exe /delete /tn "CIE Middleware Update" /f'
 
   IfRebootFlag 0 noreboot2
   MessageBox MB_YESNO "Per completare l'installazione e' necessario il riavvio del computer. Riavviare adesso?" IDNO noreboot2

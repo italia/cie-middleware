@@ -48,7 +48,7 @@ class IAS
 	ByteDynArray CIE_AID;
 	ByteDynArray ATR;
 	ByteDynArray Certificate;
-	ByteDynArray CardEncKey;
+	ByteDynArray CardEncKey, CardEncIv;
 	StatusWord SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
 	StatusWord SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
 	StatusWord getResp(ByteDynArray &Cardresp, StatusWord sw, ByteDynArray &resp);

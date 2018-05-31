@@ -33,8 +33,9 @@ int TokenTransmitCallback(PCARD_DATA data, BYTE *apdu, DWORD apduSize, BYTE *res
 	if (apduSize == 2) {
 		WORD code = *(WORD*)apdu;
 		if (code == 0xfffd) {
+			int bufLen = *respSize;
 			*respSize = sizeof(data->hScard)+2;
-			memcpy(resp, &data->hScard, sizeof(data->hScard));
+			memcpy_s(resp, bufLen, &data->hScard, sizeof(data->hScard));
 			resp[sizeof(data->hScard)] = 0;
 			resp[sizeof(data->hScard)+1] = 0;
 			return SCARD_S_SUCCESS;
