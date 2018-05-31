@@ -223,7 +223,7 @@
     <ClCompile Include="PCSC\CardLocker.cpp" />
     <ClCompile Include="CSP\CSP.cpp" />
     <ClCompile Include="crypto\DES3.cpp" />
-    <ClCompile Include="update.cpp" />
+    <ClCompile Include="CSP\update.cpp" />
     <ClCompile Include="Util\Array.cpp" />
     <ClCompile Include="Util\funccallinfo.cpp" />
     <ClCompile Include="CSP\IAS.cpp" />
