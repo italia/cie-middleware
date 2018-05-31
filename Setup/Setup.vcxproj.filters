@@ -12,6 +12,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="UpdateTask.xml" />
+    <Xml Include="UpdateTask.xml">
+      <Filter>Source Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

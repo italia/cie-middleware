@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include <Winhttp.h>
 #include "Util\tinyxml2.h"
-#include <Winver.h>
 #include "util/ModuleInfo.h"
 #include "UI/SystemTray.h"
 #include <vector>
@@ -19,7 +18,7 @@ WNDCLASS wndClass;
 #endif
 
 void UpdateClick(CSystemTray* tray, WPARAM uID, LPARAM lEvent) {
-	if (lEvent == WM_LBUTTONUP || lEvent == 0x405) {
+	if (lEvent == WM_LBUTTONUP || lEvent == NIN_BALLOONUSERCLICK) {
 		ShellExecute(NULL, "open", latestVersionURL.c_str(), NULL, NULL, SW_SHOWNORMAL);
 		tray->HideIcon();
 		PostQuitMessage(0);
@@ -27,13 +26,34 @@ void UpdateClick(CSystemTray* tray, WPARAM uID, LPARAM lEvent) {
 }
 
 void QuitClick(CSystemTray* tray, WPARAM uID, LPARAM lEvent) {
-	if (lEvent == WM_LBUTTONUP || lEvent == 0x405) {
+	if (lEvent == WM_LBUTTONUP || lEvent == NIN_BALLOONUSERCLICK) {
 		tray->HideIcon();
 		PostQuitMessage(0);
 	}
 }
+void QuitUpdate(CSystemTray* tray) {
+	tray->HideIcon();
+	PostQuitMessage(0);
+}
 
-void checkVersion(tinyxml2::XMLDocument &doc) {
+void DisplayBaloon(std::string &tip, void(*TrayNotification)(CSystemTray* tray, WPARAM uID, LPARAM lEvent), void(*TrayBaloonTimeout)(CSystemTray* tray))
+{
+	CSystemTray tray(wndClass.hInstance, nullptr, WM_APP, "Aggiornamento middleware CIE",
+		LoadIcon(wndClass.hInstance, MAKEINTRESOURCE(IDI_CIE)), 1);
+
+	tray.ShowIcon();
+	tray.ShowBalloon(tip.c_str(), "CIE", NIIF_INFO);
+	tray.TrayNotification = TrayNotification;
+	tray.TrayBaloonTimeout = TrayBaloonTimeout;
+	MSG Msg;
+	while (GetMessage(&Msg, NULL, 0, 0) > 0)
+	{
+		TranslateMessage(&Msg);
+		DispatchMessage(&Msg);
+	}
+}
+
+void checkVersion(tinyxml2::XMLDocument &doc,bool alwaysDisplay) {
 	VS_FIXEDFILEINFO    *pFileInfo = NULL;
 	UINT                puLenFileInfo = 0;
 	
@@ -58,7 +78,7 @@ void checkVersion(tinyxml2::XMLDocument &doc) {
 		return;
 	std::string verName("version");
 	bool deprecated = false;
-	bool later = false;
+	bool openURL = false;
 	for (auto version = versions->FirstChildElement(); version != NULL; version = version->NextSiblingElement()) {
 		if (verName != version->Name())
 			continue;
@@ -91,11 +111,11 @@ void checkVersion(tinyxml2::XMLDocument &doc) {
 			}
 		}
 
-		if (isMoreRecent) {
+		if (isMoreRecent && std::string(status->GetText()) == "stable") {
 			// versione più recente
 			if (latestVersionURL == "")
 				latestVersionURL = httpURL->GetText();
-			later = true;
+			openURL = true;
 		}
 		if (major == thisMajor && minor == thisMinor && revision == thisRevision && build == thisBuild) {
 			// questa release
@@ -108,44 +128,38 @@ void checkVersion(tinyxml2::XMLDocument &doc) {
 	if (deprecated) {
 		rows.push_back("Attenzione! Questa versione del");
 		rows.push_back("Middleware CIE non è affidabile!");
-		if (!later)
+		if (!openURL)
 			rows.push_back("Si consiglia di disinstallarla");
 	}
 	else {
-		if (later) {
+		if (openURL) {
 			rows.push_back("E' stata pubblicata una versione");
 			rows.push_back("aggiornata del Middleware CIE");
 		}
 	}
-	if (later) {
+	if (openURL) {
 		rows.push_back("Si consiglia di installare l'ultima versione.");
 		rows.push_back("Premere OK per aprire la pagina di download");
 	}
+
+	std::string tip;
 	if (rows.size() == 0)
-		return;
-
-	std::string tip = rows[0];
-	for (int i = 1; i < rows.size(); i++) {
-		tip += "\n";
-		tip += rows[i];
+		if (alwaysDisplay)
+			tip = "La versione installata è già aggiornata";
+		else
+			return;
+	else {
+		tip = rows[0];
+		for (size_t i = 1; i < rows.size(); i++) {
+			tip += "\n";
+			tip += rows[i];
+		}
 	}
 
-
-	CSystemTray tray(wndClass.hInstance, nullptr, WM_APP, "Aggiornamento middleware CIE",
-		LoadIcon(wndClass.hInstance, MAKEINTRESOURCE(IDI_CIE)), 1);
-	
-	tray.ShowBalloon(tip.c_str(), "CIE", NIIF_INFO);
-	tray.ShowIcon();
-	if (later)
-		tray.TrayNotification = UpdateClick;
+	if (openURL)
+		DisplayBaloon(tip, UpdateClick, QuitUpdate);
 	else
-		tray.TrayNotification = QuitClick;
-	MSG Msg;
-	while (GetMessage(&Msg, NULL, 0, 0) > 0)
-	{
-		TranslateMessage(&Msg);
-		DispatchMessage(&Msg);
-	}
+		DisplayBaloon(tip, QuitClick, QuitUpdate);
 	return;
 }
 
@@ -161,6 +175,10 @@ extern "C" int CALLBACK Update(
 		_AtlWinModule.cbSize = sizeof(_ATL_WIN_MODULE);
 		AtlWinModuleInit(&_AtlWinModule);
 	}
+
+	std::string displayCommand = "Display";
+	bool alwaysDisplay = false;
+	alwaysDisplay = displayCommand == lpCmdLine;
 
 	GetClassInfo(NULL, WC_DIALOG, &wndClass);
 	wndClass.hInstance = (HINSTANCE)moduleInfo.getModule();
@@ -179,46 +197,56 @@ extern "C" int CALLBACK Update(
 		WINHTTP_NO_PROXY_NAME,
 		WINHTTP_NO_PROXY_BYPASS, 0);
 
+	bool downloadXML = false;
 	// Specify an HTTP server.
-	if (hSession)
+	if (hSession) {
 		hConnect = WinHttpConnect(hSession, L"localhost",
 			INTERNET_DEFAULT_HTTP_PORT, 0);
-	
-	// Create an HTTP Request handle.
-	if (hConnect != nullptr)
-		hRequest = WinHttpOpenRequest(hConnect, L"GET",
-			L"/temp/version-list.xml",
-			NULL, WINHTTP_NO_REFERER,
-			WINHTTP_DEFAULT_ACCEPT_TYPES,
-			0);
 
-	// Send a Request.
-	if (hRequest != nullptr)
-		bResults = WinHttpSendRequest(hRequest,
-			WINHTTP_NO_ADDITIONAL_HEADERS,
-			0, WINHTTP_NO_REQUEST_DATA, 0,
-			0, 0);
 
-	if (bResults) {
-		bResults = WinHttpReceiveResponse(hRequest, nullptr);
+		// Create an HTTP Request handle.
+		if (hConnect != nullptr) {
+			hRequest = WinHttpOpenRequest(hConnect, L"GET",
+				L"/temp/version-list.xml",
+				NULL, WINHTTP_NO_REFERER,
+				WINHTTP_DEFAULT_ACCEPT_TYPES,
+				0);
 
-		ByteDynArray response;
-		BYTE chunk[4096];
-		DWORD readBytes = 0;
-		while (WinHttpReadData(hRequest, chunk, 4096, &readBytes)) {
-			if (readBytes == 0)
-				break;
-			response.append(ByteArray(chunk, readBytes));
+			// Send a Request.
+			if (hRequest != nullptr) {
+				bResults = WinHttpSendRequest(hRequest,
+					WINHTTP_NO_ADDITIONAL_HEADERS,
+					0, WINHTTP_NO_REQUEST_DATA, 0,
+					0, 0);
+
+				if (bResults) {
+					bResults = WinHttpReceiveResponse(hRequest, nullptr);
+
+					ByteDynArray response;
+					BYTE chunk[4096];
+					DWORD readBytes = 0;
+					while (WinHttpReadData(hRequest, chunk, 4096, &readBytes)) {
+						if (readBytes == 0)
+							break;
+						response.append(ByteArray(chunk, readBytes));
+					}
+					tinyxml2::XMLDocument doc;
+					doc.Parse((char*)response.data(), response.size());
+					if (!doc.Error()) {
+						downloadXML = true;
+						checkVersion(doc, alwaysDisplay);
+					}
+				}
+			}
 		}
-		tinyxml2::XMLDocument doc;
-		doc.Parse((char*)response.data(), response.size());
-		checkVersion(doc);
 	}
-
 	// Close any open handles.
 	if (hRequest) WinHttpCloseHandle(hRequest);
 	if (hConnect) WinHttpCloseHandle(hConnect);
 	if (hSession) WinHttpCloseHandle(hSession);
+
+	if (!downloadXML && alwaysDisplay)
+		DisplayBaloon(std::string("Errore nella comunicazione con il server"), QuitClick, QuitUpdate);
 	exit_CSP_func
 		return 0;
 }
