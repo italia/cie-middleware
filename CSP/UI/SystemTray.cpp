@@ -68,6 +68,8 @@ void CSystemTray::Initialise()
 
 	m_hTargetWnd = NULL;
 	m_uCreationFlags = 0;
+	TrayNotification = NULL;
+	TrayBaloonTimeout = NULL;
 }
 
 ATOM CSystemTray::RegisterClass(HINSTANCE hInstance)
@@ -477,6 +479,10 @@ LRESULT CSystemTray::OnTrayNotification(WPARAM wParam, LPARAM lParam)
 		return 0L;
 	}
 	else {
+		if (lParam == NIN_BALLOONTIMEOUT) {
+			if (TrayBaloonTimeout != NULL)
+				TrayBaloonTimeout(this);
+		}
 		if (TrayNotification!=NULL)
 			TrayNotification(this,wParam,lParam);
 	}
