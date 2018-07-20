@@ -636,13 +636,7 @@ __out_opt                               PDWORD      pcAttemptsRemaining) {
 		if (ias->Callback != nullptr)
 			ias->Callback(3, "Verify PIN", ias->CallbackData);
 
-		if (dwAuthenticatingPinId == ROLE_USER) {
-
-			//ias->GetFirstPIN(PIN);
-			//veriPIN = PIN;
-			//veriPIN.append(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
-			sw = ias->VerifyPIN(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
-		}
+		sw = ias->VerifyPIN(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
 
 		if (sw >= 0x63C0 && sw <= 0x63CF) {
 			ias->attemptsRemaining = sw - 0x63C0;

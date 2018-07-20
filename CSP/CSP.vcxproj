@@ -252,7 +252,6 @@
     <ClCompile Include="CSP\StoreProvider.cpp" />
     <ClCompile Include="Util\SyncroEvent.cpp" />
     <ClCompile Include="UI\SystemTray.cpp" />
-    <ClCompile Include="Util\tinyxml2.cpp" />
     <ClCompile Include="Util\TLV.cpp" />
     <ClCompile Include="PCSC\Token.cpp" />
     <ClCompile Include="Util\util.cpp" />
@@ -304,7 +303,6 @@
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Util\SyncroEvent.h" />
     <ClInclude Include="UI\SystemTray.h" />
-    <ClInclude Include="Util\tinyxml2.h" />
     <ClInclude Include="Util\TLV.h" />
     <ClInclude Include="PCSC\Token.h" />
     <ClInclude Include="Util\util.h" />
