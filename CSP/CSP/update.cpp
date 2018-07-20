@@ -1,9 +1,10 @@
 #include "..\StdAfx.h"
 #include <Winhttp.h>
-#include "..\Util\tinyxml2.h"
 #include "..\util/ModuleInfo.h"
+#include "..\util/IniSettings.h"
 #include "..\UI\SystemTray.h"
 #include <vector>
+#include <fstream>
 #include "..\res\resource.h"
 #include "CSP.h"
 
@@ -53,7 +54,7 @@ void DisplayBaloon(std::string &tip, void(*TrayNotification)(CSystemTray* tray, 
 	}
 }
 
-void checkVersion(tinyxml2::XMLDocument &doc,bool alwaysDisplay) {
+void checkVersion(std::string iniPath,bool alwaysDisplay) {
 	VS_FIXEDFILEINFO    *pFileInfo = NULL;
 	UINT                puLenFileInfo = 0;
 	
@@ -73,21 +74,34 @@ void checkVersion(tinyxml2::XMLDocument &doc,bool alwaysDisplay) {
 	auto thisRevision = (pFileInfo->dwProductVersionLS >> 16) & 0xffff;
 	auto thisBuild = (pFileInfo->dwProductVersionLS >> 0) & 0xffff;
 
-	auto versions = doc.FirstChildElement("versions");
-	if (versions == NULL)
-		return;
-	std::string verName("version");
 	bool deprecated = false;
 	bool openURL = false;
-	for (auto version = versions->FirstChildElement(); version != NULL; version = version->NextSiblingElement()) {
-		if (verName != version->Name())
-			continue;
-		auto number = version->FirstChildElement("number");
-		auto status = version->FirstChildElement("status");
-		auto httpURL = version->FirstChildElement("httpURL");
-		auto installerURL = version->FirstChildElement("installerURL");
-		auto autoupdate = version->FirstChildElement("autoupdate");
-		std::string num = number->GetText();
+	for (int i = 1;;i++) {
+		std::string versionVar("version");
+		versionVar.append(std::to_string(i));
+		IniSettingsString IniVersion("Versions", versionVar.c_str(),"","Versions");
+		std::string versionNumber;
+		IniVersion.GetValue(iniPath.c_str(), versionNumber);
+		if (versionNumber.empty())
+			break;
+
+		IniSettingsString IniVersionNumber(versionNumber.c_str(), "number", "", "Version number");
+		IniSettingsString IniVersionStatus(versionNumber.c_str(), "status", "", "Version status");
+		IniSettingsString IniVersionURL(versionNumber.c_str(), "httpURL", "", "Version URL");
+		IniSettingsString IniVersionInstallerURL(versionNumber.c_str(), "installerURL", "", "Installer URL");
+		IniSettingsString IniVersionAutoUpdate(versionNumber.c_str(), "autoupdate", "", "Version autoupdate");
+
+		std::string num;
+		IniVersionNumber.GetValue(iniPath.c_str(), num);
+		std::string status;
+		IniVersionStatus.GetValue(iniPath.c_str(), status);
+		std::string httpURL;
+		IniVersionURL.GetValue(iniPath.c_str(), httpURL);
+		std::string installerURL;
+		IniVersionInstallerURL.GetValue(iniPath.c_str(), installerURL);
+		std::string autoupdate;
+		IniVersionAutoUpdate.GetValue(iniPath.c_str(), autoupdate);
+
 		size_t off = 0, off2;
 		DWORD major, minor, revision, build;
 		off2 = num.find('.', off); major = std::stoi(num.substr(off, off2 - off)); off = off2 + 1;
@@ -111,15 +125,17 @@ void checkVersion(tinyxml2::XMLDocument &doc,bool alwaysDisplay) {
 			}
 		}
 
-		if (isMoreRecent && std::string(status->GetText()) == "stable") {
+		if (isMoreRecent && (status == "stable")) {
 			// versione più recente
-			if (latestVersionURL == "")
-				latestVersionURL = httpURL->GetText();
-			openURL = true;
+			if (PathIsURL(httpURL.c_str())) {
+				if (latestVersionURL == "")
+					latestVersionURL = httpURL;
+				openURL = true;
+			}
 		}
 		if (major == thisMajor && minor == thisMinor && revision == thisRevision && build == thisBuild) {
 			// questa release
-			if (std::string(status->GetText()) == "deprecated")
+			if (status == "deprecated")
 				deprecated = true;
 			break;
 		}
@@ -197,7 +213,7 @@ extern "C" int CALLBACK Update(
 		WINHTTP_NO_PROXY_NAME,
 		WINHTTP_NO_PROXY_BYPASS, 0);
 
-	bool downloadXML = false;
+	bool downloadIni = false;
 	// Specify an HTTP server.
 	if (hSession) {
 		hConnect = WinHttpConnect(hSession, L"localhost",
@@ -207,7 +223,7 @@ extern "C" int CALLBACK Update(
 		// Create an HTTP Request handle.
 		if (hConnect != nullptr) {
 			hRequest = WinHttpOpenRequest(hConnect, L"GET",
-				L"/temp/version-list.xml",
+				L"/temp/version-list.txt",
 				NULL, WINHTTP_NO_REFERER,
 				WINHTTP_DEFAULT_ACCEPT_TYPES,
 				0);
@@ -222,19 +238,47 @@ extern "C" int CALLBACK Update(
 				if (bResults) {
 					bResults = WinHttpReceiveResponse(hRequest, nullptr);
 
-					ByteDynArray response;
-					BYTE chunk[4096];
-					DWORD readBytes = 0;
-					while (WinHttpReadData(hRequest, chunk, 4096, &readBytes)) {
-						if (readBytes == 0)
-							break;
-						response.append(ByteArray(chunk, readBytes));
-					}
-					tinyxml2::XMLDocument doc;
-					doc.Parse((char*)response.data(), response.size());
-					if (!doc.Error()) {
-						downloadXML = true;
-						checkVersion(doc, alwaysDisplay);
+					if (bResults) {
+						DWORD StatusCode = 0;
+						DWORD Size = sizeof(StatusCode);
+
+						if (WinHttpQueryHeaders(hRequest,
+							WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+							WINHTTP_HEADER_NAME_BY_INDEX,
+							&StatusCode, &Size, WINHTTP_NO_HEADER_INDEX)) {
+
+							if (StatusCode == 200) {
+								ByteDynArray response;
+								BYTE chunk[4096];
+								DWORD readBytes = 0;
+								while (WinHttpReadData(hRequest, chunk, 4096, &readBytes)) {
+									if (readBytes == 0)
+										break;
+									response.append(ByteArray(chunk, readBytes));
+								}
+
+								downloadIni = true;
+
+								WinHttpCloseHandle(hRequest);
+								WinHttpCloseHandle(hConnect);
+								WinHttpCloseHandle(hSession);
+								hRequest = nullptr;
+								hConnect = nullptr;
+								hSession = nullptr;
+
+								char TempPathBuffer[MAX_PATH];
+								char TempFileName[MAX_PATH];
+								if (GetTempPath(MAX_PATH, TempPathBuffer) != 0) {
+									if (GetTempFileName(TempPathBuffer, "CIE", 0, TempFileName) != 0) {
+										std::ofstream str(TempFileName, std::ofstream::binary);
+										str.write((const char*)response.data(),response.size());
+										str.close();
+										checkVersion(std::string(TempFileName), alwaysDisplay);
+										DeleteFile(TempFileName);
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -245,7 +289,7 @@ extern "C" int CALLBACK Update(
 	if (hConnect) WinHttpCloseHandle(hConnect);
 	if (hSession) WinHttpCloseHandle(hSession);
 
-	if (!downloadXML && alwaysDisplay)
+	if (!downloadIni && alwaysDisplay)
 		DisplayBaloon(std::string("Errore nella comunicazione con il server"), QuitClick, QuitUpdate);
 	exit_CSP_func
 		return 0;

@@ -10,7 +10,7 @@ void GetIniString(const char *fileName, const char* section, const char* name, s
 	while (true) {
 		DWORD size=GetPrivateProfileStringA(section,name,"",&buf[0],(DWORD)buf.size(),fileName);
 		if (size<(buf.size()-2)) {
-			buf.resize(size+1,true);
+			buf.resize(size,true);
 			return;
 		}
 		buf.resize(buf.size()*2);
@@ -19,7 +19,7 @@ void GetIniString(const char *fileName, const char* section, const char* name, s
 
 IniSettings::IniSettings(int typeIdconst, const char* section, const char* name, const char *description) {
 	_iniSettings.push_back(this);
-	this->typeId = typeId;
+	this->typeId = typeIdconst;
 	this->section = section;
 	this->name = name;
 	this->description = description;
