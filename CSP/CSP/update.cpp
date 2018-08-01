@@ -179,6 +179,21 @@ void checkVersion(std::string iniPath,bool alwaysDisplay) {
 	return;
 }
 
+string getRandomPrefix() {
+	// genera un prefisso di 3 caratteri alfanumerici random
+	string prefix;
+	ByteDynArray rand(3);
+	rand.random();
+	for (int i = 0; i < 3; i++) {
+		int seed = rand[i] % 36;
+		if (seed < 10)
+			prefix += ('0' + (char)seed);
+		else
+			prefix += ('A' + (char)(seed-10));
+	}
+	return prefix;
+}
+
 extern "C" int CALLBACK Update(
 	_In_ HINSTANCE hInstance,
 	_In_ HINSTANCE hPrevInstance,
@@ -266,10 +281,11 @@ extern "C" int CALLBACK Update(
 								hConnect = nullptr;
 								hSession = nullptr;
 
-								char TempPathBuffer[MAX_PATH];
+								char TempPathBuffer[MAX_PATH-14];
 								char TempFileName[MAX_PATH];
-								if (GetTempPath(MAX_PATH, TempPathBuffer) != 0) {
-									if (GetTempFileName(TempPathBuffer, "CIE", 0, TempFileName) != 0) {
+								if (GetTempPath(MAX_PATH - 14, TempPathBuffer) != 0) {
+									string prefix = getRandomPrefix();
+									if (GetTempFileName(TempPathBuffer, prefix.c_str(), 0, TempFileName) != 0) {
 										std::ofstream str(TempFileName, std::ofstream::binary);
 										str.write((const char*)response.data(),response.size());
 										str.close();
