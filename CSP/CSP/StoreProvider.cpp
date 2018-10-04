@@ -24,9 +24,9 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 	_In_    const void                  *pvPara,
 	_In_          HCERTSTORE            hCertStore,
 	_Inout_       PCERT_STORE_PROV_INFO pStoreProvInfo
-	) {
+) {
 	init_CSP_func
-	HCRYPTPROV prov=0;
+	HCRYPTPROV prov = 0;
 	CryptAcquireContext(&prov, nullptr, MS_SCARD_PROV, PROV_RSA_FULL, CRYPT_SILENT);
 	if (prov == 0) {
 		return TRUE;
@@ -35,12 +35,16 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 	BYTE containerName[200];
 	DWORD containerNameSize = 200;
 	CryptGetProvParam(prov, PP_CONTAINER, containerName, &containerNameSize, 0);
-	DWORD keySpecs[] = { AT_SIGNATURE, AT_KEYEXCHANGE };
-	for (int i = 0; i < 2; i++) {
-		HCRYPTKEY key=0;
-		CryptGetUserKey(prov, keySpecs[i], &key);
-		if (key == 0)
-			continue;
+	std::string ciePrefix(CIE_CONTAINER_NAME);
+	if (containerNameSize<= ciePrefix.length())
+		return TRUE;
+	if (ByteArray(containerName, ciePrefix.length())!=ByteArray((BYTE*)ciePrefix.c_str(), ciePrefix.length()))
+		return TRUE;
+
+	HCRYPTKEY key = 0;
+	CryptGetUserKey(prov, AT_KEYEXCHANGE, &key);
+	if (key != 0) {
+
 		BYTE cert[5000];
 		DWORD certSize = 5000;
 		auto ris = CryptGetKeyParam(key, KP_CERTIFICATE, cert, &certSize, 0);
@@ -49,31 +53,31 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 			WCHAR containerW[100];
 			swprintf_s(containerW, L"%S", containerName);
 			PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert, certSize);
-			if (cer == nullptr)
-				continue;
-			
-			auto _1 = scopeExit([&]() noexcept {
-				CertFreeCertificateContext(cer);
-			});
+			if (cer != nullptr) {
 
-			PCCERT_CONTEXT storeCert = nullptr;
-			CertAddCertificateContextToStore(hCertStore, cer, CERT_STORE_ADD_REPLACE_EXISTING, &storeCert);
-			if (storeCert == nullptr)
-				continue;		
+				auto _1 = scopeExit([&]() noexcept {
+					CertFreeCertificateContext(cer);
+				});
 
-			auto _2 = scopeExit([&]() noexcept {
-				CertFreeCertificateContext(storeCert); 
-			});
+				PCCERT_CONTEXT storeCert = nullptr;
+				CertAddCertificateContextToStore(hCertStore, cer, CERT_STORE_ADD_REPLACE_EXISTING, &storeCert);
+				if (storeCert != nullptr) {
+
+					auto _2 = scopeExit([&]() noexcept {
+						CertFreeCertificateContext(storeCert);
+					});
 
 
-			CRYPT_KEY_PROV_INFO KeyProvInfo;
-			ZeroMem(KeyProvInfo);
-			KeyProvInfo.pwszProvName = MS_SCARD_PROV_W;
-			KeyProvInfo.pwszContainerName = containerW;
-			KeyProvInfo.dwKeySpec = keySpecs[i];
-			KeyProvInfo.dwProvType = PROV_RSA_FULL;
+					CRYPT_KEY_PROV_INFO KeyProvInfo;
+					ZeroMem(KeyProvInfo);
+					KeyProvInfo.pwszProvName = MS_SCARD_PROV_W;
+					KeyProvInfo.pwszContainerName = containerW;
+					KeyProvInfo.dwKeySpec = AT_KEYEXCHANGE;
+					KeyProvInfo.dwProvType = PROV_RSA_FULL;
 
-			CertSetCertificateContextProperty(storeCert, CERT_KEY_PROV_INFO_PROP_ID, 0, &KeyProvInfo);
+					CertSetCertificateContextProperty(storeCert, CERT_KEY_PROV_INFO_PROP_ID, 0, &KeyProvInfo);
+				}
+			}
 		}
 	}
 	CryptReleaseContext(prov, 0);
@@ -139,7 +143,7 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 	SCardEstablishContext(SCARD_SCOPE_SYSTEM,NULL,NULL,&hSC);
 	BYTE ATR[] = { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00, 0x73 };
 	BYTE ATR2[] = { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x04, 0x00, 0x11, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00, 0x8A };
-	BYTE ATR3[] = { 0x3B, 0x88, 0x80, 0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01 };
+	BYTE ATR3[] = { 0x3B, 0x8e, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0x49, 0x54, 0x4E, 0x58, 0x50, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0xF0 };
 	LONG ris;
 	if (ris = RegisterCard(hSC, "CIE_1", ATR, sizeof(ATR)) != SCARD_S_SUCCESS)
 		return E_UNEXPECTED;
