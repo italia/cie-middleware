@@ -7,6 +7,7 @@
 #include <fstream>
 #include "..\res\resource.h"
 #include "CSP.h"
+#include <VersionHelpers.h>
 
 extern CModuleInfo moduleInfo;
 std::string latestVersionURL = "";
@@ -222,26 +223,31 @@ extern "C" int CALLBACK Update(
 		hConnect = nullptr,
 		hRequest = nullptr;
 
+	DWORD accessType = 0;
+	if (IsWindows8Point1OrGreater())
+		accessType = WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY;
+	else
+		accessType = WINHTTP_ACCESS_TYPE_DEFAULT_PROXY;
+
 	// Use WinHttpOpen to obtain a session handle.
 	hSession = WinHttpOpen(L"CIE Middleware",
-		WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,
+		accessType,
 		WINHTTP_NO_PROXY_NAME,
 		WINHTTP_NO_PROXY_BYPASS, 0);
 
 	bool downloadIni = false;
 	// Specify an HTTP server.
 	if (hSession) {
-		hConnect = WinHttpConnect(hSession, L"localhost",
-			INTERNET_DEFAULT_HTTP_PORT, 0);
-
+		hConnect = WinHttpConnect(hSession, L"www.cartaidentita.interno.gov.it",
+			INTERNET_DEFAULT_HTTPS_PORT, 0);
 
 		// Create an HTTP Request handle.
 		if (hConnect != nullptr) {
 			hRequest = WinHttpOpenRequest(hConnect, L"GET",
-				L"/temp/version-list.txt",
+				L"version-list.txt",
 				NULL, WINHTTP_NO_REFERER,
 				WINHTTP_DEFAULT_ACCEPT_TYPES,
-				0);
+				WINHTTP_FLAG_SECURE);
 
 			// Send a Request.
 			if (hRequest != nullptr) {

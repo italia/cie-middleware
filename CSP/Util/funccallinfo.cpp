@@ -33,8 +33,8 @@ CFuncCallInfo::~CFuncCallInfo() {
 	//OutputDebugString(stdPrintf("OUT %s", fName).c_str());
 	//fName = NULL;
 	tlsCallDepth=tlsCallDepth-1;
-	//if (fName)
-	//	log.write("%*sOUT -> %s (%u)",(DWORD)tlsCallDepth,szEmpty,fName,LogNum-1);
+	if (fName)
+		log.write("%*sOUT -> %s (%u)",(DWORD)tlsCallDepth,szEmpty,fName,LogNum-1);
 
 	if (callQueue!=nullptr && callQueue->info == this) {
 		auto head = callQueue->next.release();
