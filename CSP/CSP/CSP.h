@@ -1,5 +1,15 @@
 #pragma once
 
+#define CIE_KEY_BITLEN 2048
+
+#define CIE_CONTAINER_ID 0
+#define CIE_CONTAINER_NAME "CIE"
+#define CIE_PIN_ID ROLE_USER
+#define CIE_PUK_ID ROLE_ADMIN
+#define CIE_SUPPORTED_CYPHER_ALGORITHM L"\0"
+#define CIE_SUPPORTED_ASYMMETRIC_ALGORITHM L"RSA\0"
+
+
 #define init_CSP_func \
 	CFuncCallInfo info(__FUNCTION__, Log); \
 	try {

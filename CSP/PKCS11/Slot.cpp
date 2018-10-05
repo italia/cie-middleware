@@ -2,6 +2,7 @@
 #include "slot.h"
 #include "PKCS11Functions.h"
 #include "../PCSC/token.h"
+#include "../PCSC/PCSC.h"
 
 #include "CardTemplate.h"
 #include "../util/util.h"
@@ -23,8 +24,9 @@ namespace p11 {
 	CCardContext *CSlot::ThreadContext = NULL;
 	bool CSlot::bMonitorUpdate = false;
 
-	CSlot::CSlot(const char *szReader) {
-		szName = szReader;
+	CSlot::CSlot(const char *reader, const char *vendor) {
+		szName = reader;
+		szVendor = vendor;
 		lastEvent = SE_NoEvent;
 		bUpdated = 0;
 		User = CKU_NOBODY;
@@ -70,7 +72,6 @@ namespace p11 {
 							Log.write("Errore nella SCardGetStatusChange - %08X", ris);
 							// non uso la ExitThread!!!
 							// altrimenti non chiamo i distruttori, e mi rimane tutto appeso
-							// SOPRATTUTTO il p11Mutex
 							CSlot::ThreadContext = NULL;
 							return 1;
 						}
@@ -120,11 +121,6 @@ namespace p11 {
 					if ((state[i].dwCurrentState & SCARD_STATE_PRESENT) &&
 						((state[i].dwEventState & SCARD_STATE_EMPTY) ||
 						(state[i].dwEventState & SCARD_STATE_UNAVAILABLE))) {
-						// una carta è stata estratta!!
-						// sincronizzo sul mutex principale p11
-						// le funzioni attualmente in esecuzione che vanno sulla
-						// carta falliranno miseramente, ma se levi la carta
-						// mentre sto firmado mica è colpa mia!
 
 						std::unique_lock<std::mutex> lock(p11Mutex);
 
@@ -262,7 +258,23 @@ namespace p11 {
 			Log.write("reader:%s", szReaderName);
 			std::shared_ptr<CSlot> pSlot = GetSlotFromReaderName(szReaderName);
 			if (pSlot == nullptr) {
-				auto pSlot = std::make_shared<CSlot>(szReaderName);
+				std::string VendorName;
+				{
+					SCARDHANDLE tempCard = 0;
+					DWORD proto = 0;
+					SCardConnect(Context, szReaderName, SCARD_SHARE_DIRECT, SCARD_PROTOCOL_UNDEFINED, &tempCard, &proto);
+					safeConnection safeConn(tempCard);
+					DWORD len = 0;
+					if (SCardGetAttrib(tempCard, SCARD_ATTR_VENDOR_NAME, NULL, &len) == 0) {
+						len++;
+						ByteDynArray vendor(len);
+						vendor.fill(0);
+						SCardGetAttrib(tempCard, SCARD_ATTR_VENDOR_NAME, vendor.data(), &len);
+						SCardDisconnect(tempCard, SCARD_LEAVE_CARD);
+						VendorName=(char*)vendor.data();
+					}
+				}
+				auto pSlot = std::make_shared<CSlot>(szReaderName, VendorName.c_str());
 				CK_SLOT_ID hSlotID = AddSlot(pSlot);
 				bMapChanged = true;
 			}
@@ -348,14 +360,14 @@ namespace p11 {
 		if (IsTokenPresent())
 			pInfo->flags |= CKF_TOKEN_PRESENT;
 
-		memset(pInfo->slotDescription, ' ', 64);
-		size_t SDLen = min(64, szName.size() - 1);
+		memset(pInfo->slotDescription, 0, 64);
+		size_t SDLen = min(64, szName.size());
 		memcpy_s(pInfo->slotDescription, 64, szName.c_str(), SDLen);
 
-		memset(pInfo->manufacturerID, ' ', 32);
-		// non so esattamente perchè, ma nella R1 il manufacturerID sono i primi 32 dello slotDescription
-		size_t MIDLen = min(32, szName.size());
-		memcpy_s(pInfo->manufacturerID, 32, szName.c_str(), MIDLen);
+		memset(pInfo->manufacturerID, 0, 32);
+
+		size_t MIDLen = min(32, szVendor.size());
+		memcpy_s(pInfo->manufacturerID, 32, szVendor.c_str(), MIDLen);
 
 		pInfo->hardwareVersion.major = 0;
 		pInfo->hardwareVersion.minor = 0;
@@ -368,15 +380,13 @@ namespace p11 {
 	{
 		init_func
 
-			//CToken token;
-			//if (token.Connect(szName.stringlock())) _return(CKR_TOKEN_NOT_PRESENT)
 			if (pTemplate == nullptr)
 				pTemplate = CCardTemplate::GetTemplate(*this);
 
 		if (pTemplate == nullptr)
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
 
-		memset(pInfo->label, ' ', sizeof(pInfo->label));
+		memset(pInfo->label, 0, sizeof(pInfo->label));
 		memcpy_s((char*)pInfo->label, 32, pTemplate->szName.c_str(), min(pTemplate->szName.length(), sizeof(pInfo->label)));
 		memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
 
@@ -400,13 +410,13 @@ namespace p11 {
 		std::string model;
 		pTemplate->FunctionList.templateGetModel(*this, model);
 
-		memset(pInfo->serialNumber, ' ', sizeof(pInfo->serialNumber));
+		memset(pInfo->serialNumber, 0, sizeof(pInfo->serialNumber));
 		size_t UIDsize = min(sizeof(pInfo->serialNumber), baSerial.size());
 		memcpy_s(pInfo->serialNumber, 16, baSerial.data(), UIDsize);
 
 		memcpy_s((char*)pInfo->label + pTemplate->szName.length() + 1, sizeof(pInfo->label) - pTemplate->szName.length() - 1, baSerial.data(), baSerial.size());
 
-		memset(pInfo->model, ' ', sizeof(pInfo->model));
+		memset(pInfo->model, 0, sizeof(pInfo->model));
 		memcpy_s(pInfo->model, 16, model.c_str(), min(model.length(), sizeof(pInfo->model)));
 
 		CK_FLAGS dwFlags;
@@ -423,10 +433,10 @@ namespace p11 {
 		pInfo->ulSessionCount = (CK_ULONG)dwSessCount;
 		size_t dwRWSessCount = RWSessionCount();
 
-		pInfo->ulRwSessionCount = dwRWSessCount;
+		pInfo->ulRwSessionCount = (CK_ULONG)dwRWSessCount;
 		pInfo->ulMaxRwSessionCount = MAXSESSIONS;
 
-		pInfo->ulMinPinLen = 5;
+		pInfo->ulMinPinLen = 4;
 		pInfo->ulMaxPinLen = 8;
 
 		pInfo->hardwareVersion.major = 0;
