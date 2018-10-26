@@ -739,7 +739,7 @@ namespace p11 {
 
 		if (Signature.isNull()) {
 			CK_ULONG ulSignLength = pSignMechanism->SignLength();
-			Signature = Signature.left(ulSignLength);
+			Signature = ByteDynArray(ulSignLength);
 			mech.release();
 			return;
 		}
