@@ -35,8 +35,6 @@ public:
 
     // Change or retrieve the Tooltip text
     BOOL   SetTooltipText(LPCTSTR pszTooltipText);
-    BOOL   SetTooltipText(UINT nID);
-    LPTSTR GetTooltipText() const;
 
     // Change or retrieve the icon displayed
     BOOL  SetIcon(HICON hIcon);

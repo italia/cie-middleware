@@ -110,6 +110,47 @@ LRESULT CPin::OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandl
 			ShowToolTip(edit2, tip, L"Lunghezza PIN errata");
 			return TRUE;
 		}
+		char ref = PIN2[0];
+		char last;
+		for (int i = 1; i < PinLen; i++) {
+			last = PIN2[i];
+			if (last != ref)
+				break;
+		}
+		if (last == ref) {
+			ShowToolTip(edit2, L"Il nuovo PIN non deve essere composto da cifre uguali", L"PIN non valido");
+			return TRUE;
+		}
+
+		char prec = PIN2[0];
+		bool isSequence = true;
+		for (int i = 1; i < PinLen; i++) {
+			prec++;
+			if (PIN2[i] != prec) {
+				isSequence = false;
+				break;
+			}
+		}
+		if (isSequence) {
+			ShowToolTip(edit2, L"Il nuovo PIN non deve essere composto da cifre consecutive", L"PIN non valido");
+			return TRUE;
+		}
+
+		prec = PIN2[0];
+		isSequence = true;
+		for (int i = 1; i < PinLen; i++) {
+			prec--;
+			if (PIN2[i] != prec) {
+				isSequence = false;
+				break;
+			}
+		}
+		if (isSequence) {
+			ShowToolTip(edit2, L"Il nuovo PIN non deve essere composto da cifre consecutive", L"PIN non valido");
+			return TRUE;
+		}
+
+
 		if (StrCmpN(PIN, PIN2, 99) != 0) {
 			ShowToolTip(edit, L"Il PIN deve essere digitato due volte", L"PIN non corrispondente");
 			return TRUE;

@@ -24,7 +24,7 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 			ODS("UNPOWER CARD");
 			auto ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
 			if (ris == SCARD_S_SUCCESS) {
-				SCardBeginTransaction(data->hCard);
+				//SCardBeginTransaction(data->hCard);
 				*respSize = 2;
 				resp[0] = 0x90;
 				resp[1] = 0x00;
@@ -35,7 +35,7 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 			DWORD protocol = 0;
 			auto ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
 			if (ris == SCARD_S_SUCCESS) {
-				SCardBeginTransaction(data->hCard);
+				//SCardBeginTransaction(data->hCard);
 				*respSize = 2;
 				resp[0] = 0x90;
 				resp[1] = 0x00;
@@ -44,7 +44,7 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 			return ris;
 		}
 	}
-	//ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
+
 	auto ris = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
 	if (ris == SCARD_W_RESET_CARD)
 	{
@@ -56,8 +56,6 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 	if (ris != SCARD_S_SUCCESS) {
 		ODS("Errore trasmissione APDU");
 	}
-	//else 
-		//ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
 	
 	return ris;
 }

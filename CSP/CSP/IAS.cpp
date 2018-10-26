@@ -241,10 +241,9 @@ void IAS::SelectAID_CIE(bool SM) {
 	exit_func
 }
 
-uint8_t NXP_ATR[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-//uint8_t NXP_ATR[] = { 0x3b,0x80,0x80,0x01,0x01 };
+uint8_t NXP_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0x49, 0x54, 0x4E, 0x58, 0x50, 0x12, 0x0F, 0xFF, 0x82, 0x90 };
 uint8_t Gemalto_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x04, 0x00, 0x11, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00 };
-uint8_t Gemalto2_ATR[] = {0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00 };
+uint8_t Gemalto2_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00 };
 ByteArray baNXP_ATR(NXP_ATR, sizeof(NXP_ATR));
 ByteArray baGemalto_ATR(Gemalto_ATR, sizeof(Gemalto_ATR));
 ByteArray baGemalto2_ATR(Gemalto2_ATR, sizeof(Gemalto2_ATR));
@@ -270,32 +269,39 @@ void IAS::SelectAID_IAS(bool SM) {
 	}
 	ByteDynArray resp;
 	StatusWord sw;
-	uint8_t selectMF[] = { 0x00, 0xa4, 0x00, 0x00 };
-	if (SM)
-	{
-		if ((sw = SendAPDU_SM(VarToByteArray(selectMF), ByteArray(), resp)) != 0x9000)
-			throw scard_error(sw);
-	}
-	else
-	{
-		if ((sw = SendAPDU(VarToByteArray(selectMF), ByteArray(), resp)) != 0x9000)
-			throw scard_error(sw);
-	}
-
-	SM = false;
-	if (type != CIE_Type::CIE_NXP)  {
-		uint8_t selectIAS[] = { 0x00, 0xa4, 0x04, 0x0c };
+	if (type == CIE_Type::CIE_NXP) {
+		uint8_t selectMF[] = { 0x00, 0xa4, 0x00, 0x00 };
 		if (SM)
 		{
-			if ((sw = SendAPDU_SM(VarToByteArray(selectIAS), IAS_AID, resp)) != 0x9000)
+			if ((sw = SendAPDU_SM(VarToByteArray(selectMF), ByteArray(), resp)) != 0x9000)
 				throw scard_error(sw);
 		}
 		else
 		{
-			if ((sw = SendAPDU(VarToByteArray(selectIAS), IAS_AID, resp)) != 0x9000)
+			if ((sw = SendAPDU(VarToByteArray(selectMF), ByteArray(), resp)) != 0x9000)
 				throw scard_error(sw);
 		}
 	}
+	else 	
+		if (type == CIE_Type::CIE_Gemalto) {
+			uint8_t selectIAS[] = { 0x00, 0xa4, 0x04, 0x0c };
+			if (SM)
+			{
+				if ((sw = SendAPDU_SM(VarToByteArray(selectIAS), IAS_AID, resp)) != 0x9000)
+					throw scard_error(sw);
+			}
+			else
+			{
+				if ((sw = SendAPDU(VarToByteArray(selectIAS), IAS_AID, resp)) != 0x9000)
+					throw scard_error(sw);
+			}
+		}
+		else
+		{
+			throw logged_error("Tipo CIE sconosciuto");
+		}
+	
+	SM = false;
 	ActiveDF = DF_IAS;
 	ActiveSM = false;
 	exit_func

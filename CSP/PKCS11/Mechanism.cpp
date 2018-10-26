@@ -571,7 +571,7 @@ namespace p11 {
 
 		// se non posso levare il padding, la firma ha
 		// qualcosa di sbagliato
-		DWORD dwPadLen;
+		size_t dwPadLen;
 		try {
 			dwPadLen = RemovePaddingBT1(baPlainSignature);
 		}
@@ -698,7 +698,7 @@ namespace p11 {
 
 			// devo levare il padding BT2 da paddedData e copiare tutto in unpaddedData;
 			// se non posso levare il padding i dati criptati non sono validi!
-			DWORD dwPaddingLen;
+		size_t dwPaddingLen;
 		try {
 			dwPaddingLen = RemovePaddingBT2(paddedData);
 		}

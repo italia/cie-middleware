@@ -435,19 +435,21 @@ CK_RV CK_ENTRY C_GetInfo(CK_INFO_PTR pInfo /* location that receives information
 
 //	checkOutPtr(pInfo)
 
-		logParam(pInfo)
+	logParam(pInfo)
 
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+	if (!bP11Initialized)
+		throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
 	pInfo->cryptokiVersion.major = 2; /* Cryptoki interface ver */
 	pInfo->cryptokiVersion.minor = 10;   //12345678901234567890123456789012
 	memcpy_s((char*)pInfo->manufacturerID,32,"IPZS                            ", 32);
+	pInfo->manufacturerID[4] = 0;
 
 	pInfo->flags = 0; /* must be zero */
 
 	/* libraryDescription and libraryVersion are new for v2.0 */
 	memcpy_s((char*)pInfo->libraryDescription,32,"CIE PKCS11                      ", 32);
+	pInfo->libraryDescription[10] = 0;
 
 	pInfo->libraryVersion.major = 1; /* version of library */
 	pInfo->libraryVersion.minor = 0; /* version of library */
@@ -464,10 +466,10 @@ CK_RV CK_ENTRY C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR ppFunctionList)
 
 //	checkOutPtr(ppFunctionList)
 
-		logParam(ppFunctionList)
+	logParam(ppFunctionList)
 
-		if (ppFunctionList == NULL)
-			throw p11_error(CKR_ARGUMENTS_BAD);
+	if (ppFunctionList == NULL)
+		throw p11_error(CKR_ARGUMENTS_BAD);
 	
 	*ppFunctionList = &m_FunctionList;
 

@@ -8,11 +8,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-#ifndef ASSERT
-#include <assert.h>
-#define ASSERT assert
-#endif
-
 #ifndef _countof
 #define _countof(x) (sizeof(x)/sizeof(x[0]))
 #endif
@@ -99,18 +94,43 @@ BOOL CSystemTray::Create(HINSTANCE hInst, HWND hParent, UINT uCallbackMessage,
                        LPCTSTR szBalloonTitle /*=NULL*/,  
                        DWORD dwBalloonIcon /*=NIIF_NONE*/,
                        UINT uBalloonTimeout /*=10*/)
-{
-	m_bEnabled = true;
-   
+{   
     m_nMaxTooltipLength = _countof(m_tnd.szTip);
     
-    ASSERT(uCallbackMessage >= WM_APP);
+	if (uCallbackMessage < WM_APP)
+		return FALSE;
 
-    ASSERT(_tcsnlen(szToolTip, m_nMaxTooltipLength+1) <= m_nMaxTooltipLength);
+    if (_tcsnlen(szToolTip, m_nMaxTooltipLength+1) > m_nMaxTooltipLength)
+		return FALSE;
 
-    m_hInstance = hInst;
+	if (szBalloonTip)
+	{
+#if _MSC_VER < 0x1000
+		// The balloon tooltip text can be up to 255 chars long.
+		if (strnlen_s(szBalloonTip, 257) >= 256)
+			return FALSE;
+#endif
 
-    RegisterClass(hInst);
+		// The balloon title text can be up to 63 chars long.
+		if (szBalloonTitle)
+		{
+			if (strnlen_s(szBalloonTitle, 65) >= 64)
+				return FALSE;
+		}
+
+		if (dwBalloonIcon != NIIF_NONE && dwBalloonIcon != NIIF_INFO &&
+			dwBalloonIcon != NIIF_WARNING && dwBalloonIcon != NIIF_ERROR)
+			return FALSE;
+
+		if (uBalloonTimeout < 10 || uBalloonTimeout > 30)
+			return FALSE;
+	}
+
+	m_bEnabled = true;
+
+	m_hInstance = hInst;
+	
+	RegisterClass(hInst);
 
     m_hWnd = ::CreateWindow(TRAYICON_CLASS, _T(""), WS_POPUP, 
                             CW_USEDEFAULT,CW_USEDEFAULT, 
@@ -130,23 +150,6 @@ BOOL CSystemTray::Create(HINSTANCE hInst, HWND hParent, UINT uCallbackMessage,
 
     if (szBalloonTip)
     {
-#if _MSC_VER < 0x1000
-        // The balloon tooltip text can be up to 255 chars long.
-//        ASSERT(AfxIsValidString(szBalloonTip)); 
-        ASSERT(strnlen_s(szBalloonTip,257) < 256);
-#endif
-
-        // The balloon title text can be up to 63 chars long.
-        if (szBalloonTitle)
-        {
-            ASSERT(strnlen_s(szBalloonTitle,65) < 64);
-        }
-
-        ASSERT(NIIF_NONE == dwBalloonIcon    || NIIF_INFO == dwBalloonIcon ||
-               NIIF_WARNING == dwBalloonIcon || NIIF_ERROR == dwBalloonIcon);
-
-        ASSERT(uBalloonTimeout >= 10 && uBalloonTimeout <= 30);
-
         m_tnd.uFlags |= NIF_INFO;
 
         _tcsncpy_s(m_tnd.szInfo, szBalloonTip, 255);
@@ -318,7 +321,8 @@ HICON CSystemTray::GetIcon() const
 
 BOOL CSystemTray::SetTooltipText(LPCTSTR pszTip)
 {
-	ASSERT(_tcsnlen(pszTip, m_nMaxTooltipLength+1) < m_nMaxTooltipLength);
+	if (_tcsnlen(pszTip, m_nMaxTooltipLength + 1) >= m_nMaxTooltipLength)
+		return FALSE;
 
     if (!m_bEnabled)
         return FALSE;
@@ -332,51 +336,26 @@ BOOL CSystemTray::SetTooltipText(LPCTSTR pszTip)
         return Shell_NotifyIcon(NIM_MODIFY, &m_tnd);
 }
 
-BOOL CSystemTray::SetTooltipText(UINT nID)
-{
-    TCHAR strBuffer[1024];
-    ASSERT(1024 >= m_nMaxTooltipLength);
-
-    if (!LoadString(m_hInstance, nID, strBuffer, m_nMaxTooltipLength-1))
-        return FALSE;
-
-    return SetTooltipText(strBuffer);
-}
-
-LPTSTR CSystemTray::GetTooltipText() const
-{
-    if (!m_bEnabled)
-        return FALSE;
-
-    static TCHAR strBuffer[1024];
-    ASSERT(1024 >= m_nMaxTooltipLength);
-
-#ifdef _UNICODE
-    strBuffer[0] = _T('\0');
-    MultiByteToWideChar(CP_ACP, 0, m_tnd.szTip, -1, strBuffer, m_nMaxTooltipLength, NULL, NULL);	
-#else
-    strncpy_s(strBuffer, m_tnd.szTip, m_nMaxTooltipLength-1);
-#endif
-
-    return strBuffer;
-}
-
 BOOL CSystemTray::ShowBalloon(LPCTSTR szText,
                             LPCTSTR szTitle  /*=NULL*/,
                             DWORD   dwIcon   /*=NIIF_NONE*/,
                             UINT    uTimeout /*=10*/ )
 {
-    ASSERT(strnlen_s(szText,257) < 256);
+	if (strnlen_s(szText, 257) >= 256)
+		return FALSE;
 
     if (szTitle)
     {
-        ASSERT(strnlen_s(szTitle,65) < 64);
-    }
+		if (strnlen_s(szTitle, 65) >= 64)
+			return FALSE;
+	}
 
-    ASSERT(NIIF_NONE == dwIcon    || NIIF_INFO == dwIcon ||
-           NIIF_WARNING == dwIcon || NIIF_ERROR == dwIcon);
-
-    ASSERT(uTimeout >= 10 && uTimeout <= 30);
+	if (dwIcon != NIIF_NONE && dwIcon != NIIF_INFO &&
+		dwIcon != NIIF_WARNING && dwIcon != NIIF_ERROR)
+		return FALSE;
+		
+	if (uTimeout  < 10 || uTimeout > 30)
+		return FALSE;
 
 
     m_tnd.uFlags = NIF_INFO;
@@ -403,7 +382,6 @@ BOOL CSystemTray::SetNotificationWnd(HWND hNotifyWnd)
 
     if (!hNotifyWnd || !::IsWindow(hNotifyWnd))
     {
-        ASSERT(FALSE);
         return FALSE;
     }
 
@@ -440,7 +418,8 @@ BOOL CSystemTray::SetCallbackMessage(UINT uCallbackMessage)
     if (!m_bEnabled)
         return FALSE;
 
-    ASSERT(uCallbackMessage >= WM_APP);
+	if (uCallbackMessage < WM_APP)
+		return FALSE;
 
     m_tnd.uCallbackMessage = uCallbackMessage;
     m_tnd.uFlags = NIF_MESSAGE;
@@ -514,8 +493,6 @@ void CSystemTray::InstallIconPending()
     m_bHidden = !Shell_NotifyIcon(NIM_ADD, &m_tnd);
 
     m_bShowIconPending = !m_bHidden;
-
-    ASSERT(m_bHidden == FALSE);
 }
 
 

@@ -53,6 +53,7 @@ public:
 	CK_SLOT_ID hSlot; // ID P11 dello slot
 
 	std::string szName; // nome del lettore associato
+	std::string szVendor; // vendor lettore associato
 
 	bool bUpdated;	// flag: la mappa degli oggetti è aggiornata alla carta
 					// che attualmente è nel lettore?
@@ -81,7 +82,7 @@ public:
 
 	CK_USER_TYPE User; 
 
-	CSlot(const char *szName);
+	CSlot(const char *name, const char *vendor);
 	~CSlot();
 	static CK_SLOT_ID GetNewSlotID();
 	static void InitSlotList();
