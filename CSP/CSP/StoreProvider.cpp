@@ -103,13 +103,17 @@ extern "C" HRESULT __stdcall DllUnregisterServer(void) {
 	return E_UNEXPECTED;
 }
 
-LONG RegisterCard(SCARDCONTEXT hSC, const char *name, BYTE* ATR, int ATRLen) {
+LONG RegisterCard(SCARDCONTEXT hSC, const char *name, BYTE* ATR, int ATRLen, BYTE *Mask) {
 	init_func
 	ByteDynArray ATRMask;
 	LONG ris;
-	SCardForgetCardType(hSC, name);
-	ATRMask.resize(ATRLen);
-	ATRMask.fill(0xff);
+	SCardForgetCardType(hSC, name);	
+	if (Mask == nullptr) {
+		ATRMask.resize(ATRLen);
+		ATRMask.fill(0xff);
+	}
+	else
+		ATRMask = ByteArray(Mask, ATRLen);
 	if ((ris = SCardIntroduceCardType(hSC, name, nullptr, nullptr, 0, ATR, ATRMask.data(), (DWORD)ATRMask.size()) != SCARD_S_SUCCESS))
 	{
 		return E_UNEXPECTED;
@@ -143,13 +147,14 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 	SCardEstablishContext(SCARD_SCOPE_SYSTEM,NULL,NULL,&hSC);
 	BYTE ATR[] = { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00, 0x73 };
 	BYTE ATR2[] = { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x04, 0x00, 0x11, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00, 0x8A };
-	BYTE ATR3[] = { 0x3B, 0x8e, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0x49, 0x54, 0x4E, 0x58, 0x50, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0xF0 };
+	BYTE ATR3[] =      { 0x3B, 0x8E, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0x49, 0x54, 0x4E, 0x58, 0x50, 0x12, 0x0F, 0xFF, 0xFF, 0xFF, 0xE2 };
+	BYTE ATR3_Mask[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 };
 	LONG ris;
-	if (ris = RegisterCard(hSC, "CIE_1", ATR, sizeof(ATR)) != SCARD_S_SUCCESS)
+	if (ris = RegisterCard(hSC, "CIE_1", ATR, sizeof(ATR), nullptr) != SCARD_S_SUCCESS)
 		return E_UNEXPECTED;
-	if (ris = RegisterCard(hSC, "CIE_2", ATR2, sizeof(ATR2)) != SCARD_S_SUCCESS)
+	if (ris = RegisterCard(hSC, "CIE_2", ATR2, sizeof(ATR2), nullptr) != SCARD_S_SUCCESS)
 		return E_UNEXPECTED;
-	if (ris = RegisterCard(hSC, "CIE_3", ATR3, sizeof(ATR3)) != SCARD_S_SUCCESS)
+	if (ris = RegisterCard(hSC, "CIE_3", ATR3, sizeof(ATR3), ATR3_Mask) != SCARD_S_SUCCESS)
 		return E_UNEXPECTED;
 
 	SCardReleaseContext(hSC);
