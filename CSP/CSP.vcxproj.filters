@@ -357,18 +357,6 @@
     <Manifest Include="custom.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\Cancel.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\Cancel2.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\OK.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\OK2.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\Cancel.bmp">
       <Filter>Resource Files</Filter>
     </Image>
