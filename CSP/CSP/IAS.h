@@ -63,6 +63,7 @@ class IAS
 	void increment(ByteArray &seq);
 	void ReadCIEType();
 
+	bool IsImpersonationRunning();
 public:
 	CToken token;
 
@@ -104,6 +105,7 @@ public:
 	void SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN);
 	bool IsEnrolled();
 	void IconaSbloccoPIN();
+	void IconaCertificatoScaduto(const char *seriale);
 
 	void VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 

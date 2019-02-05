@@ -739,7 +739,7 @@ namespace p11 {
 
 		if (Signature.isNull()) {
 			CK_ULONG ulSignLength = pSignMechanism->SignLength();
-			Signature = Signature.left(ulSignLength);
+			Signature = ByteArray(nullptr, ulSignLength);
 			mech.release();
 			return;
 		}
@@ -831,7 +831,7 @@ namespace p11 {
 
 		if (Signature.isNull()) {
 			CK_ULONG ulSignRecoverLength = pSignRecoverMechanism->SignRecoverLength();
-			Signature = Signature.left(ulSignRecoverLength);
+			Signature = ByteArray(nullptr, ulSignRecoverLength);
 			mech.release();
 			return;
 		}
@@ -1084,7 +1084,7 @@ namespace p11 {
 
 		if (Data.isNull()) {
 			pDecryptMechanism->setCache(ByteArray(), baUnpaddedData);
-			Data = Data.left(baUnpaddedData.size());
+			Data = ByteArray(nullptr, baUnpaddedData.size());
 			mech.release();
 		}
 		else if (Data.size()<baUnpaddedData.size()) {
@@ -1383,7 +1383,7 @@ namespace p11 {
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
 
 		if (OperationState.isNull()) {
-			OperationState = OperationState.left(newOperationState.size());
+			OperationState = ByteArray(nullptr, newOperationState.size());
 			return;
 		}
 		if (OperationState.size() < newOperationState.size())

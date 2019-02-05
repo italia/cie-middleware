@@ -3,6 +3,7 @@
 #include "Cardmod.h"
 #include "../PCSC/Token.h"
 #include "../util/moduleinfo.h"
+#include "../Crypto/ASNParser.h"
 #include "CSP.h"
 #include "IAS.h"
 #include <bcrypt.h>
@@ -140,6 +141,29 @@ DWORD WINAPI CardReadFile(
 			DWORD keylen = CIE_KEY_BITLEN;
 			if (!cert.isEmpty()) {
 				PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());
+
+				FILETIME ft;
+				SYSTEMTIME st;
+
+				GetSystemTime(&st); // gets current time
+				SystemTimeToFileTime(&st, &ft); // converts to file time format
+
+				if (CompareFileTime(&ft, &cer->pCertInfo->NotAfter) == 1) {
+					std::string serial = "";
+					CASNParser parser;
+					BYTE snTag[] = { 0x55,0x04,0x05 };
+					ByteArray SNTag(snTag, 3);
+					parser.Parse(ByteArray(cer->pCertInfo->Subject.pbData, cer->pCertInfo->Subject.cbData));					
+					for (int i = 0; i < parser.tags[0]->tags.size(); i++) {
+						auto tag=parser.tags[0]->tags[i].get();
+						if (tag->Child(0, 0x30).Child(0, 6).content == SNTag) {
+							serial = std::string((const char *)tag->Child(0, 0x30).Child(1, 0x13).content.mid(6).data(), 9);
+							break;
+						}
+					}
+					ias->IconaCertificatoScaduto(serial.c_str());
+				}
+
 				if (cer == nullptr)
 					throw logged_error(stdPrintf("Errore nella lettura del certificato:%08x", GetLastError()));
 				auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(cer); });

@@ -241,14 +241,14 @@ void IAS::SelectAID_CIE(bool SM) {
 	exit_func
 }
 
-uint8_t NXP_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0x49, 0x54, 0x4E, 0x58, 0x50, 0x12, 0x0F, 0xFF, 0x82, 0x90 };
-uint8_t Gemalto_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x04, 0x00, 0x11, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00 };
-uint8_t Gemalto2_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00 };
+uint8_t NXP_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0x49, 0x54, 0x4E, 0x58, 0x50 };
+uint8_t Gemalto_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x04, 0x00, 0x11 };
+uint8_t Gemalto2_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF };
 ByteArray baNXP_ATR(NXP_ATR, sizeof(NXP_ATR));
 ByteArray baGemalto_ATR(Gemalto_ATR, sizeof(Gemalto_ATR));
 ByteArray baGemalto2_ATR(Gemalto2_ATR, sizeof(Gemalto2_ATR));
 
-void IAS::ReadCIEType() {	
+void IAS::ReadCIEType() {
 	init_func
 		size_t position;
 	if (ATR.indexOf(baNXP_ATR,position))
@@ -478,7 +478,7 @@ void IAS::DHKeyExchange() {
 	uint8_t MSE_SET[] = { 0x00, 0x22, 0x41, 0xa6 };
 	StatusWord sw;
 	if ((sw = SendAPDU(VarToByteArray(MSE_SET), d1, resp)) != 0x9000)
-	throw scard_error(sw);
+		throw scard_error(sw);
 	uint8_t GET_DATA[] = { 0x00, 0xcb, 0x3f, 0xff };
 	uint8_t GET_DATA_Data[] = { 0x4d, 0x04, 0xa6, 0x02, 0x91, 0x00 };
 	if ((sw = SendAPDU(VarToByteArray(GET_DATA), VarToByteArray(GET_DATA_Data), resp)) != 0x9000)
@@ -885,7 +885,7 @@ void IAS::InitExtAuthKeyParam() {
 	ByteDynArray resp;
 
 	uint8_t getKeyDoup[] = { 00, 0xcb, 0x3f, 0xff };
-	uint8_t getKeyDuopData[] = { 0x4d, 0x0C, 0x70, 0x0A, 0xBF, 0xA0, CIE_KEY_ExtAuth_ID & 0x7f, 0x06, 0x7F, 0x49, 0x03, 0x5F, 0x20, 0x80 };
+	uint8_t getKeyDuopData[] = { 0x4d, 0x09, 0x70, 0x07, 0xBF, 0xA0, CIE_KEY_ExtAuth_ID & 0x7f, 0x03, 0x7F, 0x49, 0x80 };
 	StatusWord sw;
 	if ((sw = SendAPDU(VarToByteArray(getKeyDoup), VarToByteArray(getKeyDuopData), resp)) != 0x9000)
 	throw scard_error(sw);
@@ -1025,6 +1025,39 @@ bool IsUserInteractive()
 	return bIsUserInteractive == TRUE;
 }
 
+bool IAS::IsImpersonationRunning() {
+	HANDLE token = NULL;
+	OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
+	if (token != NULL) {
+		CloseHandle(token);
+		return true;
+	}
+	return false;
+}
+
+void IAS::IconaCertificatoScaduto(const char *seriale) {
+	init_func
+		if (IsUserInteractive()) {
+			PROCESS_INFORMATION pi;
+			STARTUPINFO si;
+			ZeroMem(si);
+			si.cb = sizeof(STARTUPINFO);
+
+			char runDll32Path[MAX_PATH];
+			GetSystemDirectory(runDll32Path, MAX_PATH);
+			strcat_s(runDll32Path, "\\");
+			strcat_s(runDll32Path, "rundll32.exe");
+
+			if (!IsImpersonationRunning()) {
+				if (CreateProcess(runDll32Path, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",CertificatoScaduto ").append(seriale).c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
+					CloseHandle(pi.hThread);
+					CloseHandle(pi.hProcess);
+				}
+			}
+		}
+}
+	
+
 void IAS::IconaSbloccoPIN() {
 	init_func
 		if (IsUserInteractive()) {
@@ -1043,18 +1076,11 @@ void IAS::IconaSbloccoPIN() {
 		strcat_s(runDll32Path, "\\");
 		strcat_s(runDll32Path, "rundll32.exe");
 
-		// check impersonation
-		HANDLE token = NULL;
-		OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
-
-		if (token == NULL) {
+		if (!IsImpersonationRunning()) {
 			if (CreateProcess(runDll32Path, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",SbloccoPIN ICON").c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
 				CloseHandle(pi.hThread);
 				CloseHandle(pi.hProcess);
 			}
-		}
-		else {
-			CloseHandle(token);
 		}
 	}
 }
