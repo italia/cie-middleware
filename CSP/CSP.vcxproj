@@ -213,6 +213,7 @@
     <ClCompile Include="Crypto\SHA512.cpp" />
     <ClCompile Include="CSP\abilitaCIE.cpp" />
     <ClCompile Include="crypto\AES.cpp" />
+    <ClCompile Include="CSP\CIEScaduta.cpp" />
     <ClCompile Include="CSP\ExtAuthKey.cpp" />
     <ClCompile Include="PCSC\APDU.cpp" />
     <ClCompile Include="CSP\cambioPIN.cpp" />

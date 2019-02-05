@@ -198,6 +198,9 @@
     <ClCompile Include="CSP\update.cpp">
       <Filter>Source Files\CSP</Filter>
     </ClCompile>
+    <ClCompile Include="CSP\CIEScaduta.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
