@@ -218,101 +218,23 @@ extern "C" int CALLBACK Update(
 	wndClass.lpszClassName = "CIEDialog";
 	RegisterClass(&wndClass);
 
-	BOOL bResults = FALSE;
-	HINTERNET hSession = nullptr,
-		hConnect = nullptr,
-		hRequest = nullptr;
 
-	DWORD accessType = 0;
-	if (IsWindows8Point1OrGreater())
-		accessType = WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY;
-	else
-		accessType = WINHTTP_ACCESS_TYPE_DEFAULT_PROXY;
-
-	// Use WinHttpOpen to obtain a session handle.
-	hSession = WinHttpOpen(L"CIE Middleware",
-		accessType,
-		WINHTTP_NO_PROXY_NAME,
-		WINHTTP_NO_PROXY_BYPASS, 0);
-
-	bool downloadIni = false;
-	// Specify an HTTP server.
-	if (hSession) {
-		hConnect = WinHttpConnect(hSession, L"www.cartaidentita.interno.gov.it",
-			INTERNET_DEFAULT_HTTPS_PORT, 0);
-
-		// Create an HTTP Request handle.
-		if (hConnect != nullptr) {
-			hRequest = WinHttpOpenRequest(hConnect, L"GET",
-				L"version-list.txt",
-				NULL, WINHTTP_NO_REFERER,
-				WINHTTP_DEFAULT_ACCEPT_TYPES,
-				WINHTTP_FLAG_SECURE);
-
-			// Send a Request.
-			if (hRequest != nullptr) {
-				bResults = WinHttpSendRequest(hRequest,
-					WINHTTP_NO_ADDITIONAL_HEADERS,
-					0, WINHTTP_NO_REQUEST_DATA, 0,
-					0, 0);
-
-				if (bResults) {
-					bResults = WinHttpReceiveResponse(hRequest, nullptr);
-
-					if (bResults) {
-						DWORD StatusCode = 0;
-						DWORD Size = sizeof(StatusCode);
-
-						if (WinHttpQueryHeaders(hRequest,
-							WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-							WINHTTP_HEADER_NAME_BY_INDEX,
-							&StatusCode, &Size, WINHTTP_NO_HEADER_INDEX)) {
-
-							if (StatusCode == 200) {
-								ByteDynArray response;
-								BYTE chunk[4096];
-								DWORD readBytes = 0;
-								while (WinHttpReadData(hRequest, chunk, 4096, &readBytes)) {
-									if (readBytes == 0)
-										break;
-									response.append(ByteArray(chunk, readBytes));
-								}
-
-								downloadIni = true;
-
-								WinHttpCloseHandle(hRequest);
-								WinHttpCloseHandle(hConnect);
-								WinHttpCloseHandle(hSession);
-								hRequest = nullptr;
-								hConnect = nullptr;
-								hSession = nullptr;
-
-								char TempPathBuffer[MAX_PATH-14];
-								char TempFileName[MAX_PATH];
-								if (GetTempPath(MAX_PATH - 14, TempPathBuffer) != 0) {
-									string prefix = getRandomPrefix();
-									if (GetTempFileName(TempPathBuffer, prefix.c_str(), 0, TempFileName) != 0) {
-										std::ofstream str(TempFileName, std::ofstream::binary);
-										str.write((const char*)response.data(),response.size());
-										str.close();
-										checkVersion(std::string(TempFileName), alwaysDisplay);
-										DeleteFile(TempFileName);
-									}
-								}
-							}
-						}
-					}
-				}
+	char TempPathBuffer[MAX_PATH - 14];
+	char TempFileName[MAX_PATH];
+	if (GetTempPath(MAX_PATH - 14, TempPathBuffer) != 0) {
+		string prefix = getRandomPrefix();
+		if (GetTempFileName(TempPathBuffer, prefix.c_str(), 0, TempFileName) != 0) {
+			if (URLDownloadToFile(nullptr, "https://www.cartaidentita.interno.gov.it/version-list.txt", TempFileName, 0, nullptr) == S_OK) {
+				checkVersion(std::string(TempFileName), alwaysDisplay);
+				DeleteFile(TempFileName);
+			}
+			else {
+				if (alwaysDisplay)
+					DisplayBaloon(std::string("Errore nella comunicazione con il server"), QuitClick, QuitUpdate);
 			}
 		}
 	}
-	// Close any open handles.
-	if (hRequest) WinHttpCloseHandle(hRequest);
-	if (hConnect) WinHttpCloseHandle(hConnect);
-	if (hSession) WinHttpCloseHandle(hSession);
 
-	if (!downloadIni && alwaysDisplay)
-		DisplayBaloon(std::string("Errore nella comunicazione con il server"), QuitClick, QuitUpdate);
 	exit_CSP_func
 		return 0;
 }
