@@ -54,9 +54,6 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 		bModuleInit=true;
 		moduleInfo.init(hModule);
 		std::string mainMutexName;
-		//mainMutexName="CIE_P11_Mutex_"+moduleInfo.szModuleName;
-		//p11Mutex.Create(mainMutexName.c_str());
-		//xmlInit();
 		std::string configPath;
 		configPath = moduleInfo.szModulePath + moduleInfo.szModuleName + ".ini";
 		initLog(configPath.c_str(), __DATE__ " " __TIME__);
@@ -72,7 +69,7 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 			C_Finalize(NULL);
 			bP11Initialized = false;
 		}
-		//xmlCleanup();
+		
 		bModuleInit=false;
 		bP11Terminate=true;
 
