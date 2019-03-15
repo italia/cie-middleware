@@ -298,7 +298,10 @@ namespace p11 {
 	CK_OBJECT_HANDLE CSession::GenerateKey(CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount) {
 		init_func
 
-		if ((flags & CKF_RW_SESSION) == 0)
+			// NON SUPPORTATO DALLA CIE
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+
+		/*if ((flags & CKF_RW_SESSION) == 0)
 			throw p11_error(CKR_SESSION_READ_ONLY);
 
 		if (pSlot->User != CKU_USER)
@@ -310,13 +313,16 @@ namespace p11 {
 			return pSlot->GetIDFromObject(pKey);
 		}
 		else
-			throw p11_error(CKR_GENERAL_ERROR);
+			throw p11_error(CKR_GENERAL_ERROR);*/
 	}
 
 	void CSession::GenerateKeyPair(CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, CK_OBJECT_HANDLE_PTR phPublicKey, CK_OBJECT_HANDLE_PTR phPrivateKey) {
 		init_func
 
-			if ((flags & CKF_RW_SESSION) == 0)
+			// NON SUPPORTATO DALLA CIE
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+
+		/*	if ((flags & CKF_RW_SESSION) == 0)
 				throw p11_error(CKR_SESSION_READ_ONLY);
 
 		if (pSlot->User != CKU_USER)
@@ -337,7 +343,7 @@ namespace p11 {
 		}
 		else
 			throw p11_error(CKR_GENERAL_ERROR);
-		
+		*/
 	}
 
 	void CSession::DestroyObject(CK_OBJECT_HANDLE hObject) {
@@ -517,13 +523,14 @@ namespace p11 {
 			pVerifyMechanism = std::move(mech);
 			break;
 		}
+		/*	NON SUPPORTATO DALLA CIE
 		case CKM_RSA_X_509:
 		{
 			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			mech->VerifyInit(hKey);
 			pVerifyMechanism = std::move(mech);
 			break;
-		}
+		}*/
 		default:
 			throw p11_error(CKR_MECHANISM_INVALID);
 		}
@@ -596,13 +603,14 @@ namespace p11 {
 			pVerifyRecoverMechanism = std::move(mech);
 			break;
 		}
+		/* NON SUPPORTATO DALLA CIE
 		case CKM_RSA_X_509:
 		{
 			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			mech->VerifyRecoverInit(hKey);
 			pVerifyRecoverMechanism = std::move(mech);
 			break;
-		}
+		}*/
 		default:
 			throw p11_error(CKR_MECHANISM_INVALID);
 		}
@@ -684,13 +692,14 @@ namespace p11 {
 			pSignMechanism = std::move(mech);
 			break;
 		}
+		/* NON SUPPORTATO DALLA CIE
 		case CKM_RSA_X_509:
 		{
 			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			mech->SignInit(hKey);
 			pSignMechanism = std::move(mech);
 			break;
-		}
+		}*/
 		default:
 			throw p11_error(CKR_MECHANISM_INVALID);
 		}
@@ -798,13 +807,15 @@ namespace p11 {
 			pSignRecoverMechanism = std::move(mech);
 			break;
 		}
+		/*
+		NON SUPPORTATO DALLA CIE
 		case CKM_RSA_X_509:
 		{
 			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
 			mech->SignRecoverInit(hKey);
 			pSignRecoverMechanism = std::move(mech);
 			break;
-		}
+		}*/
 		default:
 			throw p11_error(CKR_MECHANISM_INVALID);
 		}
@@ -858,52 +869,60 @@ namespace p11 {
 	void CSession::EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	{
 		init_func
-		if (pEncryptMechanism != nullptr)
-			throw p11_error(CKR_OPERATION_ACTIVE);
 
-		std::shared_ptr<CP11Object> pObject = pSlot->GetObjectFromID(hKey);
-		if (pObject == NULL)
-			throw p11_error(CKR_KEY_HANDLE_INVALID);
-		if (pObject->ObjClass != CKO_PUBLIC_KEY)
-			throw p11_error(CKR_KEY_HANDLE_INVALID);
-		auto pEncryptKey = std::static_pointer_cast<CP11PublicKey>(pObject);
+			// NON SUPPORTATO DALLA CIE
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 
-		if (pEncryptKey->IsPrivate() && pSlot->User != CKU_USER)
-			throw p11_error(CKR_USER_NOT_LOGGED_IN);
+		//if (pEncryptMechanism != nullptr)
+		//	throw p11_error(CKR_OPERATION_ACTIVE);
 
-		ByteArray *baAttrVal = pEncryptKey->getAttribute(CKA_ENCRYPT);
-		if (baAttrVal == nullptr)
-			throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-		else {
-			if (ByteArrayToVar(*baAttrVal, CK_BBOOL) == FALSE)
-				throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-		}
+		//std::shared_ptr<CP11Object> pObject = pSlot->GetObjectFromID(hKey);
+		//if (pObject == NULL)
+		//	throw p11_error(CKR_KEY_HANDLE_INVALID);
+		//if (pObject->ObjClass != CKO_PUBLIC_KEY)
+		//	throw p11_error(CKR_KEY_HANDLE_INVALID);
+		//auto pEncryptKey = std::static_pointer_cast<CP11PublicKey>(pObject);
 
-		switch (pMechanism->mechanism) {
-		case CKM_RSA_PKCS:
-		{
-			auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
-			mech->EncryptInit(hKey);
-			pEncryptMechanism = std::move(mech);
-			break;
-		}
-		case CKM_RSA_X_509:
-		{
-			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
-			mech->EncryptInit(hKey);
-			pEncryptMechanism = std::move(mech);
-			break;
-		}
-		default:
-			throw p11_error(CKR_MECHANISM_INVALID);
-		}
+		//if (pEncryptKey->IsPrivate() && pSlot->User != CKU_USER)
+		//	throw p11_error(CKR_USER_NOT_LOGGED_IN);
+
+		//ByteArray *baAttrVal = pEncryptKey->getAttribute(CKA_ENCRYPT);
+		//if (baAttrVal == nullptr)
+		//	throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
+		//else {
+		//	if (ByteArrayToVar(*baAttrVal, CK_BBOOL) == FALSE)
+		//		throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
+		//}
+
+		//switch (pMechanism->mechanism) {
+		//case CKM_RSA_PKCS:
+		//{
+		//	auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
+		//	mech->EncryptInit(hKey);
+		//	pEncryptMechanism = std::move(mech);
+		//	break;
+		//}
+		///* NON SUPPORTATO DALLA CIE
+		//case CKM_RSA_X_509:
+		//{
+		//	auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
+		//	mech->EncryptInit(hKey);
+		//	pEncryptMechanism = std::move(mech);
+		//	break;
+		//}*/
+		//default:
+		//	throw p11_error(CKR_MECHANISM_INVALID);
+		//}
 	}
 
 	void CSession::Encrypt(ByteArray &Data, ByteArray &EncryptedData)
 	{
 		init_func
 
-		if (pEncryptMechanism == nullptr)
+			// NON SUPPORTATO DALLA CIE
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+
+		/*if (pEncryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
 
 		CK_ULONG ulReqLen = pEncryptMechanism->EncryptLength();
@@ -917,13 +936,17 @@ namespace p11 {
 
 		EncryptUpdate(Data, EncryptedData);
 
-		EncryptFinal(EncryptedData);
+		EncryptFinal(EncryptedData);*/
 	}
 
 	void CSession::EncryptUpdate(ByteArray &Data, ByteArray &EncryptedData)
 	{
 		init_func
-		if (pEncryptMechanism == nullptr)
+
+		// NON SUPPORTATO DALLA CIE
+		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+
+		/*if (pEncryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
 
 		ByteDynArray baEncryptedData = pEncryptMechanism->EncryptUpdate(Data);
@@ -932,13 +955,17 @@ namespace p11 {
 		EncryptedData = EncryptedData.left(baEncryptedData.size());
 		if (EncryptedData.isNull())
 			return;
-		EncryptedData.copy(baEncryptedData);
+		EncryptedData.copy(baEncryptedData);*/
 	}
 
 	void CSession::EncryptFinal(ByteArray &EncryptedData)
 	{
 		init_func
-		if (pEncryptMechanism == nullptr)
+
+			// NON SUPPORTATO DALLA CIE
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+
+		/*if (pEncryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
 
 		auto mech = make_resetter(pEncryptMechanism);
@@ -958,7 +985,7 @@ namespace p11 {
 		ByteDynArray baEncryptedBuffer = pEncryptMechanism->EncryptFinal();
 
 		EncryptedData.copy(baEncryptedBuffer);
-
+*/
 	}
 
 	/* ******************** */
@@ -968,46 +995,52 @@ namespace p11 {
 	void CSession::DecryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 	{
 		init_func
-			if (pDecryptMechanism != nullptr)
-				throw p11_error(CKR_OPERATION_ACTIVE);
 
-		std::shared_ptr<CP11Object> pObject = pSlot->GetObjectFromID(hKey);
-		if (pObject == nullptr)
-			throw p11_error(CKR_KEY_HANDLE_INVALID);
-		if (pObject->ObjClass != CKO_PRIVATE_KEY)
-			throw p11_error(CKR_KEY_HANDLE_INVALID);
-		auto pDecryptKey = std::static_pointer_cast<CP11PrivateKey>(pObject);
+			// NON SUPPORTATO DALLA CIE
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);			
 
 		
-		if (pDecryptKey->IsPrivate() && pSlot->User != CKU_USER)
-			throw p11_error(CKR_USER_NOT_LOGGED_IN);
+		//if (pDecryptMechanism != nullptr)
+		//	throw p11_error(CKR_OPERATION_ACTIVE);
 
-		ByteArray *baAttrVal = pDecryptKey->getAttribute(CKA_DECRYPT);
-		if (baAttrVal == nullptr)
-			throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-			else {
-				if (ByteArrayToVar(*baAttrVal, CK_BBOOL) == FALSE)
-					throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-			}
+		//std::shared_ptr<CP11Object> pObject = pSlot->GetObjectFromID(hKey);
+		//if (pObject == nullptr)
+		//	throw p11_error(CKR_KEY_HANDLE_INVALID);
+		//if (pObject->ObjClass != CKO_PRIVATE_KEY)
+		//	throw p11_error(CKR_KEY_HANDLE_INVALID);
+		//auto pDecryptKey = std::static_pointer_cast<CP11PrivateKey>(pObject);
 
-		switch (pMechanism->mechanism) {
-		case CKM_RSA_PKCS:
-		{
-			auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
-			mech->DecryptInit(hKey);
-			pDecryptMechanism = std::move(mech);
-			break;
-		}
-		case CKM_RSA_X_509:
-		{
-			auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
-			mech->DecryptInit(hKey);
-			pDecryptMechanism = std::move(mech);
-			break;
-		}
-		default:
-			throw p11_error(CKR_MECHANISM_INVALID);
-		}
+		//
+		//if (pDecryptKey->IsPrivate() && pSlot->User != CKU_USER)
+		//	throw p11_error(CKR_USER_NOT_LOGGED_IN);
+
+		//ByteArray *baAttrVal = pDecryptKey->getAttribute(CKA_DECRYPT);
+		//if (baAttrVal == nullptr)
+		//	throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
+		//	else {
+		//		if (ByteArrayToVar(*baAttrVal, CK_BBOOL) == FALSE)
+		//			throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
+		//	}
+
+		//switch (pMechanism->mechanism) {
+		//case CKM_RSA_PKCS:
+		//{
+		//	auto mech = std::unique_ptr<CRSA_PKCS1>(new CRSA_PKCS1(shared_from_this()));
+		//	mech->DecryptInit(hKey);
+		//	pDecryptMechanism = std::move(mech);
+		//	break;
+		//}
+		///* NON SUPPORTATO DALLA CIE
+		//case CKM_RSA_X_509:
+		//{
+		//	auto mech = std::unique_ptr<CRSA_X509>(new CRSA_X509(shared_from_this()));
+		//	mech->DecryptInit(hKey);
+		//	pDecryptMechanism = std::move(mech);
+		//	break;
+		//}*/
+		//default:
+		//	throw p11_error(CKR_MECHANISM_INVALID);
+		//}
 
 	}
 
@@ -1015,7 +1048,10 @@ namespace p11 {
 	{
 		init_func
 
-		if (pDecryptMechanism == nullptr)
+			// NON SUPPORTATO DALLA CIE
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+
+		/*if (pDecryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
 
 		bool bFound = pDecryptMechanism->checkCache(EncryptedData, Data);
@@ -1029,13 +1065,17 @@ namespace p11 {
 		DecryptFinal(Data);
 
 		if (Data.isNull())
-			pDecryptMechanism->cacheData = EncryptedData;
+			pDecryptMechanism->cacheData = EncryptedData;*/
 	}
 
 	void CSession::DecryptUpdate(ByteArray &EncryptedData, ByteArray &Data)
 	{
 		init_func
-		if (pDecryptMechanism == nullptr)
+
+			// NON SUPPORTATO DALLA CIE
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+
+		/*if (pDecryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
 
 		ByteDynArray baData = pDecryptMechanism->DecryptUpdate(EncryptedData);
@@ -1045,13 +1085,17 @@ namespace p11 {
 		Data = Data.left(baData.size());
 		if (Data.isNull())
 			return;
-		Data.copy(baData);
+		Data.copy(baData);*/
 	}
 
 	void CSession::DecryptFinal(ByteArray &Data)
 	{
 		init_func
-		if (pDecryptMechanism == nullptr)
+
+			// NON SUPPORTATO DALLA CIE
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+
+		/*if (pDecryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
 
 		auto mech = make_resetter(pDecryptMechanism);
@@ -1097,7 +1141,7 @@ namespace p11 {
 			pDecryptMechanism->setCache(ByteArray(), baUnpaddedData);
 			Data.copy(baUnpaddedData);
 			Data = Data.left(baUnpaddedData.size());
-		}
+		}*/
 	}
 
 	void CSession::GenerateRandom(ByteArray &RandomData)

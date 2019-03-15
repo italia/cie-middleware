@@ -251,7 +251,7 @@ namespace p11 {
 		void DigestSetOperationState(ByteArray &OperationState);
 	};
 
-	class CRSA_X509 : public CSignRSA, public CSignRecoverRSA, public CVerifyRSA, public CVerifyRecoverRSA, public CEncryptRSA, public CDecryptRSA
+	/*class CRSA_X509 : public CSignRSA, public CSignRecoverRSA, public CVerifyRSA, public CVerifyRecoverRSA, public CEncryptRSA, public CDecryptRSA
 	{
 	public:
 		CRSA_X509(std::shared_ptr<CSession> Session);
@@ -286,7 +286,7 @@ namespace p11 {
 		ByteDynArray DecryptFinal();
 		ByteDynArray DecryptRemovePadding(ByteArray &paddedData);
 
-	};
+	};*/
 
 	class CRSA_PKCS1 : public CSignRSA, public CSignRecoverRSA, public CVerifyRSA, public CVerifyRecoverRSA, public CEncryptRSA, public CDecryptRSA
 	{

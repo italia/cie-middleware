@@ -1,0 +1,11 @@
+﻿  TestCIE.cpp
+c:\progetti\qequipe\ipzs\cie-middleware\pkcs11\win32.h(9): warning C4005: 'CK_DEFINE_FUNCTION': ridefinizione macro
+  c:\progetti\qequipe\ipzs\cie-middleware\pkcs11\cryptoki.h(60): note: vedere la precedente definizione di 'CK_DEFINE_FUNCTION'
+c:\progetti\qequipe\ipzs\cie-middleware\pkcs11\win32.h(12): warning C4005: 'CK_DECLARE_FUNCTION': ridefinizione macro
+  c:\progetti\qequipe\ipzs\cie-middleware\pkcs11\cryptoki.h(63): note: vedere la precedente definizione di 'CK_DECLARE_FUNCTION'
+c:\progetti\qequipe\ipzs\cie-middleware\pkcs11\win32.h(15): warning C4005: 'CK_DECLARE_FUNCTION_POINTER': ridefinizione macro
+  c:\progetti\qequipe\ipzs\cie-middleware\pkcs11\cryptoki.h(66): note: vedere la precedente definizione di 'CK_DECLARE_FUNCTION_POINTER'
+c:\progetti\qequipe\ipzs\cie-middleware\pkcs11\win32.h(18): warning C4005: 'CK_CALLBACK_FUNCTION': ridefinizione macro
+  c:\progetti\qequipe\ipzs\cie-middleware\pkcs11\cryptoki.h(69): note: vedere la precedente definizione di 'CK_CALLBACK_FUNCTION'
+c:\progetti\qequipe\ipzs\cie-middleware\testcie\testcie.cpp(227): warning C4018: '<': errata corrispondenza tra signed e unsigned
+  TestCIE.vcxproj -> C:\progetti\QEquipe\ipzs\cie-middleware\Win32\Debug\TestCIE.exe

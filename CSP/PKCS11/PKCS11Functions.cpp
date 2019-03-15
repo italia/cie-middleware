@@ -32,7 +32,7 @@ auto_reset_event p11slotEvent/*("CardOS_P11_Event")*/;
 CK_MECHANISM_TYPE P11mechanisms[]= {
 	//CKM_RSA_PKCS_KEY_PAIR_GEN,
 	CKM_RSA_PKCS,
-	CKM_RSA_X_509,
+	// CKM_RSA_X_509, NON SUPPORTATO DALLA CIE
 	CKM_MD5,
 	CKM_SHA_1,
 	CKM_SHA1_RSA_PKCS,
@@ -938,11 +938,12 @@ CK_RV CK_ENTRY C_GetMechanismInfo(CK_SLOT_ID slotID, CK_MECHANISM_TYPE type, CK_
 			pInfo->ulMinKeySize = 1024;
 			pInfo->ulMaxKeySize = 2048;
 			break;
+		/* NON SUPPORTATO DALLA CIE
 		case CKM_RSA_X_509:
 			pInfo->flags = CKF_HW | CKF_ENCRYPT | CKF_DECRYPT | CKF_SIGN | CKF_VERIFY | CKF_SIGN_RECOVER | CKF_VERIFY_RECOVER;
 			pInfo->ulMinKeySize = 1024;
 			pInfo->ulMaxKeySize = 2048;
-			break;
+			break;*/
 		case CKM_SHA1_RSA_PKCS:
 			pInfo->flags = CKF_HW | CKF_SIGN | CKF_VERIFY;
 			pInfo->ulMinKeySize = 1024;
