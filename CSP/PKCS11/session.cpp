@@ -866,12 +866,12 @@ namespace p11 {
 	/*       Encrypt        */
 	/* ******************* */
 
-	void CSession::EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
-	{
-		init_func
+	//void CSession::EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
+	//{
+	//	init_func
 
-			// NON SUPPORTATO DALLA CIE
-			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+	//		// NON SUPPORTATO DALLA CIE
+	//		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 
 		//if (pEncryptMechanism != nullptr)
 		//	throw p11_error(CKR_OPERATION_ACTIVE);
@@ -913,14 +913,14 @@ namespace p11 {
 		//default:
 		//	throw p11_error(CKR_MECHANISM_INVALID);
 		//}
-	}
+	//}
 
-	void CSession::Encrypt(ByteArray &Data, ByteArray &EncryptedData)
-	{
-		init_func
+	//void CSession::Encrypt(ByteArray &Data, ByteArray &EncryptedData)
+	//{
+	//	init_func
 
-			// NON SUPPORTATO DALLA CIE
-			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+	//		// NON SUPPORTATO DALLA CIE
+	//		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 
 		/*if (pEncryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
@@ -937,14 +937,14 @@ namespace p11 {
 		EncryptUpdate(Data, EncryptedData);
 
 		EncryptFinal(EncryptedData);*/
-	}
+	/*}*/
 
-	void CSession::EncryptUpdate(ByteArray &Data, ByteArray &EncryptedData)
-	{
-		init_func
+	//void CSession::EncryptUpdate(ByteArray &Data, ByteArray &EncryptedData)
+	//{
+	//	init_func
 
-		// NON SUPPORTATO DALLA CIE
-		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+	//	// NON SUPPORTATO DALLA CIE
+	//	throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 
 		/*if (pEncryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
@@ -956,14 +956,14 @@ namespace p11 {
 		if (EncryptedData.isNull())
 			return;
 		EncryptedData.copy(baEncryptedData);*/
-	}
+	//}
 
-	void CSession::EncryptFinal(ByteArray &EncryptedData)
-	{
-		init_func
+	//void CSession::EncryptFinal(ByteArray &EncryptedData)
+	//{
+	//	init_func
 
-			// NON SUPPORTATO DALLA CIE
-			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+	//		// NON SUPPORTATO DALLA CIE
+	//		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 
 		/*if (pEncryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
@@ -986,18 +986,18 @@ namespace p11 {
 
 		EncryptedData.copy(baEncryptedBuffer);
 */
-	}
+	//}
 
 	/* ******************** */
 	/*		Decrypt			*/
 	/* ******************** */
 
-	void CSession::DecryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
-	{
-		init_func
+	//void CSession::DecryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
+	//{
+	//	init_func
 
-			// NON SUPPORTATO DALLA CIE
-			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);			
+	//		// NON SUPPORTATO DALLA CIE
+	//		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);			
 
 		
 		//if (pDecryptMechanism != nullptr)
@@ -1042,14 +1042,14 @@ namespace p11 {
 		//	throw p11_error(CKR_MECHANISM_INVALID);
 		//}
 
-	}
+	//}
 
-	void CSession::Decrypt(ByteArray &EncryptedData, ByteArray &Data)
-	{
-		init_func
+	//void CSession::Decrypt(ByteArray &EncryptedData, ByteArray &Data)
+	//{
+	//	init_func
 
-			// NON SUPPORTATO DALLA CIE
-			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+	//		// NON SUPPORTATO DALLA CIE
+	//		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 
 		/*if (pDecryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
@@ -1066,14 +1066,14 @@ namespace p11 {
 
 		if (Data.isNull())
 			pDecryptMechanism->cacheData = EncryptedData;*/
-	}
+	//}
 
-	void CSession::DecryptUpdate(ByteArray &EncryptedData, ByteArray &Data)
-	{
-		init_func
+	//void CSession::DecryptUpdate(ByteArray &EncryptedData, ByteArray &Data)
+	//{
+	//	init_func
 
-			// NON SUPPORTATO DALLA CIE
-			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+	//		// NON SUPPORTATO DALLA CIE
+	//		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 
 		/*if (pDecryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
@@ -1086,14 +1086,14 @@ namespace p11 {
 		if (Data.isNull())
 			return;
 		Data.copy(baData);*/
-	}
+	//}
 
-	void CSession::DecryptFinal(ByteArray &Data)
-	{
-		init_func
+	//void CSession::DecryptFinal(ByteArray &Data)
+	//{
+	//	init_func
 
-			// NON SUPPORTATO DALLA CIE
-			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+	//		// NON SUPPORTATO DALLA CIE
+	//		throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
 
 		/*if (pDecryptMechanism == nullptr)
 			throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
@@ -1142,7 +1142,7 @@ namespace p11 {
 			Data.copy(baUnpaddedData);
 			Data = Data.left(baUnpaddedData.size());
 		}*/
-	}
+	//}
 
 	void CSession::GenerateRandom(ByteArray &RandomData)
 	{
@@ -1242,7 +1242,7 @@ namespace p11 {
 			pSignMechanism->SignSetOperationState(Data);
 		}
 
-		ByteArray DecryptOperationState = Tlv.getValue(OS_Decrypt);
+		/*ByteArray DecryptOperationState = Tlv.getValue(OS_Decrypt);
 		if (!DecryptOperationState.isNull()) {
 			pDecryptMechanism.reset();
 			CTLV DecryptTlv(DecryptOperationState);
@@ -1264,7 +1264,7 @@ namespace p11 {
 
 			DecryptInit(&mech, hKey);
 			pDecryptMechanism->DecryptSetOperationState(Data);
-		}
+		}*/
 
 		ByteArray VerifyOperationState = Tlv.getValue(OS_Verify);
 		if (!VerifyOperationState.isNull()) {
@@ -1293,7 +1293,7 @@ namespace p11 {
 		}
 
 		ByteArray EncryptOperationState = Tlv.getValue(OS_Encrypt);
-		if (!EncryptOperationState.isNull()) {
+		/*if (!EncryptOperationState.isNull()) {
 			pEncryptMechanism.reset();
 			CTLV EncryptTlv(EncryptOperationState);
 			ByteArray Algo = EncryptTlv.getValue(OS_Algo);
@@ -1316,7 +1316,7 @@ namespace p11 {
 			EncryptInit(&mech, hKey);
 
 			pEncryptMechanism->EncryptSetOperationState(Data);
-		}
+		}*/
 
 		ByteArray DigestOperationState = Tlv.getValue(OS_Digest);
 		if (!DigestOperationState.isNull()) {
@@ -1387,7 +1387,7 @@ namespace p11 {
 			ByteDynArray *DigestOperationState = Tlv.addValue(OS_Digest);
 			*DigestOperationState = DigestTlv.getBuffer();
 		}
-		if (pEncryptMechanism) {
+		/*if (pEncryptMechanism) {
 			CTLVCreate EncryptTlv;
 			EncryptTlv.setValue(OS_Algo, ByteArray((BYTE*)&pEncryptMechanism->mtType, sizeof(pEncryptMechanism->mtType)));
 			ByteDynArray EncryptData = pEncryptMechanism->EncryptGetOperationState();
@@ -1403,8 +1403,8 @@ namespace p11 {
 
 			ByteDynArray *EncryptOperationState = Tlv.addValue(OS_Encrypt);
 			*EncryptOperationState = EncryptTlv.getBuffer();
-		}
-		if (pDecryptMechanism) {
+		}*/
+		/*if (pDecryptMechanism) {
 			CTLVCreate DecryptTlv;
 			DecryptTlv.setValue(OS_Algo, ByteArray((BYTE*)&pDecryptMechanism->mtType, sizeof(pDecryptMechanism->mtType)));
 			ByteDynArray DecryptData = pDecryptMechanism->DecryptGetOperationState();
@@ -1420,7 +1420,7 @@ namespace p11 {
 
 			ByteDynArray *DecryptOperationState = Tlv.addValue(OS_Decrypt);
 			*DecryptOperationState = DecryptTlv.getBuffer();
-		}
+		}*/
 		ByteDynArray newOperationState = Tlv.getBuffer();
 
 		if (newOperationState.size() == 0)

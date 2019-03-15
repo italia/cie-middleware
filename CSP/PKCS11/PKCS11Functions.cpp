@@ -1447,28 +1447,31 @@ CK_RV CK_ENTRY C_VerifyFinal(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pSignature,
 CK_RV CK_ENTRY C_Encrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ulDataLen, CK_BYTE_PTR pEncryptedData, CK_ULONG_PTR pulEncryptedDataLen)
 {
 	init_p11_func
-	std::unique_lock<std::mutex> lock(p11Mutex);
 
-//	checkInBuffer(pData, ulDataLen)
-//		checkOutArray(pEncryptedData, pulEncryptedDataLen)
+		return CKR_FUNCTION_NOT_SUPPORTED;
 
-		logParam(hSession)
-		logParamBuf(pData, ulDataLen)
-		logParamBuf(pEncryptedData, pulEncryptedDataLen)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
-
-			std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
-		
-	if (pSession == nullptr) 
-		throw p11_error(CKR_SESSION_HANDLE_INVALID);
-
-	ByteArray EncryptedData(pEncryptedData, *pulEncryptedDataLen);
-	pSession->Encrypt(ByteArray(pData, ulDataLen), EncryptedData);
-	*pulEncryptedDataLen = (CK_ULONG)EncryptedData.size();
-
-	return CKR_OK;
+//	std::unique_lock<std::mutex> lock(p11Mutex);
+//
+////	checkInBuffer(pData, ulDataLen)
+////		checkOutArray(pEncryptedData, pulEncryptedDataLen)
+//
+//		logParam(hSession)
+//		logParamBuf(pData, ulDataLen)
+//		logParamBuf(pEncryptedData, pulEncryptedDataLen)
+//
+//		if (!bP11Initialized)
+//			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+//
+//			std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
+//		
+//	if (pSession == nullptr) 
+//		throw p11_error(CKR_SESSION_HANDLE_INVALID);
+//
+//	ByteArray EncryptedData(pEncryptedData, *pulEncryptedDataLen);
+//	pSession->Encrypt(ByteArray(pData, ulDataLen), EncryptedData);
+//	*pulEncryptedDataLen = (CK_ULONG)EncryptedData.size();
+//
+//	return CKR_OK;
 	exit_p11_func
 	return CKR_GENERAL_ERROR;	
 }
@@ -1476,29 +1479,32 @@ CK_RV CK_ENTRY C_Encrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG
 CK_RV CK_ENTRY C_EncryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pEncryptedData,CK_ULONG_PTR pulEncryptedDataLen)
 {
 	init_p11_func
-	std::unique_lock<std::mutex> lock(p11Mutex);
+	
+		return CKR_FUNCTION_NOT_SUPPORTED;
 
-//	checkOutArray(pEncryptedData, pulEncryptedDataLen)
-
-		logParam(hSession)
-		logParamBuf(pEncryptedData, pulEncryptedDataLen)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
-
-	std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
-		
-	if (pSession == nullptr) 
-		throw p11_error(CKR_SESSION_HANDLE_INVALID);
-
-	if (!pSession->pEncryptMechanism->EncryptSupportMultipart())
-		throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-
-	ByteArray EncryptedData(pEncryptedData, *pulEncryptedDataLen);
-	pSession->EncryptFinal(EncryptedData);
-	*pulEncryptedDataLen = (CK_ULONG)EncryptedData.size();
-
-	return CKR_OK;
+//	std::unique_lock<std::mutex> lock(p11Mutex);
+//
+////	checkOutArray(pEncryptedData, pulEncryptedDataLen)
+//
+//		logParam(hSession)
+//		logParamBuf(pEncryptedData, pulEncryptedDataLen)
+//
+//		if (!bP11Initialized)
+//			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+//
+//	std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
+//		
+//	if (pSession == nullptr) 
+//		throw p11_error(CKR_SESSION_HANDLE_INVALID);
+//
+//	if (!pSession->pEncryptMechanism->EncryptSupportMultipart())
+//		throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
+//
+//	ByteArray EncryptedData(pEncryptedData, *pulEncryptedDataLen);
+//	pSession->EncryptFinal(EncryptedData);
+//	*pulEncryptedDataLen = (CK_ULONG)EncryptedData.size();
+//
+//	return CKR_OK;
 	exit_p11_func
 	return CKR_GENERAL_ERROR;	
 }
@@ -1506,28 +1512,31 @@ CK_RV CK_ENTRY C_EncryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pEncryptedD
 CK_RV CK_ENTRY C_EncryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 {
 	init_p11_func
-	std::unique_lock<std::mutex> lock(p11Mutex);
 
-//	checkInPtr(pMechanism)
+		return CKR_FUNCTION_NOT_SUPPORTED;
 
-		logParam(hSession)
-		logParam(pMechanism)
-		logParam(hKey)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
-
-	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
-		
-	if (pSession == nullptr)
-		throw p11_error(CKR_SESSION_HANDLE_INVALID);
-	
-	if (!CheckMechanismParam(pMechanism))
-		throw p11_error(CKR_MECHANISM_PARAM_INVALID);
-
-	pSession->EncryptInit(pMechanism, hKey);
-
-	return CKR_OK;
+//	std::unique_lock<std::mutex> lock(p11Mutex);
+//
+////	checkInPtr(pMechanism)
+//
+//		logParam(hSession)
+//		logParam(pMechanism)
+//		logParam(hKey)
+//
+//		if (!bP11Initialized)
+//			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+//
+//	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
+//		
+//	if (pSession == nullptr)
+//		throw p11_error(CKR_SESSION_HANDLE_INVALID);
+//	
+//	if (!CheckMechanismParam(pMechanism))
+//		throw p11_error(CKR_MECHANISM_PARAM_INVALID);
+//
+//	pSession->EncryptInit(pMechanism, hKey);
+//
+//	return CKR_OK;
 	exit_p11_func
 	return CKR_GENERAL_ERROR;	
 }
@@ -1535,31 +1544,34 @@ CK_RV CK_ENTRY C_EncryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 CK_RV CK_ENTRY C_EncryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK_ULONG ulPartLen, CK_BYTE_PTR pEncryptedPart, CK_ULONG_PTR pulEncryptedPartLen)
 {
 	init_p11_func
-	std::unique_lock<std::mutex> lock(p11Mutex);
 
-//	checkInBuffer(pPart, ulPartLen)
-//		checkOutArray(pEncryptedPart, pulEncryptedPartLen)
+		return CKR_FUNCTION_NOT_SUPPORTED;
 
-		logParam(hSession)
-		logParamBuf(pPart, ulPartLen)
-		logParamBuf(pEncryptedPart, pulEncryptedPartLen)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
-
-	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
-		
-	if (pSession == nullptr)
-		throw p11_error(CKR_SESSION_HANDLE_INVALID);
-
-	if (!pSession->pEncryptMechanism->EncryptSupportMultipart())
-		throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-
-	ByteArray EncryptedPart(pEncryptedPart, *pulEncryptedPartLen);
-	pSession->EncryptUpdate(ByteArray(pPart, ulPartLen), EncryptedPart);
-	*pulEncryptedPartLen = (CK_ULONG)EncryptedPart.size();
-
-	return CKR_OK;
+//	std::unique_lock<std::mutex> lock(p11Mutex);
+//
+////	checkInBuffer(pPart, ulPartLen)
+////		checkOutArray(pEncryptedPart, pulEncryptedPartLen)
+//
+//		logParam(hSession)
+//		logParamBuf(pPart, ulPartLen)
+//		logParamBuf(pEncryptedPart, pulEncryptedPartLen)
+//
+//		if (!bP11Initialized)
+//			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+//
+//	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
+//		
+//	if (pSession == nullptr)
+//		throw p11_error(CKR_SESSION_HANDLE_INVALID);
+//
+//	if (!pSession->pEncryptMechanism->EncryptSupportMultipart())
+//		throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
+//
+//	ByteArray EncryptedPart(pEncryptedPart, *pulEncryptedPartLen);
+//	pSession->EncryptUpdate(ByteArray(pPart, ulPartLen), EncryptedPart);
+//	*pulEncryptedPartLen = (CK_ULONG)EncryptedPart.size();
+//
+//	return CKR_OK;
 	exit_p11_func
 	return CKR_GENERAL_ERROR;	
 }
@@ -1567,28 +1579,31 @@ CK_RV CK_ENTRY C_EncryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pPart, CK
 CK_RV CK_ENTRY C_Decrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncryptedData, CK_ULONG ulEncryptedDataLen, CK_BYTE_PTR pData, CK_ULONG_PTR pulDataLen)
 {
 	init_p11_func
-	std::unique_lock<std::mutex> lock(p11Mutex);
 
-//	checkInBuffer(pEncryptedData, ulEncryptedDataLen)
-//		checkOutArray(pData, pulDataLen)
+		return CKR_FUNCTION_NOT_SUPPORTED;
 
-		logParam(hSession)
-		logParamBuf(pEncryptedData, ulEncryptedDataLen)
-		logParamBuf(pData, pulDataLen)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
-
-	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
-		
-	if (pSession == nullptr)
-		throw p11_error(CKR_SESSION_HANDLE_INVALID);
-
-	ByteArray Data(pData, *pulDataLen);
-	pSession->Decrypt(ByteArray(pEncryptedData, ulEncryptedDataLen), Data);
-	*pulDataLen = (CK_ULONG)Data.size();
-	
-	return CKR_OK;
+//	std::unique_lock<std::mutex> lock(p11Mutex);
+//
+////	checkInBuffer(pEncryptedData, ulEncryptedDataLen)
+////		checkOutArray(pData, pulDataLen)
+//
+//		logParam(hSession)
+//		logParamBuf(pEncryptedData, ulEncryptedDataLen)
+//		logParamBuf(pData, pulDataLen)
+//
+//		if (!bP11Initialized)
+//			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+//
+//	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
+//		
+//	if (pSession == nullptr)
+//		throw p11_error(CKR_SESSION_HANDLE_INVALID);
+//
+//	ByteArray Data(pData, *pulDataLen);
+//	pSession->Decrypt(ByteArray(pEncryptedData, ulEncryptedDataLen), Data);
+//	*pulDataLen = (CK_ULONG)Data.size();
+//	
+//	return CKR_OK;
 	exit_p11_func
 	return CKR_GENERAL_ERROR;	
 }
@@ -1596,29 +1611,32 @@ CK_RV CK_ENTRY C_Decrypt(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncryptedData,
 CK_RV CK_ENTRY C_DecryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pData,CK_ULONG_PTR pulDataLen)
 {
 	init_p11_func
-	std::unique_lock<std::mutex> lock(p11Mutex);
 
-//	checkOutArray(pData, pulDataLen)
+		return CKR_FUNCTION_NOT_SUPPORTED;
 
-		logParam(hSession)
-		logParamBuf(pData, pulDataLen)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
-
-	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
-		
-	if (pSession == nullptr)
-		throw p11_error(CKR_SESSION_HANDLE_INVALID);
-
-	if (!pSession->pDecryptMechanism->DecryptSupportMultipart())
-		throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-
-	ByteArray Data(pData, *pulDataLen);
-	pSession->DecryptFinal(Data);
-	*pulDataLen = (CK_ULONG)Data.size();
-
-	return CKR_OK;
+//	std::unique_lock<std::mutex> lock(p11Mutex);
+//
+////	checkOutArray(pData, pulDataLen)
+//
+//		logParam(hSession)
+//		logParamBuf(pData, pulDataLen)
+//
+//		if (!bP11Initialized)
+//			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+//
+//	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
+//		
+//	if (pSession == nullptr)
+//		throw p11_error(CKR_SESSION_HANDLE_INVALID);
+//
+//	if (!pSession->pDecryptMechanism->DecryptSupportMultipart())
+//		throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
+//
+//	ByteArray Data(pData, *pulDataLen);
+//	pSession->DecryptFinal(Data);
+//	*pulDataLen = (CK_ULONG)Data.size();
+//
+//	return CKR_OK;
 	exit_p11_func
 	return CKR_GENERAL_ERROR;	
 }
@@ -1626,29 +1644,32 @@ CK_RV CK_ENTRY C_DecryptFinal(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pData,CK_UL
 CK_RV CK_ENTRY C_DecryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey)
 {
 	init_p11_func
-	std::unique_lock<std::mutex> lock(p11Mutex);
 
-//	checkInPtr(pMechanism)
+		return CKR_FUNCTION_NOT_SUPPORTED;
 
-		logParam(hSession)
-		logParam(pMechanism)
-		logParam(hKey)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
-
-	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
-		
-	if (pSession == nullptr)
-		throw p11_error(CKR_SESSION_HANDLE_INVALID);
-	
-
-	if (!CheckMechanismParam(pMechanism))
-		throw p11_error(CKR_MECHANISM_PARAM_INVALID);
-
-	pSession->DecryptInit(pMechanism, hKey);
-
-	return CKR_OK;
+//	std::unique_lock<std::mutex> lock(p11Mutex);
+//
+////	checkInPtr(pMechanism)
+//
+//		logParam(hSession)
+//		logParam(pMechanism)
+//		logParam(hKey)
+//
+//		if (!bP11Initialized)
+//			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+//
+//	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
+//		
+//	if (pSession == nullptr)
+//		throw p11_error(CKR_SESSION_HANDLE_INVALID);
+//	
+//
+//	if (!CheckMechanismParam(pMechanism))
+//		throw p11_error(CKR_MECHANISM_PARAM_INVALID);
+//
+//	pSession->DecryptInit(pMechanism, hKey);
+//
+//	return CKR_OK;
 	exit_p11_func
 	return CKR_GENERAL_ERROR;	
 }
@@ -1656,31 +1677,34 @@ CK_RV CK_ENTRY C_DecryptInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMecha
 CK_RV CK_ENTRY C_DecryptUpdate(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pEncryptedPart, CK_ULONG ulEncryptedPartLen, CK_BYTE_PTR pPart, CK_ULONG_PTR pulPartLen)
 {
 	init_p11_func
-	std::unique_lock<std::mutex> lock(p11Mutex);
 
-//	checkInBuffer(pEncryptedPart, ulEncryptedPartLen)
-//		checkOutArray(pPart, pulPartLen)
+		return CKR_FUNCTION_NOT_SUPPORTED;
 
-		logParam(hSession)
-		logParamBuf(pEncryptedPart, ulEncryptedPartLen)
-		logParamBuf(pPart, pulPartLen)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
-
-	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
-		
-	if (pSession == nullptr)
-		throw p11_error(CKR_SESSION_HANDLE_INVALID);
-
-	if (!pSession->pDecryptMechanism->DecryptSupportMultipart())
-		throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-
-	ByteArray Part(pPart, *pulPartLen);
-	pSession->DecryptUpdate(ByteArray(pEncryptedPart, ulEncryptedPartLen), Part);
-	*pulPartLen = (CK_ULONG)Part.size();
-
-	return CKR_OK;
+//	std::unique_lock<std::mutex> lock(p11Mutex);
+//
+////	checkInBuffer(pEncryptedPart, ulEncryptedPartLen)
+////		checkOutArray(pPart, pulPartLen)
+//
+//		logParam(hSession)
+//		logParamBuf(pEncryptedPart, ulEncryptedPartLen)
+//		logParamBuf(pPart, pulPartLen)
+//
+//		if (!bP11Initialized)
+//			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+//
+//	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
+//		
+//	if (pSession == nullptr)
+//		throw p11_error(CKR_SESSION_HANDLE_INVALID);
+//
+//	if (!pSession->pDecryptMechanism->DecryptSupportMultipart())
+//		throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
+//
+//	ByteArray Part(pPart, *pulPartLen);
+//	pSession->DecryptUpdate(ByteArray(pEncryptedPart, ulEncryptedPartLen), Part);
+//	*pulPartLen = (CK_ULONG)Part.size();
+//
+//	return CKR_OK;
 	exit_p11_func
 	return CKR_GENERAL_ERROR;	
 }

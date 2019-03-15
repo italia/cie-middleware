@@ -151,7 +151,7 @@ namespace p11 {
 		virtual void SignRecoverSetOperationState(ByteArray &OperationState);
 	};
 
-	class CEncrypt : public CMechanism
+	/*class CEncrypt : public CMechanism
 	{
 	public:
 		CK_OBJECT_HANDLE hEncryptKey;
@@ -179,9 +179,10 @@ namespace p11 {
 		ByteDynArray EncryptCompute(ByteArray &baPlainData);
 		ByteDynArray EncryptGetOperationState();
 		void EncryptSetOperationState(ByteArray &OperationState);
-	};
+	};*/
 
-	class CDecrypt : public CMechanism
+
+	/*class CDecrypt : public CMechanism
 	{
 		static uint8_t uninitializedCacheData;
 	public:
@@ -215,7 +216,7 @@ namespace p11 {
 		CK_ULONG DecryptLength();
 		ByteDynArray  DecryptGetOperationState();
 		void DecryptSetOperationState(ByteArray &OperationState);
-	};
+	};*/
 
 	class CDigestSHA : public CDigest
 	{
@@ -288,7 +289,7 @@ namespace p11 {
 
 	};*/
 
-	class CRSA_PKCS1 : public CSignRSA, public CSignRecoverRSA, public CVerifyRSA, public CVerifyRecoverRSA, public CEncryptRSA, public CDecryptRSA
+	class CRSA_PKCS1 : public CSignRSA, public CSignRecoverRSA, public CVerifyRSA, public CVerifyRecoverRSA/*, public CEncryptRSA, public CDecryptRSA*/
 	{
 	public:
 		CRSA_PKCS1(std::shared_ptr<CSession> Session);
@@ -296,8 +297,8 @@ namespace p11 {
 
 		ByteDynArray baVerifyBuffer;
 		ByteDynArray baSignBuffer;
-		ByteDynArray baEncryptBuffer;
-		ByteDynArray baDecryptBuffer;
+		/*ByteDynArray baEncryptBuffer;
+		ByteDynArray baDecryptBuffer;*/
 
 		void VerifyInit(CK_OBJECT_HANDLE PublicKey);
 		void VerifyUpdate(ByteArray &Part);
@@ -314,14 +315,14 @@ namespace p11 {
 		void SignRecoverInit(CK_OBJECT_HANDLE PrivateKey);
 		ByteDynArray SignRecover(ByteArray &baData);
 
-		void EncryptInit(CK_OBJECT_HANDLE PublicKey);
+		/*void EncryptInit(CK_OBJECT_HANDLE PublicKey);
 		ByteDynArray  EncryptUpdate(ByteArray &Data);
 		ByteDynArray  EncryptFinal();
 
 		void DecryptInit(CK_OBJECT_HANDLE PrivateKey);
 		ByteDynArray  DecryptUpdate(ByteArray &EncryptedData);
 		ByteDynArray DecryptFinal();
-		ByteDynArray DecryptRemovePadding(ByteArray &paddedData);
+		ByteDynArray DecryptRemovePadding(ByteArray &paddedData);*/
 	};
 
 	class CSignRSAwithDigest : public CSignRSA

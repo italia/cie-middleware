@@ -110,7 +110,7 @@ public:
 	void SignRecover(ByteArray &Data, ByteArray &Signature);
 	std::unique_ptr<CSignRecover> pSignRecoverMechanism;
 
-	void EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
+	/*void EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
 	void Encrypt(ByteArray &Data, ByteArray &EncryptedData);
 	void EncryptUpdate(ByteArray &Data,ByteArray &EncryptedData);
 	void EncryptFinal(ByteArray &EncryptedData);
@@ -120,7 +120,7 @@ public:
 	void Decrypt(ByteArray &EncryptedData, ByteArray &DataData);
 	void DecryptUpdate(ByteArray &EncryptedData,ByteArray &Data);
 	void DecryptFinal(ByteArray &Data);
-	std::unique_ptr<CDecrypt> pDecryptMechanism;
+	std::unique_ptr<CDecrypt> pDecryptMechanism;*/
 
 	void SetOperationState(ByteArray &OperationState);
 	void GetOperationState(ByteArray &OperationState);

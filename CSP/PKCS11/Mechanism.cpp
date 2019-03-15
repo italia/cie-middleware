@@ -15,7 +15,7 @@ namespace p11 {
 
 	CMechanism::CMechanism(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session) : mtType(type), pSession(std::move(Session)) {}
 	CMechanism::~CMechanism() {}
-	bool CDecrypt::checkCache(ByteArray &Data, ByteArray &Result)
+	/*bool CDecrypt::checkCache(ByteArray &Data, ByteArray &Result)
 	{
 		init_func
 			if (Data.data() == cacheData.data() && Data.size() == cacheData.size()) {
@@ -36,7 +36,7 @@ namespace p11 {
 		init_func
 			cacheData = Data;
 		resultCache = Result;
-	}
+	}*/
 
 	CVerify::CVerify(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session) : CMechanism(type, std::move(Session)) {}
 	CVerify::~CVerify() {}
@@ -53,13 +53,13 @@ namespace p11 {
 	CSignRecover::CSignRecover(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session) : CMechanism(type, std::move(Session)) {}
 	CSignRecover::~CSignRecover() {}
 
-	CEncrypt::CEncrypt(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session) : CMechanism(type, std::move(Session)) {}
+	/*CEncrypt::CEncrypt(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session) : CMechanism(type, std::move(Session)) {}
 	CEncrypt::~CEncrypt() {}
 
 	BYTE CDecrypt::uninitializedCacheData = 0;
 	CDecrypt::CDecrypt(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session)
 		: CMechanism(type, Session), cacheData(&uninitializedCacheData, 1) {}
-	CDecrypt::~CDecrypt() {}
+	CDecrypt::~CDecrypt() {}*/
 
 	/* ******************** */
 	/*		   SHA1	        */
@@ -513,9 +513,10 @@ namespace p11 {
 	CRSA_PKCS1::CRSA_PKCS1(std::shared_ptr<CSession> Session) : CSignRSA(CKM_RSA_PKCS, Session),
 		CSignRecoverRSA(CKM_RSA_PKCS, Session),
 		CVerifyRSA(CKM_RSA_PKCS, Session),
-		CVerifyRecoverRSA(CKM_RSA_PKCS, Session),
+		CVerifyRecoverRSA(CKM_RSA_PKCS, Session) /*,
 		CEncryptRSA(CKM_RSA_PKCS, Session),
-		CDecryptRSA(CKM_RSA_PKCS, Session) {}
+		CDecryptRSA(CKM_RSA_PKCS, Session) */
+	{}
 	CRSA_PKCS1::~CRSA_PKCS1() {}
 
 	void CRSA_PKCS1::VerifyInit(CK_OBJECT_HANDLE PublicKey) {
@@ -637,85 +638,85 @@ namespace p11 {
 		return Data;
 
 	}
-	void  CRSA_PKCS1::EncryptInit(CK_OBJECT_HANDLE PublicKey) {
-		init_func
-			hEncryptKey = PublicKey;
-	}
+	//void  CRSA_PKCS1::EncryptInit(CK_OBJECT_HANDLE PublicKey) {
+	//	init_func
+	//		hEncryptKey = PublicKey;
+	//}
 
-	ByteDynArray CRSA_PKCS1::EncryptUpdate(ByteArray &Part) {
-		init_func
-		auto dwSize = baEncryptBuffer.size();
-		baEncryptBuffer.resize(dwSize + Part.size(), true);
-		baEncryptBuffer.mid(dwSize, Part.size()).copy(Part);
-		return ByteDynArray();
-	}
+	//ByteDynArray CRSA_PKCS1::EncryptUpdate(ByteArray &Part) {
+	//	init_func
+	//	auto dwSize = baEncryptBuffer.size();
+	//	baEncryptBuffer.resize(dwSize + Part.size(), true);
+	//	baEncryptBuffer.mid(dwSize, Part.size()).copy(Part);
+	//	return ByteDynArray();
+	//}
 
-	ByteDynArray CRSA_PKCS1::EncryptFinal()
-	{
-		init_func
-			CK_ULONG ulEncryptLength = EncryptLength();
+	//ByteDynArray CRSA_PKCS1::EncryptFinal()
+	//{
+	//	init_func
+	//		CK_ULONG ulEncryptLength = EncryptLength();
 
-		// al massimo k-11 bytes (specifiche p11)
-		if (baEncryptBuffer.size() > (ulEncryptLength - 11))
-			throw p11_error(CKR_DATA_LEN_RANGE);
+	//	// al massimo k-11 bytes (specifiche p11)
+	//	if (baEncryptBuffer.size() > (ulEncryptLength - 11))
+	//		throw p11_error(CKR_DATA_LEN_RANGE);
 
-		ByteDynArray baPlainData(ulEncryptLength);
-		baPlainData.rightcopy(baEncryptBuffer);
-		PutPaddingBT2(baPlainData, baEncryptBuffer.size());
+	//	ByteDynArray baPlainData(ulEncryptLength);
+	//	baPlainData.rightcopy(baEncryptBuffer);
+	//	PutPaddingBT2(baPlainData, baEncryptBuffer.size());
 
-		return EncryptCompute(baPlainData);
+	//	return EncryptCompute(baPlainData);
 
-	}
+	//}
 
-	void CRSA_PKCS1::DecryptInit(CK_OBJECT_HANDLE PrivateKey)
-	{
-		init_func
-			hDecryptKey = PrivateKey;
-	}
+	//void CRSA_PKCS1::DecryptInit(CK_OBJECT_HANDLE PrivateKey)
+	//{
+	//	init_func
+	//		hDecryptKey = PrivateKey;
+	//}
 
-	ByteDynArray CRSA_PKCS1::DecryptUpdate(ByteArray &Part) {
-		init_func
-		auto dwSize = baDecryptBuffer.size();
-		baDecryptBuffer.resize(dwSize + Part.size(), true);
-		baDecryptBuffer.mid(dwSize, Part.size()).copy(Part);
-		return ByteDynArray();
-	}
+	//ByteDynArray CRSA_PKCS1::DecryptUpdate(ByteArray &Part) {
+	//	init_func
+	//	auto dwSize = baDecryptBuffer.size();
+	//	baDecryptBuffer.resize(dwSize + Part.size(), true);
+	//	baDecryptBuffer.mid(dwSize, Part.size()).copy(Part);
+	//	return ByteDynArray();
+	//}
 
-	ByteDynArray CRSA_PKCS1::DecryptFinal()
-	{
-		init_func
-			CK_ULONG ulDecryptLength = DecryptLength();
+	//ByteDynArray CRSA_PKCS1::DecryptFinal()
+	//{
+	//	init_func
+	//		CK_ULONG ulDecryptLength = DecryptLength();
 
-		// esattamente k bytes (specifiche p11, ma mi sembra ovvio!)
-		if (baDecryptBuffer.size() != ulDecryptLength)
-			throw p11_error(CKR_ENCRYPTED_DATA_LEN_RANGE);
+	//	// esattamente k bytes (specifiche p11, ma mi sembra ovvio!)
+	//	if (baDecryptBuffer.size() != ulDecryptLength)
+	//		throw p11_error(CKR_ENCRYPTED_DATA_LEN_RANGE);
 
-		return baDecryptBuffer;
-	}
+	//	return baDecryptBuffer;
+	//}
 
-	ByteDynArray CRSA_PKCS1::DecryptRemovePadding(ByteArray &paddedData)
-	{
-		init_func
+	//ByteDynArray CRSA_PKCS1::DecryptRemovePadding(ByteArray &paddedData)
+	//{
+	//	init_func
 
-			// devo levare il padding BT2 da paddedData e copiare tutto in unpaddedData;
-			// se non posso levare il padding i dati criptati non sono validi!
-		size_t dwPaddingLen;
-		try {
-			dwPaddingLen = RemovePaddingBT2(paddedData);
-		}
-		catch (...) {
-			throw p11_error(CKR_ENCRYPTED_DATA_INVALID);
-		}
+	//		// devo levare il padding BT2 da paddedData e copiare tutto in unpaddedData;
+	//		// se non posso levare il padding i dati criptati non sono validi!
+	//	size_t dwPaddingLen;
+	//	try {
+	//		dwPaddingLen = RemovePaddingBT2(paddedData);
+	//	}
+	//	catch (...) {
+	//		throw p11_error(CKR_ENCRYPTED_DATA_INVALID);
+	//	}
 
-		auto unpaddedData = paddedData.mid(dwPaddingLen);
+	//	auto unpaddedData = paddedData.mid(dwPaddingLen);
 
-		// i dati possono essere lunghi al massiko k-11
-		// (specifiche p11)
-		if (unpaddedData.size() > paddedData.size() - 11)
-			throw p11_error(CKR_ENCRYPTED_DATA_INVALID);
+	//	// i dati possono essere lunghi al massiko k-11
+	//	// (specifiche p11)
+	//	if (unpaddedData.size() > paddedData.size() - 11)
+	//		throw p11_error(CKR_ENCRYPTED_DATA_INVALID);
 
-		return unpaddedData;
-	}
+	//	return unpaddedData;
+	//}
 
 	/* ************************ */
 	/*		SignRSA_withDigest	*/
@@ -839,75 +840,75 @@ namespace p11 {
 	CRSAwithSHA1::CRSAwithSHA1(std::shared_ptr<CSession> Session) : CSignRSAwithDigest(CKM_SHA1_RSA_PKCS, Session, &sha1), CVerifyRSAwithDigest(CKM_SHA1_RSA_PKCS, Session, &sha1), sha1(Session) {}
 	CRSAwithSHA1::~CRSAwithSHA1() {}
 
-	/* ******************** */
-	/*		EncryptRSA		*/
-	/* ******************** */
-	CEncryptRSA::CEncryptRSA(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session) : CEncrypt(type, std::move(Session)) {}
-	CEncryptRSA::~CEncryptRSA() {}
+	///* ******************** */
+	///*		EncryptRSA		*/
+	///* ******************** */
+	//CEncryptRSA::CEncryptRSA(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session) : CEncrypt(type, std::move(Session)) {}
+	//CEncryptRSA::~CEncryptRSA() {}
 
-	bool CEncryptRSA::EncryptSupportMultipart() {
-		init_func
-			return false;
-	}
+	//bool CEncryptRSA::EncryptSupportMultipart() {
+	//	init_func
+	//		return false;
+	//}
 
-	CK_ULONG CEncryptRSA::EncryptLength() {
-		init_func
-			std::shared_ptr<CP11Object> pObject = pSession->pSlot->GetObjectFromID(hEncryptKey);
-		ER_ASSERT(pObject != nullptr, ERR_CANT_GET_OBJECT)
-			ER_ASSERT(pObject->ObjClass == CKO_PUBLIC_KEY, ERR_WRONG_OBJECT_TYPE)
-			auto pPrivateKey = std::static_pointer_cast<CP11PrivateKey>(pObject);
+	//CK_ULONG CEncryptRSA::EncryptLength() {
+	//	init_func
+	//		std::shared_ptr<CP11Object> pObject = pSession->pSlot->GetObjectFromID(hEncryptKey);
+	//	ER_ASSERT(pObject != nullptr, ERR_CANT_GET_OBJECT)
+	//		ER_ASSERT(pObject->ObjClass == CKO_PUBLIC_KEY, ERR_WRONG_OBJECT_TYPE)
+	//		auto pPrivateKey = std::static_pointer_cast<CP11PrivateKey>(pObject);
 
-		ByteArray *baKeyModule = pPrivateKey->getAttribute(CKA_MODULUS);
-		ER_ASSERT(baKeyModule != nullptr, ERR_CANT_GET_PUBKEY_MODULUS)
-			return (CK_ULONG)baKeyModule->size();
-	}
+	//	ByteArray *baKeyModule = pPrivateKey->getAttribute(CKA_MODULUS);
+	//	ER_ASSERT(baKeyModule != nullptr, ERR_CANT_GET_PUBKEY_MODULUS)
+	//		return (CK_ULONG)baKeyModule->size();
+	//}
 
-	ByteDynArray CEncryptRSA::EncryptCompute(ByteArray &baPlainData)
-	{
-		init_func
-			ByteArray *baKeyExponent = nullptr, *baKeyModule = nullptr;
+	//ByteDynArray CEncryptRSA::EncryptCompute(ByteArray &baPlainData)
+	//{
+	//	init_func
+	//		ByteArray *baKeyExponent = nullptr, *baKeyModule = nullptr;
 
-		std::shared_ptr<CP11Object> pObject = pSession->pSlot->GetObjectFromID(hEncryptKey);
-		ER_ASSERT(pObject != nullptr, ERR_CANT_GET_OBJECT)
-			ER_ASSERT(pObject->ObjClass == CKO_PUBLIC_KEY, ERR_WRONG_OBJECT_TYPE)
-			auto pPublicKey = std::static_pointer_cast<CP11PublicKey>(pObject);
+	//	std::shared_ptr<CP11Object> pObject = pSession->pSlot->GetObjectFromID(hEncryptKey);
+	//	ER_ASSERT(pObject != nullptr, ERR_CANT_GET_OBJECT)
+	//		ER_ASSERT(pObject->ObjClass == CKO_PUBLIC_KEY, ERR_WRONG_OBJECT_TYPE)
+	//		auto pPublicKey = std::static_pointer_cast<CP11PublicKey>(pObject);
 
-		baKeyExponent = pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT);
-		ER_ASSERT(baKeyExponent != nullptr, ERR_CANT_GET_PUBKEY_EXPONENT)
+	//	baKeyExponent = pPublicKey->getAttribute(CKA_PUBLIC_EXPONENT);
+	//	ER_ASSERT(baKeyExponent != nullptr, ERR_CANT_GET_PUBKEY_EXPONENT)
 
-			baKeyModule = pPublicKey->getAttribute(CKA_MODULUS);
-		ER_ASSERT(baKeyModule != nullptr, ERR_CANT_GET_PUBKEY_MODULUS)
+	//		baKeyModule = pPublicKey->getAttribute(CKA_MODULUS);
+	//	ER_ASSERT(baKeyModule != nullptr, ERR_CANT_GET_PUBKEY_MODULUS)
 
-		auto dwKeyLenBytes = baKeyModule->size();
+	//	auto dwKeyLenBytes = baKeyModule->size();
 
-		// è molto strano che baPlainData non sia lungo quanto la chiave...
-		// il controllo su CKR_DATA_LEN_RANGE è stato fatto prima, ma
-		// lo uso anche in questo caso
-		if (baPlainData.size() != dwKeyLenBytes)
-			throw p11_error(CKR_DATA_LEN_RANGE);
+	//	// è molto strano che baPlainData non sia lungo quanto la chiave...
+	//	// il controllo su CKR_DATA_LEN_RANGE è stato fatto prima, ma
+	//	// lo uso anche in questo caso
+	//	if (baPlainData.size() != dwKeyLenBytes)
+	//		throw p11_error(CKR_DATA_LEN_RANGE);
 
-		CRSA rsa(*baKeyModule, *baKeyExponent);
-		return rsa.RSA_PURE(baPlainData);
-	}
+	//	CRSA rsa(*baKeyModule, *baKeyExponent);
+	//	return rsa.RSA_PURE(baPlainData);
+	//}
 
-	ByteDynArray CEncryptRSA::EncryptGetOperationState()
-	{
-		init_func
-			return ByteDynArray();
-	}
+	//ByteDynArray CEncryptRSA::EncryptGetOperationState()
+	//{
+	//	init_func
+	//		return ByteDynArray();
+	//}
 
-	void CEncryptRSA::EncryptSetOperationState(ByteArray &OperationState)
-	{
-		init_func
-			if (OperationState.size() != 0)
-				throw p11_error(CKR_SAVED_STATE_INVALID);
-	}
+	//void CEncryptRSA::EncryptSetOperationState(ByteArray &OperationState)
+	//{
+	//	init_func
+	//		if (OperationState.size() != 0)
+	//			throw p11_error(CKR_SAVED_STATE_INVALID);
+	//}
 
 	/* ******************** */
 	/*		DecryptRSA		*/
 	/* ******************** */
 	//CDecryptRSA::CDecryptRSA() {}
-	CDecryptRSA::CDecryptRSA(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session) : CDecrypt(type, std::move(Session)) {}
+	/*CDecryptRSA::CDecryptRSA(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session) : CDecrypt(type, std::move(Session)) {}
 	CDecryptRSA::~CDecryptRSA() {}
 
 	bool CDecryptRSA::DecryptSupportMultipart() {
@@ -938,6 +939,6 @@ namespace p11 {
 		init_func
 			if (OperationState.size() != 0)
 				throw p11_error(CKR_SAVED_STATE_INVALID);
-	}
+	}*/
 
 }
