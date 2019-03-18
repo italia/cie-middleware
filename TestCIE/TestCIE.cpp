@@ -180,6 +180,38 @@ void getTokenInfo(CK_SLOT_ID slotid)
 		std::cout << "  -- Richiesta completata " << std::endl;
 }
 
+void mechanismList(CK_SLOT_ID slotid)
+{
+	if (g_nLogLevel > 1)
+	{
+		std::cout << "  -> Legge i maccanismi disponibili nello slot " << slotid << " - C_GetMechanismList" << std::endl;
+	}
+
+	CK_MECHANISM_TYPE_PTR pMechanismType = NULL;
+	CK_ULONG count = 0;
+	CK_RV rv = g_pFuncList->C_GetMechanismList(slotid, pMechanismType, &count);
+	if (rv != CKR_OK)
+	{
+		error(rv);
+		return;
+	}
+
+	pMechanismType = new CK_MECHANISM_TYPE[count];
+
+	rv = g_pFuncList->C_GetMechanismList(slotid, pMechanismType, &count);
+	if (rv != CKR_OK)
+	{
+		error(rv);
+		return;
+	}
+
+	for (CK_ULONG i = 0; i < count; i++)
+	{
+		if (g_nLogLevel > 1)
+			std::cout << "  -- MECHANISM_TYPE: " << pMechanismType[i] << std::endl;
+	}
+}
+
 CK_SESSION_HANDLE openSession(CK_SLOT_ID slotid)
 {
 	if (g_nLogLevel > 1)
@@ -764,7 +796,8 @@ int main(int argc, char* argv[])
 			std::cout << "4 Open Session" << std::endl;
 			std::cout << "5 Find objects" << std::endl;
 			std::cout << "6 WaitForSlotEvent" << std::endl;
-			std::cout << "7 Sign + Verify" << std::endl;
+			std::cout << "7 Read Mechanism List" << std::endl;
+			std::cout << "8 Sign + Verify RSA PKCS" << std::endl;
 			//            std::cout << "8 Encrypt + Decrypt" << std::endl;
 			std::cout << "20 Exit" << std::endl;
 			std::cout << "Insert the test number:" << std::endl;
@@ -966,7 +999,27 @@ int main(int argc, char* argv[])
 		else if (strcmp(szCmd, "7") == 0)
 		{
 			CK_ULONG ulCount = 0;
-			std::cout << "-> Test 7 Sign + Verify By CIE Key Pair" << std::endl;
+			std::cout << "-> Test 7 Read Mechanism List" << std::endl;
+			init();
+
+			CK_SLOT_ID_PTR pSlotList = getSlotList(true, &ulCount);
+			if (pSlotList == NULL_PTR)
+			{
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			mechanismList(pSlotList[0]);
+
+			close();
+
+			std::cout << "-> Test 07 concluso" << std::endl;
+		}
+		else if (strcmp(szCmd, "8") == 0)
+		{
+			CK_ULONG ulCount = 0;
+			std::cout << "-> Test 8 Sign + Verify By CIE Key Pair" << std::endl;
 			init();
 
 			CK_SLOT_ID_PTR pSlotList = getSlotList(true, &ulCount);

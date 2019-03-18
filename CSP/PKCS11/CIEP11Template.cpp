@@ -46,8 +46,25 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 	}
 
 	auto ris = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
-	if (ris != SCARD_S_SUCCESS) {
-		ODS("Errore trasmissione APDU");
+	if (ris != SCARD_S_SUCCESS) 
+	{
+		if (ris == SCARD_W_RESET_CARD)
+		{
+			DWORD protocol = 0;
+			ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
+			if (ris == SCARD_S_SUCCESS) 
+			{
+				ris = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
+				if (ris != SCARD_S_SUCCESS) 
+				{
+					ODS("Errore trasmissione APDU");
+				}
+			}
+			else
+			{
+				ODS("Errore reconnet card");
+			}
+		}
 	}
 	
 	return ris;

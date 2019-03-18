@@ -312,16 +312,19 @@ const char* UUCByteArray::toHexString(int nSize)
 		nSize = (int)m_unLen;
 	}
 	
-	m_szHex = new char[(nSize + 1) * 2];	
+	int nLen = (nSize + 1) * 2;
+	m_szHex = new char[nLen];	
 
 	try
 	{
 		char szDigit[3];
-        memset(m_szHex, 0, (nSize + 1) * 2);
+        memset(m_szHex, 0, nLen);
 		for(int i = 0; i < nSize; i++)
 		{
-			snprintf(szDigit, 3, "%02X", m_pbtContent[i]);
-			strncat_s(m_szHex, 3, szDigit, 2);
+
+			sprintf_s(szDigit, 3, "%02X", m_pbtContent[i]);
+			strcat_s(m_szHex, nLen, szDigit);
+			//strncat_s(m_szHex, 3, szDigit, 2);
 		}	
 
 		return m_szHex;
