@@ -40,21 +40,24 @@
 /* Define CRYPTOKI_EXPORTS during the build of cryptoki libraries. Do
  * not define it in applications.
  */
-#ifdef CRYPTOKI_EXPORTS
-/* Specified that the function is an exported DLL entry point. */
-#	if defined(_WIN32_WCE)
-#		define CK_EXPORT_SPEC 
-#	else
-#		define CK_EXPORT_SPEC __declspec(dllexport) 
-#	endif
-#else
-#define CK_EXPORT_SPEC CK_IMPORT_SPEC 
-#endif
+//#ifdef CRYPTOKI_EXPORTS
+///* Specified that the function is an exported DLL entry point. */
+//#	if defined(_WIN32_WCE)
+//#		define CK_EXPORT_SPEC 
+//#	else
+//#		define CK_EXPORT_SPEC __declspec(dllexport) 
+//#	endif
+//#else
+//#define CK_EXPORT_SPEC CK_IMPORT_SPEC 
+//#endif
 
+#define CK_EXPORT_SPEC __declspec(dllexport) 
 /* Ensures the calling convention for Win32 builds */
 #define CK_CALL_SPEC __cdecl
 
 #endif
+
+#define CK_PTR *
 
 #define CK_DEFINE_FUNCTION(returnType, name) \
   returnType CK_EXPORT_SPEC CK_CALL_SPEC name
@@ -63,10 +66,10 @@
   returnType CK_EXPORT_SPEC CK_CALL_SPEC name
 
 #define CK_DECLARE_FUNCTION_POINTER(returnType, name) \
-  returnType CK_IMPORT_SPEC (CK_CALL_SPEC* name)
+  returnType CK_IMPORT_SPEC (CK_CALL_SPEC CK_PTR name)
 
 #define CK_CALLBACK_FUNCTION(returnType, name) \
-  returnType(* name)
+  returnType (CK_CALL_SPEC CK_PTR name)
 
 #ifndef NULL_PTR
 #define NULL_PTR 0

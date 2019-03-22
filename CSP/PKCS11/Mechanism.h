@@ -1,9 +1,11 @@
 #pragma once
 #include "../Crypto/SHA1.h"
+#include "../Crypto/sha256.h"
 #include "../Crypto/MD5.h"
-#pragma pack(1)
-#include "pkcs11.h"
-#pragma pack()
+#include "cryptoki.h"
+//#pragma pack(1)
+//#include "pkcs11.h"
+//#pragma pack()
 
 #include <memory>
 
@@ -235,6 +237,24 @@ namespace p11 {
 		void DigestSetOperationState(ByteArray &OperationState);
 	};
 
+	class CDigestSHA256 : public CDigest
+	{
+	public:
+		CDigestSHA256(std::shared_ptr<CSession> Session);
+		virtual ~CDigestSHA256();
+
+		ByteDynArray data;
+		CSHA256 sha256;
+
+		void DigestInit();
+		void DigestUpdate(ByteArray &Part);
+		void DigestFinal(ByteArray &Digest);
+		CK_ULONG DigestLength();
+		ByteArray DigestInfo();
+		ByteDynArray  DigestGetOperationState();
+		void DigestSetOperationState(ByteArray &OperationState);
+	};
+
 	class CDigestMD5 : public CDigest
 	{
 	public:
@@ -372,6 +392,15 @@ namespace p11 {
 		virtual ~CRSAwithSHA1();
 
 		CDigestSHA sha1;
+	};
+
+	class CRSAwithSHA256 : public CSignRSAwithDigest, public CVerifyRSAwithDigest
+	{
+	public:
+		CRSAwithSHA256(std::shared_ptr<CSession> Session);
+		virtual ~CRSAwithSHA256();
+
+		CDigestSHA256 sha256;
 	};
 
 }

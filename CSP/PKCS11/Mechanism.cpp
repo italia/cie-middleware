@@ -105,6 +105,50 @@ namespace p11 {
 	}
 
 	/* ******************** */
+	/*		   SHA256	        */
+	/* ******************** */
+	CDigestSHA256::CDigestSHA256(std::shared_ptr<CSession> Session) : CDigest(CKM_SHA_1, std::move(Session)) {}
+	CDigestSHA256::~CDigestSHA256() {}
+
+	void CDigestSHA256::DigestInit() {
+		init_func
+	}
+
+	void CDigestSHA256::DigestUpdate(ByteArray &Part) {
+		init_func
+			data.append(Part);
+	}
+
+	void CDigestSHA256::DigestFinal(ByteArray &Digest) {
+		init_func
+		
+			data.append(Digest);
+			Digest = sha256.Digest(data);
+	}
+
+	CK_ULONG CDigestSHA256::DigestLength() {
+		init_func
+			return SHA256_DIGEST_LENGTH;
+	}
+
+	ByteArray CDigestSHA256::DigestInfo() {
+		init_func
+			return baSHA1DigestInfo;
+	}
+
+	ByteDynArray  CDigestSHA256::DigestGetOperationState()
+	{
+		init_func
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+	}
+
+	void  CDigestSHA256::DigestSetOperationState(ByteArray &OperationState)
+	{
+		init_func
+			throw p11_error(CKR_FUNCTION_NOT_SUPPORTED);
+	}
+
+	/* ******************** */
 	/*		   MD5	        */
 	/* ******************** */
 	CDigestMD5::CDigestMD5(std::shared_ptr<CSession> Session) : CDigest(CKM_MD5, std::move(Session)) {}
@@ -839,6 +883,12 @@ namespace p11 {
 	/* ******************** */
 	CRSAwithSHA1::CRSAwithSHA1(std::shared_ptr<CSession> Session) : CSignRSAwithDigest(CKM_SHA1_RSA_PKCS, Session, &sha1), CVerifyRSAwithDigest(CKM_SHA1_RSA_PKCS, Session, &sha1), sha1(Session) {}
 	CRSAwithSHA1::~CRSAwithSHA1() {}
+
+	/* ******************** */
+	/*		RSA_withSHA1	*/
+	/* ******************** */
+	CRSAwithSHA256::CRSAwithSHA256(std::shared_ptr<CSession> Session) : CSignRSAwithDigest(CKM_SHA256_RSA_PKCS, Session, &sha256), CVerifyRSAwithDigest(CKM_SHA256_RSA_PKCS, Session, &sha256), sha256(Session) {}
+	CRSAwithSHA256::~CRSAwithSHA256() {}
 
 	///* ******************** */
 	///*		EncryptRSA		*/

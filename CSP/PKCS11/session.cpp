@@ -409,6 +409,14 @@ namespace p11 {
 					pDigestMechanism = std::move(mech);
 					break;
 				}
+				case CKM_SHA256:
+				{
+					auto mech = std::unique_ptr<CDigestSHA256>(new CDigestSHA256(shared_from_this()));
+					mech->DigestInit();
+
+					pDigestMechanism = std::move(mech);
+					break;
+				}
 				case CKM_MD5:
 				{
 					auto mech = std::unique_ptr<CDigestMD5>(new CDigestMD5(shared_from_this()));
@@ -505,6 +513,13 @@ namespace p11 {
 		case CKM_SHA1_RSA_PKCS:
 		{
 			auto mech = std::unique_ptr<CRSAwithSHA1>(new CRSAwithSHA1(shared_from_this()));
+			mech->VerifyInit(hKey);
+			pVerifyMechanism = std::move(mech);
+			break;
+		}
+		case CKM_SHA256_RSA_PKCS:
+		{
+			auto mech = std::unique_ptr<CRSAwithSHA256>(new CRSAwithSHA256(shared_from_this()));
 			mech->VerifyInit(hKey);
 			pVerifyMechanism = std::move(mech);
 			break;
@@ -674,6 +689,13 @@ namespace p11 {
 		case CKM_SHA1_RSA_PKCS:
 		{
 			auto mech = std::unique_ptr<CRSAwithSHA1>(new CRSAwithSHA1(shared_from_this()));
+			mech->SignInit(hKey);
+			pSignMechanism = std::move(mech);
+			break;
+		}
+		case CKM_SHA256_RSA_PKCS:
+		{
+			auto mech = std::unique_ptr<CRSAwithSHA256>(new CRSAwithSHA256(shared_from_this()));
 			mech->SignInit(hKey);
 			pSignMechanism = std::move(mech);
 			break;

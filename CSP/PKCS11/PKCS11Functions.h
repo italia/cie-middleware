@@ -1,8 +1,10 @@
 #pragma once
 
-#pragma pack(1)
-#include "pkcs11.h"
-#pragma pack()
+#include "cryptoki.h"
+
+//#pragma pack(1)
+//#include "pkcs11.h"
+//#pragma pack()
 
 #include <winscard.h>
 

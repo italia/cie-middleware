@@ -3,6 +3,7 @@
 #ifdef WIN32
 #include <bcrypt.h>
 #define SHA_DIGEST_LENGTH 20
+#define SHA256_DIGEST_LENGTH 32
 #else
 #include <openssl/sha.h>
 #endif

@@ -36,7 +36,9 @@ CK_MECHANISM_TYPE P11mechanisms[]= {
 	CKM_MD5,
 	CKM_SHA_1,
 	CKM_SHA1_RSA_PKCS,
-	CKM_MD5_RSA_PKCS
+	CKM_MD5_RSA_PKCS,
+	CKM_SHA256,
+	CKM_SHA256_RSA_PKCS,
 };
 
 char *getAttributeName(DWORD dwId);
@@ -934,7 +936,8 @@ CK_RV CK_ENTRY C_GetMechanismInfo(CK_SLOT_ID slotID, CK_MECHANISM_TYPE type, CK_
 
 	switch (type) {
 		case CKM_RSA_PKCS:
-			pInfo->flags = CKF_HW | CKF_ENCRYPT | CKF_DECRYPT | CKF_SIGN | CKF_VERIFY | CKF_SIGN_RECOVER | CKF_VERIFY_RECOVER;
+
+			pInfo->flags = CKF_HW | CKF_SIGN | CKF_VERIFY | CKF_SIGN_RECOVER | CKF_VERIFY_RECOVER;
 			pInfo->ulMinKeySize = 1024;
 			pInfo->ulMaxKeySize = 2048;
 			break;
@@ -945,6 +948,7 @@ CK_RV CK_ENTRY C_GetMechanismInfo(CK_SLOT_ID slotID, CK_MECHANISM_TYPE type, CK_
 			pInfo->ulMaxKeySize = 2048;
 			break;*/
 		case CKM_SHA1_RSA_PKCS:
+		case CKM_SHA256_RSA_PKCS:
 			pInfo->flags = CKF_HW | CKF_SIGN | CKF_VERIFY;
 			pInfo->ulMinKeySize = 1024;
 			pInfo->ulMaxKeySize = 2048;
@@ -960,6 +964,7 @@ CK_RV CK_ENTRY C_GetMechanismInfo(CK_SLOT_ID slotID, CK_MECHANISM_TYPE type, CK_
 			pInfo->ulMaxKeySize = 0;
 			break;
 		case CKM_SHA_1:
+		case CKM_SHA256:
 			pInfo->flags = CKF_DIGEST;
 			pInfo->ulMinKeySize = 0;
 			pInfo->ulMaxKeySize = 0;

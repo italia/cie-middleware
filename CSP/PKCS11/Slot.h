@@ -1,8 +1,9 @@
 #pragma once
 
-#pragma pack(1)
-#include "pkcs11.h"
-#pragma pack()
+#include "cryptoki.h"
+//#pragma pack(1)
+//#include "pkcs11.h"
+//#pragma pack()
 #include "../util/syncromutex.h"
 #include "../util/thread.h"
 #pragma pack()

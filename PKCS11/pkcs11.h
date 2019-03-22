@@ -1,4 +1,20 @@
-/* pkcs11.h include file for PKCS #11.  2001 June 25 */
+/* pkcs11.h include file for PKCS #11. */
+/* $Revision: 1.4 $ */
+
+/* License to copy and use this software is granted provided that it is
+ * identified as "RSA Security Inc. PKCS #11 Cryptographic Token Interface
+ * (Cryptoki)" in all material mentioning or referencing this software.
+
+ * License is also granted to make and use derivative works provided that
+ * such works are identified as "derived from the RSA Security Inc. PKCS #11
+ * Cryptographic Token Interface (Cryptoki)" in all material mentioning or 
+ * referencing the derived work.
+
+ * RSA Security Inc. makes no representations concerning either the 
+ * merchantability of this software or the suitability of this software for
+ * any particular purpose. It is provided "as is" without express or implied
+ * warranty of any kind.
+ */
 
 #ifndef _PKCS11_H_
 #define _PKCS11_H_ 1
@@ -102,7 +118,7 @@ extern "C" {
  * return type and a function name.  It should be used in the
  * following fashion:
  *
- * extern CK_DECLARE_FUNCTION(CK_RV, C_Initialize)(
+ * static CK_DECLARE_FUNCTION(CK_RV, C_Initialize)(
  *   CK_VOID_PTR pReserved
  * );
  *
@@ -204,7 +220,6 @@ extern "C" {
  * #endif
  */
 
-#include "win32.h"
 
 /* All the various Cryptoki types and #define'd values are in the
  * file pkcs11t.h. */
@@ -214,7 +229,7 @@ extern "C" {
 
 
 /* ==============================================================
- * Define the "extern" form of all the entry points.
+ * Define the "static" form of all the entry points.
  * ==============================================================
  */
 
