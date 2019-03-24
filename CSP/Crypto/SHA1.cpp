@@ -25,8 +25,8 @@ CSHA1::~CSHA1() {
 		BCryptDestroyHash(hash);
 }
 void CSHA1::Init() {
-	if (hash != nullptr)
-		throw logged_error("Un'operazione di hash è già in corso");
+	/*if (hash != nullptr)
+		throw logged_error("Un'operazione di hash è già in corso");*/
 	if (BCryptCreateHash(algo_sha1.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
 		throw logged_error("Errore nella creazione dell'hash SHA1");
 }
@@ -36,7 +36,7 @@ void CSHA1::Update(ByteArray data) {
 	if (BCryptHashData(hash, data.data(), (ULONG)data.size(), 0) != 0)
 		throw logged_error("Errore nell'hash dei dati SHA1");
 }
-ByteDynArray CSHA1::Final() {
+void CSHA1::Final(ByteArray& digest) {
 	if (hash == nullptr)
 		throw logged_error("Hash non inizializzato");
 	ByteDynArray resp(SHA_DIGEST_LENGTH);
@@ -46,7 +46,7 @@ ByteDynArray CSHA1::Final() {
 	BCryptDestroyHash(hash);
 	hash = nullptr;
 
-	return resp;
+	return digest.copy(resp);
 }
 
 #else
@@ -83,5 +83,7 @@ ByteDynArray CSHA1::Digest(ByteArray data)
 {
 	Init();
 	Update(data);
-	return Final();
+	ByteArray resp;
+	Final(resp);
+	return resp;
 }

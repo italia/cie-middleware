@@ -27,5 +27,5 @@ public:
 
 	void Init();
 	void Update(ByteArray data);
-	ByteDynArray Final();
+	void Final(ByteArray& data);
 };

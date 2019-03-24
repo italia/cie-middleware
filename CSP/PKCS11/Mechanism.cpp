@@ -79,7 +79,7 @@ namespace p11 {
 
 	void CDigestSHA::DigestFinal(ByteArray &Digest) {
 		init_func
-			Digest = sha1.Final();
+			sha1.Final(Digest);
 	}
 
 	CK_ULONG CDigestSHA::DigestLength() {
@@ -112,6 +112,7 @@ namespace p11 {
 
 	void CDigestSHA256::DigestInit() {
 		init_func
+			data.clear();
 	}
 
 	void CDigestSHA256::DigestUpdate(ByteArray &Part) {
@@ -121,9 +122,11 @@ namespace p11 {
 
 	void CDigestSHA256::DigestFinal(ByteArray &Digest) {
 		init_func
-		
-			data.append(Digest);
-			Digest = sha256.Digest(data);
+
+			//			data.append(Digest);
+			ByteDynArray dataOut(SHA256_DIGEST_LENGTH);
+			sha256.Digest(data, dataOut);
+			Digest.copy(dataOut);
 	}
 
 	CK_ULONG CDigestSHA256::DigestLength() {
@@ -166,7 +169,7 @@ namespace p11 {
 
 	void CDigestMD5::DigestFinal(ByteArray &Digest) {
 		init_func
-			Digest = md5.Final();
+			md5.Final(Digest);
 	}
 
 	CK_ULONG CDigestMD5::DigestLength() {
@@ -797,7 +800,10 @@ namespace p11 {
 
 		ByteDynArray SignBuffer(ulDigestLength);
 		pDigest->DigestFinal(SignBuffer);
-		return SignBuffer;
+
+		ByteDynArray baDigestInfo = pDigest->DigestInfo();
+
+		return baDigestInfo.append(SignBuffer);
 	}
 
 	ByteDynArray CSignRSAwithDigest::SignGetOperationState()

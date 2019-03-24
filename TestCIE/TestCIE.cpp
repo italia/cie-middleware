@@ -32,12 +32,15 @@
 
 #include <memory.h>
 #include <time.h>
+#include <map>
 
 #include "UUCByteArray.h"
 
 typedef CK_RV(*C_GETFUNCTIONLIST)(CK_FUNCTION_LIST_PTR_PTR ppFunctionList);
 CK_FUNCTION_LIST_PTR g_pFuncList;
 int g_nLogLevel = 5;
+
+std::map<CK_MECHANISM_TYPE, std::string> mechanismMap;
 
 void error(CK_RV rv)
 {
@@ -206,9 +209,8 @@ void mechanismList(CK_SLOT_ID slotid)
 	}
 
 	for (CK_ULONG i = 0; i < count; i++)
-	{
-		if (g_nLogLevel > 1)
-			std::cout << "  -- MECHANISM_TYPE: " << pMechanismType[i] << std::endl;
+	{		
+		std::cout << "  -- " << mechanismMap[pMechanismType[i]] << ": " << pMechanismType[i] << std::endl;
 	}
 }
 
@@ -244,8 +246,8 @@ bool login(CK_SESSION_HANDLE hSession)
 	while (!pinIsGood)
 	{
 		std::cout << "   - Inserire la seconda parte del PIN ";
-		//std::cin >> sPIN;
-		std::getline(std::cin, sPIN);
+		std::cin >> sPIN;
+		//std::getline(std::cin, sPIN);
 		size_t len = sPIN.size();
 		if (len != 4)
 		{
@@ -255,7 +257,7 @@ bool login(CK_SESSION_HANDLE hSession)
 		{
 			const char* szPIN = sPIN.c_str();
 
-			int i = 0;
+			size_t i = 0;
 			while (i < len && (szPIN[i] >= '0' && szPIN[i] <= '9'))
 				i++;
 
@@ -402,8 +404,8 @@ void showAttributes(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObject)
 	if (g_nLogLevel > 3)
 	{
 		std::cout << "      - Label: " << btLabel << std::endl;
-		std::cout << "      - Private: " << bPrivate << std::endl;
-		std::cout << "      - Token: " << bToken << std::endl;
+		std::cout << "      - Private: " << (bPrivate ? "true" : "false") << std::endl;
+		std::cout << "      - Token: " << (bToken ? "true" : "false") << std::endl;
 		std::cout << "      - ID: " << btID << std::endl;
 		//std::cout << "      - Value: " << szValue << std::endl;
 	}
@@ -471,10 +473,10 @@ void showCertAttributes(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObject)
 }
 
 
-bool signVerify(CK_SESSION_HANDLE hSession)
+bool signVerify(CK_SESSION_HANDLE hSession, CK_MECHANISM_TYPE mechanism)
 {
 	if (g_nLogLevel > 1)
-		std::cout << "  -> Firma e verifica con chiave CIE\n    - C_Sign\n    - C_Verify" << std::endl;
+		std::cout << "  -> Firma e verifica con algo " << mechanismMap[mechanism] << "\n   - C_Sign\n    - C_Verify" << std::endl;
 
 	UUCByteArray dataValHashed;
 
@@ -523,7 +525,7 @@ bool signVerify(CK_SESSION_HANDLE hSession)
 
 	showAttributes(hSession, hObjectPubKey);
 
-	CK_MECHANISM pMechanism[] = { CKM_RSA_PKCS, NULL_PTR, 0 };
+	CK_MECHANISM pMechanism[] = { mechanism, NULL_PTR, 0 };
 	BYTE* pOutput;
 	CK_ULONG outputLen = 256;
 
@@ -586,6 +588,63 @@ bool signVerify(CK_SESSION_HANDLE hSession)
 
 	if (g_nLogLevel > 1)
 		std::cout << "  -- Verifica completata: " << std::endl << "     " << output.toHexString() << std::endl;
+
+	delete pOutput;
+
+	return true;
+}
+
+bool digest(CK_SESSION_HANDLE hSession, CK_MECHANISM_TYPE mechanism)
+{
+	if (g_nLogLevel > 1)
+		std::cout << "  -> Hash con algo " << mechanismMap[mechanism] << std::endl;
+
+	UUCByteArray dataValHashed;
+
+	CK_ULONG ulCount = 1;
+
+	CK_MECHANISM pMechanism[] = { mechanism, NULL_PTR, 0 };
+	BYTE* pOutput;
+	CK_ULONG outputLen = 256;
+
+	//    char* szHex =  "0959208F14CC999E619536D85FEC0E7488FA2E99624228629A79512FE61274D4333824294279941F57DF36BCCC89DDB459D6607E43209874F2B631BD541ECA4A3FDFA8893E6ED0E0D4508AE335E7C85D77EEDFCB548472E172A661CAE514FFF6359407EF0FD595BED3D0BED606CA18032C1286606BE57A09CED2DD41955BB8176243BD0363D055B42C3017E726E26F4A680AF3FCE685C0AFF73ABF4F78DF55E4FD304DC2F8C81F4D918A23A5DE79E2BF7637DFC064C92ED7EE50FA2F168773C3D541CEB7439327C8B7176FBA3CEE8ADDC125A1518A6BBD4E5BB2D13EB9FF884875175774D60EB34F4EE08E81B8C65DB0CBBB251619B54BCFDA8C243DE0D037BC";
+	//
+	//    UUCByteArray dataVal(szHex);
+
+	const char* szToHash = "some text to hash";
+	UUCByteArray dataVal((BYTE*)szToHash, strlen(szToHash));
+
+	if (g_nLogLevel > 2)
+		std::cout << "  -> Appone la Firma digitale : " << std::endl;
+
+	CK_RV rv = g_pFuncList->C_DigestInit(hSession, pMechanism);
+	if (rv != CKR_OK)
+	{
+		error(rv);
+		return false;
+	}
+
+	rv = g_pFuncList->C_Digest(hSession, (BYTE*)dataVal.getContent(), dataVal.getLength(), NULL, &outputLen);
+	if (rv != CKR_OK)
+	{
+		error(rv);
+		return false;
+	}
+
+	pOutput = (BYTE*)malloc(outputLen);
+
+	rv = g_pFuncList->C_Digest(hSession, (BYTE*)dataVal.getContent(), dataVal.getLength(), pOutput, &outputLen);
+	if (rv != CKR_OK)
+	{
+		delete pOutput;
+		error(rv);
+		return false;
+	}
+
+	UUCByteArray output(pOutput, outputLen);
+
+	if (g_nLogLevel > 2)
+		std::cout << "  -- Hash calcolato: " << std::endl << "     " << output.toHexString() << std::endl;
 
 	delete pOutput;
 
@@ -710,6 +769,14 @@ int main(int argc, char* argv[])
 
 	g_nLogLevel = 5;
 
+	mechanismMap[CKM_RSA_PKCS] = "CKM_RSA_PKCS";
+	mechanismMap[CKM_SHA1_RSA_PKCS] = "CKM_SHA1_RSA_PKCS";
+	mechanismMap[CKM_SHA256_RSA_PKCS] = "CKM_SHA256_RSA_PKCS";
+	mechanismMap[CKM_MD5_RSA_PKCS] = "CKM_MD5_RSA_PKCS";	
+	mechanismMap[CKM_MD5] = "CKM_MD5";
+	mechanismMap[CKM_SHA_1] = "CKM_SHA1";
+	mechanismMap[CKM_SHA256] = "CKM_SHA256";
+
 	
 #ifdef WIN32
 	LPCWSTR szCryptoki = L"ciepki.dll";
@@ -798,6 +865,12 @@ int main(int argc, char* argv[])
 			std::cout << "6 WaitForSlotEvent" << std::endl;
 			std::cout << "7 Read Mechanism List" << std::endl;
 			std::cout << "8 Sign + Verify RSA PKCS" << std::endl;
+			std::cout << "9 Sign + Verify SHA1 RSA PKCS" << std::endl;
+			std::cout << "10 Sign + Verify SHA256 RSA PKCS" << std::endl;
+			std::cout << "11 Sign + Verify MD5 RSA PKCS" << std::endl;
+			std::cout << "12 Hash SHA1" << std::endl;
+			std::cout << "13 Hash SHA256" << std::endl;
+			std::cout << "14 Hash MD5" << std::endl;
 			//            std::cout << "8 Encrypt + Decrypt" << std::endl;
 			std::cout << "20 Exit" << std::endl;
 			std::cout << "Insert the test number:" << std::endl;
@@ -1019,7 +1092,7 @@ int main(int argc, char* argv[])
 		else if (strcmp(szCmd, "8") == 0)
 		{
 			CK_ULONG ulCount = 0;
-			std::cout << "-> Test 8 Sign + Verify By CIE Key Pair" << std::endl;
+			std::cout << "-> Test 8 Sign + Verify By RSA_PKCS" << std::endl;
 			init();
 
 			CK_SLOT_ID_PTR pSlotList = getSlotList(true, &ulCount);
@@ -1048,7 +1121,7 @@ int main(int argc, char* argv[])
 				continue;
 			}
 
-			if (!signVerify(hSession))
+			if (!signVerify(hSession, CKM_RSA_PKCS))
 			{
 				free(pSlotList);
 				closeSession(hSession);
@@ -1056,7 +1129,6 @@ int main(int argc, char* argv[])
 				std::cout << "-> Test non completato" << std::endl;
 				continue;
 			}
-
 
 			if (!logout(hSession))
 			{
@@ -1073,6 +1145,289 @@ int main(int argc, char* argv[])
 			close();
 			std::cout << "-> Test concluso" << std::endl;
 		}
+		else if (strcmp(szCmd, "9") == 0)
+		{
+			CK_ULONG ulCount = 0;
+			std::cout << "-> Test 9 Sign + Verify By RSA_SHA1_PKCS" << std::endl;
+			init();
+
+			CK_SLOT_ID_PTR pSlotList = getSlotList(true, &ulCount);
+			if (pSlotList == NULL_PTR)
+			{
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			CK_SESSION_HANDLE hSession = openSession(pSlotList[0]);
+			if (hSession == NULL_PTR)
+			{
+				free(pSlotList);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!login(hSession))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!signVerify(hSession, CKM_SHA1_RSA_PKCS))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!logout(hSession))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			free(pSlotList);
+			closeSession(hSession);
+
+			close();
+			std::cout << "-> Test concluso" << std::endl;
+		}
+		else if (strcmp(szCmd, "10") == 0)
+		{
+			CK_ULONG ulCount = 0;
+			std::cout << "-> Test 10 Sign + Verify By RSA_SHA256_PKCS" << std::endl;
+			init();
+
+			CK_SLOT_ID_PTR pSlotList = getSlotList(true, &ulCount);
+			if (pSlotList == NULL_PTR)
+			{
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			CK_SESSION_HANDLE hSession = openSession(pSlotList[0]);
+			if (hSession == NULL_PTR)
+			{
+				free(pSlotList);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!login(hSession))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!signVerify(hSession, CKM_SHA256_RSA_PKCS))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!logout(hSession))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			free(pSlotList);
+			closeSession(hSession);
+
+			close();
+			std::cout << "-> Test concluso" << std::endl;
+		}
+		else if (strcmp(szCmd, "11") == 0)
+		{
+			CK_ULONG ulCount = 0;
+			std::cout << "-> Test 11 Sign + Verify By RSA_MD5_PKCS" << std::endl;
+			init();
+
+			CK_SLOT_ID_PTR pSlotList = getSlotList(true, &ulCount);
+			if (pSlotList == NULL_PTR)
+			{
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			CK_SESSION_HANDLE hSession = openSession(pSlotList[0]);
+			if (hSession == NULL_PTR)
+			{
+				free(pSlotList);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!login(hSession))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!signVerify(hSession, CKM_MD5_RSA_PKCS))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!logout(hSession))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			free(pSlotList);
+			closeSession(hSession);
+
+			close();
+			std::cout << "-> Test concluso" << std::endl;
+		}
+		else if (strcmp(szCmd, "12") == 0)
+		{
+			CK_ULONG ulCount = 0;
+			std::cout << "-> Test 12 Hash SHA1" << std::endl;
+			init();
+
+			CK_SLOT_ID_PTR pSlotList = getSlotList(true, &ulCount);
+			if (pSlotList == NULL_PTR)
+			{
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			CK_SESSION_HANDLE hSession = openSession(pSlotList[0]);
+			if (hSession == NULL_PTR)
+			{
+				free(pSlotList);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!digest(hSession, CKM_SHA_1))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			free(pSlotList);
+			closeSession(hSession);
+
+			close();
+			std::cout << "-> Test concluso" << std::endl;
+		}
+		else if (strcmp(szCmd, "13") == 0)
+		{
+			CK_ULONG ulCount = 0;
+			std::cout << "-> Test 13 Hash SHA256" << std::endl;
+			init();
+
+			CK_SLOT_ID_PTR pSlotList = getSlotList(true, &ulCount);
+			if (pSlotList == NULL_PTR)
+			{
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			CK_SESSION_HANDLE hSession = openSession(pSlotList[0]);
+			if (hSession == NULL_PTR)
+			{
+				free(pSlotList);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!digest(hSession, CKM_SHA256))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			free(pSlotList);
+			closeSession(hSession);
+
+			close();
+			std::cout << "-> Test concluso" << std::endl;
+		}
+		else if (strcmp(szCmd, "14") == 0)
+		{
+			CK_ULONG ulCount = 0;
+			std::cout << "-> Test 14 Hash SHA256" << std::endl;
+			init();
+
+			CK_SLOT_ID_PTR pSlotList = getSlotList(true, &ulCount);
+			if (pSlotList == NULL_PTR)
+			{
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			CK_SESSION_HANDLE hSession = openSession(pSlotList[0]);
+			if (hSession == NULL_PTR)
+			{
+				free(pSlotList);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			if (!digest(hSession, CKM_MD5))
+			{
+				free(pSlotList);
+				closeSession(hSession);
+				close();
+				std::cout << "-> Test non completato" << std::endl;
+				continue;
+			}
+
+			free(pSlotList);
+			closeSession(hSession);
+
+			close();
+			std::cout << "-> Test concluso" << std::endl;
+		}
+
 		//        else if(strcmp(szCmd, "8") == 0)
 		//        {
 		//            CK_ULONG ulCount = 0;

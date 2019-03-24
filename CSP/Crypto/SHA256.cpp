@@ -32,6 +32,19 @@ ByteDynArray CSHA256::Digest(ByteArray &data)
 	return resp;
 }
 
+void CSHA256::Digest(ByteArray &dataIn, ByteArray &dataOut)
+{
+	BCRYPT_HASH_HANDLE hash;
+	if (BCryptCreateHash(algo_sha256.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
+		throw logged_error("Errore nella creazione dell'hash SHA256");
+	ByteDynArray resp(SHA256_DIGEST_LENGTH);
+	if (BCryptHashData(hash, dataIn.data(), (ULONG)dataIn.size(), 0) != 0)
+		throw logged_error("Errore nell'hash dei dati SHA256");
+	if (BCryptFinishHash(hash, dataOut.data(), (ULONG)dataOut.size(), 0) != 0)
+		throw logged_error("Errore nel calcolo dell'hash SHA256");
+	BCryptDestroyHash(hash);
+}
+
 #else
 	
 ByteDynArray CSHA256::Digest(ByteArray &data)

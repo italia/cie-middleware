@@ -464,7 +464,7 @@ namespace p11 {
 				throw p11_error(CKR_OPERATION_NOT_INITIALIZED);
 
 		auto mech = std::move(pDigestMechanism);
-		CK_ULONG ulReqLen = pDigestMechanism->DigestLength();
+		CK_ULONG ulReqLen = mech->DigestLength();
 
 		if (!Digest.isNull() && Digest.size()<ulReqLen) {
 				pDigestMechanism = std::move(mech);
@@ -476,7 +476,7 @@ namespace p11 {
 			pDigestMechanism = std::move(mech);
 			return;
 		}
-		pDigestMechanism->DigestFinal(Digest);
+		mech->DigestFinal(Digest);
 
 	}
 

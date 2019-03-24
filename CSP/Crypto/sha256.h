@@ -7,4 +7,6 @@ class CSHA256
 {
 public:
 	ByteDynArray Digest(ByteArray &data);
+
+	void Digest(ByteArray &dataIn, ByteArray &dataOut);
 };

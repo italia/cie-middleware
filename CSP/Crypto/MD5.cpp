@@ -25,8 +25,8 @@ CMD5::~CMD5() {
 		BCryptDestroyHash(hash);
 }
 void CMD5::Init() {
-	if (hash != nullptr)
-		throw logged_error("Un'operazione di hash è già in corso");
+	/*if (hash != nullptr)
+		throw logged_error("Un'operazione di hash è già in corso");*/
 	if (BCryptCreateHash(algo_md5.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
 		throw logged_error("Errore nella creazione dell'hash SHA1");
 }
@@ -47,6 +47,16 @@ ByteDynArray CMD5::Final() {
 	hash = nullptr;
 
 	return resp;
+}
+
+void CMD5::Final(ByteArray& digest) {
+	if (hash == nullptr)
+		throw logged_error("Hash non inizializzato");
+	if (BCryptFinishHash(hash, digest.data(), (ULONG)digest.size(), 0) != 0)
+		throw logged_error("Errore nel calcolo dell'hash SHA1");
+
+	BCryptDestroyHash(hash);
+	hash = nullptr;
 }
 
 #else
