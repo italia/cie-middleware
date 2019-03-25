@@ -407,7 +407,6 @@ void showAttributes(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE hObject)
 		std::cout << "      - Private: " << (bPrivate ? "true" : "false") << std::endl;
 		std::cout << "      - Token: " << (bToken ? "true" : "false") << std::endl;
 		std::cout << "      - ID: " << btID << std::endl;
-		//std::cout << "      - Value: " << szValue << std::endl;
 	}
 
 	free(attr[2].pValue);
@@ -831,14 +830,6 @@ int main(int argc, char* argv[])
 		std::cout << "  -> Funzione C_GetFunctionList ritorna errore " << rv << std::endl;
 		exit(1);
 	}
-
-	//    rv = pfnGetFunctionList(&g_pFuncList);
-	//    if(rv != CKR_OK)
-	//    {
-	//        dlclose(hModule);
-	//        std::cout << "  -> Funzione C_GetFunctionList ritorna errore " << rv << std::endl;
-	//        exit(1);
-	//    }
 
 	if (g_nLogLevel > 2)
 		std::cout << "  -- Richiesta completata " << std::endl;
