@@ -88,11 +88,13 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)</TargetName>
     <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -178,7 +180,7 @@
       </AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
+      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\Bin\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -207,7 +209,7 @@
       <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
+      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\Bin\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

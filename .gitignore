@@ -45,3 +45,5 @@ x64/Release/
 /Setup/Debug/CIE-Middleware.exe
 /Setup/Release
 /Release
+/TestCIE/x64/Release/TestCIE.tlog
+/TestCIE/x64/Release
