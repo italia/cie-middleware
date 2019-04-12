@@ -136,7 +136,7 @@ void CLog::initParam(bool enabled) {
 DWORD CLog::write(const char *format,...) {
 	
 	if (!Enabled)
-		return;
+		return 0;
 
  	va_list params;
 	va_start (params, format);
