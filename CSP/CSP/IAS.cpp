@@ -1108,6 +1108,13 @@ bool IAS::IsEnrolled() {
 	return CacheExists(PANStr.c_str());
 }
 
+bool IAS::Unenroll() {
+	init_func
+		std::string PANStr;
+	dumpHexData(PAN.mid(5, 6), PANStr, false);
+	return CacheRemove(PANStr.c_str());
+}
+
 void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 	init_func
 		if (!Certificate.isEmpty()) {

@@ -104,6 +104,7 @@ public:
 	void GetFirstPIN(ByteDynArray &PIN);
 	void SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN);
 	bool IsEnrolled();
+	bool Unenroll();
 	void IconaSbloccoPIN();
 	void IconaCertificatoScaduto(const char *seriale);
 

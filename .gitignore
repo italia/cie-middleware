@@ -47,3 +47,7 @@ x64/Release/
 /Release
 /TestCIE/x64/Release/TestCIE.tlog
 /TestCIE/x64/Release
+/CIEID/.vs/CIEID/v15
+/CIEID/bin/Debug
+/CIEID/obj
+/CIEID/CIEID.csproj.user

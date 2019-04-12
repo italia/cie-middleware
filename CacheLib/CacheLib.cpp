@@ -42,8 +42,21 @@ void GetCardPath(const char *PAN, char szPath[MAX_PATH]) {
 bool CacheExists(const char *PAN) {
 	char szPath[MAX_PATH];
 	GetCardPath(PAN, szPath);
-	return (PathFileExists(szPath)!=FALSE);
+	return PathFileExists(szPath);
 }
+
+bool CacheRemove(const char *PAN) 
+{
+	char szPath[MAX_PATH];
+	GetCardPath(PAN, szPath);
+	if (PathFileExists(szPath))
+	{
+		return DeleteFile(szPath);
+	}
+
+	return false;
+}
+
 
 void CacheGetCertificate(const char *PAN, std::vector<uint8_t>&certificate)
 {
