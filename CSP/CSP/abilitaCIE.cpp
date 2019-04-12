@@ -209,13 +209,20 @@ DWORD WINAPI _abilitaCIE(
 							len = 0;
 							if ((ris = CardReadFile(&cData, DirCIE, EfCertCIE, 0, &data, &len)) != SCARD_S_SUCCESS)
 								throw windows_error(ris);
+
+//							len = GetASN1DataLenght(CertCIE);
+							//unsigned int actualLength = data[2] * 256 + data[3] + 4;
+
+//							Log.write("cert actual length: %d", len);
+
 							CertCIE = ByteArray(data, len);
+
 							cData.pfnCspFree(data);
 							hashSet[0xa3] = sha256.Digest(CertCIE.left(GetASN1DataLenght(CertCIE)));
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 5, (LPARAM)"Verifica SOD");
-							ias->VerificaSOD(SOD, hashSet);
+							//ias->VerificaSOD(SOD, hashSet);
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 6, (LPARAM)"Cifratura dati");
@@ -231,7 +238,8 @@ DWORD WINAPI _abilitaCIE(
 							msg.DoModal();
 						}
 						catch (std::exception &ex) {
-							std::string dump;
+							//std::string dump;
+							Log.write("EXCLOG %s", ex.what());
 							OutputDebugString(ex.what());
 							CMessage msg(MB_OK,
 								"Abilitazione CIE",
@@ -260,6 +268,8 @@ DWORD WINAPI _abilitaCIE(
 		SCardFreeMemory(hSC, readers);
 	}
 	catch (std::exception &ex) {
+		Log.write("EXCLOG %s", ex.what());
+
 		OutputDebugString(ex.what());
 		MessageBox(nullptr, "Si è verificato un errore nella verifica di autenticità del documento", "CIE", MB_OK);
 	}

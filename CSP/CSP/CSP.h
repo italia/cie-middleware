@@ -16,12 +16,14 @@
 
 #define exit_CSP_func } \
 	catch (CSP_error &CSPErr) { \
+		Log.write("EXCLOG %s", CSPErr.what()); \
 		OutputDebugString("EXCLOG->"); \
 		OutputDebugString(CSPErr.what()); \
 		OutputDebugString("<-EXCLOG");\
 		return CSPErr.getCSPErrorCode(); \
 	} \
 	catch (std::exception &err) { \
+			Log.write("EXCLOG %s", err.what()); \
 		OutputDebugString("EXCLOG->"); \
 		OutputDebugString(err.what()); \
 		OutputDebugString("<-EXCLOG");\

@@ -58,8 +58,8 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 		std::string mainMutexName;
 		std::string configPath;
 		configPath = moduleInfo.szModulePath + moduleInfo.szModuleName + ".ini";
-		initLog(configPath.c_str(), __DATE__ " " __TIME__);
-		Log.initModule("PKCS11", __DATE__ " " __TIME__);
+		initLog();
+		//Log.initModule("PKCS11", __DATE__ " " __TIME__);
 		p11::InitP11(configPath.c_str());
 
 	}

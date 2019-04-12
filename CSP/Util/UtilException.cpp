@@ -8,6 +8,8 @@ extern thread_local std::unique_ptr<CFuncCallInfoList> callQueue;
 
 logged_error::logged_error(const char *message) : std::runtime_error(message) {
 	OutputDebugString(what());
+	Log.write("logged error: %s", message);
+
 	CFuncCallInfoList *ptr = callQueue.get();
 	while (ptr != nullptr) {
 		OutputDebugString(ptr->info->FunctionName());

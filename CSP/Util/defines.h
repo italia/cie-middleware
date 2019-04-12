@@ -56,7 +56,7 @@
   	CFuncCallInfo info(__FUNCTION__,Log);
 
 #define exit_func
-
+	
 #define ER_ASSERT(a,b) \
 	if (!(a)) \
 		throw logged_error(stdPrintf("Eccezione nel file %s, linea %i: %s",__FILE__,__LINE__,b));

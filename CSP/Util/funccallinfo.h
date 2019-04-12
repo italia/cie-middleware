@@ -4,7 +4,7 @@
 #include <memory>
 
 class  CFuncCallInfo {
-	char *fName;
+	std::string sName;
 	unsigned int LogNum;
 	CLog &log;
 public:

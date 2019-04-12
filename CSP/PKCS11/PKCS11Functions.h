@@ -24,13 +24,15 @@
 
 #define exit_p11_func } \
 	catch (p11_error &p11Err) { \
+		Log.write("EXCLOG %s", p11Err.what()); \
 		OutputDebugString("EXCLOG->"); \
 		OutputDebugString(p11Err.what()); \
 		OutputDebugString("<-EXCLOG");\
 		return p11Err.getP11ErrorCode(); \
 	} \
 	catch (std::exception &err) { \
-		OutputDebugString("EXCLOG->"); \
+			Log.write("EXCLOG %s", err.what()); \
+			OutputDebugString("EXCLOG->"); \
 		OutputDebugString(err.what()); \
 		OutputDebugString("<-EXCLOG");\
 		return CKR_GENERAL_ERROR; \

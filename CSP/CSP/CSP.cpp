@@ -154,7 +154,7 @@ DWORD WINAPI CardReadFile(
 					BYTE snTag[] = { 0x55,0x04,0x05 };
 					ByteArray SNTag(snTag, 3);
 					parser.Parse(ByteArray(cer->pCertInfo->Subject.pbData, cer->pCertInfo->Subject.cbData));					
-					for (int i = 0; i < parser.tags[0]->tags.size(); i++) {
+					for (size_t i = 0; i < parser.tags[0]->tags.size(); i++) {
 						auto tag=parser.tags[0]->tags[i].get();
 						if (tag->Child(0, 0x30).Child(0, 6).content == SNTag) {
 							serial = std::string((const char *)tag->Child(0, 0x30).Child(1, 0x13).content.mid(6).data(), 9);

@@ -13,9 +13,9 @@
 #include "util/utilexception.h"
 
 #ifdef _DEBUG
-#define ODS(s) OutputDebugString(s)
+#define ODS(s) OutputDebugString(s);Log.writePure(s)
 #else
-#define ODS(s)
+#define ODS(s) Log.writePure(s) /*ODS(s)*/
 #endif
 
 extern ByteArray baNXP_ATR;

@@ -314,6 +314,8 @@ void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 
 	CASNParser parser;
 	parser.Parse(DappKey);
+	Log.write("parsing ok");
+
 	ByteArray module = parser.tags[0]->tags[0]->content;
 	while (module[0] == 0)
 		module = module.mid(1);
@@ -322,6 +324,9 @@ void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 	while (pubKey[0] == 0)
 		pubKey = pubKey.mid(1);
 	DappPubKey = pubKey;
+
+	Log.write("exit readdapppubkey");
+
 	exit_func
 }
 
@@ -1124,7 +1129,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			token.Transmit(VarToByteArray(getHandle), &resp);
 			SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
 
-			SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
+			//SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
 
 			// check impersonation
 			HANDLE token=NULL;
@@ -1146,7 +1151,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			else {
 				CloseHandle(token);
 			}
-			SCardBeginTransaction(hCard);
+			//SCardBeginTransaction(hCard);
 		}
 		else {
 			certificate.clear();

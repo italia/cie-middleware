@@ -12,13 +12,13 @@ extern bool GlobalParam;
 char szEmpty[]={NULL};
 
 CFuncCallInfo::CFuncCallInfo(char *name, CLog &logInfo) : log(logInfo) {
-	fName = name;
+	sName = name;
 	//OutputDebugString(fName);
-	if (FunctionLog) {
-		if (tlsCallDepth < GlobalDepth) {
-			LogNum = logInfo.write("%*sIN -> %s", (DWORD)tlsCallDepth, szEmpty, fName);
-		}
-	}
+	//if (FunctionLog) {
+	//	if (tlsCallDepth < GlobalDepth) {
+			LogNum = logInfo.write("%u IN -> %s", (DWORD)tlsCallDepth, sName.c_str());
+		//}
+	//}
 
 	//fName = name;
 	tlsCallDepth = tlsCallDepth + 1;
@@ -33,8 +33,8 @@ CFuncCallInfo::~CFuncCallInfo() {
 	//OutputDebugString(stdPrintf("OUT %s", fName).c_str());
 	//fName = NULL;
 	tlsCallDepth=tlsCallDepth-1;
-	if (fName)
-		log.write("%*sOUT -> %s (%u)",(DWORD)tlsCallDepth,szEmpty,fName,LogNum-1);
+	//if (sName)
+//		log.write("%u OUT -> %s (%u)",(DWORD)tlsCallDepth,sName.c_str(),LogNum-1);
 
 	if (callQueue!=nullptr && callQueue->info == this) {
 		auto head = callQueue->next.release();
@@ -47,5 +47,5 @@ CFuncCallInfo::~CFuncCallInfo() {
 }
 
 const char *CFuncCallInfo::FunctionName() {
-	return fName;
+	return sName.c_str();
 }
