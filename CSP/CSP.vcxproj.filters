@@ -201,6 +201,9 @@
     <ClCompile Include="CSP\CIEScaduta.cpp">
       <Filter>Source Files\CSP</Filter>
     </ClCompile>
+    <ClCompile Include="CSP\PINManager.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
@@ -346,6 +349,9 @@
     </ClInclude>
     <ClInclude Include="Crypto\sha512.h">
       <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="CSP\PINManager.h">
+      <Filter>Header Files\CSP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

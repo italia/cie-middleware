@@ -12,21 +12,8 @@
 #include "../PCSC/PCSC.h"
 #include <atlbase.h>
 #include <string>
-#include "cryptoki.h"
-#include "../PKCS11/PKCS11Functions.h"
+#include "PINManager.h"
 
-#define DEF_CALLBACK_FUNCTION(returnType, name) \
-  returnType (__stdcall CK_PTR name)
-
-
-/* CK_NOTIFY is an application callback that processes events */
-typedef DEF_CALLBACK_FUNCTION(CK_RV, PROGRESS_CALLBACK)(
-	const int progress,
-	const char* szMessage);
-
-typedef DEF_CALLBACK_FUNCTION(CK_RV, COMPLETED_CALLBACK)(
-	const char* pan,
-	const char* name);
 
 typedef CK_RV(*AbilitaCIEfn)(const char*  szPAN,
 	const char*  szPIN,

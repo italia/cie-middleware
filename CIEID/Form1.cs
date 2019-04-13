@@ -45,6 +45,12 @@ namespace CIEID
         [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
         static extern long AbbinaCIE(string szPAN, string szPIN, int[] attempts, ProgressCallback progressCallBack, CompletedCallback completedCallBack);
 
+        [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
+        static extern long ChangePIN(string szPIN, string szNewPIN, int[] attempts, ProgressCallback progressCallBack);
+
+        [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
+        static extern long UnlockPIN(string szPUK, string szNewPIN, int[] attempts, ProgressCallback progressCallBack);
+
         public MainForm()
         {
             InitializeComponent();
@@ -66,7 +72,7 @@ namespace CIEID
             ControlPaint.DrawBorder(e.Graphics, ((Control)sender).DisplayRectangle, Color.LightGray, ButtonBorderStyle.Solid);
         }
 
-        long Progress(int progress, string message)
+        long ProgressAbbina(int progress, string message)
         {
             this.Invoke((MethodInvoker)delegate
             {
@@ -77,11 +83,33 @@ namespace CIEID
             return 0;
         }
 
-        long Completed(string pan, string name)
+        long CompletedAbbina(string pan, string name)
         {
             Properties.Settings.Default.serialNumber = pan;
             Properties.Settings.Default.cardHolder = name;
             Properties.Settings.Default.Save();
+
+            return 0;
+        }
+
+        long ProgressCambioPIN(int progress, string message)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                progressBarCambioPIN.Value = progress;
+                labelProgressCambioPIN.Text = message;
+            });
+
+            return 0;
+        }
+
+        long ProgressSbloccaPIN(int progress, string message)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                progressBarUnlock.Value = progress;
+                labelProgressUnlock.Text = message;
+            });
 
             return 0;
         }
@@ -245,11 +273,11 @@ namespace CIEID
             {
                 int[] attempts = new int[1];
 
-                long ret = AbbinaCIE(null, pin, attempts, new ProgressCallback(Progress), new CompletedCallback(Completed));
+                long ret = AbbinaCIE(null, pin, attempts, new ProgressCallback(ProgressAbbina), new CompletedCallback(CompletedAbbina));
 
                 this.Invoke((MethodInvoker)delegate
                 {
-                    ((Control)sender).Enabled = false;
+                    ((Control)sender).Enabled = true;
 
                     switch (ret)
                     {
@@ -304,7 +332,7 @@ namespace CIEID
                     tabControlMain.SelectedIndex = 0;
                     MessageBox.Show("CIE disabilitata con successo", "CIE disabilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     labelSerialNumber.Text = Properties.Settings.Default.serialNumber;
-                    labelCardHolder.Text = Properties.Settings.Default.cardHolder;                    
+                    labelCardHolder.Text = Properties.Settings.Default.cardHolder;
                     Properties.Settings.Default.serialNumber = "";
                     Properties.Settings.Default.cardHolder = "";
                     Properties.Settings.Default.Save();
@@ -319,26 +347,436 @@ namespace CIEID
                     break;
             }
         }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonCambiaPIN_Click(object sender, EventArgs e)
+        {
+            string pin = textBoxPIN.Text;
+            string newpin = textBoxNewPIN.Text;
+            string newpin2 = textBoxNewPIN2.Text;
+
+            int i;
+
+            if (pin.Length != 8)
+            {
+                MessageBox.Show("Il PIN deve essere composto da 8 numeri", "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            if (newpin.Length != 8)
+            {
+                MessageBox.Show("Il PIN deve essere composto da 8 numeri", "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+
+            char c = pin[0];
+
+            i = 1;
+            for (i = 1; i < pin.Length && (c >= '0' && c <= '9'); i++)
+            {
+                c = pin[i];
+            }
+
+            if (i < pin.Length || !(c >= '0' && c <= '9'))
+            {
+                MessageBox.Show("Il PIN deve essere composto da 8 numeri", "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            c = newpin[0];
+
+            i = 1;
+            for (i = 1; i < newpin.Length && (c >= '0' && c <= '9'); i++)
+            {
+                c = newpin[i];
+            }
+
+            if (i < newpin.Length || !(c >= '0' && c <= '9'))
+            {
+                MessageBox.Show("Il PIN deve essere composto da 8 numeri", "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            if (!newpin.Equals(newpin2))
+            {
+                MessageBox.Show("I PIN non corrispondono", "PIN non corrispondenti", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            c = newpin[0];
+            char lastchar = c;
+
+            for (i = 1; i < newpin.Length && c == lastchar; i++)
+            {
+                lastchar = c;
+                c = newpin[i];
+            }
+
+            if (c == lastchar)
+            {
+                MessageBox.Show("Il nuovo PIN non deve essere composto da cifre uguali", "PIN non valido", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            c = newpin[0];
+            lastchar = (char)((int)c - 1);
+
+            for (i = 1; i < newpin.Length && c == lastchar + 1; i++)
+            {
+                lastchar = c;
+                c = newpin[i];
+            }
+
+            if (c == lastchar + 1)
+            {
+                MessageBox.Show("Il nuovo PIN non deve essere composto da cifre consecutive", "PIN non valido", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            c = newpin[0];
+            lastchar = (char)(c + 1);
+
+            for (i = 1; i < newpin.Length && c == lastchar - 1; i++)
+            {
+                lastchar = c;
+                c = newpin[i];
+            }
+
+            if (c == lastchar - 1)
+            {
+                MessageBox.Show("Il nuovo PIN non deve essere composto da cifre consecutive", "PIN non valido", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            textBoxPIN.Text = "";
+            textBoxNewPIN2.Text = "";
+            textBoxNewPIN.Text = "";
+
+            ((Control)sender).Enabled = false;
+
+            tabControlMain.SelectedIndex = 2;
+
+            ThreadStart processTaskThread = delegate { cambiaPIN(sender, pin, newpin); };
+
+            new Thread(processTaskThread).Start();
+        }
+
+        private void cambiaPIN(object sender, string pin, string newpin)
+        {
+            int[] attempts = new int[1];
+
+            long ret = ChangePIN(pin, newpin, attempts, ProgressCambioPIN);
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                ((Control)sender).Enabled = true;
+
+                switch (ret)
+                {
+                    case CKR_TOKEN_NOT_RECOGNIZED:
+                        MessageBox.Show("CIE non presente sul lettore", "Cambio PIN", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        //[self showHomeFirstPage];
+                        break;
+
+                    case CKR_TOKEN_NOT_PRESENT:
+                        MessageBox.Show("CIE non presente sul lettore", "Cambio PIN", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        break;
+
+                    case CKR_PIN_INCORRECT:
+                        MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono %d tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        break;
+
+                    case CKR_PIN_LOCKED:
+                        MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        break;
+
+                    case CKR_GENERAL_ERROR:
+                        MessageBox.Show("Errore inaspettato durante la comunicazione con la smart card", "Errore inaspettato", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        break;
+
+                    case CKR_OK:
+                        MessageBox.Show("Il PIN è stato modificato con successo", "Operazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        selectHome();
+                        break;
+                }
+            });                      
+        }
+
+        private void sbloccaPIN(object sender, string puk, string newpin)
+        {
+            int[] attempts = new int[1];
+
+            long ret = UnlockPIN(puk, newpin, attempts, ProgressSbloccaPIN);
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                ((Control)sender).Enabled = true;
+
+                switch (ret)
+                {
+                    case CKR_TOKEN_NOT_RECOGNIZED:
+                        MessageBox.Show("CIE non presente sul lettore", "Sblocca PIN", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        //[self showHomeFirstPage];
+                        break;
+
+                    case CKR_TOKEN_NOT_PRESENT:
+                        MessageBox.Show("CIE non presente sul lettore", "Sblocca PIN", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        break;
+
+                    case CKR_PIN_INCORRECT:
+                        MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono %d tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        break;
+
+                    case CKR_PIN_LOCKED:
+                        MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        break;
+
+                    case CKR_GENERAL_ERROR:
+                        MessageBox.Show("Errore inaspettato durante la comunicazione con la smart card", "Errore inaspettato", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        break;
+
+                    case CKR_OK:
+                        MessageBox.Show("Il PIN è stato modificato con successo", "Operazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        selectHome();
+                        break;
+                }
+            });
+        }
+
+        private void buttonChangePIN_Click(object sender, EventArgs e)
+        {
+            tabControlMain.SelectedIndex = 3;
+
+            buttonHome.BackColor = Color.Transparent;
+            buttonChangePIN.BackColor = Color.LightGray;
+            buttonUnlock.BackColor = Color.Transparent;
+            buttonTutorial.BackColor = Color.Transparent;
+            buttonInfo.BackColor = Color.Transparent;
+            buttonHelp.BackColor = Color.Transparent;
+
+        }
+
+        private void buttonUnlock_Click(object sender, EventArgs e)
+        {
+            tabControlMain.SelectedIndex = 5;
+
+            buttonHome.BackColor = Color.Transparent;
+            buttonChangePIN.BackColor = Color.Transparent;
+            buttonUnlock.BackColor = Color.LightGray;
+            buttonTutorial.BackColor = Color.Transparent;
+            buttonInfo.BackColor = Color.Transparent;
+            buttonHelp.BackColor = Color.Transparent;
+        }
+
+        private void buttonUnlockPIN_Click(object sender, EventArgs e)
+        {
+            string puk = textBoxPUK.Text;
+            string newpin = textBoxUnclockPIN.Text;
+            string newpin2 = textBoxUnclockPIN.Text;
+
+            int i;
+
+            if (puk.Length != 8)
+            {
+                MessageBox.Show("Il PUK deve essere composto da 8 numeri", "PUK non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            if (newpin.Length != 8)
+            {
+                MessageBox.Show("Il PIN deve essere composto da 8 numeri", "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+
+            char c = puk[0];
+
+            i = 1;
+            for (i = 1; i < puk.Length && (c >= '0' && c <= '9'); i++)
+            {
+                c = puk[i];
+            }
+
+            if (i < puk.Length || !(c >= '0' && c <= '9'))
+            {
+                MessageBox.Show("Il PUK deve essere composto da 8 numeri", "PUK non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            c = newpin[0];
+
+            i = 1;
+            for (i = 1; i < newpin.Length && (c >= '0' && c <= '9'); i++)
+            {
+                c = newpin[i];
+            }
+
+            if (i < newpin.Length || !(c >= '0' && c <= '9'))
+            {
+                MessageBox.Show("Il PIN deve essere composto da 8 numeri", "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            if (!newpin.Equals(newpin2))
+            {
+                MessageBox.Show("I PIN non corrispondono", "PIN non corrispondenti", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            c = newpin[0];
+            char lastchar = c;
+
+            for (i = 1; i < newpin.Length && c == lastchar; i++)
+            {
+                lastchar = c;
+                c = newpin[i];
+            }
+
+            if (c == lastchar)
+            {
+                MessageBox.Show("Il nuovo PIN non deve essere composto da cifre uguali", "PIN non valido", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            c = newpin[0];
+            lastchar = (char)((int)c - 1);
+
+            for (i = 1; i < newpin.Length && c == lastchar + 1; i++)
+            {
+                lastchar = c;
+                c = newpin[i];
+            }
+
+            if (c == lastchar + 1)
+            {
+                MessageBox.Show("Il nuovo PIN non deve essere composto da cifre consecutive", "PIN non valido", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            c = newpin[0];
+            lastchar = (char)(c + 1);
+
+            for (i = 1; i < newpin.Length && c == lastchar - 1; i++)
+            {
+                lastchar = c;
+                c = newpin[i];
+            }
+
+            if (c == lastchar - 1)
+            {
+                MessageBox.Show("Il nuovo PIN non deve essere composto da cifre consecutive", "PIN non valido", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            textBoxPUK.Text = "";
+            textBoxUnclockPIN.Text = "";
+            textBoxUnclockPIN2.Text = "";
+
+            ((Control)sender).Enabled = false;
+
+            tabControlMain.SelectedIndex = 6;
+
+            ThreadStart processTaskThread = delegate { sbloccaPIN(sender, puk, newpin); };
+
+            new Thread(processTaskThread).Start();
+        }
+
+        private void label26_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label22_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonTutorial_Click(object sender, EventArgs e)
+        {
+            tabControlMain.SelectedIndex = 7;
+
+            buttonHome.BackColor = Color.Transparent;
+            buttonChangePIN.BackColor = Color.Transparent;
+            buttonUnlock.BackColor = Color.Transparent;
+            buttonTutorial.BackColor = Color.LightGray;
+            buttonInfo.BackColor = Color.Transparent;
+            buttonHelp.BackColor = Color.Transparent;
+
+            webBrowserTutorial.Navigate("https://idserver.servizicie.interno.gov.it/idp/tutorial_mac.jsp");
+        }
+
+        private void buttonHelp_Click(object sender, EventArgs e)
+        {
+            tabControlMain.SelectedIndex = 8;
+
+            buttonHome.BackColor = Color.Transparent;
+            buttonChangePIN.BackColor = Color.Transparent;
+            buttonUnlock.BackColor = Color.Transparent;
+            buttonTutorial.BackColor = Color.Transparent;
+            buttonInfo.BackColor = Color.Transparent;
+            buttonHelp.BackColor = Color.LightGray;
+
+            webBrowserHelp.Navigate("https://idserver.servizicie.interno.gov.it/idp/aiuto.jsp");        
+        }
+
+        private void buttonInfo_Click(object sender, EventArgs e)
+        {
+            tabControlMain.SelectedIndex = 9;
+
+            buttonHome.BackColor = Color.Transparent;
+            buttonChangePIN.BackColor = Color.Transparent;
+            buttonUnlock.BackColor = Color.Transparent;
+            buttonTutorial.BackColor = Color.Transparent;
+            buttonInfo.BackColor = Color.LightGray;
+            buttonHelp.BackColor = Color.Transparent;
+
+            webBrowserInfo.Navigate("https://idserver.servizicie.interno.gov.it/idp/privacy.jsp");
+        }
     }
-//long ret = VerificaCIEAbilitata();
+        //long ret = VerificaCIEAbilitata();
 
-//            switch (ret)
-//            {
-//                case CKR_DEVICE_ERROR:
-//                    break;
+        //            switch (ret)
+        //            {
+        //                case CKR_DEVICE_ERROR:
+        //                    break;
 
-//                case CKR_TOKEN_NOT_PRESENT:
-//                    break;
+        //                case CKR_TOKEN_NOT_PRESENT:
+        //                    break;
 
-//                case CKR_GENERAL_ERROR:
-//                    break;
+        //                case CKR_GENERAL_ERROR:
+        //                    break;
 
-//                case ENROLLED:
-//                    break;
+        //                case ENROLLED:
+        //                    break;
 
-//                case NOT_ENROLLED:
-//                    abbina();
-//                    break;
+        //                case NOT_ENROLLED:
+        //                    abbina();
+        //                    break;
 
-//            }
-}
+        //            }
+ }
