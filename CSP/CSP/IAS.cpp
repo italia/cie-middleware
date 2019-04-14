@@ -1065,13 +1065,29 @@ void IAS::IconaCertificatoScaduto(const char *seriale) {
 
 void IAS::IconaSbloccoPIN() {
 	init_func
-		if (IsUserInteractive()) {
-		PROCESS_INFORMATION pi;
-		STARTUPINFO si;
-		ZeroMem(si);
-		si.cb = sizeof(STARTUPINFO);
+		if (IsUserInteractive()) 
+		{
 
-		WORD getHandle = 0xfffd;
+			PROCESS_INFORMATION pi;
+			STARTUPINFO si;
+			ZeroMem(si);
+			si.cb = sizeof(STARTUPINFO);
+
+			if (!IsImpersonationRunning()) {
+
+				if (CreateProcess(NULL, (char*)std::string("CIEID ").append("unlock").c_str(), NULL, NULL, FALSE, 0, nullptr, nullptr, &si, &pi))
+				{
+					CloseHandle(pi.hThread);
+					CloseHandle(pi.hProcess);
+				}
+				else
+				{
+					throw logged_error("Errore in creazione processo CIEID");
+				}
+			}
+
+
+		/*WORD getHandle = 0xfffd;
 		ByteDynArray resp;
 		token.Transmit(VarToByteArray(getHandle), &resp);
 		SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
@@ -1086,7 +1102,7 @@ void IAS::IconaSbloccoPIN() {
 				CloseHandle(pi.hThread);
 				CloseHandle(pi.hProcess);
 			}
-		}
+		}*/
 	}
 }
 
@@ -1143,7 +1159,19 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
 
 			if (token == NULL) {
-				char runDll32Path[MAX_PATH];
+
+				if (!CreateProcess(NULL, (char*)std::string("CIEID ").append(dumpHexData(PAN.mid(5, 6), std::string(), false)).c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
+				{
+					DWORD dwerr = GetLastError();
+					throw logged_error("Errore in creazione processo CIEID");
+				}
+				else
+					CloseHandle(pi.hThread);
+				//WaitForSingleObject(pi.hProcess, INFINITE);
+				CloseHandle(pi.hProcess);
+
+
+				/*char runDll32Path[MAX_PATH];
 				GetSystemDirectory(runDll32Path, MAX_PATH);
 				strcat_s(runDll32Path, "\\");
 				strcat_s(runDll32Path, "rundll32.exe");
@@ -1153,7 +1181,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 				else
 					CloseHandle(pi.hThread);
 				WaitForSingleObject(pi.hProcess, INFINITE);
-				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hProcess);*/
 			}
 			else {
 				CloseHandle(token);

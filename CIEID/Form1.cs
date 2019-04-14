@@ -37,21 +37,21 @@ namespace CIEID
         delegate long CompletedCallback(string pan, string name);
 
         [DllImport("ciepki.dll")]
-        static extern long VerificaCIEAbilitata();
+        static extern int VerificaCIEAbilitata();
 
         [DllImport("ciepki.dll")]
         static extern int DisabilitaCIE();
 
         [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
-        static extern long AbbinaCIE(string szPAN, string szPIN, int[] attempts, ProgressCallback progressCallBack, CompletedCallback completedCallBack);
+        static extern int AbbinaCIE(string szPAN, string szPIN, int[] attempts, ProgressCallback progressCallBack, CompletedCallback completedCallBack);
 
         [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
-        static extern long ChangePIN(string szPIN, string szNewPIN, int[] attempts, ProgressCallback progressCallBack);
+        static extern int ChangePIN(string szPIN, string szNewPIN, int[] attempts, ProgressCallback progressCallBack);
 
         [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
-        static extern long UnlockPIN(string szPUK, string szNewPIN, int[] attempts, ProgressCallback progressCallBack);
+        static extern int UnlockPIN(string szPUK, string szNewPIN, int[] attempts, ProgressCallback progressCallBack);
 
-        public MainForm()
+        public MainForm(string arg)
         {
             InitializeComponent();
 
@@ -64,7 +64,14 @@ namespace CIEID
             //    txtField.BorderStyle = BorderStyle.None;
             //}
 
-            selectHome();
+            if ("unlock".Equals(arg))
+            {
+                selectUnlock();
+            }
+            else
+            {
+                selectHome();
+            }
         }
 
         void TextBox_Paint(object sender, PaintEventArgs e)
@@ -175,16 +182,6 @@ namespace CIEID
             return null;
         }
 
-        private void label5_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void labelSerialNumber_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void buttonHome_Click(object sender, EventArgs e)
         {
             selectHome();
@@ -273,7 +270,7 @@ namespace CIEID
             {
                 int[] attempts = new int[1];
 
-                long ret = AbbinaCIE(null, pin, attempts, new ProgressCallback(ProgressAbbina), new CompletedCallback(CompletedAbbina));
+                int ret = AbbinaCIE(null, pin, attempts, new ProgressCallback(ProgressAbbina), new CompletedCallback(CompletedAbbina));
 
                 this.Invoke((MethodInvoker)delegate
                 {
@@ -346,21 +343,6 @@ namespace CIEID
                     MessageBox.Show("Impossibile disabilitare la CIE", "CIE non disabilitata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     break;
             }
-        }
-
-        private void label9_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label8_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox4_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void buttonCambiaPIN_Click(object sender, EventArgs e)
@@ -469,7 +451,7 @@ namespace CIEID
 
             ((Control)sender).Enabled = false;
 
-            tabControlMain.SelectedIndex = 2;
+            tabControlMain.SelectedIndex = 4;
 
             ThreadStart processTaskThread = delegate { cambiaPIN(sender, pin, newpin); };
 
@@ -480,7 +462,7 @@ namespace CIEID
         {
             int[] attempts = new int[1];
 
-            long ret = ChangePIN(pin, newpin, attempts, ProgressCambioPIN);
+            int ret = ChangePIN(pin, newpin, attempts, ProgressCambioPIN);
 
             this.Invoke((MethodInvoker)delegate
             {
@@ -582,6 +564,11 @@ namespace CIEID
         }
 
         private void buttonUnlock_Click(object sender, EventArgs e)
+        {
+            selectUnlock();
+        }
+
+        private void selectUnlock()
         {
             tabControlMain.SelectedIndex = 5;
 
@@ -756,6 +743,11 @@ namespace CIEID
             buttonHelp.BackColor = Color.Transparent;
 
             webBrowserInfo.Navigate("https://idserver.servizicie.interno.gov.it/idp/privacy.jsp");
+        }
+
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
         }
     }
         //long ret = VerificaCIEAbilitata();

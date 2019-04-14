@@ -20,12 +20,12 @@ namespace CIEID
         private void buttonStart_Click(object sender, EventArgs e)
         {
             Hide();
-
-
-            MainForm mainForm = new MainForm();
+    
+            MainForm mainForm = new MainForm(null);
 
             mainForm.Show();
 
+            Close();
         }
 
         private void buttonContine_Click(object sender, EventArgs e)

@@ -472,8 +472,8 @@ DWORD CardAuthenticateEx(IAS*       ias,
 		return SCARD_E_INVALID_PARAMETER;
 
 	if (sw == 0x6983) {
-		if (PinId == ROLE_USER)
-			ias->IconaSbloccoPIN();
+		//if (PinId == ROLE_USER)
+		//	ias->IconaSbloccoPIN();
 		return SCARD_W_CHV_BLOCKED;
 	}
 	if (sw >= 0x63C0 && sw <= 0x63CF) {

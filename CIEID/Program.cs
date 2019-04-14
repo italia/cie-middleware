@@ -11,7 +11,7 @@ namespace CIEID
         /// Punto di ingresso principale dell'applicazione.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -22,12 +22,12 @@ namespace CIEID
             if (Properties.Settings.Default.firstTime)
             {
                 Properties.Settings.Default.firstTime = false;
-                Properties.Settings.Default.Save(); // Saves settings in application configuration file
+                Properties.Settings.Default.Save(); // Saves settings in application configuration file                
                 Application.Run(new Intro());
             }
             else
-            {
-                Application.Run(new MainForm());
+            {                
+                Application.Run(new MainForm(args.Length > 0 ? args[0] : null));
             }
 
         }
