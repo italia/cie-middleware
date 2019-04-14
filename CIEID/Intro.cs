@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * CIE ID, l'applicazione per gestire la CIE
+ * Author: Ugo Chirico - http://www.ugochirico.com
+ * Data: 10/04/2019 
+ */
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;

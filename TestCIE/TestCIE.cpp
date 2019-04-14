@@ -763,7 +763,7 @@ int main(int argc, char* argv[])
 {
 	std::cout << "----------------------------------------------" << std::endl;
 	std::cout << "- Benvenuti nella Console di test del PKCS#11" << std::endl;
-	std::cout << "- Copyright (c) 2006-2009 by Ugo Chirico\n- http://www.ugosweb.com\n- All right reserved" << std::endl;
+	std::cout << "- Copyright (c) 2006-2019 by Ugo Chirico\n- http://www.ugochirico.com\n- All right reserved" << std::endl;
 	std::cout << "----------------------------------------------" << std::endl;
 
 	g_nLogLevel = 5;
