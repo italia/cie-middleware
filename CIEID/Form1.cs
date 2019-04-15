@@ -71,6 +71,10 @@ namespace CIEID
             {
                 selectUnlock();
             }
+            else if ("changepin".Equals(arg))
+            {
+                selectChangePIN();
+            }
             else
             {
                 selectHome();
@@ -555,6 +559,11 @@ namespace CIEID
 
         private void buttonChangePIN_Click(object sender, EventArgs e)
         {
+            selectChangePIN();
+        }
+
+        private void selectChangePIN()
+        { 
             tabControlMain.SelectedIndex = 3;
 
             buttonHome.BackColor = Color.Transparent;

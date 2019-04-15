@@ -74,10 +74,21 @@ Section "Install"
 
   SetOutPath $INSTDIR    
 	createShortCut "$SMPROGRAMS\CIE Middleware\Disinstalla.lnk" "$INSTDIR\Uninstall.exe"
+	
+	File "..\x64\${Config}\CIEID.exe"
+	File "..\x64\${Config}\CIEID.exe.config"
+	
+	ExecWait 'setx PATH %PATH%;$INSTDIR /m'
+  
   SetOutPath $SYSDIR
-	createShortCut "$SMPROGRAMS\CIE Middleware\Cambio PIN.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll CambioPIN" "$SYSDIR\CIEPKI.dll" 0
-	createShortCut "$SMPROGRAMS\CIE Middleware\Sblocco PIN.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll SbloccoPIN" "$SYSDIR\CIEPKI.dll" 0
-	createShortCut "$SMPROGRAMS\CIE Middleware\Verifica aggiornamenti.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll Update Display" "$SYSDIR\CIEPKI.dll" 0
+	
+	createShortCut "$SMPROGRAMS\CIE Middleware\Cambio PIN.lnk" "$INSTDIR\CIEID.exe" "changepin" "$SYSDIR\CIEPKI.dll" 0
+	createShortCut "$SMPROGRAMS\CIE Middleware\Sblocco PIN.lnk" "$INSTDIR\CIEID.exe" "unlock" "$SYSDIR\CIEPKI.dll" 0
+	createShortCut "$SMPROGRAMS\CIE Middleware\Verifica aggiornamenti.lnk" "$INSTDIR\CIEID.exe" "update" "$SYSDIR\CIEPKI.dll" 0
+
+	;createShortCut "$SMPROGRAMS\CIE Middleware\Cambio PIN.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll CambioPIN" "$SYSDIR\CIEPKI.dll" 0
+	;createShortCut "$SMPROGRAMS\CIE Middleware\Sblocco PIN.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll SbloccoPIN" "$SYSDIR\CIEPKI.dll" 0
+	;createShortCut "$SMPROGRAMS\CIE Middleware\Verifica aggiornamenti.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll Update Display" "$SYSDIR\CIEPKI.dll" 0
 
   SetOutPath $INSTDIR
   File UpdateTask.xml 
