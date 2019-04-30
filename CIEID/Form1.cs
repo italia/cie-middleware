@@ -297,7 +297,7 @@ namespace CIEID
                             break;
 
                         case CKR_PIN_INCORRECT:
-                            MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono %d tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                             selectHome();
                             break;
 
@@ -489,7 +489,7 @@ namespace CIEID
                         break;
 
                     case CKR_PIN_INCORRECT:
-                        MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono %d tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         selectHome();
                         break;
 
@@ -535,7 +535,7 @@ namespace CIEID
                         break;
 
                     case CKR_PIN_INCORRECT:
-                        MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono %d tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         selectHome();
                         break;
 
