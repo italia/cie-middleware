@@ -63,8 +63,12 @@ Section "Install"
     !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\Win32\${Config}\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
   ${EndIf}
 
+  RMDir /r "$APPDATA\Local\CIEID"
  
   SetShellVarContext all
+  RMDir /r "$SMPROGRAMS\CIE Middleware"
+  
+
   # Start Menu
 	createDirectory "$SMPROGRAMS\CIE Middleware"
 
@@ -82,13 +86,13 @@ Section "Install"
   
   SetOutPath $SYSDIR
 	
-	createShortCut "$SMPROGRAMS\CIE Middleware\Cambio PIN.lnk" "$INSTDIR\CIEID.exe" "changepin" "$SYSDIR\CIEPKI.dll" 0
-	createShortCut "$SMPROGRAMS\CIE Middleware\Sblocco PIN.lnk" "$INSTDIR\CIEID.exe" "unlock" "$SYSDIR\CIEPKI.dll" 0
-	createShortCut "$SMPROGRAMS\CIE Middleware\Verifica aggiornamenti.lnk" "$INSTDIR\CIEID.exe" "update" "$SYSDIR\CIEPKI.dll" 0
+	;createShortCut "$SMPROGRAMS\CIE Middleware\Cambio PIN.lnk" "$INSTDIR\CIEID.exe" 
+	;createShortCut "$SMPROGRAMS\CIE Middleware\Sblocco PIN.lnk" "$INSTDIR\CIEID.exe" 
+	createShortCut "$SMPROGRAMS\CIE Middleware\CIE ID.lnk" "$INSTDIR\CIEID.exe"
 
 	;createShortCut "$SMPROGRAMS\CIE Middleware\Cambio PIN.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll CambioPIN" "$SYSDIR\CIEPKI.dll" 0
 	;createShortCut "$SMPROGRAMS\CIE Middleware\Sblocco PIN.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll SbloccoPIN" "$SYSDIR\CIEPKI.dll" 0
-	;createShortCut "$SMPROGRAMS\CIE Middleware\Verifica aggiornamenti.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll Update Display" "$SYSDIR\CIEPKI.dll" 0
+	createShortCut "$SMPROGRAMS\CIE Middleware\Verifica aggiornamenti.lnk" "$SYSDIR\rundll32.exe" "CIEPKI.dll Update Display" "$SYSDIR\CIEPKI.dll" 0
 
   SetOutPath $INSTDIR
   File UpdateTask.xml 
@@ -136,6 +140,7 @@ Section "Uninstall"
 	Delete "$SYSDIR\CIEPKI.dll"
   ${EndIf}
   
+  RMDir /r "$APPDATA\Local\CIEID"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
   
