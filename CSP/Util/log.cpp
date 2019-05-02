@@ -97,12 +97,12 @@ void initLog()
 	}
 //	GetTempPath(MAX_PATH, szLogDir);
 
-	Log.initParam(false);
+	Log.initParam(true);
 }
 
 CLog::CLog() {
 	
-	Enabled = false;
+	Enabled = true;
 	LogParam = true;
 }
 
@@ -163,7 +163,7 @@ DWORD CLog::write(const char *format,...) {
 	}
 	else
 	{
-		printf("error %x\n", err);
+		//printf("error %x\n", err);
 	}
 
 #ifdef _DEBUG

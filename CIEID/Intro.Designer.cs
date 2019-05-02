@@ -36,6 +36,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.checkBoxNoMore = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
@@ -100,12 +101,12 @@
             // label2
             // 
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(155, 61);
+            this.label2.Location = new System.Drawing.Point(90, 56);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(459, 53);
+            this.label2.Size = new System.Drawing.Size(588, 74);
             this.label2.TabIndex = 1;
             this.label2.Text = "Il software che ti permette di autenticarti ai servizi online della Pubblica Ammi" +
-    "nistrazione per mezzo della";
+    "nistrazione per mezzo della nuova carta d\'identità elettronica";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label1
@@ -121,6 +122,7 @@
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.Color.White;
+            this.tabPage2.Controls.Add(this.checkBoxNoMore);
             this.tabPage2.Controls.Add(this.label3);
             this.tabPage2.Controls.Add(this.label4);
             this.tabPage2.Controls.Add(this.pictureBox2);
@@ -131,6 +133,16 @@
             this.tabPage2.Size = new System.Drawing.Size(779, 510);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
+            // 
+            // checkBoxNoMore
+            // 
+            this.checkBoxNoMore.AutoSize = true;
+            this.checkBoxNoMore.Location = new System.Drawing.Point(595, 445);
+            this.checkBoxNoMore.Name = "checkBoxNoMore";
+            this.checkBoxNoMore.Size = new System.Drawing.Size(139, 21);
+            this.checkBoxNoMore.TabIndex = 8;
+            this.checkBoxNoMore.Text = "Non mostrare più";
+            this.checkBoxNoMore.UseVisualStyleBackColor = true;
             // 
             // label3
             // 
@@ -212,5 +224,6 @@
         private System.Windows.Forms.Button buttonStart;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.CheckBox checkBoxNoMore;
     }
 }

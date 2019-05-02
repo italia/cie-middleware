@@ -63,15 +63,14 @@ Section "Install"
     !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\Win32\${Config}\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
   ${EndIf}
 
-  RMDir /r "$APPDATA\Local\CIEID"
+  RMDir /r "$LOCALAPPDATA\CIEID"
  
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\CIE Middleware"
   
-
   # Start Menu
 	createDirectory "$SMPROGRAMS\CIE Middleware"
-
+	
   ;Create uninstaller
   createDirectory "$INSTDIR"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -79,11 +78,11 @@ Section "Install"
   SetOutPath $INSTDIR    
 	createShortCut "$SMPROGRAMS\CIE Middleware\Disinstalla.lnk" "$INSTDIR\Uninstall.exe"
 	
+	
 	File "..\x64\${Config}\CIEID.exe"
 	File "..\x64\${Config}\CIEID.exe.config"
-	
-	ExecWait 'setx PATH %PATH%;$INSTDIR /m'
-  
+		
+
   SetOutPath $SYSDIR
 	
 	;createShortCut "$SMPROGRAMS\CIE Middleware\Cambio PIN.lnk" "$INSTDIR\CIEID.exe" 

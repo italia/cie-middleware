@@ -1065,45 +1065,36 @@ void IAS::IconaCertificatoScaduto(const char *seriale) {
 
 void IAS::IconaSbloccoPIN() {
 	init_func
-		if (IsUserInteractive()) 
-		{
-
+		if (IsUserInteractive()) {
 			PROCESS_INFORMATION pi;
 			STARTUPINFO si;
 			ZeroMem(si);
 			si.cb = sizeof(STARTUPINFO);
 
-			if (!IsImpersonationRunning()) {
+			WORD getHandle = 0xfffd;
+			ByteDynArray resp;
+			token.Transmit(VarToByteArray(getHandle), &resp);
+			SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
 
-				if (CreateProcess(NULL, (char*)std::string("CIEID ").append("unlock").c_str(), NULL, NULL, FALSE, 0, nullptr, nullptr, &si, &pi))
-				{
+			char runDll32Path[MAX_PATH];
+			GetSystemDirectory(runDll32Path, MAX_PATH);
+			strcat_s(runDll32Path, "\\");
+			strcat_s(runDll32Path, "rundll32.exe");
+
+			// check impersonation
+			HANDLE token = NULL;
+			OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
+
+			if (token == NULL) {
+				if (CreateProcess(runDll32Path, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",SbloccoPIN ICON").c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
 					CloseHandle(pi.hThread);
 					CloseHandle(pi.hProcess);
 				}
-				else
-				{
-					throw logged_error("Errore in creazione processo CIEID");
-				}
 			}
-
-
-		/*WORD getHandle = 0xfffd;
-		ByteDynArray resp;
-		token.Transmit(VarToByteArray(getHandle), &resp);
-		SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
-
-		char runDll32Path[MAX_PATH];
-		GetSystemDirectory(runDll32Path, MAX_PATH);
-		strcat_s(runDll32Path, "\\");
-		strcat_s(runDll32Path, "rundll32.exe");
-
-		if (!IsImpersonationRunning()) {
-			if (CreateProcess(runDll32Path, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",SbloccoPIN ICON").c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
-				CloseHandle(pi.hThread);
-				CloseHandle(pi.hProcess);
+			else {
+				CloseHandle(token);
 			}
-		}*/
-	}
+		}
 }
 
 void IAS::GetFirstPIN(ByteDynArray &PIN) {
@@ -1141,7 +1132,12 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 	std::string PANStr;
 	dumpHexData(PAN.mid(5, 6), PANStr, false);
 	if (!CacheExists(PANStr.c_str())) {
-		if (askEnable && IsUserInteractive() && !IsLowIntegrity()) {
+		Log.writePure("Cache non esiste");
+		Log.writePure("askEnabled %d", askEnable);
+		Log.writePure("IsUserInteractive() %d", IsUserInteractive());
+		Log.writePure("IsLowIntegrity() %d", IsLowIntegrity());
+
+		if (askEnable /*&& IsUserInteractive()*/ && !IsLowIntegrity()) {
 			PROCESS_INFORMATION pi;
 			STARTUPINFO si;
 			ZeroMem(si);
@@ -1152,41 +1148,39 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			token.Transmit(VarToByteArray(getHandle), &resp);
 			SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
 
-			//SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
+			SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
 
 			// check impersonation
-			HANDLE token=NULL;
+			HANDLE token = NULL;
 			OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
 
+			Log.writePure("token %d", token);
+
 			if (token == NULL) {
-
-				if (!CreateProcess(NULL, (char*)std::string("CIEID ").append(dumpHexData(PAN.mid(5, 6), std::string(), false)).c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
-				{
-					DWORD dwerr = GetLastError();
-					throw logged_error("Errore in creazione processo CIEID");
-				}
-				else
-					CloseHandle(pi.hThread);
-				//WaitForSingleObject(pi.hProcess, INFINITE);
-				CloseHandle(pi.hProcess);
-
-
-				/*char runDll32Path[MAX_PATH];
+				char runDll32Path[MAX_PATH];
 				GetSystemDirectory(runDll32Path, MAX_PATH);
 				strcat_s(runDll32Path, "\\");
 				strcat_s(runDll32Path, "rundll32.exe");
 
+				Log.writePure("run AbilitaCIE");
+
 				if (!CreateProcess(runDll32Path, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",AbilitaCIE ").append(dumpHexData(PAN.mid(5, 6), std::string(), false)).c_str(), NULL, NULL, FALSE, 0, nullptr, nullptr, &si, &pi))
+				{
+					Log.writePure("Errore in creazione processo AbilitaCIE");
 					throw logged_error("Errore in creazione processo AbilitaCIE");
+				}
 				else
+				{
+					Log.writePure("AbilitaCIE creato");
 					CloseHandle(pi.hThread);
-				WaitForSingleObject(pi.hProcess, INFINITE);
-				CloseHandle(pi.hProcess);*/
+				}
+				//WaitForSingleObject(pi.hProcess, INFINITE);
+				CloseHandle(pi.hProcess);
 			}
 			else {
 				CloseHandle(token);
 			}
-			//SCardBeginTransaction(hCard);
+			SCardBeginTransaction(hCard);
 		}
 		else {
 			certificate.clear();

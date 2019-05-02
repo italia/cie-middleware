@@ -137,7 +137,7 @@ DWORD WINAPI CardReadFile(
 				throw logged_error("IAS non inizializzato");
 			ias->SetCardContext(pCardData);
 			ByteDynArray cert;
-			ias->GetCertificate(cert, false);
+			ias->GetCertificate(cert);// , false);
 			DWORD keylen = CIE_KEY_BITLEN;
 			if (!cert.isEmpty()) {
 				PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());

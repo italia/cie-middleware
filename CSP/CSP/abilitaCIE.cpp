@@ -13,6 +13,8 @@
 #include <atlbase.h>
 #include <string>
 #include "PINManager.h"
+#include <shlobj_core.h>
+#include "../UI/SystemTray.h"
 
 
 typedef CK_RV(*AbilitaCIEfn)(const char*  szPAN,
@@ -364,7 +366,7 @@ extern "C" {
 
 				hashSet[0xa3] = sha256.Digest(certCIEData);
 
-				ias.VerificaSOD(SOD, hashSet);
+				//ias.VerificaSOD(SOD, hashSet);
 
 				ByteArray pinBa((uint8_t*)szPIN, 4);
 
@@ -847,18 +849,66 @@ DWORD WINAPI _abilitaCIE(
 	return E_UNEXPECTED;
 }
 
+#pragma data_seg("Shared")
+int g_working = 0;
+#pragma data_seg()
+
+#pragma comment(linker, "/section:Shared,RWS")
+
+
+void TrayNotificationAbilitaCIE(CSystemTray* tray, WPARAM uID, LPARAM lEvent) 
+{
+	if (lEvent == WM_LBUTTONUP || lEvent == 0x405) {
+
+		tray->HideIcon();
+
+		PROCESS_INFORMATION pi;
+		STARTUPINFO si;
+		ZeroMem(si);
+		si.cb = sizeof(STARTUPINFO);
+
+		char szProgramFilesDir[MAX_PATH];
+		if (!SHGetSpecialFolderPath(NULL, szProgramFilesDir, CSIDL_PROGRAM_FILESX86, 0))
+			SHGetSpecialFolderPath(NULL, szProgramFilesDir, CSIDL_PROGRAM_FILES, 0);
+
+		Log.writePure("szProgramFilesDir %s", szProgramFilesDir);
+
+		if (!CreateProcess(NULL, (char*)std::string(szProgramFilesDir).append("\\CIEPKI\\CIEID").c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
+		{
+			DWORD dwerr = GetLastError();
+			Log.writePure("error run CIEID %x", dwerr);
+			throw logged_error("Errore in creazione processo CIEID");
+		}
+		else
+		{
+			throw logged_error("Errore in creazione processo CIEID");
+		}
+
+		//std::thread thread(_sbloccoPIN, GetCurrentThreadId());
+		//thread.detach();
+		//tray->HideIcon();
+	}
+}
 
 extern "C" int CALLBACK AbilitaCIE(
 	_In_ HINSTANCE hInstance,
 	_In_ HINSTANCE hPrevInstance,
 	_In_ LPSTR     lpCmdLine,
 	_In_ int       nCmdShow
-	)
+)
 {
+	if (g_working)
+		return 0;
+
+	g_working = 1;
+
+	ODS("Start AbilitaCIE");
+
 	if (_AtlWinModule.cbSize != sizeof(_ATL_WIN_MODULE)) {
 		_AtlWinModule.cbSize = sizeof(_ATL_WIN_MODULE);
 		AtlWinModuleInit(&_AtlWinModule);
 	}
+
 	WNDCLASS wndClass;
 	GetClassInfo(NULL, WC_DIALOG, &wndClass);
 	wndClass.hInstance = (HINSTANCE)moduleInfo.getModule();
@@ -866,14 +916,55 @@ extern "C" int CALLBACK AbilitaCIE(
 	wndClass.lpszClassName = "CIEDialog";
 	RegisterClass(&wndClass);
 
-	ODS("Start AbilitaCIE");
-	if (!CheckOneInstance("CIEAbilitaOnce")) {
-		ODS("Already running AbilitaCIE");
-		return 0;
+	
+	CSystemTray tray(wndClass.hInstance, nullptr, WM_APP, "La CIE non è abilitata. Premere per abilitarla ora",
+		LoadIcon(wndClass.hInstance, MAKEINTRESOURCE(IDI_CIE)), 1);
+	tray.ShowBalloon("Premere per abilitare la CIE", "CIE", NIIF_INFO);
+	tray.ShowIcon();
+	tray.TrayNotification = TrayNotificationAbilitaCIE;
+	
+	MSG Msg;
+	while (GetMessage(&Msg, NULL, 0, 0) > 0)
+	{
+		TranslateMessage(&Msg);
+		if (Msg.message == WM_COMMAND) 
+		{
+			ODS("WMCOMMAND");
+			if (Msg.wParam == 0)
+				return 0;
+			else 
+			{
+				tray.ShowIcon();
+				ODS("Show Baloon");
+				tray.ShowBalloon("Premere per abilitare la CIE", "CIE", NIIF_INFO, 30);
+			}
+		}
+		DispatchMessage(&Msg);
 	}
-	//std::thread thread(_abilitaCIE, lpCmdLine);
-	//thread.join();
-	_abilitaCIE(lpCmdLine);
-	ODS("End AbilitaCIE");
+
 	return 0;
 }
+
+
+	//if (_AtlWinModule.cbSize != sizeof(_ATL_WIN_MODULE)) {
+	//	_AtlWinModule.cbSize = sizeof(_ATL_WIN_MODULE);
+	//	AtlWinModuleInit(&_AtlWinModule);
+	//}
+	//WNDCLASS wndClass;
+	//GetClassInfo(NULL, WC_DIALOG, &wndClass);
+	//wndClass.hInstance = (HINSTANCE)moduleInfo.getModule();
+	//wndClass.style |= CS_DROPSHADOW;
+	//wndClass.lpszClassName = "CIEDialog";
+	//RegisterClass(&wndClass);
+
+	//ODS("Start AbilitaCIE");
+	//if (!CheckOneInstance("CIEAbilitaOnce")) {
+	//	ODS("Already running AbilitaCIE");
+	//	return 0;
+	//}
+	////std::thread thread(_abilitaCIE, lpCmdLine);
+	////thread.join();
+	//_abilitaCIE(lpCmdLine);
+	//ODS("End AbilitaCIE");
+//	return 0;
+//}

@@ -11,6 +11,7 @@
 #include "../UI/safeDesktop.h"
 #include "../PCSC/PCSC.h"
 #include <atlbase.h>
+#include <shlobj_core.h>
 
 extern CModuleInfo moduleInfo;
 extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD dwFlags);
@@ -174,9 +175,33 @@ DWORD WINAPI _sbloccoPIN(
 
 void TrayNotification(CSystemTray* tray, WPARAM uID, LPARAM lEvent) {
 	if (lEvent == WM_LBUTTONUP || lEvent== 0x405) {
-		std::thread thread(_sbloccoPIN, GetCurrentThreadId());
-		thread.detach();
+
 		tray->HideIcon();
+		PROCESS_INFORMATION pi;
+		STARTUPINFO si;
+		ZeroMem(si);
+		si.cb = sizeof(STARTUPINFO);
+
+		char szProgramFilesDir[MAX_PATH];
+		if (!SHGetSpecialFolderPath(NULL, szProgramFilesDir, CSIDL_PROGRAM_FILESX86, 0))
+			SHGetSpecialFolderPath(NULL, szProgramFilesDir, CSIDL_PROGRAM_FILES, 0);
+
+		Log.writePure("szProgramFilesDir %s", szProgramFilesDir);
+
+		if (!CreateProcess(NULL, (char*)std::string(szProgramFilesDir).append("\\CIEPKI\\CIEID ").append("unlock").c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
+		{
+			DWORD dwerr = GetLastError();
+			Log.writePure("error run CIEID %x", dwerr);
+			throw logged_error("Errore in creazione processo CIEID");
+		}
+		else
+		{
+			throw logged_error("Errore in creazione processo CIEID");
+		}
+
+		//std::thread thread(_sbloccoPIN, GetCurrentThreadId());
+		//thread.detach();
+		//tray->HideIcon();
 	}
 }
 
@@ -207,6 +232,9 @@ extern "C" int CALLBACK SbloccoPIN(
 	}	
 
 	if (strcmp(lpCmdLine, "ICON") == 0) {
+
+		ODS("Start SbloccoPIN with ICON");
+
 		CSystemTray tray(wndClass.hInstance, nullptr, WM_APP, "Premere per sbloccare il PIN della CIE",
 			LoadIcon(wndClass.hInstance, MAKEINTRESOURCE(IDI_CIE)), 1);
 		tray.ShowBalloon("Premere per sbloccare il PIN dalla CIE", "CIE", NIIF_INFO);
@@ -217,10 +245,12 @@ extern "C" int CALLBACK SbloccoPIN(
 		{
 			TranslateMessage(&Msg);
 			if (Msg.message == WM_COMMAND) {
+				ODS("WMCOMMAND");
 				if (Msg.wParam == 0)
 					return 0;
 				else {
 					tray.ShowIcon();
+					ODS("Show Baloon");
 					tray.ShowBalloon("Premere per sbloccare il PIN dalla CIE", "CIE", NIIF_INFO);
 				}
 			}

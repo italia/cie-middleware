@@ -25,13 +25,18 @@ namespace CIEID
 
         private void buttonStart_Click(object sender, EventArgs e)
         {
-            Hide();
-    
-            MainForm mainForm = new MainForm(null);
+            if(checkBoxNoMore.Checked)
+            {
+                Properties.Settings.Default.firstTime = false;
+                Properties.Settings.Default.Save(); // Saves settings in application configuration file                
+            }
 
+            MainForm mainForm = new MainForm(null);
             mainForm.Show();
 
-            Close();
+            Hide();
+            //Close();
+
         }
 
         private void buttonContine_Click(object sender, EventArgs e)
