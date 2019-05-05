@@ -524,23 +524,23 @@ namespace CIEID
                 switch (ret)
                 {
                     case CKR_TOKEN_NOT_RECOGNIZED:
-                        MessageBox.Show("CIE non presente sul lettore", "Sblocca PIN", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        MessageBox.Show("CIE non presente sul lettore", "Sblocca CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         selectHome();
                         //[self showHomeFirstPage];
                         break;
 
                     case CKR_TOKEN_NOT_PRESENT:
-                        MessageBox.Show("CIE non presente sul lettore", "Sblocca PIN", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        MessageBox.Show("CIE non presente sul lettore", "Sblocca CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         selectHome();
                         break;
 
                     case CKR_PIN_INCORRECT:
-                        MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        MessageBox.Show(String.Format("Il PUK digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         selectHome();
                         break;
 
                     case CKR_PIN_LOCKED:
-                        MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        MessageBox.Show("PUK bloccato. La tua CIE deve essere sostutuita", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         selectHome();
                         break;
 
@@ -550,7 +550,7 @@ namespace CIEID
                         break;
 
                     case CKR_OK:
-                        MessageBox.Show("Il PIN è stato modificato con successo", "Operazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("La CIE è stata sbloccata con successo", "Operazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         selectHome();
                         break;
                 }
@@ -726,7 +726,7 @@ namespace CIEID
             buttonInfo.BackColor = Color.Transparent;
             buttonHelp.BackColor = Color.Transparent;
 
-            webBrowserTutorial.Navigate("https://idserver.servizicie.interno.gov.it/idp/tutorial_mac.jsp");
+            webBrowserTutorial.Navigate("https://idserver.servizicie.interno.gov.it/idp/tutorial_win.jsp");
         }
 
         private void buttonHelp_Click(object sender, EventArgs e)
