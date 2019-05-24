@@ -1122,6 +1122,18 @@ bool IAS::Unenroll() {
 	return CacheRemove(PANStr.c_str());
 }
 
+bool IAS::IsEnrolled(const char* szPAN) {
+	init_func
+
+		return CacheExists(szPAN);
+}
+
+bool IAS::Unenroll(const char* szPAN) {
+	init_func
+		return CacheRemove(szPAN);
+}
+
+
 void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 	init_func
 		if (!Certificate.isEmpty()) {

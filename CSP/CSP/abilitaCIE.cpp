@@ -23,8 +23,8 @@ typedef CK_RV(*AbilitaCIEfn)(const char*  szPAN,
 	PROGRESS_CALLBACK progressCallBack,
 	COMPLETED_CALLBACK completedCallBack);
 
-typedef CK_RV(*VerificaCIEAbilitatafn)();
-typedef CK_RV(*DisabilitaCIEfn)();
+typedef CK_RV(*VerificaCIEAbilitatafn)(const char*  szPAN);
+typedef CK_RV(*DisabilitaCIEfn)(const char*  szPAN);
 
 int TokenTransmitCallback(safeConnection *data, uint8_t *apdu, DWORD apduSize, uint8_t *resp, DWORD *respSize);
 
@@ -39,184 +39,28 @@ DWORD CardAuthenticateEx(IAS*       ias,
 
 extern "C" {
 
-
-	CK_RV CK_ENTRY VerificaCIEAbilitata()
+	CK_RV CK_ENTRY __stdcall VerificaCIEAbilitata(const char*  szPAN)
 	{
-		DWORD len = 0;
 
-		SCARDCONTEXT hSC;
-
-		long nRet = SCardEstablishContext(SCARD_SCOPE_USER, nullptr, nullptr, &hSC);
-		if (nRet != SCARD_S_SUCCESS)
-			return CKR_DEVICE_ERROR;
-
-		char* readers = NULL;
-		char* ATR = NULL;
-		if (SCardListReaders(hSC, nullptr, NULL, &len) != SCARD_S_SUCCESS) {
-			return CKR_TOKEN_NOT_PRESENT;
-		}
-
-		if (len == 1)
-			return CKR_TOKEN_NOT_PRESENT;
-
-		readers = (char*)malloc(len);
-
-		if (SCardListReaders(hSC, nullptr, (char*)readers, &len) != SCARD_S_SUCCESS) {
-			free(readers);
-			return CKR_TOKEN_NOT_PRESENT;
-		}
-
-		char *curreader = readers;
-		for (; curreader[0] != 0; curreader += strnlen(curreader, len) + 1)
-		{
-			try
-			{
-				safeConnection conn(hSC, curreader, SCARD_SHARE_SHARED);
-				if (!conn.hCard)
-					continue;
-
-				DWORD atrLen = 40;
-				if (SCardGetAttrib(conn.hCard, SCARD_ATTR_ATR_STRING, (uint8_t*)ATR, &atrLen) != SCARD_S_SUCCESS) {
-					free(readers);
-					return CKR_DEVICE_ERROR;
-				}
-
-				ATR = (char*)malloc(atrLen);
-
-				if (SCardGetAttrib(conn.hCard, SCARD_ATTR_ATR_STRING, (uint8_t*)ATR, &atrLen) != SCARD_S_SUCCESS) {
-					free(readers);
-					free(ATR);
-					return CKR_DEVICE_ERROR;
-				}
-
-				ByteArray atrBa((BYTE*)ATR, atrLen);
-
-				IAS ias((CToken::TokenTransmitCallback)TokenTransmitCallback, atrBa);
-				ias.SetCardContext(&conn);
-				ias.SelectAID_IAS();
-				ias.ReadPAN();
-
-				free(ATR);
-				free(readers);
-
-				if (ias.IsEnrolled())
-					return 1;
-				else
-					return 0;
-			}
-			catch (...)
-			{
-				if (ATR)
-					free(ATR);
-				if (readers)
-					free(readers);
-				return CKR_GENERAL_ERROR;
-			}
-		}
-
-		if (ATR)
-			free(ATR);
-
-		if (readers)
-			free(readers);
-
-		return CKR_TOKEN_NOT_PRESENT;
+		if (IAS::IsEnrolled(szPAN))
+			return 1;
+		else
+			return 0;
 
 	}
 
-	CK_RV CK_ENTRY DisabilitaCIE()
+	CK_RV CK_ENTRY __stdcall DisabilitaCIE(const char*  szPAN)
 	{
-		DWORD len = 0;
-
-		SCARDCONTEXT hSC;
-
-		long nRet = SCardEstablishContext(SCARD_SCOPE_USER, nullptr, nullptr, &hSC);
-		if (nRet != SCARD_S_SUCCESS)
-			return CKR_DEVICE_ERROR;
-
-		char* readers = NULL;
-		char* ATR = NULL;
-
-		if (SCardListReaders(hSC, nullptr, NULL, &len) != SCARD_S_SUCCESS) {
-			return CKR_TOKEN_NOT_PRESENT;
-		}
-
-		if (len == 1)
-			return CKR_TOKEN_NOT_PRESENT;
-
-		readers = (char*)malloc(len);
-
-		if (SCardListReaders(hSC, nullptr, (char*)readers, &len) != SCARD_S_SUCCESS) {
-			free(readers);
-			return CKR_TOKEN_NOT_PRESENT;
-		}
-
-		char *curreader = readers;
-		for (; curreader[0] != 0; curreader += strnlen(curreader, len) + 1)
+		if (IAS::IsEnrolled(szPAN))
 		{
-			try
-			{
-				safeConnection conn(hSC, curreader, SCARD_SHARE_SHARED);
-				if (!conn.hCard)
-					continue;
-
-				DWORD atrLen = 0;
-				if (SCardGetAttrib(conn.hCard, SCARD_ATTR_ATR_STRING, (uint8_t*)ATR, &atrLen) != SCARD_S_SUCCESS) {
-					free(readers);
-					return CKR_DEVICE_ERROR;
-				}
-
-				ATR = (char*)malloc(atrLen);
-
-				if (SCardGetAttrib(conn.hCard, SCARD_ATTR_ATR_STRING, (uint8_t*)ATR, &atrLen) != SCARD_S_SUCCESS) {
-					free(readers);
-					free(ATR);
-					return CKR_DEVICE_ERROR;
-				}
-
-				ByteArray atrBa((BYTE*)ATR, atrLen);
-
-				IAS ias((CToken::TokenTransmitCallback)TokenTransmitCallback, atrBa);
-
-				ias.SetCardContext(&conn);
-
-				ias.token.Reset();
-				ias.SelectAID_IAS();
-
-				ias.ReadPAN();
-				if (ias.IsEnrolled())
-				{
-					ias.Unenroll();
-					free(ATR);
-					free(readers);
-					return CKR_OK;
-				}
-				else
-				{
-					free(ATR);
-					free(readers);
-					return CKR_FUNCTION_FAILED;
-				}
-			}
-			catch (...)
-			{
-				if (ATR)
-					free(ATR);
-
-				free(readers);
-
-				return CKR_GENERAL_ERROR;
-			}
+			IAS::Unenroll(szPAN);
+			return CKR_OK;
 		}
 
-		if (ATR)
-			free(ATR);
-
-		free(readers);
-
-		return CKR_TOKEN_NOT_PRESENT;
+		return CKR_FUNCTION_FAILED;
 	}
 
+	
 	CK_RV CK_ENTRY __stdcall AbbinaCIE(const char*  szPAN, const char*  szPIN, int* attempts, PROGRESS_CALLBACK progressCallBack, COMPLETED_CALLBACK completedCallBack)
 	{
 		char* readers = NULL;

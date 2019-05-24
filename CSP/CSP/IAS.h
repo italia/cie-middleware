@@ -105,6 +105,8 @@ public:
 	void SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN);
 	bool IsEnrolled();
 	bool Unenroll();
+	static bool IsEnrolled(const char *szPAN);
+	static bool Unenroll(const char *szPAN);
 	void IconaSbloccoPIN();
 	void IconaCertificatoScaduto(const char *seriale);
 

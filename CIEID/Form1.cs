@@ -40,10 +40,10 @@ namespace CIEID
         delegate long CompletedCallback(string pan, string name);
 
         [DllImport("ciepki.dll")]
-        static extern int VerificaCIEAbilitata();
+        static extern int VerificaCIEAbilitata(string pan);
 
         [DllImport("ciepki.dll")]
-        static extern int DisabilitaCIE();
+        static extern int DisabilitaCIE(string pan);
 
         [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
         static extern int AbbinaCIE(string szPAN, string szPIN, int[] attempts, ProgressCallback progressCallBack, CompletedCallback completedCallBack);
@@ -328,7 +328,11 @@ namespace CIEID
 
         private void buttonDeleteCIE_Click(object sender, EventArgs e)
         {
-            int ret = DisabilitaCIE();
+            if(MessageBox.Show("Vuoi disabilitare la CIE?", "Disabilita CIE", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                return;
+
+
+            int ret = DisabilitaCIE(Properties.Settings.Default.serialNumber);
 
             switch (ret)
             {
