@@ -554,6 +554,7 @@
             this.textBoxNewPIN2.Size = new System.Drawing.Size(248, 22);
             this.textBoxNewPIN2.TabIndex = 23;
             this.textBoxNewPIN2.UseSystemPasswordChar = true;
+            this.textBoxNewPIN2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPIN_KeyPress);
             // 
             // label14
             // 
@@ -571,6 +572,7 @@
             this.textBoxNewPIN.Size = new System.Drawing.Size(248, 22);
             this.textBoxNewPIN.TabIndex = 21;
             this.textBoxNewPIN.UseSystemPasswordChar = true;
+            this.textBoxNewPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPIN_KeyPress);
             // 
             // label13
             // 
@@ -588,6 +590,7 @@
             this.textBoxPIN.Size = new System.Drawing.Size(248, 22);
             this.textBoxPIN.TabIndex = 19;
             this.textBoxPIN.UseSystemPasswordChar = true;
+            this.textBoxPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPIN_KeyPress);
             // 
             // label12
             // 
@@ -740,6 +743,7 @@
             this.textBoxUnclockPIN2.Size = new System.Drawing.Size(248, 22);
             this.textBoxUnclockPIN2.TabIndex = 34;
             this.textBoxUnclockPIN2.UseSystemPasswordChar = true;
+            this.textBoxUnclockPIN2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
             // 
             // label19
             // 
@@ -757,6 +761,7 @@
             this.textBoxUnclockPIN.Size = new System.Drawing.Size(248, 22);
             this.textBoxUnclockPIN.TabIndex = 32;
             this.textBoxUnclockPIN.UseSystemPasswordChar = true;
+            this.textBoxUnclockPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
             // 
             // label20
             // 
@@ -774,6 +779,7 @@
             this.textBoxPUK.Size = new System.Drawing.Size(248, 22);
             this.textBoxPUK.TabIndex = 30;
             this.textBoxPUK.UseSystemPasswordChar = true;
+            this.textBoxPUK.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
             // 
             // label21
             // 

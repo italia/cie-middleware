@@ -765,6 +765,22 @@ namespace CIEID
         {
             Application.Exit();
         }
+
+        private void textBoxPIN_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 13) // enter
+            {
+                buttonCambiaPIN_Click(sender, e);
+            }
+        }
+
+        private void textBoxPUK_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 13) // enter
+            {
+                buttonUnlockPIN_Click(sender, e);
+            }
+        }
     }
         //long ret = VerificaCIEAbilitata();
 
