@@ -80,9 +80,9 @@
             this.tabPage6 = new System.Windows.Forms.TabPage();
             this.label16 = new System.Windows.Forms.Label();
             this.buttonUnlockPIN = new System.Windows.Forms.Button();
-            this.textBoxUnclockPIN2 = new System.Windows.Forms.TextBox();
+            this.textBoxUnlockPIN2 = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
-            this.textBoxUnclockPIN = new System.Windows.Forms.TextBox();
+            this.textBoxUnlockPIN = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
             this.textBoxPUK = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
@@ -699,9 +699,9 @@
             this.tabPage6.BackColor = System.Drawing.Color.White;
             this.tabPage6.Controls.Add(this.label16);
             this.tabPage6.Controls.Add(this.buttonUnlockPIN);
-            this.tabPage6.Controls.Add(this.textBoxUnclockPIN2);
+            this.tabPage6.Controls.Add(this.textBoxUnlockPIN2);
             this.tabPage6.Controls.Add(this.label19);
-            this.tabPage6.Controls.Add(this.textBoxUnclockPIN);
+            this.tabPage6.Controls.Add(this.textBoxUnlockPIN);
             this.tabPage6.Controls.Add(this.label20);
             this.tabPage6.Controls.Add(this.textBoxPUK);
             this.tabPage6.Controls.Add(this.label21);
@@ -736,14 +736,14 @@
             this.buttonUnlockPIN.UseVisualStyleBackColor = false;
             this.buttonUnlockPIN.Click += new System.EventHandler(this.buttonUnlockPIN_Click);
             // 
-            // textBoxUnclockPIN2
+            // textBoxUnlockPIN2
             // 
-            this.textBoxUnclockPIN2.Location = new System.Drawing.Point(312, 290);
-            this.textBoxUnclockPIN2.Name = "textBoxUnclockPIN2";
-            this.textBoxUnclockPIN2.Size = new System.Drawing.Size(248, 22);
-            this.textBoxUnclockPIN2.TabIndex = 34;
-            this.textBoxUnclockPIN2.UseSystemPasswordChar = true;
-            this.textBoxUnclockPIN2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
+            this.textBoxUnlockPIN2.Location = new System.Drawing.Point(312, 290);
+            this.textBoxUnlockPIN2.Name = "textBoxUnlockPIN2";
+            this.textBoxUnlockPIN2.Size = new System.Drawing.Size(248, 22);
+            this.textBoxUnlockPIN2.TabIndex = 34;
+            this.textBoxUnlockPIN2.UseSystemPasswordChar = true;
+            this.textBoxUnlockPIN2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
             // 
             // label19
             // 
@@ -754,14 +754,14 @@
             this.label19.TabIndex = 33;
             this.label19.Text = "Ripeti il nuovo PIN";
             // 
-            // textBoxUnclockPIN
+            // textBoxUnlockPIN
             // 
-            this.textBoxUnclockPIN.Location = new System.Drawing.Point(312, 230);
-            this.textBoxUnclockPIN.Name = "textBoxUnclockPIN";
-            this.textBoxUnclockPIN.Size = new System.Drawing.Size(248, 22);
-            this.textBoxUnclockPIN.TabIndex = 32;
-            this.textBoxUnclockPIN.UseSystemPasswordChar = true;
-            this.textBoxUnclockPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
+            this.textBoxUnlockPIN.Location = new System.Drawing.Point(312, 230);
+            this.textBoxUnlockPIN.Name = "textBoxUnlockPIN";
+            this.textBoxUnlockPIN.Size = new System.Drawing.Size(248, 22);
+            this.textBoxUnlockPIN.TabIndex = 32;
+            this.textBoxUnlockPIN.UseSystemPasswordChar = true;
+            this.textBoxUnlockPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
             // 
             // label20
             // 
@@ -1119,7 +1119,7 @@
             this.buttonInfo.Name = "buttonInfo";
             this.buttonInfo.Size = new System.Drawing.Size(165, 39);
             this.buttonInfo.TabIndex = 7;
-            this.buttonInfo.Text = "  Infornazioni";
+            this.buttonInfo.Text = "  Informazioni";
             this.buttonInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.buttonInfo.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.buttonInfo.UseVisualStyleBackColor = false;
@@ -1245,9 +1245,9 @@
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Button buttonUnlockPIN;
-        private System.Windows.Forms.TextBox textBoxUnclockPIN2;
+        private System.Windows.Forms.TextBox textBoxUnlockPIN2;
         private System.Windows.Forms.Label label19;
-        private System.Windows.Forms.TextBox textBoxUnclockPIN;
+        private System.Windows.Forms.TextBox textBoxUnlockPIN;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.TextBox textBoxPUK;
         private System.Windows.Forms.Label label21;

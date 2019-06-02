@@ -312,7 +312,7 @@ namespace CIEID
                             break;
 
                         case CKR_OK:
-                            MessageBox.Show("L'abilitazione della CIE è avvennuta con successo", "CIE abilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("L'abilitazione della CIE è avvenuta con successo", "CIE abilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             labelSerialNumber.Text = Properties.Settings.Default.serialNumber;
                             labelCardHolder.Text = Properties.Settings.Default.cardHolder;
                             tabControlMain.SelectedIndex = 1;
@@ -599,8 +599,8 @@ namespace CIEID
         private void buttonUnlockPIN_Click(object sender, EventArgs e)
         {
             string puk = textBoxPUK.Text;
-            string newpin = textBoxUnclockPIN.Text;
-            string newpin2 = textBoxUnclockPIN.Text;
+            string newpin = textBoxUnlockPIN.Text;
+            string newpin2 = textBoxUnlockPIN2.Text;
 
             int i;
 
@@ -697,8 +697,8 @@ namespace CIEID
             }
 
             textBoxPUK.Text = "";
-            textBoxUnclockPIN.Text = "";
-            textBoxUnclockPIN2.Text = "";
+            textBoxUnlockPIN.Text = "";
+            textBoxUnlockPIN2.Text = "";
 
             ((Control)sender).Enabled = false;
 
