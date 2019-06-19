@@ -1,6 +1,7 @@
 #include "..\stdafx.h"
 #include ".\rsa.h"
 
+
 static char *szCompiledFile=__FILE__;
 
 #ifdef WIN32
@@ -19,7 +20,10 @@ public:
 
 CRSA::CRSA(ByteArray &mod, ByteArray &exp)
 {
-	KeySize = mod.size();
+	CryptoPP::Integer n(mod.data(), mod.size()), e(exp.data(), exp.size());	
+	pubKey.Initialize(n, e);
+
+	/*KeySize = mod.size();
 	ByteDynArray KeyData(sizeof(BCRYPT_RSAKEY_BLOB) + mod.size() + exp.size());
 	BCRYPT_RSAKEY_BLOB *rsaImpKey = (BCRYPT_RSAKEY_BLOB *)KeyData.data();
 	rsaImpKey->Magic = BCRYPT_RSAPUBLIC_MAGIC;
@@ -28,13 +32,19 @@ CRSA::CRSA(ByteArray &mod, ByteArray &exp)
 	rsaImpKey->cbPublicExp = (ULONG)exp.size();
 	rsaImpKey->cbPrime1 = 0;
 	rsaImpKey->cbPrime2 = 0;
-
 	KeyData.copy(exp, sizeof(BCRYPT_RSAKEY_BLOB));
 	KeyData.rightcopy(mod);
 
 	this->key = nullptr;
-	if (BCryptImportKeyPair(algo_rsa.algo, nullptr, BCRYPT_RSAPUBLIC_BLOB, &this->key, KeyData.data(), (ULONG)KeyData.size(), BCRYPT_NO_KEY_VALIDATION) != 0)
+	DWORD dwRes = BCryptImportKeyPair(algo_rsa.algo, nullptr, BCRYPT_RSAPUBLIC_BLOB, &this->key, KeyData.data(), (ULONG)KeyData.size(), BCRYPT_NO_KEY_VALIDATION);
+	if (dwRes != 0)
+	{
+		DWORD dwRes1 = GetLastError();
+	
+		Log.write("Errore %x, %x nella creazione della chiave RSA", dwRes, dwRes1);
+
 		throw logged_error("Errore nella creazione della chiave RSA");
+	}*/
 }
 
 void CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, ByteDynArray &privexp)
@@ -45,20 +55,34 @@ void CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, B
 
 CRSA::~CRSA(void)
 {
-	if (key != nullptr)
-		BCryptDestroyKey(key);
+	/*if (key != nullptr)
+		BCryptDestroyKey(key);*/
 }
 
 ByteDynArray CRSA::RSA_PURE(ByteArray &data)
 {
-	ULONG size = 0;
+	CryptoPP::Integer m((const byte *)data.data(), data.size());
+
+	CryptoPP::Integer c = pubKey.ApplyFunction(m);
+
+	size_t len = c.MinEncodedSize();
+	ByteDynArray resp(len);
+
+	c.Encode((byte *)resp.data(), resp.size(), CryptoPP::Integer::UNSIGNED);
+
+	
+	/*ULONG size = 0;
 	if (BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, nullptr, 0, nullptr, 0, &size, 0) != 0)
 		throw logged_error("Errore nella cifratura RSA");
-	ByteDynArray resp(size);
-	if (BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, nullptr, 0, resp.data(), (ULONG)resp.size(), &size, 0) != 0)
+	ByteDynArray resp1(size);
+	if (BCryptEncrypt(key, data.data(), (ULONG)data.size(), nullptr, nullptr, 0, resp1.data(), (ULONG)resp1.size(), &size, 0) != 0)
 		throw logged_error("Errore nella cifratura RSA");
 
-	ER_ASSERT(size == KeySize, "Errore nella lunghezza dei dati per operazione RSA")
+	ER_ASSERT(size == KeySize, "Errore nella lunghezza dei dati per operazione RSA")*/
+
+
+
+
 	return resp;
 }
 

@@ -1,7 +1,12 @@
 #pragma once
 
 #ifdef WIN32
-#include <bcrypt.h>
+//#include <bcrypt.h>
+#include "..\cryptopp\cryptlib.h"
+#include "..\cryptopp\integer.h"
+#include "..\cryptopp\nbtheory.h"
+#include "..\cryptopp\osrng.h"
+#include "..\cryptopp\rsa.h"
 #else
 #include <openssl\rsa.h>
 #endif
@@ -12,6 +17,7 @@ class CRSA
 {
 #ifdef WIN32
 	BCRYPT_KEY_HANDLE key;
+	CryptoPP::RSA::PublicKey pubKey;
 #else
 	RSA* keyPriv;
 #endif
