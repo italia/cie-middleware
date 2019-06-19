@@ -510,6 +510,7 @@ namespace CIEID
                     case CKR_OK:
                         MessageBox.Show("Il PIN è stato modificato con successo", "Operazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         selectHome();
+                        new PINNotice().ShowDialog();
                         break;
                 }
             });                      
@@ -556,6 +557,7 @@ namespace CIEID
                     case CKR_OK:
                         MessageBox.Show("La CIE è stata sbloccata con successo", "Operazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         selectHome();
+                        new PINNotice().ShowDialog();
                         break;
                 }
             });
