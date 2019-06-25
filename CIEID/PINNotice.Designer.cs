@@ -88,12 +88,12 @@
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(-2, 242);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(401, 93);
+            this.label2.Size = new System.Drawing.Size(401, 145);
             this.label2.TabIndex = 14;
             this.label2.Text = "se utilizzi CIE ID anche su altre piattaforme (WIndows, Mac, Linux o altri dispos" +
     "itivi Android), è necessario ripetere l\'abbinamento della CIE utilizzando il nuo" +
     "vo PIN su ogni piattaforma in uso.";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label2.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // label5
             // 
@@ -110,7 +110,7 @@
             this.buttonOK.BackColor = System.Drawing.Color.CornflowerBlue;
             this.buttonOK.FlatAppearance.BorderSize = 0;
             this.buttonOK.ForeColor = System.Drawing.Color.White;
-            this.buttonOK.Location = new System.Drawing.Point(114, 346);
+            this.buttonOK.Location = new System.Drawing.Point(114, 390);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(152, 35);
             this.buttonOK.TabIndex = 21;
@@ -137,7 +137,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(400, 433);
+            this.ClientSize = new System.Drawing.Size(396, 453);
             this.ControlBox = false;
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.buttonOK);

@@ -66,6 +66,9 @@ ByteDynArray CRSA::RSA_PURE(ByteArray &data)
 	CryptoPP::Integer c = pubKey.ApplyFunction(m);
 
 	size_t len = c.MinEncodedSize();
+	if (len == 0xff)
+		len = 0x100;
+
 	ByteDynArray resp(len);
 
 	c.Encode((byte *)resp.data(), resp.size(), CryptoPP::Integer::UNSIGNED);
