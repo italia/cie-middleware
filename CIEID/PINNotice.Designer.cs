@@ -110,7 +110,7 @@
             this.buttonOK.BackColor = System.Drawing.Color.CornflowerBlue;
             this.buttonOK.FlatAppearance.BorderSize = 0;
             this.buttonOK.ForeColor = System.Drawing.Color.White;
-            this.buttonOK.Location = new System.Drawing.Point(114, 390);
+            this.buttonOK.Location = new System.Drawing.Point(114, 360);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(152, 35);
             this.buttonOK.TabIndex = 21;
