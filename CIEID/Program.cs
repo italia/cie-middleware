@@ -10,12 +10,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace CIEID
 {
     static class Program
     {
         private static Mutex mutex = null;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool SetProcessDPIAware();
 
         /// <summary>
         /// Punto di ingresso principale dell'applicazione.
@@ -33,6 +37,9 @@ namespace CIEID
                 //app is already running! Exiting the application  
                 return;
             }
+
+            if (Environment.OSVersion.Version.Major >= 6)
+                SetProcessDPIAware();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

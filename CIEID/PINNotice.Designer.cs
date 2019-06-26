@@ -88,7 +88,7 @@
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(-2, 242);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(401, 145);
+            this.label2.Size = new System.Drawing.Size(389, 145);
             this.label2.TabIndex = 14;
             this.label2.Text = "se utilizzi CIE ID anche su altre piattaforme (WIndows, Mac, Linux o altri dispos" +
     "itivi Android), è necessario ripetere l\'abbinamento della CIE utilizzando il nuo" +
@@ -137,7 +137,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(396, 453);
+            this.ClientSize = new System.Drawing.Size(392, 449);
             this.ControlBox = false;
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.buttonOK);
