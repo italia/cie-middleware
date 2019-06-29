@@ -46,7 +46,7 @@
             // pictureBoxLogo
             // 
             this.pictureBoxLogo.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxLogo.Image")));
-            this.pictureBoxLogo.Location = new System.Drawing.Point(158, 5);
+            this.pictureBoxLogo.Location = new System.Drawing.Point(175, 6);
             this.pictureBoxLogo.Name = "pictureBoxLogo";
             this.pictureBoxLogo.Size = new System.Drawing.Size(71, 68);
             this.pictureBoxLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -55,10 +55,11 @@
             // 
             // label3
             // 
+            this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(55, 122);
+            this.label3.Location = new System.Drawing.Point(2, 122);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(270, 28);
+            this.label3.Size = new System.Drawing.Size(432, 28);
             this.label3.TabIndex = 11;
             this.label3.Text = "Annota il nuovo codice PIN";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -66,8 +67,9 @@
             // label4
             // 
             this.label4.AutoSize = true;
+            this.label4.BackColor = System.Drawing.Color.Transparent;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(69, 96);
+            this.label4.Location = new System.Drawing.Point(92, 97);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(244, 25);
             this.label4.TabIndex = 10;
@@ -75,20 +77,22 @@
             // 
             // label1
             // 
+            this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(55, 145);
+            this.label1.Location = new System.Drawing.Point(2, 145);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(270, 44);
+            this.label1.Size = new System.Drawing.Size(432, 44);
             this.label1.TabIndex = 12;
             this.label1.Text = "sarà necessario per le prossime richieste di autenticazione.";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label2
             // 
+            this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(-2, 242);
+            this.label2.Location = new System.Drawing.Point(27, 226);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(389, 145);
+            this.label2.Size = new System.Drawing.Size(376, 156);
             this.label2.TabIndex = 14;
             this.label2.Text = "se utilizzi CIE ID anche su altre piattaforme (WIndows, Mac, Linux o altri dispos" +
     "itivi Android), è necessario ripetere l\'abbinamento della CIE utilizzando il nuo" +
@@ -97,8 +101,9 @@
             // 
             // label5
             // 
+            this.label5.BackColor = System.Drawing.Color.Transparent;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(55, 217);
+            this.label5.Location = new System.Drawing.Point(79, 201);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(270, 28);
             this.label5.TabIndex = 13;
@@ -110,7 +115,7 @@
             this.buttonOK.BackColor = System.Drawing.Color.CornflowerBlue;
             this.buttonOK.FlatAppearance.BorderSize = 0;
             this.buttonOK.ForeColor = System.Drawing.Color.White;
-            this.buttonOK.Location = new System.Drawing.Point(114, 360);
+            this.buttonOK.Location = new System.Drawing.Point(138, 331);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(152, 35);
             this.buttonOK.TabIndex = 21;
@@ -124,7 +129,7 @@
             this.panel1.Controls.Add(this.pictureBoxLogo);
             this.panel1.Location = new System.Drawing.Point(2, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(397, 81);
+            this.panel1.Size = new System.Drawing.Size(432, 81);
             this.panel1.TabIndex = 22;
             // 
             // countdownTimer
@@ -137,10 +142,10 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(392, 449);
+            this.ClientSize = new System.Drawing.Size(432, 453);
             this.ControlBox = false;
-            this.Controls.Add(this.panel1);
             this.Controls.Add(this.buttonOK);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label1);
