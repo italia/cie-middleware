@@ -1,8 +1,5 @@
 # MIDDLEWARE CSP-PKCS11 PER LA CIE 3.0 [![Build status](https://ci.appveyor.com/api/projects/status/dpc0ditjn04ylw6y?svg=true)](https://ci.appveyor.com/project/italia/cie-middleware)
 
-## VERSIONE BETA
-
-Il middleware qui presente è in fase di sviluppo, ed è da considerarsi in **versione beta**. È possibile effettuare tutti gli sviluppi e i test, ma è per ora questa base di codice **non è consigliabile per l'uso in produzione**. 
 
 ## CASO D’USO
 
