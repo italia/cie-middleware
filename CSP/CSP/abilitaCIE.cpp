@@ -210,7 +210,7 @@ extern "C" {
 
 				hashSet[0xa3] = sha256.Digest(certCIEData);
 
-				//ias.VerificaSOD(SOD, hashSet);
+				ias.VerificaSOD(SOD, hashSet);
 
 				ByteArray pinBa((uint8_t*)szPIN, 4);
 
@@ -636,7 +636,7 @@ DWORD WINAPI _abilitaCIE(
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 5, (LPARAM)"Verifica SOD");
-							//ias->VerificaSOD(SOD, hashSet);
+							ias->VerificaSOD(SOD, hashSet);
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 6, (LPARAM)"Cifratura dati");
