@@ -1,7 +1,6 @@
 #include "..\stdafx.h"
 #include ".\rsa.h"
 
-
 static char *szCompiledFile=__FILE__;
 
 #ifdef WIN32
@@ -22,7 +21,7 @@ CRSA::CRSA(ByteArray &mod, ByteArray &exp)
 {
 	CryptoPP::Integer n(mod.data(), mod.size()), e(exp.data(), exp.size());	
 	pubKey.Initialize(n, e);
-
+	
 	/*KeySize = mod.size();
 	ByteDynArray KeyData(sizeof(BCRYPT_RSAKEY_BLOB) + mod.size() + exp.size());
 	BCRYPT_RSAKEY_BLOB *rsaImpKey = (BCRYPT_RSAKEY_BLOB *)KeyData.data();
@@ -52,6 +51,7 @@ void CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, B
 	init_func
 	throw logged_error("Non supportato");
 }
+
 
 CRSA::~CRSA(void)
 {

@@ -20,6 +20,7 @@
  * must be defined and the structure-packing conventions that
  * must be set before including this file. */
 
+
 #ifndef _PKCS11T_H_
 #define _PKCS11T_H_ 1
 
@@ -35,6 +36,8 @@
 #define TRUE CK_TRUE
 #endif
 #endif
+
+#include "cryptoki.h"
 
 /* an unsigned 8-bit value */
 typedef unsigned char     CK_BYTE;
@@ -63,11 +66,12 @@ typedef CK_ULONG          CK_FLAGS;
 #define CK_UNAVAILABLE_INFORMATION (~0UL)
 #define CK_EFFECTIVELY_INFINITE    0
 
-
+ 
 typedef CK_BYTE     CK_PTR   CK_BYTE_PTR;
 typedef CK_CHAR     CK_PTR   CK_CHAR_PTR;
 typedef CK_UTF8CHAR CK_PTR   CK_UTF8CHAR_PTR;
 typedef CK_ULONG    CK_PTR   CK_ULONG_PTR;
+
 typedef void        CK_PTR   CK_VOID_PTR;
 
 /* Pointer to a CK_VOID_PTR-- i.e., pointer to pointer to void */

@@ -1,6 +1,5 @@
 #include "..\stdafx.h"
 #include ".\sha512.h"
-
 static char *szCompiledFile=__FILE__;
 
 #ifdef WIN32

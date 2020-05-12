@@ -37,7 +37,7 @@ namespace CIEID
         public const int NOT_ENROLLED = 0;
 
         delegate long ProgressCallback(int progress, string message);
-        delegate long CompletedCallback(string pan, string name);
+        delegate long CompletedCallback(string pan, string name, string ef_seriale);
 
         [DllImport("ciepki.dll")]
         static extern int VerificaCIEAbilitata(string pan);
@@ -97,10 +97,11 @@ namespace CIEID
             return 0;
         }
 
-        long CompletedAbbina(string pan, string name)
+        long CompletedAbbina(string pan, string name, string efSeriale)
         {
             Properties.Settings.Default.serialNumber = pan;
             Properties.Settings.Default.cardHolder = name;
+            Properties.Settings.Default.efSeriale = efSeriale;
             Properties.Settings.Default.Save();
 
             return 0;
@@ -203,7 +204,7 @@ namespace CIEID
             else
             {
                 tabControlMain.SelectedIndex = 1;
-                labelSerialNumber.Text = Properties.Settings.Default.serialNumber;
+                labelSerialNumber.Text = Properties.Settings.Default.efSeriale;
                 labelCardHolder.Text = Properties.Settings.Default.cardHolder;
                 tabControlMain.SelectedIndex = 1;
             }
@@ -313,7 +314,7 @@ namespace CIEID
 
                         case CKR_OK:
                             MessageBox.Show("L'abilitazione della CIE è avvenuta con successo", "CIE abilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            labelSerialNumber.Text = Properties.Settings.Default.serialNumber;
+                            labelSerialNumber.Text = Properties.Settings.Default.efSeriale;
                             labelCardHolder.Text = Properties.Settings.Default.cardHolder;
                             tabControlMain.SelectedIndex = 1;
                             break;
@@ -343,6 +344,7 @@ namespace CIEID
                     labelCardHolder.Text = Properties.Settings.Default.cardHolder;
                     Properties.Settings.Default.serialNumber = "";
                     Properties.Settings.Default.cardHolder = "";
+                    Properties.Settings.Default.efSeriale = "";
                     Properties.Settings.Default.Save();
                     break;
 

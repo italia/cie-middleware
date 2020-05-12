@@ -37,6 +37,7 @@ x64/Release/
 /CSP/res/CIEPKI.APS
 /CSP/RCb02144
 /CSP/RCa02144
+/CSP/Cryptopp/Win32
 /CacheLib_NoKeys
 /CacheLib_Keys
 /Setup/CIEMiddleware.nsi.bak
@@ -47,9 +48,12 @@ x64/Release/
 /Release
 /TestCIE/x64/Release/TestCIE.tlog
 /TestCIE/x64/Release
+/TestCIE/X64/*
 /CIEID/.vs/CIEID/v15
 /CIEID/bin/Debug
 /CIEID/obj
 /CIEID/CIEID.csproj.user
 /TestCIE/Debug
+/TestCIE/Release
 /CIEID/bin/Release
+NoteCIEtxt/
