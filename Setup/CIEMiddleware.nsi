@@ -56,6 +56,7 @@ Section "Install"
  
   ${If} ${RunningX64}	
     !define LIBRARY_X64
+	!echo ${Config}
     !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\x64\${Config}\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
     !undef LIBRARY_X64
     !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\Win32\${Config}\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
@@ -106,7 +107,7 @@ Section "Install"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "IPZS"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMajor" "0"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMinor" "1"
-  SetRegView default
+  SetRegView lastused
 
   ExecWait 'schtasks.exe /create /xml "$INSTDIR\UpdateTask.xml" /tn "CIE Middleware Update" /f'
   
@@ -148,7 +149,7 @@ Section "Uninstall"
   ${EndIf}
   DeleteRegKey /ifempty HKLM "Software\CIEPKI"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-  SetRegView default
+  SetRegView lastused
 
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\CIE Middleware"

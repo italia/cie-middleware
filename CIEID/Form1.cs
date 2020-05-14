@@ -197,11 +197,28 @@ namespace CIEID
 
         private void selectHome()
         {
-            if (Properties.Settings.Default.serialNumber.Equals(""))
+
+            if (VerificaCIEAbilitata(Properties.Settings.Default.serialNumber) == 0)
             {
+                Properties.Settings.Default.serialNumber = "";
+                Properties.Settings.Default.efSeriale = "";
+                Properties.Settings.Default.cardHolder = "";
                 tabControlMain.SelectedIndex = 0;
-            }
-            else
+            }else if (Properties.Settings.Default.efSeriale.Equals(""))
+            {
+                var result = MessageBox.Show("Effettuare di nuovo l’abbinamento per visualizzare il numero della carta?", "Abbinare nuovamente la CIE", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if(result == DialogResult.Yes)
+                {
+                    Properties.Settings.Default.serialNumber = "";
+                    Properties.Settings.Default.efSeriale = "";
+                    Properties.Settings.Default.cardHolder = "";
+                    tabControlMain.SelectedIndex = 0;
+                }
+                else
+                {
+                    Properties.Settings.Default.efSeriale = "Abbinare nuovamente la CIE per visualizzare il numero della carta";
+                }
+            }else
             {
                 tabControlMain.SelectedIndex = 1;
                 labelSerialNumber.Text = Properties.Settings.Default.efSeriale;
