@@ -51,9 +51,7 @@
 Section "Install"
 
   SetOutPath $SYSDIR
-      
-  RMDir /r "$%PROGRAMDATA%\CIEPKI"
- 
+       
   ${If} ${RunningX64}	
     !define LIBRARY_X64
 	!echo ${Config}

@@ -198,27 +198,33 @@ namespace CIEID
         private void selectHome()
         {
 
-            if (VerificaCIEAbilitata(Properties.Settings.Default.serialNumber) == 0)
+            if(Properties.Settings.Default.cardHolder.Equals(""))
             {
-                Properties.Settings.Default.serialNumber = "";
-                Properties.Settings.Default.efSeriale = "";
-                Properties.Settings.Default.cardHolder = "";
                 tabControlMain.SelectedIndex = 0;
-            }else if (Properties.Settings.Default.efSeriale.Equals(""))
+            }
+            else if (Properties.Settings.Default.efSeriale.Equals(""))
             {
-                var result = MessageBox.Show("Effettuare di nuovo l’abbinamento per visualizzare il numero della carta?", "Abbinare nuovamente la CIE", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if(result == DialogResult.Yes)
+
+                tabControlMain.SelectedIndex = 1;
+                var result = MessageBox.Show("E’ necessario procedere con un nuovo abbinamento", "Abbinare nuovamente la CIE", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                if (result == DialogResult.Yes)
                 {
                     Properties.Settings.Default.serialNumber = "";
                     Properties.Settings.Default.efSeriale = "";
                     Properties.Settings.Default.cardHolder = "";
+                    Properties.Settings.Default.Save();
                     tabControlMain.SelectedIndex = 0;
                 }
                 else
                 {
-                    Properties.Settings.Default.efSeriale = "Abbinare nuovamente la CIE per visualizzare il numero della carta";
+                    //Properties.Settings.Default.efSeriale = "Abbinare nuovamente la CIE per visualizzare il numero della carta";
+                    labelSerialNumber.Text = "Numero di carta non disponibile, procedere con un nuovo abbinamento";
+                    labelCardHolder.Text = Properties.Settings.Default.cardHolder;
+                    Properties.Settings.Default.Save();
+                    tabControlMain.SelectedIndex = 1;
                 }
-            }else
+            }
+            else
             {
                 tabControlMain.SelectedIndex = 1;
                 labelSerialNumber.Text = Properties.Settings.Default.efSeriale;
@@ -232,7 +238,8 @@ namespace CIEID
             buttonTutorial.BackColor = Color.Transparent;
             buttonInfo.BackColor = Color.Transparent;
             buttonHelp.BackColor = Color.Transparent;
-        }
+    }
+        
 
         private void selectAbbinaProgress()
         {
