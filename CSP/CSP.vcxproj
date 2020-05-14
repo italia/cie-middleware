@@ -77,14 +77,14 @@
     <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     <GenerateManifest>false</GenerateManifest>
     <IncludePath>$(IncludePath)</IncludePath>
-    <LibraryPath>C:\progetti\QEquipe\ipzs\cie-middleware\CSP\cryptopp\Win32\debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)\cryptopp\Win32\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     <GenerateManifest>false</GenerateManifest>
     <IncludePath>$(IncludePath)</IncludePath>
-    <LibraryPath>F:\Projects\cie-middleware\CSP\cryptopp\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)\cryptopp\x64\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -94,7 +94,7 @@
     <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     <GenerateManifest>false</GenerateManifest>
     <IncludePath>$(IncludePath)</IncludePath>
-    <LibraryPath>C:\progetti\QEquipe\ipzs\cie-middleware\CSP\cryptopp\Win32;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)\cryptopp\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -102,7 +102,7 @@
     <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     <GenerateManifest>false</GenerateManifest>
     <IncludePath>$(IncludePath)</IncludePath>
-    <LibraryPath>F:\Projects\cie-middleware\CSP\cryptopp\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)\cryptopp\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -119,8 +119,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Comctl32.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>F:\Projects\IPZS\cie-middleware\CSP\cryptopp\Win32\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -152,6 +153,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
       <AdditionalDependencies>cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Comctl32.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>F:\Projects\cie-middleware\CSP\cryptopp\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -182,7 +186,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>F:\Projects\cryptopp\Win32\Output\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\alfon\Desktop\Bit4id\cie-middleware\cie-middleware\CSP\cryptopp\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>"C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
@@ -344,4 +348,6 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+
+
 </Project>
