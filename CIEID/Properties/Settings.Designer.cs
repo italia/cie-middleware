@@ -58,5 +58,17 @@ namespace CIEID.Properties {
                 this["cardHolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string efSeriale {
+            get {
+                return ((string)(this["efSeriale"]));
+            }
+            set {
+                this["efSeriale"] = value;
+            }
+        }
     }
 }
