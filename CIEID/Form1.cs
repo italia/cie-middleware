@@ -206,7 +206,7 @@ namespace CIEID
             {
 
                 tabControlMain.SelectedIndex = 1;
-                var result = MessageBox.Show("E’ necessario procedere con un nuovo abbinamento", "Abbinare nuovamente la CIE", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                var result = MessageBox.Show("E’ necessario effettuare un nuovo abbinamento. Procedere?", "Abbinare nuovamente la CIE", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
                 if (result == DialogResult.Yes)
                 {
                     Properties.Settings.Default.serialNumber = "";
@@ -218,15 +218,30 @@ namespace CIEID
                 else
                 {
                     //Properties.Settings.Default.efSeriale = "Abbinare nuovamente la CIE per visualizzare il numero della carta";
-                    labelSerialNumber.Text = "Numero di carta non disponibile, procedere con un nuovo abbinamento";
                     labelCardHolder.Text = Properties.Settings.Default.cardHolder;
                     Properties.Settings.Default.Save();
+                    labelSerialNumber.Font = new Font("Microsoft Sans Serif", 8, FontStyle.Bold);
+                    labelSerialNumber.Text = "Numero carta non disponibile, effettuare un nuovo abbinamento.";
+                    labelSerialNumber.MaximumSize = new Size(220, 50);
+                    labelSerialNumber.AutoSize = true;
+                    labelCardHolder.Text = Properties.Settings.Default.cardHolder;
+
+                    label7.Location = new System.Drawing.Point(224, 230);
+                    labelCardHolder.Location = new System.Drawing.Point(223, 244);
+
                     tabControlMain.SelectedIndex = 1;
                 }
             }
             else
             {
                 tabControlMain.SelectedIndex = 1;
+                labelSerialNumber.Font = new Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                labelSerialNumber.Size = new Size(108, 20);
+                labelSerialNumber.Location = new System.Drawing.Point(223, 171);
+                Console.WriteLine("CIAO");
+                label7.Location = new Point(224, 200);
+                labelCardHolder.Location = new System.Drawing.Point(223, 214);
+
                 labelSerialNumber.Text = Properties.Settings.Default.efSeriale;
                 labelCardHolder.Text = Properties.Settings.Default.cardHolder;
                 tabControlMain.SelectedIndex = 1;
@@ -340,7 +355,8 @@ namespace CIEID
                             MessageBox.Show("L'abilitazione della CIE è avvenuta con successo", "CIE abilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             labelSerialNumber.Text = Properties.Settings.Default.efSeriale;
                             labelCardHolder.Text = Properties.Settings.Default.cardHolder;
-                            tabControlMain.SelectedIndex = 1;
+                            //tabControlMain.SelectedIndex = 1;
+                            selectHome();
                             break;
                     }
                 });

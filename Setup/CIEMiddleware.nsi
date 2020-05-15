@@ -138,7 +138,10 @@ Section "Uninstall"
 	Delete "$SYSDIR\CIEPKI.dll"
   ${EndIf}
   
-  RMDir /r "$APPDATA\Local\CIEID"
+  !echo $%LOCALAPPDATA%
+
+  RMDir /r "$%LOCALAPPDATA%\IPZS"
+  RMDir /r "$%PROGRAMDATA%\CIEPKI"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
   
