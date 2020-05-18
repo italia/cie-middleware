@@ -198,7 +198,15 @@ namespace CIEID
         private void selectHome()
         {
 
-            if(Properties.Settings.Default.cardHolder.Equals(""))
+            if(VerificaCIEAbilitata(Properties.Settings.Default.serialNumber) == 0)
+            {
+                Properties.Settings.Default.serialNumber = "";
+                Properties.Settings.Default.efSeriale = "";
+                Properties.Settings.Default.cardHolder = "";
+                Properties.Settings.Default.Save();
+                tabControlMain.SelectedIndex = 0;
+            }
+            else if(Properties.Settings.Default.cardHolder.Equals(""))
             {
                 tabControlMain.SelectedIndex = 0;
             }
