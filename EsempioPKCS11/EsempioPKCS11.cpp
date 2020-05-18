@@ -7,9 +7,9 @@
 #include <string>
 #include <vector>
 
-#pragma pack(1)
-#include "pkcs11.h"
-#pragma pack()
+
+#include "cryptoki.h"
+
 
 
 // la specifica PKCS#11 di riferimento può essere consultata all'indirizzo https://www.cryptsoft.com/pkcs11doc/STANDARD/pkcs-11v2-11r1.pdf

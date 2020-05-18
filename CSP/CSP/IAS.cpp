@@ -333,7 +333,7 @@ void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 void IAS::ReadPAN() {
 	init_func
 	readfile(0xd003, PAN);
-
+	//Log.writeBinData(PAN.data(), PAN.size());
 	exit_func
 }
 
@@ -357,6 +357,7 @@ void IAS::DAPP() {
 	ByteDynArray privexp = VarToByteArray(defPrivExp);
 
 	ByteDynArray cert;
+
 	ByteDynArray CHR, CHA, OID;
 
 
@@ -1222,6 +1223,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	CASNTag &temp = SODTag.Child(0, 0x30);
 	uint8_t OID[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x02 };
 	temp.Child(0, 06).Verify(VarToByteArray(OID));
+	
 	uint8_t val3=3;
 	CASNTag &temp2 = temp.Child(1, 0xA0).Child(0, 0x30);
 	temp2.Child(0, 2).Verify(VarToByteArray(val3));
@@ -1231,27 +1233,35 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 
 	uint8_t OID3[] = { 0x67, 0x81, 0x08, 0x01, 0x01, 0x01 };
 	temp2.Child(2, 0x30).Child(0, 06).Verify(VarToByteArray(OID3));
+	
 	ByteArray ttData = temp2.Child(2, 0x30).Child(1, 0xA0).Child(0, 04).content;
+
 	CASNParser ttParser;
 	ttParser.Parse(ttData);
 	CASNTag &signedData = *ttParser.tags[0];
 	signedData.CheckTag(0x30);
 
 	CASNTag &signerCert = temp2.Child(3, 0xA0).Child(0, 0x30);
+
 	CASNTag &temp3 = temp2.Child(4, 0x31).Child(0, 0x30);
 	uint8_t val1 = 1;
 	temp3.Child(0, 02).Verify(VarToByteArray(val1));
+
 	CASNTag &issuerName = temp3.Child(1, 0x30).Child(0, 0x30);
 	CASNTag &signerCertSerialNumber = temp3.Child(1, 0x30).Child(1, 02);
 	temp3.Child(2, 0x30).Child(0, 06).Verify(VarToByteArray(OID_SH256));
 
 	CASNTag &signerInfo = temp3.Child(3, 0xA0);
+
 	uint8_t OID4[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x09, 0x03 };
 	signerInfo.Child(0, 0x30).Child(0, 06).Verify(VarToByteArray(OID4));
+
 	uint8_t OID5[] = { 0x67, 0x81, 0x08, 0x01, 0x01, 0x01 };
 	signerInfo.Child(0, 0x30).Child(1, 0x31).Child(0, 06).Verify(VarToByteArray(OID5));
+
 	uint8_t OID6[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x09, 0x04 };
 	signerInfo.Child(1, 0x30).Child(0, 06).Verify(VarToByteArray(OID6));
+
 	CASNTag &digest = temp3.Child(3, 0xA0).Child(1, 0x30).Child(1, 0x31).Child(0, 04);
 
 	uint8_t OID_RSAwithSHA256[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0b };
@@ -1269,6 +1279,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 
 	CASNTag &signature = temp3.Child(5, 04);
 	
+	//Calcolo del digest del SOD (signed data) con SHA256
 	CSHA256 sha256;
 	ByteDynArray calcDigest=sha256.Digest(ttData.mid((int)signedData.startPos, (int)(signedData.endPos - signedData.startPos)));
 	if (calcDigest!=digest.content)
@@ -1297,7 +1308,20 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	ByteArray signatureData = signature.content;
 
 	CRSA rsa(mod, exp);
+#if 0
+	/******************************************************************************************/
+	/*Viene verificata la firma del SOD. Si dovrebbe intervenire qua per la verifica 
+	* con lo schema RSA_PSS
+	*/
+	ByteArray toSign_test = SOD.mid((int)signerInfo.tags[0]->startPos, (int)(signerInfo.tags[signerInfo.tags.size() - 1]->endPos - signerInfo.tags[0]->startPos));
 
+	if (!rsa.RSA_PSS(signatureData, toSign_test));
+	{
+		throw logged_error("Firma del SOD non valida");
+	}
+
+	/******************************************************************************************/
+#endif
 	ByteDynArray decryptedSignature = rsa.RSA_PURE(signatureData);
 	decryptedSignature = decryptedSignature.mid(RemovePaddingBT1(decryptedSignature));
 	ByteArray toSign = SOD.mid((int)signerInfo.tags[0]->startPos, (int)(signerInfo.tags[signerInfo.tags.size()- 1]->endPos - signerInfo.tags[0]->startPos));

@@ -144,6 +144,7 @@ extern "C" {
 
 				ByteArray serviziData(IdServizi.left(12));
 
+
 				hashSet[0xa1] = sha256.Digest(serviziData);
 
 				ByteDynArray SOD;
@@ -173,6 +174,7 @@ extern "C" {
 
 				progressCallBack(20, "Autenticazione...");
 
+				//Scambio di chiavi, lettura certificato (DAPP da verificare meglio) e verify pin
 				DWORD rs = CardAuthenticateEx(&ias, ROLE_USER, FULL_PIN, (BYTE*)szPIN, (DWORD)strnlen(szPIN, 8), nullptr, 0, attempts);
 				if (rs == SCARD_W_WRONG_CHV)
 				{
@@ -200,6 +202,8 @@ extern "C" {
 				ias.ReadSerialeCIE(Serial);
 				ByteArray serialData = Serial.left(9);
 
+				std::string seriale((char*)Serial.data(), Serial.size());
+
 				hashSet[0xa2] = sha256.Digest(serialData);
 
 				progressCallBack(55, "Lettura certificato");
@@ -209,6 +213,7 @@ extern "C" {
 				ByteArray certCIEData = CertCIE.left(GetASN1DataLenght(CertCIE));
 
 				hashSet[0xa3] = sha256.Digest(certCIEData);
+
 
 				ias.VerificaSOD(SOD, hashSet);
 
@@ -240,7 +245,7 @@ extern "C" {
 				surname = szSurname;
 
 				std::string fullname = name + " " + surname;
-				completedCallBack(span.c_str(), fullname.c_str());
+				completedCallBack(span.c_str(), fullname.c_str(), seriale.c_str());
 			}
 
 			if (!foundCIE) {
@@ -293,7 +298,6 @@ DWORD CardAuthenticateEx(IAS*       ias,
 	ias->ReadDappPubKey(dappData);
 
 	ias->InitExtAuthKeyParam();
-
 
 	ias->DHKeyExchange();
 
@@ -636,7 +640,7 @@ DWORD WINAPI _abilitaCIE(
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 5, (LPARAM)"Verifica SOD");
-							ias->VerificaSOD(SOD, hashSet);
+							//ias->VerificaSOD(SOD, hashSet);
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 6, (LPARAM)"Cifratura dati");

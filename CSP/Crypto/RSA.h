@@ -7,6 +7,9 @@
 #include "..\cryptopp\nbtheory.h"
 #include "..\cryptopp\osrng.h"
 #include "..\cryptopp\rsa.h"
+
+#include "..\cryptopp\sha.h"
+#include "..\cryptopp\pssr.h"
 #else
 #include <openssl\rsa.h>
 #endif
