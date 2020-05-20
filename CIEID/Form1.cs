@@ -213,6 +213,7 @@ namespace CIEID
             else if (Properties.Settings.Default.efSeriale.Equals(""))
             {
 
+
                 tabControlMain.SelectedIndex = 1;
                 var result = MessageBox.Show("E’ necessario effettuare un nuovo abbinamento. Procedere?", "Abbinare nuovamente la CIE", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
                 if (result == DialogResult.Yes)
@@ -235,11 +236,8 @@ namespace CIEID
                     y = label7.Height + label7.Location.Y;
                     x = labelCardHolder.Location.X;
                     labelCardHolder.Location = new System.Drawing.Point(x, y);
-
-                    labelCardHolder.MaximumSize = new Size(200, 0);
-                    labelCardHolder.AutoSize = true;
-
-                    tabControlMain.SelectedIndex = 1;
+                    
+                     tabControlMain.SelectedIndex = 1;
                 }
             }
             else
@@ -255,9 +253,6 @@ namespace CIEID
                 y = label7.Height + label7.Location.Y;
                 x = labelCardHolder.Location.X;
                 labelCardHolder.Location = new System.Drawing.Point(x, y);
-
-                labelCardHolder.MaximumSize = new Size(200, 0);
-                labelCardHolder.AutoSize = true;
 
                 tabControlMain.SelectedIndex = 1;
             }

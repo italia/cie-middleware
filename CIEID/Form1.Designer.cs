@@ -392,7 +392,7 @@
             // labelCardHolder
             // 
             this.labelCardHolder.AutoSize = true;
-            this.labelCardHolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelCardHolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelCardHolder.Location = new System.Drawing.Point(223, 214);
             this.labelCardHolder.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelCardHolder.Name = "labelCardHolder";
