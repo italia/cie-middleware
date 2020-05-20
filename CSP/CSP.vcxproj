@@ -157,7 +157,7 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Comctl32.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>F:\Projects\cie-middleware\CSP\cryptopp\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>F:\Projects\cryptopp\x64\Output\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
@@ -348,6 +348,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-
-
 </Project>

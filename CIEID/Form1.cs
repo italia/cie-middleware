@@ -217,41 +217,48 @@ namespace CIEID
                 var result = MessageBox.Show("E’ necessario effettuare un nuovo abbinamento. Procedere?", "Abbinare nuovamente la CIE", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
                 if (result == DialogResult.Yes)
                 {
-                    Properties.Settings.Default.serialNumber = "";
-                    Properties.Settings.Default.efSeriale = "";
-                    Properties.Settings.Default.cardHolder = "";
-                    Properties.Settings.Default.Save();
+
                     tabControlMain.SelectedIndex = 0;
                 }
                 else
                 {
-                    //Properties.Settings.Default.efSeriale = "Abbinare nuovamente la CIE per visualizzare il numero della carta";
                     labelCardHolder.Text = Properties.Settings.Default.cardHolder;
                     Properties.Settings.Default.Save();
-                    labelSerialNumber.Font = new Font("Microsoft Sans Serif", 8, FontStyle.Bold);
-                    labelSerialNumber.Text = "Numero carta non disponibile, effettuare un nuovo abbinamento.";
-                    labelSerialNumber.MaximumSize = new Size(220, 50);
-                    labelSerialNumber.AutoSize = true;
+
+                    labelSerialNumber.Text = "Per visualizzarlo occorre\nrifare l'abbinamento";
                     labelCardHolder.Text = Properties.Settings.Default.cardHolder;
 
-                    label7.Location = new System.Drawing.Point(224, 230);
-                    labelCardHolder.Location = new System.Drawing.Point(223, 244);
+                    int y = labelSerialNumber.Height + labelSerialNumber.Location.Y + 10;
+                    int x = label7.Location.X;
+                    label7.Location = new System.Drawing.Point(x, y);
+
+                    y = label7.Height + label7.Location.Y;
+                    x = labelCardHolder.Location.X;
+                    labelCardHolder.Location = new System.Drawing.Point(x, y);
+
+                    labelCardHolder.MaximumSize = new Size(200, 0);
+                    labelCardHolder.AutoSize = true;
 
                     tabControlMain.SelectedIndex = 1;
                 }
             }
             else
             {
-                tabControlMain.SelectedIndex = 1;
                 labelSerialNumber.Font = new Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                labelSerialNumber.Size = new Size(108, 20);
-                labelSerialNumber.Location = new System.Drawing.Point(223, 171);
-                Console.WriteLine("CIAO");
-                label7.Location = new Point(224, 200);
-                labelCardHolder.Location = new System.Drawing.Point(223, 214);
+                int y = labelSerialNumber.Height + labelSerialNumber.Location.Y + 10;
+                int x = label7.Location.X;
+                label7.Location = new System.Drawing.Point(x, y);
 
                 labelSerialNumber.Text = Properties.Settings.Default.efSeriale;
                 labelCardHolder.Text = Properties.Settings.Default.cardHolder;
+
+                y = label7.Height + label7.Location.Y;
+                x = labelCardHolder.Location.X;
+                labelCardHolder.Location = new System.Drawing.Point(x, y);
+
+                labelCardHolder.MaximumSize = new Size(200, 0);
+                labelCardHolder.AutoSize = true;
+
                 tabControlMain.SelectedIndex = 1;
             }
 

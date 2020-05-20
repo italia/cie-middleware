@@ -83,7 +83,7 @@ ByteDynArray CSHA1::Digest(ByteArray data)
 {
 	Init();
 	Update(data);
-	ByteArray resp;
+	ByteDynArray resp(SHA_DIGEST_LENGTH);
 	Final(resp);
 	return resp;
 }

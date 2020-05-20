@@ -37,7 +37,6 @@
 #endif
 #endif
 
-#include "cryptoki.h"
 
 /* an unsigned 8-bit value */
 typedef unsigned char     CK_BYTE;

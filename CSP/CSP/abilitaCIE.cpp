@@ -260,7 +260,7 @@ extern "C" {
 			OutputDebugString(ex.what());
 			if (ATR)
 				free(ATR);
-
+			Log.write("%d Eccezione: %s", ex.what());
 			if (readers)
 				free(readers);
 			return CKR_GENERAL_ERROR;
@@ -640,7 +640,7 @@ DWORD WINAPI _abilitaCIE(
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 5, (LPARAM)"Verifica SOD");
-							//ias->VerificaSOD(SOD, hashSet);
+							ias->VerificaSOD(SOD, hashSet);
 
 							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 6, (LPARAM)"Cifratura dati");
