@@ -237,7 +237,9 @@ namespace CIEID
                     x = labelCardHolder.Location.X;
                     labelCardHolder.Location = new System.Drawing.Point(x, y);
                     
-                     tabControlMain.SelectedIndex = 1;
+                    labelCardHolder.MaximumSize = new Size(labelCardHolder.Parent.Width - x, buttonDeleteCIE.Location.Y - y - 10);
+                    
+                    tabControlMain.SelectedIndex = 1;
                 }
             }
             else
@@ -253,7 +255,7 @@ namespace CIEID
                 y = label7.Height + label7.Location.Y;
                 x = labelCardHolder.Location.X;
                 labelCardHolder.Location = new System.Drawing.Point(x, y);
-
+                labelCardHolder.MaximumSize = new Size(labelCardHolder.Parent.Width - x, buttonDeleteCIE.Location.Y - y - 10);
                 tabControlMain.SelectedIndex = 1;
             }
 
