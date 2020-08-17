@@ -1,5 +1,18 @@
 #include "..\stdafx.h"
 #include ".\rsa.h"
+#include "..\cryptopp\sha.h"
+#include "..\cryptopp\rsa.h"
+#include "..\cryptopp\secblock.h"
+#include "..\cryptopp\pssr.h"
+#include "..\cryptopp\cryptlib.h"
+
+using CryptoPP::InvertibleRSAFunction;
+using CryptoPP::RSASS;
+using CryptoPP::RSA;
+using CryptoPP::SHA512;
+using CryptoPP::SecByteBlock;
+using CryptoPP::PSS;
+using CryptoPP::DecodingResult;
 
 static char *szCompiledFile=__FILE__;
 
@@ -87,6 +100,14 @@ ByteDynArray CRSA::RSA_PURE(ByteArray &data)
 
 
 	return resp;
+}
+
+bool CRSA::RSA_PSS(ByteArray &signatureData, ByteArray &toSign)
+{
+	RSASS<PSS, SHA512>::Verifier verifier(pubKey);
+	SecByteBlock signatureBlock((const byte*)signatureData.data(), signatureData.size());
+
+	return verifier.VerifyMessage((const byte*)toSign.data(), toSign.size(), signatureBlock, signatureBlock.size());
 }
 
 #else

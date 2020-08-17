@@ -2,6 +2,8 @@
 !include "x64.nsh"
 !include "Library.nsh"
 
+!define PRODUCT_VERSION "1.3.1.0"
+
 ;--------------------------------
 ;General
 
@@ -23,6 +25,17 @@
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
+
+VIAddVersionKey "ProductName" "CIE-Middleware"
+VIAddVersionKey "Comments" "CIE-Middleware"
+VIAddVersionKey "CompanyName" ""
+VIAddVersionKey "LegalTrademarks" ""
+VIAddVersionKey "LegalCopyright" "Copyright (C) IPZS 2018-2020"
+VIAddVersionKey "FileDescription" "CIE-Middleware"
+VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}"
+VIAddVersionKey "OriginalFilename" "CIE-Middleware.exe"
+VIProductVersion "${PRODUCT_VERSION}"
+
 
 ;--------------------------------
 ;Interface Configuration

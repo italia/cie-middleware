@@ -5,6 +5,6 @@
 
 class CSHA512
 {
-public:
-	ByteDynArray Digest(ByteArray &data);
+	public:
+		ByteDynArray Digest(ByteArray &data);
 };

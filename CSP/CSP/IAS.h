@@ -22,7 +22,8 @@ extern ByteArray baExtAuth_PrivExp;
 enum CIE_Type {
 	CIE_Unknown,
 	CIE_Gemalto,
-	CIE_NXP
+	CIE_NXP,
+	CIE_STM
 };
 
 enum CIE_DF {
@@ -110,7 +111,9 @@ public:
 	void IconaSbloccoPIN();
 	void IconaCertificatoScaduto(const char *seriale);
 
+	uint8_t GetSODDigestAlg(ByteArray &SOD);
 	void VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
+	void VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 
 	void(*Callback)(int progress, char *desc,void *data);
 	void* CallbackData;

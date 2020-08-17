@@ -237,9 +237,7 @@ namespace CIEID
                     x = labelCardHolder.Location.X;
                     labelCardHolder.Location = new System.Drawing.Point(x, y);
                     
-                    labelCardHolder.MaximumSize = new Size(labelCardHolder.Parent.Width - x, buttonDeleteCIE.Location.Y - y - 10);
-                    
-                    tabControlMain.SelectedIndex = 1;
+                     tabControlMain.SelectedIndex = 1;
                 }
             }
             else
@@ -255,7 +253,7 @@ namespace CIEID
                 y = label7.Height + label7.Location.Y;
                 x = labelCardHolder.Location.X;
                 labelCardHolder.Location = new System.Drawing.Point(x, y);
-                labelCardHolder.MaximumSize = new Size(labelCardHolder.Parent.Width - x, buttonDeleteCIE.Location.Y - y - 10);
+
                 tabControlMain.SelectedIndex = 1;
             }
 
@@ -607,7 +605,10 @@ namespace CIEID
                         MessageBox.Show("Errore inaspettato durante la comunicazione con la smart card", "Errore inaspettato", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         selectHome();
                         break;
-
+                    case CKR_DEVICE_ERROR:
+                        MessageBox.Show("Errore inaspettato durante la comunicazione con la smart card", "Errore inaspettato", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        selectHome();
+                        break;
                     case CKR_OK:
                         MessageBox.Show("La CIE è stata sbloccata con successo", "Operazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         selectHome();
