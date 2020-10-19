@@ -59,5 +59,63 @@ namespace CIEID.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Cerca una risorsa localizzata di tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap back_3x {
+            get {
+                object obj = ResourceManager.GetObject("back@3x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Cerca una stringa localizzata simile a Numero carta:.
+        /// </summary>
+        internal static string card_number_label {
+            get {
+                return ResourceManager.GetString("card_number_label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Cerca una risorsa localizzata di tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap cie {
+            get {
+                object obj = ResourceManager.GetObject("cie", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Cerca una risorsa localizzata di tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap cie_transparent {
+            get {
+                object obj = ResourceManager.GetObject("cie_transparent", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Cerca una risorsa localizzata di tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap forward_3x {
+            get {
+                object obj = ResourceManager.GetObject("forward@3x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Cerca una stringa localizzata simile a Intestatario:.
+        /// </summary>
+        internal static string owner_label {
+            get {
+                return ResourceManager.GetString("owner_label", resourceCulture);
+            }
+        }
     }
 }

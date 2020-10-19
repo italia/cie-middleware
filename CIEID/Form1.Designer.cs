@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.buttonAnnulla = new System.Windows.Forms.Button();
             this.buttonAbbina = new System.Windows.Forms.Button();
             this.textBox8 = new System.Windows.Forms.TextBox();
             this.textBox7 = new System.Windows.Forms.TextBox();
@@ -45,12 +46,32 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.buttonDeleteCIE = new System.Windows.Forms.Button();
-            this.labelCardHolder = new System.Windows.Forms.Label();
-            this.labelSerialNumber = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.buttonRight = new System.Windows.Forms.Button();
+            this.buttonLeft = new System.Windows.Forms.Button();
+            this.dotsGroup = new System.Windows.Forms.FlowLayoutPanel();
+            this.tableLayoutPanelCarousel = new System.Windows.Forms.TableLayoutPanel();
+            this.carouselItem0 = new System.Windows.Forms.FlowLayoutPanel();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.labelCardNumber0 = new System.Windows.Forms.Label();
+            this.labelCardNumberValue0 = new System.Windows.Forms.Label();
+            this.labelOwner0 = new System.Windows.Forms.Label();
+            this.labelOwnerValue0 = new System.Windows.Forms.Label();
+            this.carouselItem1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.pictureBox12 = new System.Windows.Forms.PictureBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.labelCardNumberValue1 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.labelOwnerValue1 = new System.Windows.Forms.Label();
+            this.carouselItem2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.pictureBox14 = new System.Windows.Forms.PictureBox();
+            this.label28 = new System.Windows.Forms.Label();
+            this.labelCardNumberValue2 = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
+            this.labelOwnerValue2 = new System.Windows.Forms.Label();
+            this.buttonRemoveAll = new System.Windows.Forms.Button();
+            this.buttonAggiungi = new System.Windows.Forms.Button();
+            this.buttonDeleteCIE = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
@@ -117,7 +138,14 @@
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabPage2.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanelCarousel.SuspendLayout();
+            this.carouselItem0.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            this.carouselItem1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox12)).BeginInit();
+            this.carouselItem2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox14)).BeginInit();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.tabPage4.SuspendLayout();
@@ -141,6 +169,9 @@
             // 
             // tabControlMain
             // 
+            this.tabControlMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControlMain.Appearance = System.Windows.Forms.TabAppearance.Buttons;
             this.tabControlMain.Controls.Add(this.tabPage1);
             this.tabControlMain.Controls.Add(this.tabPage2);
@@ -158,12 +189,13 @@
             this.tabControlMain.Multiline = true;
             this.tabControlMain.Name = "tabControlMain";
             this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(465, 406);
+            this.tabControlMain.Size = new System.Drawing.Size(667, 546);
             this.tabControlMain.TabIndex = 0;
             // 
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.White;
+            this.tabPage1.Controls.Add(this.buttonAnnulla);
             this.tabPage1.Controls.Add(this.buttonAbbina);
             this.tabPage1.Controls.Add(this.textBox8);
             this.tabPage1.Controls.Add(this.textBox7);
@@ -177,23 +209,37 @@
             this.tabPage1.Controls.Add(this.pictureBox1);
             this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.label4);
-            this.tabPage1.Location = new System.Drawing.Point(4, 9);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage1.Location = new System.Drawing.Point(4, 5);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPage1.Size = new System.Drawing.Size(457, 393);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPage1.Size = new System.Drawing.Size(659, 537);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "tabPage1";
+            // 
+            // buttonAnnulla
+            // 
+            this.buttonAnnulla.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.buttonAnnulla.FlatAppearance.BorderSize = 0;
+            this.buttonAnnulla.ForeColor = System.Drawing.Color.White;
+            this.buttonAnnulla.Location = new System.Drawing.Point(124, 481);
+            this.buttonAnnulla.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonAnnulla.Name = "buttonAnnulla";
+            this.buttonAnnulla.Size = new System.Drawing.Size(156, 30);
+            this.buttonAnnulla.TabIndex = 21;
+            this.buttonAnnulla.Text = "Annulla";
+            this.buttonAnnulla.UseVisualStyleBackColor = false;
+            this.buttonAnnulla.Click += new System.EventHandler(this.buttonAnnulla_Click);
             // 
             // buttonAbbina
             // 
             this.buttonAbbina.BackColor = System.Drawing.Color.CornflowerBlue;
             this.buttonAbbina.FlatAppearance.BorderSize = 0;
             this.buttonAbbina.ForeColor = System.Drawing.Color.White;
-            this.buttonAbbina.Location = new System.Drawing.Point(164, 341);
-            this.buttonAbbina.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonAbbina.Location = new System.Drawing.Point(368, 481);
+            this.buttonAbbina.Margin = new System.Windows.Forms.Padding(2);
             this.buttonAbbina.Name = "buttonAbbina";
-            this.buttonAbbina.Size = new System.Drawing.Size(114, 28);
+            this.buttonAbbina.Size = new System.Drawing.Size(156, 30);
             this.buttonAbbina.TabIndex = 20;
             this.buttonAbbina.Text = "Abbina";
             this.buttonAbbina.UseVisualStyleBackColor = false;
@@ -203,10 +249,10 @@
             // 
             this.textBox8.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox8.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox8.Location = new System.Drawing.Point(373, 210);
-            this.textBox8.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox8.Location = new System.Drawing.Point(528, 300);
+            this.textBox8.Margin = new System.Windows.Forms.Padding(2);
             this.textBox8.Name = "textBox8";
-            this.textBox8.Size = new System.Drawing.Size(17, 23);
+            this.textBox8.Size = new System.Drawing.Size(20, 23);
             this.textBox8.TabIndex = 8;
             this.textBox8.Tag = "8";
             this.textBox8.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -217,10 +263,10 @@
             // 
             this.textBox7.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox7.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox7.Location = new System.Drawing.Point(352, 210);
-            this.textBox7.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox7.Location = new System.Drawing.Point(504, 300);
+            this.textBox7.Margin = new System.Windows.Forms.Padding(2);
             this.textBox7.Name = "textBox7";
-            this.textBox7.Size = new System.Drawing.Size(17, 23);
+            this.textBox7.Size = new System.Drawing.Size(20, 23);
             this.textBox7.TabIndex = 7;
             this.textBox7.Tag = "7";
             this.textBox7.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -231,10 +277,10 @@
             // 
             this.textBox6.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox6.Location = new System.Drawing.Point(331, 210);
-            this.textBox6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox6.Location = new System.Drawing.Point(480, 300);
+            this.textBox6.Margin = new System.Windows.Forms.Padding(2);
             this.textBox6.Name = "textBox6";
-            this.textBox6.Size = new System.Drawing.Size(17, 23);
+            this.textBox6.Size = new System.Drawing.Size(20, 23);
             this.textBox6.TabIndex = 6;
             this.textBox6.Tag = "6";
             this.textBox6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -245,10 +291,10 @@
             // 
             this.textBox5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox5.Location = new System.Drawing.Point(310, 210);
-            this.textBox5.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox5.Location = new System.Drawing.Point(456, 300);
+            this.textBox5.Margin = new System.Windows.Forms.Padding(2);
             this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(17, 23);
+            this.textBox5.Size = new System.Drawing.Size(20, 23);
             this.textBox5.TabIndex = 5;
             this.textBox5.Tag = "5";
             this.textBox5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -259,10 +305,10 @@
             // 
             this.textBox4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox4.Location = new System.Drawing.Point(289, 210);
-            this.textBox4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox4.Location = new System.Drawing.Point(432, 300);
+            this.textBox4.Margin = new System.Windows.Forms.Padding(2);
             this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(17, 23);
+            this.textBox4.Size = new System.Drawing.Size(20, 23);
             this.textBox4.TabIndex = 4;
             this.textBox4.Tag = "4";
             this.textBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -273,10 +319,10 @@
             // 
             this.textBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox3.Location = new System.Drawing.Point(268, 210);
-            this.textBox3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox3.Location = new System.Drawing.Point(408, 300);
+            this.textBox3.Margin = new System.Windows.Forms.Padding(2);
             this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(17, 23);
+            this.textBox3.Size = new System.Drawing.Size(20, 23);
             this.textBox3.TabIndex = 3;
             this.textBox3.Tag = "3";
             this.textBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -288,10 +334,10 @@
             this.textBox2.BackColor = System.Drawing.SystemColors.Window;
             this.textBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox2.Location = new System.Drawing.Point(247, 210);
-            this.textBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox2.Location = new System.Drawing.Point(384, 300);
+            this.textBox2.Margin = new System.Windows.Forms.Padding(2);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(17, 23);
+            this.textBox2.Size = new System.Drawing.Size(20, 23);
             this.textBox2.TabIndex = 2;
             this.textBox2.Tag = "2";
             this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -302,10 +348,10 @@
             // 
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox1.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.textBox1.Location = new System.Drawing.Point(226, 210);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox1.Location = new System.Drawing.Point(360, 300);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(2);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(18, 23);
+            this.textBox1.Size = new System.Drawing.Size(20, 23);
             this.textBox1.TabIndex = 1;
             this.textBox1.Tag = "1";
             this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -314,33 +360,33 @@
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(250, 165);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(374, 249);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(123, 20);
+            this.label1.Size = new System.Drawing.Size(156, 20);
             this.label1.TabIndex = 11;
             this.label1.Text = "Inserisci il PIN";
+            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(45, 123);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox1.Location = new System.Drawing.Point(89, 195);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(147, 158);
+            this.pictureBox1.Size = new System.Drawing.Size(207, 193);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 10;
             this.pictureBox1.TabStop = false;
             // 
             // label3
             // 
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(43, 53);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(172, 85);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(380, 45);
+            this.label3.Size = new System.Drawing.Size(394, 45);
             this.label3.TabIndex = 9;
             this.label3.Text = "Dopo aver collegato e installato il lettore di smart card, posiziona la CIE sul l" +
     "ettore ed inserisci il PIN";
@@ -349,103 +395,378 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(134, 22);
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(235, 49);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(213, 29);
+            this.label4.Size = new System.Drawing.Size(264, 36);
             this.label4.TabIndex = 8;
             this.label4.Text = "Abbina la tua CIE";
             // 
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.Color.White;
+            this.tabPage2.Controls.Add(this.tableLayoutPanel1);
+            this.tabPage2.Controls.Add(this.buttonRemoveAll);
+            this.tabPage2.Controls.Add(this.buttonAggiungi);
             this.tabPage2.Controls.Add(this.buttonDeleteCIE);
-            this.tabPage2.Controls.Add(this.labelCardHolder);
-            this.tabPage2.Controls.Add(this.labelSerialNumber);
-            this.tabPage2.Controls.Add(this.label7);
-            this.tabPage2.Controls.Add(this.label6);
-            this.tabPage2.Controls.Add(this.pictureBox2);
             this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.label5);
-            this.tabPage2.Location = new System.Drawing.Point(4, 9);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage2.Location = new System.Drawing.Point(4, 5);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(457, 393);
+            this.tabPage2.Size = new System.Drawing.Size(659, 537);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             // 
-            // buttonDeleteCIE
+            // tableLayoutPanel1
             // 
-            this.buttonDeleteCIE.BackColor = System.Drawing.Color.CornflowerBlue;
-            this.buttonDeleteCIE.FlatAppearance.BorderSize = 0;
-            this.buttonDeleteCIE.ForeColor = System.Drawing.Color.White;
-            this.buttonDeleteCIE.Location = new System.Drawing.Point(166, 341);
-            this.buttonDeleteCIE.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.buttonDeleteCIE.Name = "buttonDeleteCIE";
-            this.buttonDeleteCIE.Size = new System.Drawing.Size(114, 28);
-            this.buttonDeleteCIE.TabIndex = 17;
-            this.buttonDeleteCIE.Text = "Rimuovi Carta";
-            this.buttonDeleteCIE.UseVisualStyleBackColor = false;
-            this.buttonDeleteCIE.Click += new System.EventHandler(this.buttonDeleteCIE_Click);
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.AutoSize = true;
+            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 80F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tableLayoutPanel1.Controls.Add(this.buttonRight, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.buttonLeft, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.dotsGroup, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanelCarousel, 1, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 101);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(653, 376);
+            this.tableLayoutPanel1.TabIndex = 21;
             // 
-            // labelCardHolder
+            // buttonRight
             // 
-            this.labelCardHolder.AutoSize = true;
-            this.labelCardHolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelCardHolder.Location = new System.Drawing.Point(223, 214);
-            this.labelCardHolder.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.labelCardHolder.Name = "labelCardHolder";
-            this.labelCardHolder.Size = new System.Drawing.Size(90, 20);
-            this.labelCardHolder.TabIndex = 16;
-            this.labelCardHolder.Text = "Intestatario";
+            this.buttonRight.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.buttonRight.FlatAppearance.BorderSize = 0;
+            this.buttonRight.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonRight.Image = global::CIEID.Properties.Resources.forward_3x;
+            this.buttonRight.Location = new System.Drawing.Point(604, 146);
+            this.buttonRight.Name = "buttonRight";
+            this.buttonRight.Size = new System.Drawing.Size(31, 56);
+            this.buttonRight.TabIndex = 3;
+            this.buttonRight.UseVisualStyleBackColor = true;
+            this.buttonRight.Click += new System.EventHandler(this.buttonRight_Click);
             // 
-            // labelSerialNumber
+            // buttonLeft
             // 
-            this.labelSerialNumber.AutoSize = true;
-            this.labelSerialNumber.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelSerialNumber.Location = new System.Drawing.Point(223, 171);
-            this.labelSerialNumber.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.labelSerialNumber.Name = "labelSerialNumber";
-            this.labelSerialNumber.Size = new System.Drawing.Size(108, 20);
-            this.labelSerialNumber.TabIndex = 15;
-            this.labelSerialNumber.Text = "Numero Carta";
+            this.buttonLeft.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.buttonLeft.FlatAppearance.BorderSize = 0;
+            this.buttonLeft.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonLeft.Image = global::CIEID.Properties.Resources.back_3x;
+            this.buttonLeft.Location = new System.Drawing.Point(15, 146);
+            this.buttonLeft.Name = "buttonLeft";
+            this.buttonLeft.Size = new System.Drawing.Size(34, 56);
+            this.buttonLeft.TabIndex = 2;
+            this.buttonLeft.UseVisualStyleBackColor = true;
+            this.buttonLeft.Click += new System.EventHandler(this.buttonLeft_Click);
             // 
-            // label7
+            // dotsGroup
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(224, 200);
-            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(59, 13);
-            this.label7.TabIndex = 14;
-            this.label7.Text = "Intestatario";
+            this.dotsGroup.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.dotsGroup.AutoSize = true;
+            this.dotsGroup.Location = new System.Drawing.Point(326, 362);
+            this.dotsGroup.Name = "dotsGroup";
+            this.dotsGroup.Size = new System.Drawing.Size(0, 0);
+            this.dotsGroup.TabIndex = 5;
             // 
-            // label6
+            // tableLayoutPanelCarousel
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(224, 157);
-            this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(72, 13);
-            this.label6.TabIndex = 13;
-            this.label6.Text = "Numero Carta";
+            this.tableLayoutPanelCarousel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanelCarousel.AutoSize = true;
+            this.tableLayoutPanelCarousel.BackColor = System.Drawing.Color.White;
+            this.tableLayoutPanelCarousel.ColumnCount = 3;
+            this.tableLayoutPanelCarousel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 26.41509F));
+            this.tableLayoutPanelCarousel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.16981F));
+            this.tableLayoutPanelCarousel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 26.41509F));
+            this.tableLayoutPanelCarousel.Controls.Add(this.carouselItem0, 0, 0);
+            this.tableLayoutPanelCarousel.Controls.Add(this.carouselItem1, 1, 0);
+            this.tableLayoutPanelCarousel.Controls.Add(this.carouselItem2, 2, 0);
+            this.tableLayoutPanelCarousel.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
+            this.tableLayoutPanelCarousel.Location = new System.Drawing.Point(68, 3);
+            this.tableLayoutPanelCarousel.Name = "tableLayoutPanelCarousel";
+            this.tableLayoutPanelCarousel.RowCount = 1;
+            this.tableLayoutPanelCarousel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelCarousel.Size = new System.Drawing.Size(516, 343);
+            this.tableLayoutPanelCarousel.TabIndex = 4;
+            // 
+            // carouselItem0
+            // 
+            this.carouselItem0.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.carouselItem0.Controls.Add(this.pictureBox2);
+            this.carouselItem0.Controls.Add(this.labelCardNumber0);
+            this.carouselItem0.Controls.Add(this.labelCardNumberValue0);
+            this.carouselItem0.Controls.Add(this.labelOwner0);
+            this.carouselItem0.Controls.Add(this.labelOwnerValue0);
+            this.carouselItem0.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.carouselItem0.Location = new System.Drawing.Point(4, 66);
+            this.carouselItem0.Name = "carouselItem0";
+            this.carouselItem0.Padding = new System.Windows.Forms.Padding(0, 12, 0, 12);
+            this.carouselItem0.Size = new System.Drawing.Size(127, 211);
+            this.carouselItem0.TabIndex = 0;
             // 
             // pictureBox2
             // 
             this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.Location = new System.Drawing.Point(45, 123);
-            this.pictureBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox2.Location = new System.Drawing.Point(3, 15);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(147, 158);
+            this.pictureBox2.Size = new System.Drawing.Size(118, 84);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox2.TabIndex = 12;
+            this.pictureBox2.TabIndex = 0;
             this.pictureBox2.TabStop = false;
+            // 
+            // labelCardNumber0
+            // 
+            this.labelCardNumber0.AutoSize = true;
+            this.labelCardNumber0.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelCardNumber0.ForeColor = System.Drawing.Color.LightGray;
+            this.labelCardNumber0.Location = new System.Drawing.Point(3, 117);
+            this.labelCardNumber0.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
+            this.labelCardNumber0.Name = "labelCardNumber0";
+            this.labelCardNumber0.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labelCardNumber0.Size = new System.Drawing.Size(95, 15);
+            this.labelCardNumber0.TabIndex = 3;
+            this.labelCardNumber0.Text = "Numero carta:";
+            // 
+            // labelCardNumberValue0
+            // 
+            this.labelCardNumberValue0.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelCardNumberValue0.ForeColor = System.Drawing.Color.LightGray;
+            this.labelCardNumberValue0.Location = new System.Drawing.Point(3, 132);
+            this.labelCardNumberValue0.Name = "labelCardNumberValue0";
+            this.labelCardNumberValue0.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labelCardNumberValue0.Size = new System.Drawing.Size(118, 16);
+            this.labelCardNumberValue0.TabIndex = 1;
+            this.labelCardNumberValue0.Text = "label6";
+            // 
+            // labelOwner0
+            // 
+            this.labelOwner0.AutoSize = true;
+            this.labelOwner0.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelOwner0.ForeColor = System.Drawing.Color.LightGray;
+            this.labelOwner0.Location = new System.Drawing.Point(3, 153);
+            this.labelOwner0.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
+            this.labelOwner0.Name = "labelOwner0";
+            this.labelOwner0.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labelOwner0.Size = new System.Drawing.Size(80, 15);
+            this.labelOwner0.TabIndex = 2;
+            this.labelOwner0.Text = "Intestatario:";
+            // 
+            // labelOwnerValue0
+            // 
+            this.labelOwnerValue0.AutoSize = true;
+            this.labelOwnerValue0.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelOwnerValue0.ForeColor = System.Drawing.Color.LightGray;
+            this.labelOwnerValue0.Location = new System.Drawing.Point(3, 168);
+            this.labelOwnerValue0.Name = "labelOwnerValue0";
+            this.labelOwnerValue0.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labelOwnerValue0.Size = new System.Drawing.Size(58, 13);
+            this.labelOwnerValue0.TabIndex = 4;
+            this.labelOwnerValue0.Text = "label27";
+            this.labelOwnerValue0.Click += new System.EventHandler(this.labelOwnerValue0_Click);
+            // 
+            // carouselItem1
+            // 
+            this.carouselItem1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.carouselItem1.Controls.Add(this.pictureBox12);
+            this.carouselItem1.Controls.Add(this.label6);
+            this.carouselItem1.Controls.Add(this.labelCardNumberValue1);
+            this.carouselItem1.Controls.Add(this.label24);
+            this.carouselItem1.Controls.Add(this.labelOwnerValue1);
+            this.carouselItem1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.carouselItem1.Location = new System.Drawing.Point(142, 33);
+            this.carouselItem1.Name = "carouselItem1";
+            this.carouselItem1.Padding = new System.Windows.Forms.Padding(0, 12, 0, 12);
+            this.carouselItem1.Size = new System.Drawing.Size(231, 276);
+            this.carouselItem1.TabIndex = 1;
+            // 
+            // pictureBox12
+            // 
+            this.pictureBox12.Image = global::CIEID.Properties.Resources.cie;
+            this.pictureBox12.Location = new System.Drawing.Point(3, 15);
+            this.pictureBox12.Name = "pictureBox12";
+            this.pictureBox12.Size = new System.Drawing.Size(228, 136);
+            this.pictureBox12.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox12.TabIndex = 0;
+            this.pictureBox12.TabStop = false;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(3, 169);
+            this.label6.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
+            this.label6.Name = "label6";
+            this.label6.Padding = new System.Windows.Forms.Padding(20, 0, 10, 0);
+            this.label6.Size = new System.Drawing.Size(133, 18);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "Numero carta:";
+            // 
+            // labelCardNumberValue1
+            // 
+            this.labelCardNumberValue1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelCardNumberValue1.Location = new System.Drawing.Point(3, 187);
+            this.labelCardNumberValue1.Name = "labelCardNumberValue1";
+            this.labelCardNumberValue1.Padding = new System.Windows.Forms.Padding(20, 0, 10, 0);
+            this.labelCardNumberValue1.Size = new System.Drawing.Size(228, 20);
+            this.labelCardNumberValue1.TabIndex = 1;
+            this.labelCardNumberValue1.Text = "label6";
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label24.Location = new System.Drawing.Point(3, 212);
+            this.label24.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
+            this.label24.Name = "label24";
+            this.label24.Padding = new System.Windows.Forms.Padding(20, 0, 10, 0);
+            this.label24.Size = new System.Drawing.Size(114, 18);
+            this.label24.TabIndex = 2;
+            this.label24.Text = "Intestatario:";
+            // 
+            // labelOwnerValue1
+            // 
+            this.labelOwnerValue1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelOwnerValue1.Location = new System.Drawing.Point(3, 230);
+            this.labelOwnerValue1.Name = "labelOwnerValue1";
+            this.labelOwnerValue1.Padding = new System.Windows.Forms.Padding(20, 0, 5, 0);
+            this.labelOwnerValue1.Size = new System.Drawing.Size(228, 26);
+            this.labelOwnerValue1.TabIndex = 4;
+            this.labelOwnerValue1.Text = "label27";
+            this.labelOwnerValue1.Click += new System.EventHandler(this.labelOwnerValue1_Click);
+            // 
+            // carouselItem2
+            // 
+            this.carouselItem2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.carouselItem2.Controls.Add(this.pictureBox14);
+            this.carouselItem2.Controls.Add(this.label28);
+            this.carouselItem2.Controls.Add(this.labelCardNumberValue2);
+            this.carouselItem2.Controls.Add(this.label30);
+            this.carouselItem2.Controls.Add(this.labelOwnerValue2);
+            this.carouselItem2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.carouselItem2.Location = new System.Drawing.Point(384, 66);
+            this.carouselItem2.Name = "carouselItem2";
+            this.carouselItem2.Padding = new System.Windows.Forms.Padding(0, 12, 0, 12);
+            this.carouselItem2.Size = new System.Drawing.Size(127, 211);
+            this.carouselItem2.TabIndex = 5;
+            // 
+            // pictureBox14
+            // 
+            this.pictureBox14.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox14.Image")));
+            this.pictureBox14.Location = new System.Drawing.Point(3, 15);
+            this.pictureBox14.Name = "pictureBox14";
+            this.pictureBox14.Size = new System.Drawing.Size(118, 84);
+            this.pictureBox14.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox14.TabIndex = 0;
+            this.pictureBox14.TabStop = false;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label28.ForeColor = System.Drawing.Color.LightGray;
+            this.label28.Location = new System.Drawing.Point(3, 117);
+            this.label28.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
+            this.label28.Name = "label28";
+            this.label28.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label28.Size = new System.Drawing.Size(95, 15);
+            this.label28.TabIndex = 3;
+            this.label28.Text = "Numero carta:";
+            this.label28.Click += new System.EventHandler(this.label28_Click);
+            // 
+            // labelCardNumberValue2
+            // 
+            this.labelCardNumberValue2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelCardNumberValue2.ForeColor = System.Drawing.Color.LightGray;
+            this.labelCardNumberValue2.Location = new System.Drawing.Point(3, 132);
+            this.labelCardNumberValue2.Name = "labelCardNumberValue2";
+            this.labelCardNumberValue2.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labelCardNumberValue2.Size = new System.Drawing.Size(118, 16);
+            this.labelCardNumberValue2.TabIndex = 1;
+            this.labelCardNumberValue2.Text = "label6";
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label30.ForeColor = System.Drawing.Color.LightGray;
+            this.label30.Location = new System.Drawing.Point(3, 153);
+            this.label30.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
+            this.label30.Name = "label30";
+            this.label30.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label30.Size = new System.Drawing.Size(80, 15);
+            this.label30.TabIndex = 2;
+            this.label30.Text = "Intestatario:";
+            // 
+            // labelOwnerValue2
+            // 
+            this.labelOwnerValue2.AutoSize = true;
+            this.labelOwnerValue2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelOwnerValue2.ForeColor = System.Drawing.Color.LightGray;
+            this.labelOwnerValue2.Location = new System.Drawing.Point(3, 168);
+            this.labelOwnerValue2.Name = "labelOwnerValue2";
+            this.labelOwnerValue2.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labelOwnerValue2.Size = new System.Drawing.Size(58, 13);
+            this.labelOwnerValue2.TabIndex = 4;
+            this.labelOwnerValue2.Text = "label27";
+            // 
+            // buttonRemoveAll
+            // 
+            this.buttonRemoveAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonRemoveAll.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.buttonRemoveAll.FlatAppearance.BorderSize = 0;
+            this.buttonRemoveAll.ForeColor = System.Drawing.Color.White;
+            this.buttonRemoveAll.Location = new System.Drawing.Point(256, 486);
+            this.buttonRemoveAll.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonRemoveAll.Name = "buttonRemoveAll";
+            this.buttonRemoveAll.Size = new System.Drawing.Size(157, 28);
+            this.buttonRemoveAll.TabIndex = 19;
+            this.buttonRemoveAll.Text = "Rimuovi tutte";
+            this.buttonRemoveAll.UseVisualStyleBackColor = false;
+            this.buttonRemoveAll.Click += new System.EventHandler(this.buttonRemoveAll_Click);
+            // 
+            // buttonAggiungi
+            // 
+            this.buttonAggiungi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAggiungi.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.buttonAggiungi.FlatAppearance.BorderSize = 0;
+            this.buttonAggiungi.ForeColor = System.Drawing.Color.White;
+            this.buttonAggiungi.Location = new System.Drawing.Point(445, 486);
+            this.buttonAggiungi.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonAggiungi.Name = "buttonAggiungi";
+            this.buttonAggiungi.Size = new System.Drawing.Size(157, 28);
+            this.buttonAggiungi.TabIndex = 18;
+            this.buttonAggiungi.Text = "Aggiungi Carta";
+            this.buttonAggiungi.UseVisualStyleBackColor = false;
+            this.buttonAggiungi.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // buttonDeleteCIE
+            // 
+            this.buttonDeleteCIE.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonDeleteCIE.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.buttonDeleteCIE.FlatAppearance.BorderSize = 0;
+            this.buttonDeleteCIE.ForeColor = System.Drawing.Color.White;
+            this.buttonDeleteCIE.Location = new System.Drawing.Point(58, 486);
+            this.buttonDeleteCIE.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonDeleteCIE.Name = "buttonDeleteCIE";
+            this.buttonDeleteCIE.Size = new System.Drawing.Size(157, 28);
+            this.buttonDeleteCIE.TabIndex = 17;
+            this.buttonDeleteCIE.Text = "Rimuovi carta selezionata";
+            this.buttonDeleteCIE.UseVisualStyleBackColor = false;
+            this.buttonDeleteCIE.Click += new System.EventHandler(this.buttonDeleteCIE_Click);
             // 
             // label2
             // 
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(38, 53);
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(128, 53);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(380, 45);
@@ -456,11 +777,11 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(185, 22);
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(269, 22);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(87, 29);
+            this.label5.Size = new System.Drawing.Size(107, 36);
             this.label5.TabIndex = 10;
             this.label5.Text = "CIE ID";
             // 
@@ -473,29 +794,29 @@
             this.tabPage3.Controls.Add(this.label10);
             this.tabPage3.Controls.Add(this.label11);
             this.tabPage3.Location = new System.Drawing.Point(4, 5);
-            this.tabPage3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage3.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(457, 397);
+            this.tabPage3.Size = new System.Drawing.Size(659, 537);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "tabPage3";
             // 
             // progressBar
             // 
             this.progressBar.ForeColor = System.Drawing.Color.Blue;
-            this.progressBar.Location = new System.Drawing.Point(233, 206);
-            this.progressBar.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.progressBar.Location = new System.Drawing.Point(329, 296);
+            this.progressBar.Margin = new System.Windows.Forms.Padding(2);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(162, 5);
+            this.progressBar.Size = new System.Drawing.Size(228, 13);
             this.progressBar.TabIndex = 16;
             this.progressBar.Value = 55;
             // 
             // labelProgressMessage
             // 
-            this.labelProgressMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelProgressMessage.Location = new System.Drawing.Point(203, 176);
+            this.labelProgressMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelProgressMessage.Location = new System.Drawing.Point(320, 267);
             this.labelProgressMessage.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelProgressMessage.Name = "labelProgressMessage";
-            this.labelProgressMessage.Size = new System.Drawing.Size(225, 20);
+            this.labelProgressMessage.Size = new System.Drawing.Size(237, 20);
             this.labelProgressMessage.TabIndex = 15;
             this.labelProgressMessage.Text = "Abbinamento in corso";
             this.labelProgressMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -503,21 +824,21 @@
             // pictureBox3
             // 
             this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
-            this.pictureBox3.Location = new System.Drawing.Point(45, 123);
-            this.pictureBox3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox3.Location = new System.Drawing.Point(64, 193);
+            this.pictureBox3.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(147, 158);
+            this.pictureBox3.Size = new System.Drawing.Size(214, 214);
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox3.TabIndex = 14;
             this.pictureBox3.TabStop = false;
             // 
             // label10
             // 
-            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(42, 53);
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(121, 52);
             this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(380, 45);
+            this.label10.Size = new System.Drawing.Size(446, 72);
             this.label10.TabIndex = 13;
             this.label10.Text = "Dopo aver collegato e installato il lettore di smart card, posiziona la CIE sul l" +
     "ettore ed inserisci il PIN";
@@ -526,11 +847,11 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label11.Location = new System.Drawing.Point(133, 22);
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Location = new System.Drawing.Point(220, 16);
             this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(213, 29);
+            this.label11.Size = new System.Drawing.Size(264, 36);
             this.label11.TabIndex = 12;
             this.label11.Text = "Abbina la tua CIE";
             // 
@@ -549,19 +870,19 @@
             this.tabPage4.Controls.Add(this.label8);
             this.tabPage4.Controls.Add(this.label9);
             this.tabPage4.Location = new System.Drawing.Point(4, 5);
-            this.tabPage4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage4.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(457, 397);
+            this.tabPage4.Size = new System.Drawing.Size(659, 537);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "tabPage4";
             // 
             // label15
             // 
-            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(238, 269);
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(361, 345);
             this.label15.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(186, 70);
+            this.label15.Size = new System.Drawing.Size(219, 98);
             this.label15.TabIndex = 25;
             this.label15.Text = resources.GetString("label15.Text");
             // 
@@ -570,10 +891,10 @@
             this.buttonCambiaPIN.BackColor = System.Drawing.Color.CornflowerBlue;
             this.buttonCambiaPIN.FlatAppearance.BorderSize = 0;
             this.buttonCambiaPIN.ForeColor = System.Drawing.Color.White;
-            this.buttonCambiaPIN.Location = new System.Drawing.Point(151, 341);
-            this.buttonCambiaPIN.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonCambiaPIN.Location = new System.Drawing.Point(249, 475);
+            this.buttonCambiaPIN.Margin = new System.Windows.Forms.Padding(2);
             this.buttonCambiaPIN.Name = "buttonCambiaPIN";
-            this.buttonCambiaPIN.Size = new System.Drawing.Size(114, 28);
+            this.buttonCambiaPIN.Size = new System.Drawing.Size(134, 31);
             this.buttonCambiaPIN.TabIndex = 24;
             this.buttonCambiaPIN.Text = "Cambia PIN";
             this.buttonCambiaPIN.UseVisualStyleBackColor = false;
@@ -581,10 +902,9 @@
             // 
             // textBoxNewPIN2
             // 
-            this.textBoxNewPIN2.Location = new System.Drawing.Point(238, 240);
-            this.textBoxNewPIN2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxNewPIN2.Location = new System.Drawing.Point(365, 301);
             this.textBoxNewPIN2.Name = "textBoxNewPIN2";
-            this.textBoxNewPIN2.Size = new System.Drawing.Size(187, 20);
+            this.textBoxNewPIN2.Size = new System.Drawing.Size(217, 20);
             this.textBoxNewPIN2.TabIndex = 23;
             this.textBoxNewPIN2.UseSystemPasswordChar = true;
             this.textBoxNewPIN2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPIN_KeyPress);
@@ -592,19 +912,20 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(236, 223);
+            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label14.Location = new System.Drawing.Point(362, 278);
             this.label14.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(95, 13);
+            this.label14.Size = new System.Drawing.Size(123, 17);
             this.label14.TabIndex = 22;
             this.label14.Text = "Ripeti il nuovo PIN";
             // 
             // textBoxNewPIN
             // 
-            this.textBoxNewPIN.Location = new System.Drawing.Point(238, 191);
-            this.textBoxNewPIN.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxNewPIN.Location = new System.Drawing.Point(365, 249);
+            this.textBoxNewPIN.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxNewPIN.Name = "textBoxNewPIN";
-            this.textBoxNewPIN.Size = new System.Drawing.Size(187, 20);
+            this.textBoxNewPIN.Size = new System.Drawing.Size(217, 20);
             this.textBoxNewPIN.TabIndex = 21;
             this.textBoxNewPIN.UseSystemPasswordChar = true;
             this.textBoxNewPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPIN_KeyPress);
@@ -612,19 +933,20 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(236, 174);
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.Location = new System.Drawing.Point(362, 225);
             this.label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(106, 13);
+            this.label13.Size = new System.Drawing.Size(138, 17);
             this.label13.TabIndex = 20;
             this.label13.Text = "Inserisci il nuovo PIN";
             // 
             // textBoxPIN
             // 
-            this.textBoxPIN.Location = new System.Drawing.Point(238, 143);
-            this.textBoxPIN.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxPIN.Location = new System.Drawing.Point(364, 198);
+            this.textBoxPIN.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxPIN.Name = "textBoxPIN";
-            this.textBoxPIN.Size = new System.Drawing.Size(187, 20);
+            this.textBoxPIN.Size = new System.Drawing.Size(217, 20);
             this.textBoxPIN.TabIndex = 19;
             this.textBoxPIN.UseSystemPasswordChar = true;
             this.textBoxPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPIN_KeyPress);
@@ -632,31 +954,32 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(236, 126);
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Location = new System.Drawing.Point(362, 172);
             this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(114, 13);
+            this.label12.Size = new System.Drawing.Size(147, 17);
             this.label12.TabIndex = 18;
             this.label12.Text = "Inserisci il vecchio PIN";
             // 
             // pictureBox4
             // 
             this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
-            this.pictureBox4.Location = new System.Drawing.Point(45, 123);
-            this.pictureBox4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox4.Location = new System.Drawing.Point(64, 172);
+            this.pictureBox4.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox4.Name = "pictureBox4";
-            this.pictureBox4.Size = new System.Drawing.Size(147, 158);
+            this.pictureBox4.Size = new System.Drawing.Size(214, 205);
             this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox4.TabIndex = 17;
             this.pictureBox4.TabStop = false;
             // 
             // label8
             // 
-            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(98, 53);
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(186, 66);
             this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(244, 45);
+            this.label8.Size = new System.Drawing.Size(289, 45);
             this.label8.TabIndex = 16;
             this.label8.Text = "Il PIN della tua CIE è un dato sensibile,  trattalo con cautela";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -664,11 +987,11 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(146, 22);
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(243, 24);
             this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(152, 29);
+            this.label9.Size = new System.Drawing.Size(183, 36);
             this.label9.TabIndex = 15;
             this.label9.Text = "Cambia PIN";
             // 
@@ -680,30 +1003,30 @@
             this.tabPage5.Controls.Add(this.pictureBox5);
             this.tabPage5.Controls.Add(this.label17);
             this.tabPage5.Controls.Add(this.label18);
-            this.tabPage5.Location = new System.Drawing.Point(4, 9);
-            this.tabPage5.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage5.Location = new System.Drawing.Point(4, 5);
+            this.tabPage5.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(457, 393);
+            this.tabPage5.Size = new System.Drawing.Size(659, 537);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "tabPage5";
             // 
             // progressBarCambioPIN
             // 
             this.progressBarCambioPIN.ForeColor = System.Drawing.Color.Blue;
-            this.progressBarCambioPIN.Location = new System.Drawing.Point(226, 201);
-            this.progressBarCambioPIN.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.progressBarCambioPIN.Location = new System.Drawing.Point(329, 292);
+            this.progressBarCambioPIN.Margin = new System.Windows.Forms.Padding(2);
             this.progressBarCambioPIN.Name = "progressBarCambioPIN";
-            this.progressBarCambioPIN.Size = new System.Drawing.Size(162, 5);
+            this.progressBarCambioPIN.Size = new System.Drawing.Size(228, 13);
             this.progressBarCambioPIN.TabIndex = 22;
             this.progressBarCambioPIN.Value = 55;
             // 
             // labelProgressCambioPIN
             // 
             this.labelProgressCambioPIN.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelProgressCambioPIN.Location = new System.Drawing.Point(196, 171);
+            this.labelProgressCambioPIN.Location = new System.Drawing.Point(300, 265);
             this.labelProgressCambioPIN.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelProgressCambioPIN.Name = "labelProgressCambioPIN";
-            this.labelProgressCambioPIN.Size = new System.Drawing.Size(225, 20);
+            this.labelProgressCambioPIN.Size = new System.Drawing.Size(257, 20);
             this.labelProgressCambioPIN.TabIndex = 21;
             this.labelProgressCambioPIN.Text = "Abbinamento in corso";
             this.labelProgressCambioPIN.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -711,18 +1034,18 @@
             // pictureBox5
             // 
             this.pictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
-            this.pictureBox5.Location = new System.Drawing.Point(45, 123);
-            this.pictureBox5.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox5.Location = new System.Drawing.Point(64, 192);
+            this.pictureBox5.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox5.Name = "pictureBox5";
-            this.pictureBox5.Size = new System.Drawing.Size(147, 158);
+            this.pictureBox5.Size = new System.Drawing.Size(214, 214);
             this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox5.TabIndex = 20;
             this.pictureBox5.TabStop = false;
             // 
             // label17
             // 
-            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label17.Location = new System.Drawing.Point(108, 53);
+            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label17.Location = new System.Drawing.Point(209, 60);
             this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(244, 45);
@@ -733,11 +1056,11 @@
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(156, 22);
+            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label18.Location = new System.Drawing.Point(235, 16);
             this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(152, 29);
+            this.label18.Size = new System.Drawing.Size(183, 36);
             this.label18.TabIndex = 17;
             this.label18.Text = "Cambia PIN";
             // 
@@ -756,19 +1079,20 @@
             this.tabPage6.Controls.Add(this.label22);
             this.tabPage6.Controls.Add(this.label23);
             this.tabPage6.Location = new System.Drawing.Point(4, 5);
-            this.tabPage6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage6.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Size = new System.Drawing.Size(457, 397);
+            this.tabPage6.Size = new System.Drawing.Size(659, 537);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "tabPage6";
+            this.tabPage6.Click += new System.EventHandler(this.tabPage6_Click);
             // 
             // label16
             // 
-            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label16.Location = new System.Drawing.Point(234, 265);
+            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label16.Location = new System.Drawing.Point(361, 345);
             this.label16.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(186, 68);
+            this.label16.Size = new System.Drawing.Size(219, 98);
             this.label16.TabIndex = 36;
             this.label16.Text = resources.GetString("label16.Text");
             // 
@@ -777,10 +1101,10 @@
             this.buttonUnlockPIN.BackColor = System.Drawing.Color.CornflowerBlue;
             this.buttonUnlockPIN.FlatAppearance.BorderSize = 0;
             this.buttonUnlockPIN.ForeColor = System.Drawing.Color.White;
-            this.buttonUnlockPIN.Location = new System.Drawing.Point(147, 351);
-            this.buttonUnlockPIN.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonUnlockPIN.Location = new System.Drawing.Point(249, 475);
+            this.buttonUnlockPIN.Margin = new System.Windows.Forms.Padding(2);
             this.buttonUnlockPIN.Name = "buttonUnlockPIN";
-            this.buttonUnlockPIN.Size = new System.Drawing.Size(114, 28);
+            this.buttonUnlockPIN.Size = new System.Drawing.Size(134, 31);
             this.buttonUnlockPIN.TabIndex = 35;
             this.buttonUnlockPIN.Text = "Sblocca carta";
             this.buttonUnlockPIN.UseVisualStyleBackColor = false;
@@ -788,10 +1112,10 @@
             // 
             // textBoxUnlockPIN2
             // 
-            this.textBoxUnlockPIN2.Location = new System.Drawing.Point(234, 236);
-            this.textBoxUnlockPIN2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxUnlockPIN2.Location = new System.Drawing.Point(365, 301);
+            this.textBoxUnlockPIN2.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxUnlockPIN2.Name = "textBoxUnlockPIN2";
-            this.textBoxUnlockPIN2.Size = new System.Drawing.Size(187, 20);
+            this.textBoxUnlockPIN2.Size = new System.Drawing.Size(217, 20);
             this.textBoxUnlockPIN2.TabIndex = 34;
             this.textBoxUnlockPIN2.UseSystemPasswordChar = true;
             this.textBoxUnlockPIN2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
@@ -799,19 +1123,20 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(232, 219);
+            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label19.Location = new System.Drawing.Point(362, 278);
             this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(95, 13);
+            this.label19.Size = new System.Drawing.Size(123, 17);
             this.label19.TabIndex = 33;
             this.label19.Text = "Ripeti il nuovo PIN";
             // 
             // textBoxUnlockPIN
             // 
-            this.textBoxUnlockPIN.Location = new System.Drawing.Point(234, 187);
-            this.textBoxUnlockPIN.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxUnlockPIN.Location = new System.Drawing.Point(365, 249);
+            this.textBoxUnlockPIN.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxUnlockPIN.Name = "textBoxUnlockPIN";
-            this.textBoxUnlockPIN.Size = new System.Drawing.Size(187, 20);
+            this.textBoxUnlockPIN.Size = new System.Drawing.Size(217, 20);
             this.textBoxUnlockPIN.TabIndex = 32;
             this.textBoxUnlockPIN.UseSystemPasswordChar = true;
             this.textBoxUnlockPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
@@ -819,19 +1144,20 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(232, 170);
+            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label20.Location = new System.Drawing.Point(362, 225);
             this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(106, 13);
+            this.label20.Size = new System.Drawing.Size(138, 17);
             this.label20.TabIndex = 31;
             this.label20.Text = "Inserisci il nuovo PIN";
             // 
             // textBoxPUK
             // 
-            this.textBoxPUK.Location = new System.Drawing.Point(234, 139);
-            this.textBoxPUK.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBoxPUK.Location = new System.Drawing.Point(364, 198);
+            this.textBoxPUK.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxPUK.Name = "textBoxPUK";
-            this.textBoxPUK.Size = new System.Drawing.Size(187, 20);
+            this.textBoxPUK.Size = new System.Drawing.Size(217, 20);
             this.textBoxPUK.TabIndex = 30;
             this.textBoxPUK.UseSystemPasswordChar = true;
             this.textBoxPUK.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxPUK_KeyPress);
@@ -839,31 +1165,32 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(232, 122);
+            this.label21.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label21.Location = new System.Drawing.Point(362, 172);
             this.label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(77, 13);
+            this.label21.Size = new System.Drawing.Size(101, 17);
             this.label21.TabIndex = 29;
             this.label21.Text = "Inserisci il PUK";
             // 
             // pictureBox6
             // 
             this.pictureBox6.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox6.Image")));
-            this.pictureBox6.Location = new System.Drawing.Point(45, 123);
-            this.pictureBox6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox6.Location = new System.Drawing.Point(64, 172);
+            this.pictureBox6.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox6.Name = "pictureBox6";
-            this.pictureBox6.Size = new System.Drawing.Size(147, 158);
+            this.pictureBox6.Size = new System.Drawing.Size(214, 205);
             this.pictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox6.TabIndex = 28;
             this.pictureBox6.TabStop = false;
             // 
             // label22
             // 
-            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label22.Location = new System.Drawing.Point(94, 53);
+            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label22.Location = new System.Drawing.Point(186, 60);
             this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(244, 32);
+            this.label22.Size = new System.Drawing.Size(266, 45);
             this.label22.TabIndex = 27;
             this.label22.Text = "Utilizza il codice PUK ricevuto con la CIE";
             this.label22.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -872,11 +1199,11 @@
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label23.Location = new System.Drawing.Point(142, 22);
+            this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label23.Location = new System.Drawing.Point(212, 24);
             this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(177, 29);
+            this.label23.Size = new System.Drawing.Size(215, 36);
             this.label23.TabIndex = 26;
             this.label23.Text = "Sblocco Carta";
             // 
@@ -889,29 +1216,29 @@
             this.tabPage7.Controls.Add(this.label25);
             this.tabPage7.Controls.Add(this.label26);
             this.tabPage7.Location = new System.Drawing.Point(4, 5);
-            this.tabPage7.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage7.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Size = new System.Drawing.Size(457, 397);
+            this.tabPage7.Size = new System.Drawing.Size(659, 537);
             this.tabPage7.TabIndex = 6;
             this.tabPage7.Text = "tabPage7";
             // 
             // progressBarUnlock
             // 
             this.progressBarUnlock.ForeColor = System.Drawing.Color.Blue;
-            this.progressBarUnlock.Location = new System.Drawing.Point(226, 192);
-            this.progressBarUnlock.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.progressBarUnlock.Location = new System.Drawing.Point(329, 292);
+            this.progressBarUnlock.Margin = new System.Windows.Forms.Padding(2);
             this.progressBarUnlock.Name = "progressBarUnlock";
-            this.progressBarUnlock.Size = new System.Drawing.Size(162, 5);
+            this.progressBarUnlock.Size = new System.Drawing.Size(228, 13);
             this.progressBarUnlock.TabIndex = 27;
             this.progressBarUnlock.Value = 55;
             // 
             // labelProgressUnlock
             // 
             this.labelProgressUnlock.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelProgressUnlock.Location = new System.Drawing.Point(196, 162);
+            this.labelProgressUnlock.Location = new System.Drawing.Point(321, 265);
             this.labelProgressUnlock.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelProgressUnlock.Name = "labelProgressUnlock";
-            this.labelProgressUnlock.Size = new System.Drawing.Size(225, 20);
+            this.labelProgressUnlock.Size = new System.Drawing.Size(236, 20);
             this.labelProgressUnlock.TabIndex = 26;
             this.labelProgressUnlock.Text = "Abbinamento in corso";
             this.labelProgressUnlock.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -919,21 +1246,21 @@
             // pictureBox7
             // 
             this.pictureBox7.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox7.Image")));
-            this.pictureBox7.Location = new System.Drawing.Point(45, 123);
-            this.pictureBox7.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox7.Location = new System.Drawing.Point(63, 180);
+            this.pictureBox7.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox7.Name = "pictureBox7";
-            this.pictureBox7.Size = new System.Drawing.Size(147, 158);
+            this.pictureBox7.Size = new System.Drawing.Size(214, 205);
             this.pictureBox7.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox7.TabIndex = 25;
             this.pictureBox7.TabStop = false;
             // 
             // label25
             // 
-            this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label25.Location = new System.Drawing.Point(108, 53);
+            this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label25.Location = new System.Drawing.Point(186, 66);
             this.label25.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(244, 36);
+            this.label25.Size = new System.Drawing.Size(257, 44);
             this.label25.TabIndex = 24;
             this.label25.Text = "Utilizza il codice PUK ricevuto con la CIE";
             this.label25.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -941,11 +1268,11 @@
             // label26
             // 
             this.label26.AutoSize = true;
-            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label26.Location = new System.Drawing.Point(148, 22);
+            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label26.Location = new System.Drawing.Point(217, 22);
             this.label26.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(172, 29);
+            this.label26.Size = new System.Drawing.Size(209, 36);
             this.label26.TabIndex = 23;
             this.label26.Text = "Sblocco carta";
             this.label26.Click += new System.EventHandler(this.label26_Click);
@@ -954,10 +1281,10 @@
             // 
             this.tabPage8.BackColor = System.Drawing.Color.White;
             this.tabPage8.Controls.Add(this.webBrowserTutorial);
-            this.tabPage8.Location = new System.Drawing.Point(4, 9);
-            this.tabPage8.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage8.Location = new System.Drawing.Point(4, 5);
+            this.tabPage8.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage8.Name = "tabPage8";
-            this.tabPage8.Size = new System.Drawing.Size(457, 393);
+            this.tabPage8.Size = new System.Drawing.Size(659, 537);
             this.tabPage8.TabIndex = 7;
             this.tabPage8.Text = "tabPage8";
             // 
@@ -965,10 +1292,10 @@
             // 
             this.webBrowserTutorial.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowserTutorial.Location = new System.Drawing.Point(0, 0);
-            this.webBrowserTutorial.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.webBrowserTutorial.Margin = new System.Windows.Forms.Padding(2);
             this.webBrowserTutorial.MinimumSize = new System.Drawing.Size(15, 16);
             this.webBrowserTutorial.Name = "webBrowserTutorial";
-            this.webBrowserTutorial.Size = new System.Drawing.Size(457, 393);
+            this.webBrowserTutorial.Size = new System.Drawing.Size(659, 537);
             this.webBrowserTutorial.TabIndex = 0;
             // 
             // tabPage9
@@ -978,17 +1305,17 @@
             this.tabPage9.Controls.Add(this.pictureBox13);
             this.tabPage9.Controls.Add(this.webBrowserHelp);
             this.tabPage9.Location = new System.Drawing.Point(4, 5);
-            this.tabPage9.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage9.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage9.Name = "tabPage9";
-            this.tabPage9.Size = new System.Drawing.Size(457, 397);
+            this.tabPage9.Size = new System.Drawing.Size(659, 537);
             this.tabPage9.TabIndex = 8;
             this.tabPage9.Text = "tabPage9";
             // 
             // pictureBox11
             // 
             this.pictureBox11.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox11.Image")));
-            this.pictureBox11.Location = new System.Drawing.Point(262, 316);
-            this.pictureBox11.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox11.Location = new System.Drawing.Point(360, 444);
+            this.pictureBox11.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox11.Name = "pictureBox11";
             this.pictureBox11.Size = new System.Drawing.Size(150, 67);
             this.pictureBox11.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -998,8 +1325,8 @@
             // pictureBox13
             // 
             this.pictureBox13.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox13.Image")));
-            this.pictureBox13.Location = new System.Drawing.Point(40, 316);
-            this.pictureBox13.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox13.Location = new System.Drawing.Point(138, 444);
+            this.pictureBox13.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox13.Name = "pictureBox13";
             this.pictureBox13.Size = new System.Drawing.Size(174, 67);
             this.pictureBox13.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -1009,10 +1336,10 @@
             // webBrowserHelp
             // 
             this.webBrowserHelp.Location = new System.Drawing.Point(0, 0);
-            this.webBrowserHelp.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.webBrowserHelp.Margin = new System.Windows.Forms.Padding(2);
             this.webBrowserHelp.MinimumSize = new System.Drawing.Size(15, 16);
             this.webBrowserHelp.Name = "webBrowserHelp";
-            this.webBrowserHelp.Size = new System.Drawing.Size(459, 311);
+            this.webBrowserHelp.Size = new System.Drawing.Size(652, 425);
             this.webBrowserHelp.TabIndex = 0;
             // 
             // tabPage10
@@ -1023,17 +1350,17 @@
             this.tabPage10.Controls.Add(this.pictureBox8);
             this.tabPage10.Controls.Add(this.webBrowserInfo);
             this.tabPage10.Location = new System.Drawing.Point(4, 5);
-            this.tabPage10.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage10.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage10.Name = "tabPage10";
-            this.tabPage10.Size = new System.Drawing.Size(457, 397);
+            this.tabPage10.Size = new System.Drawing.Size(659, 537);
             this.tabPage10.TabIndex = 9;
             this.tabPage10.Text = "tabPage10";
             // 
             // pictureBox10
             // 
             this.pictureBox10.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox10.Image")));
-            this.pictureBox10.Location = new System.Drawing.Point(308, 318);
-            this.pictureBox10.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox10.Location = new System.Drawing.Point(410, 439);
+            this.pictureBox10.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox10.Name = "pictureBox10";
             this.pictureBox10.Size = new System.Drawing.Size(125, 65);
             this.pictureBox10.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -1043,8 +1370,8 @@
             // pictureBox9
             // 
             this.pictureBox9.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox9.Image")));
-            this.pictureBox9.Location = new System.Drawing.Point(164, 318);
-            this.pictureBox9.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox9.Location = new System.Drawing.Point(266, 439);
+            this.pictureBox9.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox9.Name = "pictureBox9";
             this.pictureBox9.Size = new System.Drawing.Size(125, 65);
             this.pictureBox9.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -1054,8 +1381,8 @@
             // pictureBox8
             // 
             this.pictureBox8.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox8.Image")));
-            this.pictureBox8.Location = new System.Drawing.Point(19, 318);
-            this.pictureBox8.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox8.Location = new System.Drawing.Point(121, 439);
+            this.pictureBox8.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox8.Name = "pictureBox8";
             this.pictureBox8.Size = new System.Drawing.Size(125, 65);
             this.pictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -1065,10 +1392,10 @@
             // webBrowserInfo
             // 
             this.webBrowserInfo.Location = new System.Drawing.Point(0, 2);
-            this.webBrowserInfo.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.webBrowserInfo.Margin = new System.Windows.Forms.Padding(2);
             this.webBrowserInfo.MinimumSize = new System.Drawing.Size(15, 16);
             this.webBrowserInfo.Name = "webBrowserInfo";
-            this.webBrowserInfo.Size = new System.Drawing.Size(459, 311);
+            this.webBrowserInfo.Size = new System.Drawing.Size(652, 421);
             this.webBrowserInfo.TabIndex = 1;
             // 
             // buttonHome
@@ -1079,12 +1406,13 @@
             this.buttonHome.FlatAppearance.BorderColor = System.Drawing.SystemColors.ButtonFace;
             this.buttonHome.FlatAppearance.BorderSize = 0;
             this.buttonHome.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonHome.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonHome.Image = ((System.Drawing.Image)(resources.GetObject("buttonHome.Image")));
             this.buttonHome.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonHome.Location = new System.Drawing.Point(10, 114);
-            this.buttonHome.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonHome.Location = new System.Drawing.Point(6, 114);
+            this.buttonHome.Margin = new System.Windows.Forms.Padding(2);
             this.buttonHome.Name = "buttonHome";
-            this.buttonHome.Size = new System.Drawing.Size(124, 36);
+            this.buttonHome.Size = new System.Drawing.Size(130, 36);
             this.buttonHome.TabIndex = 1;
             this.buttonHome.Text = "  Home";
             this.buttonHome.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -1096,7 +1424,7 @@
             // 
             this.pictureBoxLogo.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxLogo.Image")));
             this.pictureBoxLogo.Location = new System.Drawing.Point(29, 10);
-            this.pictureBoxLogo.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBoxLogo.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBoxLogo.Name = "pictureBoxLogo";
             this.pictureBoxLogo.Size = new System.Drawing.Size(82, 89);
             this.pictureBoxLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -1111,12 +1439,13 @@
             this.buttonChangePIN.FlatAppearance.BorderColor = System.Drawing.SystemColors.ButtonFace;
             this.buttonChangePIN.FlatAppearance.BorderSize = 0;
             this.buttonChangePIN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonChangePIN.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonChangePIN.Image = ((System.Drawing.Image)(resources.GetObject("buttonChangePIN.Image")));
             this.buttonChangePIN.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonChangePIN.Location = new System.Drawing.Point(10, 157);
-            this.buttonChangePIN.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonChangePIN.Location = new System.Drawing.Point(6, 157);
+            this.buttonChangePIN.Margin = new System.Windows.Forms.Padding(2);
             this.buttonChangePIN.Name = "buttonChangePIN";
-            this.buttonChangePIN.Size = new System.Drawing.Size(124, 36);
+            this.buttonChangePIN.Size = new System.Drawing.Size(130, 36);
             this.buttonChangePIN.TabIndex = 3;
             this.buttonChangePIN.Text = "  Cambia PIN";
             this.buttonChangePIN.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -1132,12 +1461,13 @@
             this.buttonUnlock.FlatAppearance.BorderColor = System.Drawing.SystemColors.ButtonFace;
             this.buttonUnlock.FlatAppearance.BorderSize = 0;
             this.buttonUnlock.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonUnlock.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonUnlock.Image = ((System.Drawing.Image)(resources.GetObject("buttonUnlock.Image")));
             this.buttonUnlock.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonUnlock.Location = new System.Drawing.Point(10, 200);
-            this.buttonUnlock.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonUnlock.Location = new System.Drawing.Point(6, 200);
+            this.buttonUnlock.Margin = new System.Windows.Forms.Padding(2);
             this.buttonUnlock.Name = "buttonUnlock";
-            this.buttonUnlock.Size = new System.Drawing.Size(124, 36);
+            this.buttonUnlock.Size = new System.Drawing.Size(130, 36);
             this.buttonUnlock.TabIndex = 4;
             this.buttonUnlock.Text = "  Sblocca Carta";
             this.buttonUnlock.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -1153,12 +1483,13 @@
             this.buttonTutorial.FlatAppearance.BorderColor = System.Drawing.SystemColors.ButtonFace;
             this.buttonTutorial.FlatAppearance.BorderSize = 0;
             this.buttonTutorial.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonTutorial.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonTutorial.Image = ((System.Drawing.Image)(resources.GetObject("buttonTutorial.Image")));
             this.buttonTutorial.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonTutorial.Location = new System.Drawing.Point(10, 243);
-            this.buttonTutorial.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonTutorial.Location = new System.Drawing.Point(6, 243);
+            this.buttonTutorial.Margin = new System.Windows.Forms.Padding(2);
             this.buttonTutorial.Name = "buttonTutorial";
-            this.buttonTutorial.Size = new System.Drawing.Size(124, 36);
+            this.buttonTutorial.Size = new System.Drawing.Size(130, 36);
             this.buttonTutorial.TabIndex = 5;
             this.buttonTutorial.Text = "  Tutorial";
             this.buttonTutorial.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -1174,12 +1505,13 @@
             this.buttonHelp.FlatAppearance.BorderColor = System.Drawing.SystemColors.ButtonFace;
             this.buttonHelp.FlatAppearance.BorderSize = 0;
             this.buttonHelp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonHelp.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonHelp.Image = ((System.Drawing.Image)(resources.GetObject("buttonHelp.Image")));
             this.buttonHelp.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonHelp.Location = new System.Drawing.Point(10, 286);
-            this.buttonHelp.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonHelp.Location = new System.Drawing.Point(6, 286);
+            this.buttonHelp.Margin = new System.Windows.Forms.Padding(2);
             this.buttonHelp.Name = "buttonHelp";
-            this.buttonHelp.Size = new System.Drawing.Size(124, 36);
+            this.buttonHelp.Size = new System.Drawing.Size(130, 36);
             this.buttonHelp.TabIndex = 6;
             this.buttonHelp.Text = "  Aiuto";
             this.buttonHelp.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -1195,12 +1527,13 @@
             this.buttonInfo.FlatAppearance.BorderColor = System.Drawing.SystemColors.ButtonFace;
             this.buttonInfo.FlatAppearance.BorderSize = 0;
             this.buttonInfo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonInfo.Image = ((System.Drawing.Image)(resources.GetObject("buttonInfo.Image")));
             this.buttonInfo.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonInfo.Location = new System.Drawing.Point(10, 329);
-            this.buttonInfo.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonInfo.Location = new System.Drawing.Point(6, 326);
+            this.buttonInfo.Margin = new System.Windows.Forms.Padding(2);
             this.buttonInfo.Name = "buttonInfo";
-            this.buttonInfo.Size = new System.Drawing.Size(124, 36);
+            this.buttonInfo.Size = new System.Drawing.Size(130, 36);
             this.buttonInfo.TabIndex = 7;
             this.buttonInfo.Text = "  Informazioni";
             this.buttonInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -1212,7 +1545,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(600, 390);
+            this.ClientSize = new System.Drawing.Size(799, 530);
             this.Controls.Add(this.buttonInfo);
             this.Controls.Add(this.buttonHelp);
             this.Controls.Add(this.buttonTutorial);
@@ -1223,7 +1556,7 @@
             this.Controls.Add(this.tabControlMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -1235,7 +1568,18 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
+            this.tableLayoutPanelCarousel.ResumeLayout(false);
+            this.carouselItem0.ResumeLayout(false);
+            this.carouselItem0.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            this.carouselItem1.ResumeLayout(false);
+            this.carouselItem1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox12)).EndInit();
+            this.carouselItem2.ResumeLayout(false);
+            this.carouselItem2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox14)).EndInit();
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
@@ -1299,11 +1643,6 @@
         private System.Windows.Forms.TabPage tabPage8;
         private System.Windows.Forms.TabPage tabPage9;
         private System.Windows.Forms.TabPage tabPage10;
-        private System.Windows.Forms.Label labelCardHolder;
-        private System.Windows.Forms.Label labelSerialNumber;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.Button buttonDeleteCIE;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.Label labelProgressMessage;
@@ -1351,5 +1690,31 @@
         private System.Windows.Forms.PictureBox pictureBox8;
         private System.Windows.Forms.PictureBox pictureBox11;
         private System.Windows.Forms.PictureBox pictureBox13;
+        private System.Windows.Forms.Button buttonAggiungi;
+        private System.Windows.Forms.Button buttonRemoveAll;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Button buttonLeft;
+        private System.Windows.Forms.Button buttonRight;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanelCarousel;
+        private System.Windows.Forms.FlowLayoutPanel carouselItem1;
+        private System.Windows.Forms.PictureBox pictureBox12;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label labelCardNumberValue1;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Label labelOwnerValue1;
+        private System.Windows.Forms.FlowLayoutPanel carouselItem0;
+        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.Label labelCardNumber0;
+        private System.Windows.Forms.Label labelCardNumberValue0;
+        private System.Windows.Forms.Label labelOwner0;
+        private System.Windows.Forms.Label labelOwnerValue0;
+        private System.Windows.Forms.FlowLayoutPanel carouselItem2;
+        private System.Windows.Forms.PictureBox pictureBox14;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Label labelCardNumberValue2;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Label labelOwnerValue2;
+        private System.Windows.Forms.FlowLayoutPanel dotsGroup;
+        private System.Windows.Forms.Button buttonAnnulla;
     }
 }

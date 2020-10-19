@@ -38,6 +38,18 @@ namespace CIEID.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string cieList {
+            get {
+                return ((string)(this["cieList"]));
+            }
+            set {
+                this["cieList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string serialNumber {
             get {
                 return ((string)(this["serialNumber"]));

@@ -18,6 +18,8 @@
 #include "../UI/SystemTray.h"
 
 
+#define CARD_ALREADY_ENABLED		0x000000F0;
+
 typedef CK_RV(*AbilitaCIEfn)(const char*  szPAN,
 	const char*  szPIN,
 	int* attempts,
@@ -50,6 +52,7 @@ extern "C" {
 
 	}
 
+	
 	CK_RV CK_ENTRY __stdcall DisabilitaCIE(const char*  szPAN)
 	{
 		if (IAS::IsEnrolled(szPAN))
@@ -60,7 +63,6 @@ extern "C" {
 
 		return CKR_FUNCTION_FAILED;
 	}
-
 	
 	CK_RV CK_ENTRY __stdcall AbbinaCIE(const char*  szPAN, const char*  szPIN, int* attempts, PROGRESS_CALLBACK progressCallBack, COMPLETED_CALLBACK completedCallBack)
 	{
@@ -82,7 +84,10 @@ extern "C" {
 			if (nRet != SCARD_S_SUCCESS)
 				return CKR_DEVICE_ERROR;
 
+			Log.write("Establish Context ok\n");
+
 			if (SCardListReaders(hSC, nullptr, NULL, &len) != SCARD_S_SUCCESS) {
+				Log.write("List readers ko\n");
 				return CKR_TOKEN_NOT_PRESENT;
 			}
 
@@ -95,22 +100,39 @@ extern "C" {
 				free(readers);
 				return CKR_TOKEN_NOT_PRESENT;
 			}
-
-			progressCallBack(5, "CIE Connessa");
-
+			
 			char *curreader = readers;
 			bool foundCIE = false;
 			for (; curreader[0] != 0; curreader += strnlen(curreader, len) + 1)
 			{
+
 				safeConnection conn(hSC, curreader, SCARD_SHARE_SHARED);
 				if (!conn.hCard)
 					continue;
 
+				LONG res = 0;
+
+				res = SCardBeginTransaction(conn.hCard);
+
+				while (res != SCARD_S_SUCCESS)
+				{
+					DWORD protocol = 0;
+					SCardReconnect(conn.hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
+					Log.write("errore\n");
+					res = SCardBeginTransaction(conn.hCard);
+				}
+
+
+				progressCallBack(5, "CIE Connessa");
+				
 				DWORD atrLen = 40;
-				if (SCardGetAttrib(conn.hCard, SCARD_ATTR_ATR_STRING, (uint8_t*)ATR, &atrLen) != SCARD_S_SUCCESS) {
+				res = SCardGetAttrib(conn.hCard, SCARD_ATTR_ATR_STRING, (uint8_t*)ATR, &atrLen);
+				if (res != SCARD_S_SUCCESS) {
 					free(readers);
+					Log.write("GetAttrib ko 1, %d\n", res);
 					return CKR_DEVICE_ERROR;
 				}
+
 
 				ATR = (char*)malloc(atrLen);
 
@@ -121,6 +143,9 @@ extern "C" {
 				}
 
 				ByteArray atrBa((BYTE*)ATR, atrLen);
+				
+
+				progressCallBack(10, "Verifica carta esistente");
 
 				IAS ias((CToken::TokenTransmitCallback)TokenTransmitCallback, atrBa);
 				ias.SetCardContext(&conn);
@@ -130,9 +155,7 @@ extern "C" {
 				ias.token.Reset();
 				ias.SelectAID_IAS();
 				ias.ReadPAN();
-
-				progressCallBack(10, "Lettura dati dalla CIE");
-
+				
 				ByteDynArray IntAuth;
 				ias.SelectAID_CIE();
 				ias.ReadDappPubKey(IntAuth);
@@ -141,6 +164,15 @@ extern "C" {
 
 				ByteDynArray IdServizi;
 				ias.ReadIdServizi(IdServizi);
+
+				if (ias.IsEnrolled())
+				{
+					Log.write("Carta già abilitata\n");
+					return CARD_ALREADY_ENABLED;
+				}
+
+
+				progressCallBack(15, "Lettura dati dalla CIE");
 
 				ByteArray serviziData(IdServizi.left(12));
 				
@@ -260,6 +292,8 @@ extern "C" {
 
 				std::string fullname = name + " " + surname;
 				completedCallBack(span.c_str(), fullname.c_str(), seriale.c_str());
+
+				SCardEndTransaction(conn.hCard, SCARD_RESET_CARD);
 			}
 
 			if (!foundCIE) {
@@ -277,6 +311,8 @@ extern "C" {
 			Log.write("%d Eccezione: %s", ex.what());
 			if (readers)
 				free(readers);
+
+			Log.write("General error\n");
 			return CKR_GENERAL_ERROR;
 		}
 

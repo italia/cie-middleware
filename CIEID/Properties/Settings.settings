@@ -5,6 +5,9 @@
     <Setting Name="firstTime" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="cieList" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="serialNumber" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
