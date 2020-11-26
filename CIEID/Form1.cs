@@ -39,6 +39,7 @@ namespace CIEID
         public const int ENROLLED = 1;
         public const int NOT_ENROLLED = 0;
 
+
         delegate long ProgressCallback(int progress, string message);
         delegate long CompletedCallback(string pan, string name, string ef_seriale);
 
@@ -992,10 +993,6 @@ namespace CIEID
 
         }
 
-        private void label28_Click(object sender, EventArgs e)
-        {
-
-        }
         
     }
         //long ret = VerificaCIEAbilitata();

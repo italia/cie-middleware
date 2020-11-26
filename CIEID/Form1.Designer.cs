@@ -426,9 +426,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.ColumnCount = 3;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 80F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 8.728943F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 83.61409F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 7.810107F));
             this.tableLayoutPanel1.Controls.Add(this.buttonRight, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.buttonLeft, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.dotsGroup, 1, 1);
@@ -448,10 +448,9 @@
             this.buttonRight.FlatAppearance.BorderSize = 0;
             this.buttonRight.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonRight.Image = global::CIEID.Properties.Resources.forward_3x;
-            this.buttonRight.Location = new System.Drawing.Point(1209, 283);
-            this.buttonRight.Margin = new System.Windows.Forms.Padding(6);
+            this.buttonRight.Location = new System.Drawing.Point(609, 153);
             this.buttonRight.Name = "buttonRight";
-            this.buttonRight.Size = new System.Drawing.Size(62, 108);
+            this.buttonRight.Size = new System.Drawing.Size(36, 43);
             this.buttonRight.TabIndex = 3;
             this.buttonRight.UseVisualStyleBackColor = true;
             this.buttonRight.Click += new System.EventHandler(this.buttonRight_Click);
@@ -462,10 +461,9 @@
             this.buttonLeft.FlatAppearance.BorderSize = 0;
             this.buttonLeft.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonLeft.Image = global::CIEID.Properties.Resources.back_3x;
-            this.buttonLeft.Location = new System.Drawing.Point(31, 283);
-            this.buttonLeft.Margin = new System.Windows.Forms.Padding(6);
+            this.buttonLeft.Location = new System.Drawing.Point(10, 153);
             this.buttonLeft.Name = "buttonLeft";
-            this.buttonLeft.Size = new System.Drawing.Size(68, 108);
+            this.buttonLeft.Size = new System.Drawing.Size(36, 43);
             this.buttonLeft.TabIndex = 2;
             this.buttonLeft.UseVisualStyleBackColor = true;
             this.buttonLeft.Click += new System.EventHandler(this.buttonLeft_Click);
@@ -474,8 +472,7 @@
             // 
             this.dotsGroup.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.dotsGroup.AutoSize = true;
-            this.dotsGroup.Location = new System.Drawing.Point(652, 701);
-            this.dotsGroup.Margin = new System.Windows.Forms.Padding(6);
+            this.dotsGroup.Location = new System.Drawing.Point(328, 362);
             this.dotsGroup.Name = "dotsGroup";
             this.dotsGroup.Size = new System.Drawing.Size(0, 0);
             this.dotsGroup.TabIndex = 5;
@@ -488,19 +485,18 @@
             this.tableLayoutPanelCarousel.AutoSize = true;
             this.tableLayoutPanelCarousel.BackColor = System.Drawing.Color.White;
             this.tableLayoutPanelCarousel.ColumnCount = 3;
-            this.tableLayoutPanelCarousel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 26.64729F));
-            this.tableLayoutPanelCarousel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 46.80233F));
-            this.tableLayoutPanelCarousel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 26.41509F));
+            this.tableLayoutPanelCarousel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 28.57143F));
+            this.tableLayoutPanelCarousel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 43.41373F));
+            this.tableLayoutPanelCarousel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 27.88991F));
             this.tableLayoutPanelCarousel.Controls.Add(this.carouselItem0, 0, 0);
             this.tableLayoutPanelCarousel.Controls.Add(this.carouselItem2, 2, 0);
             this.tableLayoutPanelCarousel.Controls.Add(this.carouselItem1, 1, 0);
             this.tableLayoutPanelCarousel.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
-            this.tableLayoutPanelCarousel.Location = new System.Drawing.Point(136, 6);
-            this.tableLayoutPanelCarousel.Margin = new System.Windows.Forms.Padding(6);
+            this.tableLayoutPanelCarousel.Location = new System.Drawing.Point(59, 3);
             this.tableLayoutPanelCarousel.Name = "tableLayoutPanelCarousel";
             this.tableLayoutPanelCarousel.RowCount = 1;
             this.tableLayoutPanelCarousel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelCarousel.Size = new System.Drawing.Size(1032, 663);
+            this.tableLayoutPanelCarousel.Size = new System.Drawing.Size(539, 343);
             this.tableLayoutPanelCarousel.TabIndex = 4;
             // 
             // carouselItem0
@@ -512,11 +508,10 @@
             this.carouselItem0.Controls.Add(this.labelOwner0);
             this.carouselItem0.Controls.Add(this.labelOwnerValue0);
             this.carouselItem0.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.carouselItem0.Location = new System.Drawing.Point(6, 128);
-            this.carouselItem0.Margin = new System.Windows.Forms.Padding(6);
+            this.carouselItem0.Location = new System.Drawing.Point(3, 66);
             this.carouselItem0.Name = "carouselItem0";
-            this.carouselItem0.Padding = new System.Windows.Forms.Padding(0, 23, 0, 23);
-            this.carouselItem0.Size = new System.Drawing.Size(263, 406);
+            this.carouselItem0.Padding = new System.Windows.Forms.Padding(0, 12, 0, 12);
+            this.carouselItem0.Size = new System.Drawing.Size(148, 211);
             this.carouselItem0.TabIndex = 0;
             // 
             // pictureBox2
@@ -525,7 +520,7 @@
             this.pictureBox2.Location = new System.Drawing.Point(6, 29);
             this.pictureBox2.Margin = new System.Windows.Forms.Padding(6);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(257, 162);
+            this.pictureBox2.Size = new System.Drawing.Size(134, 84);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox2.TabIndex = 0;
             this.pictureBox2.TabStop = false;
@@ -533,22 +528,21 @@
             // labelCardNumber0
             // 
             this.labelCardNumber0.AutoSize = true;
-            this.labelCardNumber0.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelCardNumber0.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
             this.labelCardNumber0.ForeColor = System.Drawing.Color.LightGray;
             this.labelCardNumber0.Location = new System.Drawing.Point(6, 226);
             this.labelCardNumber0.Margin = new System.Windows.Forms.Padding(6, 29, 6, 0);
             this.labelCardNumber0.Name = "labelCardNumber0";
-            this.labelCardNumber0.Padding = new System.Windows.Forms.Padding(7, 0, 5, 0);
-            this.labelCardNumber0.Size = new System.Drawing.Size(141, 24);
+            this.labelCardNumber0.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labelCardNumber0.Size = new System.Drawing.Size(74, 12);
             this.labelCardNumber0.TabIndex = 3;
             this.labelCardNumber0.Text = "Numero carta:";
             // 
             // labelCardNumberValue0
             // 
-            this.labelCardNumberValue0.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelCardNumberValue0.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelCardNumberValue0.ForeColor = System.Drawing.Color.LightGray;
-            this.labelCardNumberValue0.Location = new System.Drawing.Point(6, 250);
-            this.labelCardNumberValue0.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.labelCardNumberValue0.Location = new System.Drawing.Point(3, 129);
             this.labelCardNumberValue0.Name = "labelCardNumberValue0";
             this.labelCardNumberValue0.Padding = new System.Windows.Forms.Padding(7, 0, 0, 0);
             this.labelCardNumberValue0.Size = new System.Drawing.Size(236, 31);
@@ -558,28 +552,97 @@
             // labelOwner0
             // 
             this.labelOwner0.AutoSize = true;
-            this.labelOwner0.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelOwner0.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
             this.labelOwner0.ForeColor = System.Drawing.Color.LightGray;
-            this.labelOwner0.Location = new System.Drawing.Point(6, 291);
-            this.labelOwner0.Margin = new System.Windows.Forms.Padding(6, 10, 6, 0);
+            this.labelOwner0.Location = new System.Drawing.Point(3, 150);
+            this.labelOwner0.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
             this.labelOwner0.Name = "labelOwner0";
-            this.labelOwner0.Padding = new System.Windows.Forms.Padding(7, 0, 5, 0);
-            this.labelOwner0.Size = new System.Drawing.Size(115, 24);
+            this.labelOwner0.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labelOwner0.Size = new System.Drawing.Size(65, 12);
             this.labelOwner0.TabIndex = 2;
             this.labelOwner0.Text = "Intestatario:";
             // 
             // labelOwnerValue0
             // 
-            this.labelOwnerValue0.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelOwnerValue0.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Bold);
             this.labelOwnerValue0.ForeColor = System.Drawing.Color.LightGray;
-            this.labelOwnerValue0.Location = new System.Drawing.Point(6, 315);
-            this.labelOwnerValue0.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.labelOwnerValue0.Location = new System.Drawing.Point(3, 162);
             this.labelOwnerValue0.Name = "labelOwnerValue0";
-            this.labelOwnerValue0.Padding = new System.Windows.Forms.Padding(7, 0, 0, 0);
-            this.labelOwnerValue0.Size = new System.Drawing.Size(263, 62);
+            this.labelOwnerValue0.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+            this.labelOwnerValue0.Size = new System.Drawing.Size(148, 30);
             this.labelOwnerValue0.TabIndex = 4;
             this.labelOwnerValue0.Text = "label27";
             this.labelOwnerValue0.Click += new System.EventHandler(this.labelOwnerValue0_Click);
+            // 
+            // carouselItem1
+            // 
+            this.carouselItem1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.carouselItem1.Controls.Add(this.pictureBox12);
+            this.carouselItem1.Controls.Add(this.label6);
+            this.carouselItem1.Controls.Add(this.labelCardNumberValue1);
+            this.carouselItem1.Controls.Add(this.label24);
+            this.carouselItem1.Controls.Add(this.labelOwnerValue1);
+            this.carouselItem1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.carouselItem1.Location = new System.Drawing.Point(157, 30);
+            this.carouselItem1.Name = "carouselItem1";
+            this.carouselItem1.Padding = new System.Windows.Forms.Padding(0, 12, 0, 12);
+            this.carouselItem1.Size = new System.Drawing.Size(228, 282);
+            this.carouselItem1.TabIndex = 1;
+            // 
+            // pictureBox12
+            // 
+            this.pictureBox12.Image = global::CIEID.Properties.Resources.cie;
+            this.pictureBox12.Location = new System.Drawing.Point(3, 15);
+            this.pictureBox12.Name = "pictureBox12";
+            this.pictureBox12.Size = new System.Drawing.Size(215, 136);
+            this.pictureBox12.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox12.TabIndex = 0;
+            this.pictureBox12.TabStop = false;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.label6.Location = new System.Drawing.Point(3, 169);
+            this.label6.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
+            this.label6.Name = "label6";
+            this.label6.Padding = new System.Windows.Forms.Padding(20, 0, 10, 0);
+            this.label6.Size = new System.Drawing.Size(128, 17);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "Numero carta:";
+            // 
+            // labelCardNumberValue1
+            // 
+            this.labelCardNumberValue1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+            this.labelCardNumberValue1.Location = new System.Drawing.Point(3, 186);
+            this.labelCardNumberValue1.Name = "labelCardNumberValue1";
+            this.labelCardNumberValue1.Padding = new System.Windows.Forms.Padding(20, 0, 10, 0);
+            this.labelCardNumberValue1.Size = new System.Drawing.Size(228, 20);
+            this.labelCardNumberValue1.TabIndex = 1;
+            this.labelCardNumberValue1.Text = "label6";
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.label24.Location = new System.Drawing.Point(3, 211);
+            this.label24.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
+            this.label24.Name = "label24";
+            this.label24.Padding = new System.Windows.Forms.Padding(20, 0, 10, 0);
+            this.label24.Size = new System.Drawing.Size(112, 17);
+            this.label24.TabIndex = 2;
+            this.label24.Text = "Intestatario:";
+            // 
+            // labelOwnerValue1
+            // 
+            this.labelOwnerValue1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+            this.labelOwnerValue1.Location = new System.Drawing.Point(3, 228);
+            this.labelOwnerValue1.Name = "labelOwnerValue1";
+            this.labelOwnerValue1.Padding = new System.Windows.Forms.Padding(20, 0, 5, 0);
+            this.labelOwnerValue1.Size = new System.Drawing.Size(238, 41);
+            this.labelOwnerValue1.TabIndex = 4;
+            this.labelOwnerValue1.Text = "label27";
+            this.labelOwnerValue1.Click += new System.EventHandler(this.labelOwnerValue1_Click);
             // 
             // carouselItem2
             // 
@@ -590,11 +653,10 @@
             this.carouselItem2.Controls.Add(this.label30);
             this.carouselItem2.Controls.Add(this.labelOwnerValue2);
             this.carouselItem2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.carouselItem2.Location = new System.Drawing.Point(764, 128);
-            this.carouselItem2.Margin = new System.Windows.Forms.Padding(6);
+            this.carouselItem2.Location = new System.Drawing.Point(391, 66);
             this.carouselItem2.Name = "carouselItem2";
-            this.carouselItem2.Padding = new System.Windows.Forms.Padding(0, 23, 0, 23);
-            this.carouselItem2.Size = new System.Drawing.Size(262, 406);
+            this.carouselItem2.Padding = new System.Windows.Forms.Padding(0, 12, 0, 12);
+            this.carouselItem2.Size = new System.Drawing.Size(145, 211);
             this.carouselItem2.TabIndex = 5;
             // 
             // pictureBox14
@@ -603,7 +665,7 @@
             this.pictureBox14.Location = new System.Drawing.Point(6, 29);
             this.pictureBox14.Margin = new System.Windows.Forms.Padding(6);
             this.pictureBox14.Name = "pictureBox14";
-            this.pictureBox14.Size = new System.Drawing.Size(257, 162);
+            this.pictureBox14.Size = new System.Drawing.Size(134, 84);
             this.pictureBox14.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox14.TabIndex = 0;
             this.pictureBox14.TabStop = false;
@@ -611,51 +673,48 @@
             // label28
             // 
             this.label28.AutoSize = true;
-            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
             this.label28.ForeColor = System.Drawing.Color.LightGray;
             this.label28.Location = new System.Drawing.Point(6, 226);
             this.label28.Margin = new System.Windows.Forms.Padding(6, 29, 6, 0);
             this.label28.Name = "label28";
-            this.label28.Padding = new System.Windows.Forms.Padding(7, 0, 0, 0);
-            this.label28.Size = new System.Drawing.Size(136, 24);
+            this.label28.Padding = new System.Windows.Forms.Padding(4, 0, 5, 0);
+            this.label28.Size = new System.Drawing.Size(73, 12);
             this.label28.TabIndex = 3;
             this.label28.Text = "Numero carta:";
-            this.label28.Click += new System.EventHandler(this.label28_Click);
             // 
             // labelCardNumberValue2
             // 
-            this.labelCardNumberValue2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelCardNumberValue2.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Bold);
             this.labelCardNumberValue2.ForeColor = System.Drawing.Color.LightGray;
-            this.labelCardNumberValue2.Location = new System.Drawing.Point(6, 250);
-            this.labelCardNumberValue2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.labelCardNumberValue2.Location = new System.Drawing.Point(3, 129);
             this.labelCardNumberValue2.Name = "labelCardNumberValue2";
-            this.labelCardNumberValue2.Padding = new System.Windows.Forms.Padding(7, 0, 0, 0);
-            this.labelCardNumberValue2.Size = new System.Drawing.Size(236, 31);
+            this.labelCardNumberValue2.Padding = new System.Windows.Forms.Padding(4, 0, 5, 0);
+            this.labelCardNumberValue2.Size = new System.Drawing.Size(118, 16);
             this.labelCardNumberValue2.TabIndex = 1;
             this.labelCardNumberValue2.Text = "label6";
             // 
             // label30
             // 
             this.label30.AutoSize = true;
-            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
             this.label30.ForeColor = System.Drawing.Color.LightGray;
-            this.label30.Location = new System.Drawing.Point(6, 291);
-            this.label30.Margin = new System.Windows.Forms.Padding(6, 10, 6, 0);
+            this.label30.Location = new System.Drawing.Point(3, 150);
+            this.label30.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
             this.label30.Name = "label30";
-            this.label30.Padding = new System.Windows.Forms.Padding(7, 0, 0, 0);
-            this.label30.Size = new System.Drawing.Size(110, 24);
+            this.label30.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label30.Size = new System.Drawing.Size(65, 12);
             this.label30.TabIndex = 2;
             this.label30.Text = "Intestatario:";
             // 
             // labelOwnerValue2
             // 
-            this.labelOwnerValue2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelOwnerValue2.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Bold);
             this.labelOwnerValue2.ForeColor = System.Drawing.Color.LightGray;
-            this.labelOwnerValue2.Location = new System.Drawing.Point(6, 315);
-            this.labelOwnerValue2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.labelOwnerValue2.Location = new System.Drawing.Point(3, 162);
             this.labelOwnerValue2.Name = "labelOwnerValue2";
-            this.labelOwnerValue2.Padding = new System.Windows.Forms.Padding(7, 0, 0, 0);
-            this.labelOwnerValue2.Size = new System.Drawing.Size(263, 62);
+            this.labelOwnerValue2.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+            this.labelOwnerValue2.Size = new System.Drawing.Size(148, 30);
             this.labelOwnerValue2.TabIndex = 4;
             this.labelOwnerValue2.Text = "label27";
             // 
