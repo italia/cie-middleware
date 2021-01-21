@@ -308,7 +308,7 @@ extern "C" {
 			OutputDebugString(ex.what());
 			if (ATR)
 				free(ATR);
-			Log.write("%d Eccezione: %s", ex.what());
+			Log.write("Eccezione: %s", ex.what());
 			if (readers)
 				free(readers);
 
@@ -755,6 +755,7 @@ void TrayNotificationAbilitaCIE(CSystemTray* tray, WPARAM uID, LPARAM lEvent)
 		{
 			DWORD dwerr = GetLastError();
 			Log.writePure("error run CIEID %x", dwerr);
+
 			throw logged_error("Errore in creazione processo CIEID");
 		}
 		else

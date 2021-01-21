@@ -389,6 +389,9 @@ namespace p11 {
 		memset(pInfo->label, 0, sizeof(pInfo->label));
 		memcpy_s((char*)pInfo->label, 32, pTemplate->szName.c_str(), min(pTemplate->szName.length(), sizeof(pInfo->label)));
 		memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
+		
+		Log.write("CIE ATR:");
+		Log.writeBinData(baATR.data(), baATR.size());
 
 		std::string manifacturer;
 		size_t position;
@@ -397,6 +400,10 @@ namespace p11 {
 		else if ((baATR.indexOf(baGemalto_ATR, position)) ||
 			(baATR.indexOf(baGemalto2_ATR, position)))
 			manifacturer = "Gemalto";
+		else if ((baATR.indexOf(baSTM_ATR, position)))
+			manifacturer = "STM";
+		else if ((baATR.indexOf(baSTM2_ATR, position)))
+			manifacturer = "STM2";
 		else
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
 
@@ -642,6 +649,8 @@ namespace p11 {
 		Context.validate();
 		bool retry = false;
 		while (true) {
+			Log.write("Slot scelto: ");
+			Log.write(szName.c_str());
 			DWORD ris = SCardConnect(Context, szName.c_str(), SCARD_SHARE_SHARED, SCARD_PROTOCOL_T1, &hCard, &dwProtocol);
 			if (ris == SCARD_S_SUCCESS) {
 				return;

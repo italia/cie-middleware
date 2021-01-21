@@ -245,10 +245,13 @@ uint8_t NXP_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0x49, 0x54, 0x4E, 0x58, 0x50 };
 uint8_t Gemalto_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x04, 0x00, 0x11 };
 uint8_t Gemalto2_ATR[] = { 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF };
 uint8_t STM_ATR[] = {0x80, 0x66, 0x47, 0x50, 0x00, 0xB8, 0x00, 0x7F};
+uint8_t STM2_ATR[] = { 0x80, 0x80, 0x01, 0x01 };
+
 ByteArray baNXP_ATR(NXP_ATR, sizeof(NXP_ATR));
 ByteArray baGemalto_ATR(Gemalto_ATR, sizeof(Gemalto_ATR));
 ByteArray baGemalto2_ATR(Gemalto2_ATR, sizeof(Gemalto2_ATR));
 ByteArray baSTM_ATR(STM_ATR, sizeof(STM_ATR));
+ByteArray baSTM2_ATR(STM2_ATR, sizeof(STM2_ATR));
 
 void IAS::ReadCIEType() {
 	init_func
@@ -261,6 +264,8 @@ void IAS::ReadCIEType() {
 		type = CIE_Type::CIE_Gemalto;
 	else if (ATR.indexOf(baSTM_ATR, position))
 		type = CIE_Type::CIE_STM;
+	else if (ATR.indexOf(baSTM2_ATR, position))
+		type = CIE_Type::CIE_STM2;
 	else
 		throw logged_error("CIE non riconosciuta");
 }
@@ -287,7 +292,7 @@ void IAS::SelectAID_IAS(bool SM) {
 		}
 	}
 	else 	
-		if (type == CIE_Type::CIE_Gemalto || type == CIE_Type::CIE_STM) {
+		if (type == CIE_Type::CIE_Gemalto || type == CIE_Type::CIE_STM || type == CIE_Type::CIE_STM2) {
 			uint8_t selectIAS[] = { 0x00, 0xa4, 0x04, 0x0c };
 			if (SM)
 			{
@@ -854,7 +859,7 @@ void IAS::InitDHParam() {
 		dh_p = parser.tags[0]->tags[0]->tags[0]->tags[1]->content;
 		dh_q = parser.tags[0]->tags[0]->tags[0]->tags[2]->content;
 	}
-	else if (type == CIE_Type::CIE_NXP || type == CIE_Type::CIE_STM) {
+	else if (type == CIE_Type::CIE_NXP || type == CIE_Type::CIE_STM || type == CIE_Type::CIE_STM2) {
 		uint8_t getDHDoup[] = { 00, 0xcb, 0x3f, 0xff };
 		uint8_t getDHDuopData_g[] = { 0x4D, 0x0A, 0x70, 0x08, 0xBF, 0xA1, 0x01, 0x04, 0xA3, 0x02, 0x97, 0x00 };
 
