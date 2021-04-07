@@ -23,3 +23,4 @@ extern ByteArray baGemalto_ATR;
 extern ByteArray baGemalto2_ATR;
 extern ByteArray baSTM_ATR;
 extern ByteArray baSTM2_ATR;
+extern ByteArray baSTM3_ATR;

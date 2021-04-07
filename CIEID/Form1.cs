@@ -16,6 +16,13 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Newtonsoft.Json;
 using CIEID.Controls;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
+using System.Drawing.Imaging;
+using System.Globalization;
+using System.IO;
+using System.Management;
+using System.Security.Cryptography;
 
 namespace CIEID
 {
@@ -31,6 +38,8 @@ namespace CIEID
         public const int CKR_PIN_INVALID = 0x000000A1;
         public const int CKR_PIN_LEN_RANGE = 0x000000A2;
         public const int CARD_ALREADY_ENABLED = 0x000000F0;
+        public const int CARD_PAN_MISMATCH = 0x000000F1;
+        public const UInt32 INVALID_FILE_TYPE = 0x84000005;
 
         /* CKR_PIN_EXPIRED and CKR_PIN_LOCKED are new for v2.0 */
         public const int CKR_PIN_EXPIRED = 0x000000A3;
@@ -39,9 +48,20 @@ namespace CIEID
         public const int ENROLLED = 1;
         public const int NOT_ENROLLED = 0;
 
+        private PdfPreview pdfPreview = null;
+        private enum opSelectedState
+        {
+            NO_OP = 0,
+            FIRMA_PADES = 1,
+            FIRMA_CADES = 2
+        }
+        private int signFontSize = 120;
+
+        private opSelectedState signOp = opSelectedState.NO_OP;
 
         delegate long ProgressCallback(int progress, string message);
         delegate long CompletedCallback(string pan, string name, string ef_seriale);
+        delegate long SignCompletedCallback(int retValue);
 
         [DllImport("ciepki.dll")]
         static extern int VerificaCIEAbilitata(string pan);
@@ -61,6 +81,10 @@ namespace CIEID
         [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
         static extern int UnlockPIN(string szPUK, string szNewPIN, int[] attempts, ProgressCallback progressCallBack);
 
+        [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
+        static extern int firmaConCIE(string inFilePath, string type, string pin, string pan, int page, float x, float y, float w, float h, string imagePathFile, string outFilePath, ProgressCallback progressCallBack, SignCompletedCallback signCompletedCallBack);
+
+
         private CieCollection cieColl;
 
         internal CieCollection CieColl { get => cieColl; set => cieColl = value; }
@@ -79,6 +103,7 @@ namespace CIEID
 
             //    txtField.BorderStyle = BorderStyle.None;
             //}
+
 
             if ("unlock".Equals(arg))
             {
@@ -110,12 +135,69 @@ namespace CIEID
             return 0;
         }
 
+        long ProgressFirma(int progress, string message)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                progressFirmaPina.Value = progress;
+            });
+
+            return 0;
+        }
+
+        private string getSignImagePath(string efSeriale)
+        {
+            string appdataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            return string.Format("{0}\\IPZS\\{1}_default.png", appdataPath, efSeriale);
+        }
+
+        long CompletedFirma(int retValue)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                Console.WriteLine("111111111111111111 {0}", retValue);
+                if (retValue != 0)
+                {
+                    lblFirmaSuccess.Text = "Si è verificato un errore";
+                    //TODO cambiare immagine con X rossa
+                    pbFirmaPin.Image = Properties.Resources.cross;
+                    pbFirmaPin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+                }else
+                {
+                    lblFirmaSuccess.Text = "File firmato con successo";
+                    pbFirmaPin.Image = Properties.Resources.check;
+                    pbFirmaPin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+                }
+
+                progressFirmaPina.Hide();
+                lblFirmaPin.Hide();
+                lblCartaFirmaPin.Hide();
+                btnAnullaFirmaPin.Hide();
+                btnFirma.Hide();
+                lblFirmaSuccess.Show();
+                lblFirmaSuccess.Update();
+                pbFirmaPin.Show();
+                pbFirmaPin.Update();
+                btnConcludi.Show();
+                btnConcludi.Update();
+            });
+
+            return 0;
+        }
+
         long CompletedAbbina(string pan, string name, string efSeriale)
         {
+
+            string defaultSignImagePath = getSignImagePath(efSeriale);
             CieColl.addCie(pan, new CieModel(efSeriale, name, pan));
 
             Properties.Settings.Default.cieList = JsonConvert.SerializeObject(CieColl.MyDictionary);
             Properties.Settings.Default.Save();
+
+            Console.WriteLine("Immagine firma salvata in: {0}", defaultSignImagePath);
+
+            TextInfo nameInfo = new CultureInfo("it-IT", false).TextInfo;
+            DrawText(nameInfo.ToTitleCase(name.ToLower()), Color.Black, defaultSignImagePath);
 
             Console.WriteLine("Cie Abbinate dopo aggiunta: " + Properties.Settings.Default.cieList);
             
@@ -180,6 +262,53 @@ namespace CIEID
 
                 if (tag == 8)
                     buttonAbbina_Click(sender, e);
+            }
+        }
+
+        private void textBoxSignPin_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar >= '0' && e.KeyChar <= '9')
+            {
+                TextBox textBox = (TextBox)sender;
+
+                int tag = Int16.Parse((String)textBox.Tag);
+
+                if (tag < 12)
+                {
+                    Control nextTextBox = FindControlByTag(this.Controls, "" + (tag + 1));
+                    nextTextBox.Focus();
+                }
+                else
+                {
+                    btnFirma.Enabled = true;
+                }
+            }
+            else if (e.KeyChar == 8) // backspace
+            {
+                TextBox textBox = (TextBox)sender;
+
+                int tag = Int16.Parse((String)textBox.Tag);
+
+
+                if (tag > 9)
+                {
+                    Control previousTextBox = FindControlByTag(this.Controls, "" + (tag - 1));
+                    previousTextBox.Focus();
+
+                }
+            }
+            else if (e.KeyChar == 13) // enter
+            {
+                TextBox textBox = (TextBox)sender;
+
+                int tag = Int16.Parse((String)textBox.Tag);
+
+                if (tag == 12)
+                {
+                    btnFirma_Click(sender, e);
+
+                }
+
             }
         }
 
@@ -262,11 +391,51 @@ namespace CIEID
             selectHome();
         }
 
+        private void changeHomeObjects()
+        {
+
+            label5.Text = "Firma Elettronica";
+            label2.Text = "Seleziona la CIE da usare";
+
+            buttonDeleteCIE.Visible = false;
+            buttonRemoveAll.Visible = false;
+            buttonAggiungi.Visible = false;
+            btnSigSelectCie.Visible = true;
+
+            tabControlMain.SelectedIndex = 1;
+        }
+
+        private void createImages(CieCollection CieColl)
+        {
+
+
+            /*
+            string defaultSignImagePath = getSignImagePath(efSeriale);
+            CieColl.addCie(pan, new CieModel(efSeriale, name, pan));
+
+            Properties.Settings.Default.cieList = JsonConvert.SerializeObject(CieColl.MyDictionary);
+            Properties.Settings.Default.Save();
+
+            Console.WriteLine("Immagine firma salvata in: {0}", defaultSignImagePath);
+
+            TextInfo nameInfo = new CultureInfo("it-IT", false).TextInfo;
+            DrawText(nameInfo.ToTitleCase(name.ToLower()), Color.Black, defaultSignImagePath);
+            */
+        }
+
         private void selectHome()
         {
+
+            buttonDeleteCIE.Visible = true;
+            buttonRemoveAll.Visible = true;
+            buttonAggiungi.Visible = true;
+            btnSigSelectCie.Visible = false;
+
+            label5.Text = "CIE ID";
+            label2.Text = "Carta d'Identità Elettronica abbinata correttamente";
+
             CieColl = new CieCollection(Properties.Settings.Default.cieList);
-
-
+            
             if (!Properties.Settings.Default.cardHolder.Equals(""))
             {
                 CieColl.addCie(Properties.Settings.Default.serialNumber, new CieModel(Properties.Settings.Default.efSeriale, Properties.Settings.Default.cardHolder, Properties.Settings.Default.serialNumber));
@@ -285,8 +454,10 @@ namespace CIEID
             if (CieColl.MyDictionary.Count == 0)
             {
                 tabControlMain.SelectedIndex = 0;
+                btnFirma.Enabled = false;
             }else
             {
+                btnFirma.Enabled = true;
                 if (carouselControl == null)
                 {
                     carouselControl = new CarouselControl(tableLayoutPanelCarousel, dotsGroup);
@@ -305,8 +476,82 @@ namespace CIEID
             buttonTutorial.BackColor = Color.Transparent;
             buttonInfo.BackColor = Color.Transparent;
             buttonHelp.BackColor = Color.Transparent;
-    }
-        
+            buttonFirma.BackColor = Color.Transparent;
+            btnSettings.BackColor = Color.Transparent;
+        }
+
+        private PrivateFontCollection loadCustomFont()
+        {
+            //Create your private font collection object.
+            PrivateFontCollection pfc = new PrivateFontCollection();
+
+            //Select your font from the resources.
+            //My font here is "Digireu.ttf"
+            int fontLength = Properties.Resources.Allura_Regular.Length;
+
+            // create a buffer to read in to
+            byte[] fontdata = Properties.Resources.Allura_Regular;
+
+            // create an unsafe memory block for the font data
+            System.IntPtr data = Marshal.AllocCoTaskMem(fontLength);
+
+            // copy the bytes to the unsafe memory block
+            Marshal.Copy(fontdata, 0, data, fontLength);
+
+            // pass the font to the font collection
+            pfc.AddMemoryFont(data, fontLength);
+
+            return pfc;
+        }
+
+        private void DrawText(String text, Color textColor, String path)
+        {
+            PrivateFontCollection pfc = loadCustomFont();
+
+            Font font = new Font(pfc.Families[0], signFontSize);
+
+            //first, create a dummy bitmap just to get a graphics object
+            Image img = new Bitmap(1, 1);
+            Graphics drawing = Graphics.FromImage(img);
+            //measure the string to see how big the image needs to be
+            SizeF textSize = drawing.MeasureString(text, font);
+
+            //set the stringformat flags to rtl
+            StringFormat sf = new StringFormat();
+            //uncomment the next line for right to left languages
+            //sf.FormatFlags = StringFormatFlags.DirectionRightToLeft;
+            sf.Trimming = StringTrimming.Word;
+            //free up the dummy image and old graphics object
+            img.Dispose();
+            drawing.Dispose();
+
+            //create a new image of the right size
+            img = new Bitmap((int)textSize.Width, (int)textSize.Height);
+
+            drawing = Graphics.FromImage(img);
+            //Adjust for high quality
+            drawing.CompositingQuality = CompositingQuality.HighQuality;
+            drawing.InterpolationMode = InterpolationMode.HighQualityBilinear;
+            drawing.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            drawing.SmoothingMode = SmoothingMode.HighQuality;
+            drawing.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+
+            //paint the background
+            drawing.Clear(Color.White);
+
+            //create a brush for the text
+            Brush textBrush = new SolidBrush(textColor);
+
+            drawing.DrawString(text, font, textBrush, new RectangleF(0, 0, textSize.Width, textSize.Height), sf);
+
+            drawing.Save();
+
+            textBrush.Dispose();
+            drawing.Dispose();
+            img.Save(path, ImageFormat.Png);
+            img.Dispose();
+
+        }
 
         private void selectAbbinaProgress()
         {
@@ -404,6 +649,7 @@ namespace CIEID
 
                         case CKR_OK:
                             MessageBox.Show("L'abilitazione della CIE è avvenuta con successo", "CIE abilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                             selectHome();
                             break;
                         case CARD_ALREADY_ENABLED:
@@ -441,6 +687,13 @@ namespace CIEID
                     Properties.Settings.Default.Save();
 
                     Console.WriteLine("Cie Rimanenti: " + Properties.Settings.Default.cieList);
+
+
+                    if (System.IO.File.Exists(getSignImagePath(model.SerialNumber)))
+                    {
+                        System.IO.File.Delete(getSignImagePath(model.SerialNumber));
+                    }
+
                     selectHome();
 
                     break;
@@ -680,6 +933,8 @@ namespace CIEID
             buttonTutorial.BackColor = Color.Transparent;
             buttonInfo.BackColor = Color.Transparent;
             buttonHelp.BackColor = Color.Transparent;
+            buttonFirma.BackColor = Color.Transparent;
+            btnSettings.BackColor = Color.Transparent;
 
         }
 
@@ -698,6 +953,8 @@ namespace CIEID
             buttonTutorial.BackColor = Color.Transparent;
             buttonInfo.BackColor = Color.Transparent;
             buttonHelp.BackColor = Color.Transparent;
+            buttonFirma.BackColor = Color.Transparent;
+            btnSettings.BackColor = Color.Transparent;
         }
 
         private void buttonUnlockPIN_Click(object sender, EventArgs e)
@@ -833,6 +1090,8 @@ namespace CIEID
             buttonTutorial.BackColor = Color.LightGray;
             buttonInfo.BackColor = Color.Transparent;
             buttonHelp.BackColor = Color.Transparent;
+            buttonFirma.BackColor = Color.Transparent;
+            btnSettings.BackColor = Color.Transparent;
             webBrowserTutorial.Navigate("https://idserver.servizicie.interno.gov.it/idp/tutorial_win.jsp");
         }
 
@@ -846,6 +1105,8 @@ namespace CIEID
             buttonTutorial.BackColor = Color.Transparent;
             buttonInfo.BackColor = Color.Transparent;
             buttonHelp.BackColor = Color.LightGray;
+            buttonFirma.BackColor = Color.Transparent;
+            btnSettings.BackColor = Color.Transparent;
 
             webBrowserHelp.Navigate("https://idserver.servizicie.interno.gov.it/idp/aiuto.jsp");        
         }
@@ -860,6 +1121,8 @@ namespace CIEID
             buttonTutorial.BackColor = Color.Transparent;
             buttonInfo.BackColor = Color.LightGray;
             buttonHelp.BackColor = Color.Transparent;
+            buttonFirma.BackColor = Color.Transparent;
+            btnSettings.BackColor = Color.Transparent;
 
             webBrowserInfo.Navigate("https://idserver.servizicie.interno.gov.it/idp/privacy.jsp");
         }
@@ -993,7 +1256,903 @@ namespace CIEID
 
         }
 
-        
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+            Panel panel = (Panel)sender;
+            float width = (float)5.0;
+            Pen pen = new Pen(SystemColors.ControlDark, width);
+            pen.DashStyle = DashStyle.Dash;
+            e.Graphics.DrawLine(pen, 0, 0, 0, panel.Height - 0);
+            e.Graphics.DrawLine(pen, 0, 0, panel.Width - 0, 0);
+            e.Graphics.DrawLine(pen, panel.Width - 1, panel.Height - 1, 0, panel.Height - 1);
+            e.Graphics.DrawLine(pen, panel.Width - 1, panel.Height - 1, panel.Width - 1, 0);
+
+        }
+
+
+        private void buttonFirma_Click(object sender, EventArgs e)
+        {
+            buttonHome.BackColor = Color.Transparent;
+            buttonChangePIN.BackColor = Color.Transparent;
+            buttonUnlock.BackColor = Color.Transparent;
+            buttonTutorial.BackColor = Color.Transparent;
+            buttonInfo.BackColor = Color.Transparent;
+            buttonHelp.BackColor = Color.Transparent;
+            buttonFirma.BackColor = Color.LightGray;
+            btnSettings.BackColor = Color.Transparent;
+
+            signOp = opSelectedState.NO_OP;
+
+            if(CieColl.MyDictionary.Count == 0)
+            {
+                selectHome();
+            }
+            else
+            {
+                changeHomeObjects();           
+
+            }
+        }
+
+        private void lbPeronalizza_Click(object sender, EventArgs e)
+        {
+
+            var model = carouselControl.ActiveCieModel;
+
+            string signImagePath = getSignImagePath(model.SerialNumber);
+
+            if (pnFirmaGrafica.Controls.Count > 0 && pnFirmaGrafica.Controls[0] != null)
+            {
+                pnFirmaGrafica.Controls[0].Dispose();
+
+            }
+
+            if (!System.IO.File.Exists(signImagePath))
+            {
+                TextInfo nameInfo = new CultureInfo("it-IT", false).TextInfo;
+                //string name = CieColl.MyDictionary.ElementAt(0).Value.Owner;
+                string name = model.Owner;
+                DrawText(nameInfo.ToTitleCase(name.ToLower()), Color.Black, signImagePath);
+            }
+
+            PictureBox signPicture = new PictureBox();
+            signPicture.BackColor = Color.Transparent;
+            signPicture.Width = pnFirmaGrafica.Width;
+            signPicture.Height = pnFirmaGrafica.Height;
+
+            Image image;
+            using (Stream stream = File.OpenRead(signImagePath))
+            {
+                image = System.Drawing.Image.FromStream(stream);
+            }
+
+            Bitmap signImage = new Bitmap(image, signPicture.Width, signPicture.Height);
+            signImage.MakeTransparent();
+            signPicture.Image = (Image)signImage.Clone();
+
+            signPicture.Update();
+            pnFirmaGrafica.Controls.Add(signPicture);
+
+
+            if(model.isCustomSign)
+            {
+                lblPersonalizzaPreambolo.Text = "Una tua firma grafica personalizzata è già stata caricata. Vuoi aggiornarla?";
+                lblPersonalizzaPreambolo.Update();
+
+                btnCreaFirma.Enabled = true;
+
+            }
+            else
+            {
+                lblPersonalizzaPreambolo.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
+                                                "Questo passaggio non è indispensabile, ma ti consentirà di dare un tocco personale ai documenti firmati.";
+
+                lblPersonalizzaPreambolo.Update();
+
+                btnCreaFirma.Enabled = false;
+            }
+
+            tabControlMain.SelectedIndex = 15;
+
+        }
+
+
+        private void lbPeronalizza_MouseEnter(object sender, EventArgs e)
+        { 
+            lbPeronalizza.Font = new Font(lbPeronalizza.Font, FontStyle.Underline);
+        }
+        private void lbPeronalizza_MouseLeave(object sender, EventArgs e)
+        {
+            lbPeronalizza.Font = new Font(lbPeronalizza.Font, FontStyle.Regular);
+        }
+
+        void panelChooseDoc_dragEnter(object sender, DragEventArgs e)
+        {
+            Console.WriteLine("Panel_DragEnter");
+            panelChooseDoc.BackColor = Color.LightGray;
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+        }
+
+
+        void panelChooseDoc_dragLeave(object sender, EventArgs e)
+        {
+            Console.WriteLine("Panel_DragLeave");
+            panelChooseDoc.BackColor = Color.Transparent;
+        }
+
+        private void goToSelectSignOp(string file_name)
+        {
+            lblPath.Text = file_name;
+            tabControlMain.SelectedIndex = 11;
+
+        }
+
+        void panelChooseDoc_dragDrop(object sender, DragEventArgs e)
+        {
+            Console.WriteLine("Panel_DropEnter");
+
+            panelChooseDoc.BackColor = Color.Transparent;
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            Console.WriteLine("File drop: {0}", files[0]);
+            goToSelectSignOp(files[0]);
+        }
+
+        private void selectDocument_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+
+            //deleteTmpFiles();
+            //page_index = 1;
+
+            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string file_name = openFile.FileName;
+                Console.WriteLine("Selected file: {0}", file_name);
+
+                goToSelectSignOp(file_name);
+            }
+        }
+
+        private void pnFirmaOp_MouseClick(object sender, EventArgs e)
+        {
+
+            lblPath2.Text = lblPath.Text;
+
+            signOp = opSelectedState.NO_OP;
+            btnSignProsegui.Enabled = false;
+
+            lblPadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            lblPadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+
+            lblCadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            lblCadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+
+            pbCades.Image = CIEID.Properties.Resources.p7m_2x_gray;
+            pbPades.Image = CIEID.Properties.Resources.pdf_2x_gray;
+
+            cbFirmaGrafica.Checked = false;
+
+            if (lblPath2.Text.EndsWith(".pdf"))
+                cbFirmaGrafica.Enabled = true;
+            else
+                cbFirmaGrafica.Enabled = false;
+            tabControlMain.SelectedIndex = 12;
+        }
+
+        private void pnFirmaOp_MouseEnter(object sender, EventArgs e)
+        {
+            lblFirmaOp.ForeColor = System.Drawing.SystemColors.Highlight;
+        }
+
+        private void pnFirmaOp_MouseLeave(object sender, EventArgs e)
+        {
+            lblFirmaOp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+        }
+
+        private void pnVerificaOp_MouseClick(object sender, EventArgs e)
+        {
+            
+            lblVerificaPath.Text = lblPath.Text;
+            SignerInfo sInfo = new SignerInfo(lblVerificaPath.Text, pnSignerInfo);
+            int n_sott = sInfo.verify();
+
+            if(n_sott == 0)
+            {
+                MessageBox.Show("Il file selezionato non contiene firme", "Verifica completata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                tabControlMain.SelectedIndex = 10;
+            }
+            
+            else if((UInt32) n_sott == INVALID_FILE_TYPE)
+            {
+                MessageBox.Show("Il file selezionato non è un file valido. E' possibile verificare solo file con estensione .p7m o .pdf", "Errore nella verifica", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                tabControlMain.SelectedIndex = 10;
+            }
+            
+            else if(n_sott < 0)
+            {
+                MessageBox.Show("Errore nella verifica del file", "Errore nella verifica", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                tabControlMain.SelectedIndex = 10;
+            }
+            else
+            {
+                lblSottoscrittori.Text = string.Format("Numero di sottoscrittori: {0}", n_sott);
+                lblSottoscrittori.Update();
+
+                pnVerifica.Visible = true;
+
+                tabControlMain.SelectedIndex = 16;
+
+            }
+        }
+
+        private void pnVerificaOp_MouseEnter(object sender, EventArgs e)
+        {
+            lblVerificaOp.ForeColor = System.Drawing.SystemColors.Highlight;
+        }
+
+        private void pnVerificaOp_MouseLeave(object sender, EventArgs e)
+        {
+            lblVerificaOp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+        }
+
+
+        private void btnAnnullaOp_Click(object sender, EventArgs e)
+        {
+            tabControlMain.SelectedIndex = 10;
+        }
+
+        private void cbFirmaGrafica_CheckedChanged(object sender, EventArgs e)
+        {
+            if (lblPath2.Text.EndsWith(".pdf"))
+            {
+                if (cbFirmaGrafica.Checked == true)
+                {
+                    cbFirmaGrafica.ForeColor = System.Drawing.SystemColors.Highlight;
+                }
+                else
+                {
+                    cbFirmaGrafica.ForeColor = System.Drawing.SystemColors.GrayText;
+                }
+            }
+
+        }
+
+        private void btnSignAnnulla_Click(object sender, EventArgs e)
+        {
+
+            signOp = opSelectedState.NO_OP;
+            btnSignProsegui.Enabled = false;
+
+            lblPadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            lblPadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+
+            lblCadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            lblCadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+
+            pbCades.Image = CIEID.Properties.Resources.p7m_2x_gray;
+            pbPades.Image = CIEID.Properties.Resources.pdf_2x_gray;
+
+            cbFirmaGrafica.Checked = false;
+
+            tabControlMain.SelectedIndex = 11;
+
+        }
+
+        private void panelChoosePades_MouseEnter(object sender, EventArgs e)
+        {
+            panelChoosePades.BorderStyle = BorderStyle.FixedSingle;
+        }
+
+        private void panelChoosePades_MouseLeave(object sender, EventArgs e)
+        {
+            panelChoosePades.BorderStyle = BorderStyle.None; 
+        }
+
+        private void panelChooseCades_MouseEnter(object sender, EventArgs e)
+        {
+            panelChooseCades.BorderStyle = BorderStyle.FixedSingle;
+        }
+
+        private void panelChooseCades_MouseLeave(object sender, EventArgs e)
+        {
+            panelChooseCades.BorderStyle = BorderStyle.None;
+        }
+
+        private void panelChoosePades_MouseClick(object sender, EventArgs e)
+        {
+            if(lblPath2.Text.EndsWith(".pdf"))
+            {
+                lblPadesTitle.ForeColor = Color.Red;
+                lblPadesExp.ForeColor = Color.Black;
+
+                lblCadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+                lblCadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+
+                pbCades.Image = CIEID.Properties.Resources.p7m_2x_gray;
+                pbPades.Image = CIEID.Properties.Resources.pdf_2x;
+
+                signOp = opSelectedState.FIRMA_PADES;
+                btnSignProsegui.Enabled = true;
+            }
+
+
+        }
+
+        private void panelChooseCades_MouseClick(object sender, EventArgs e)
+        {
+            lblCadesTitle.ForeColor = System.Drawing.SystemColors.Highlight;
+            lblCadesExp.ForeColor = Color.Black;
+
+            lblPadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            lblPadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            cbFirmaGrafica.Checked = false;
+
+            pbCades.Image = CIEID.Properties.Resources.p7m_2x;
+            pbPades.Image = CIEID.Properties.Resources.pdf_2x_gray;
+
+            signOp = opSelectedState.FIRMA_CADES;
+            btnSignProsegui.Enabled = true;
+
+        }
+
+        private void btnSignProsegui_Click(object sender, EventArgs e)
+        {
+
+            if((cbFirmaGrafica.Checked == true) && (signOp == opSelectedState.FIRMA_PADES))
+            {
+                var model = carouselControl.ActiveCieModel;
+                string signImagePath = getSignImagePath(model.SerialNumber);
+
+                if (!System.IO.File.Exists(signImagePath))
+                {
+                    TextInfo nameInfo = new CultureInfo("it-IT", false).TextInfo;
+                    string name = model.Owner;
+                    DrawText(nameInfo.ToTitleCase(name.ToLower()), Color.Black, signImagePath);
+                }
+
+                lblPath3.Text = lblPath2.Text;
+
+                btnUp.Enabled = true;
+                btnDown.Enabled = true;
+
+                if (pdfPreview != null)
+                {
+                    pdfPreview.pdfPreviewRemoveObjects();
+                }
+
+                pdfPreview = new PdfPreview(panePreview, lblPath3.Text, signImagePath);
+                if (pdfPreview.getPdfPages() <= 1)
+                {
+                    btnUp.Enabled = false;
+                    btnDown.Enabled = false;
+                }
+                tabControlMain.SelectedIndex = 13;
+            }
+            else
+            {
+                lblPath4.Text = lblPath2.Text;
+                tabControlMain.SelectedIndex = 14;
+            }
+            
+
+        }
+
+        private void btnUp_Click(object sender, EventArgs e)
+        {
+            pdfPreview.pageUp();
+        }
+
+        private void btnDown_Click(object sender, EventArgs e)
+        {
+            pdfPreview.pageDown();
+        }
+
+        private void btnAnullaFirmaPin_Click(object sender, EventArgs e)
+        {
+            for (int i = 9; i < 13; i++)
+            {
+                TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
+
+                txtField.Text = "";
+            }
+            tabControlMain.SelectedIndex = 12;
+
+        }
+
+        private void changeFirmaPinObjects()
+        {
+            lblFirmaPin.Text = "Inserisci le ultime 4 cifre del PIN";
+            lblFirmaPin.TextAlign = ContentAlignment.MiddleLeft;
+            lblFirmaPin.Show();
+
+            for (int i = 9; i < 13; i++)
+            {
+                TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
+
+                txtField.Text = "";
+                txtField.Show();
+            }
+
+            btnAnullaFirmaPin.Show();
+            btnAnullaFirmaPin.Enabled = true;
+            btnFirma.Show();
+            btnFirma.Enabled = false;
+            btnConcludi.Hide();
+            
+
+            lblCartaFirmaPin.Show();
+            pbFirmaPin.Hide();
+            lblFirmaSuccess.Hide();
+            progressFirmaPina.Hide();
+
+        }
+
+        private void btnConcludi_Click(object sender, EventArgs e)
+        {
+
+            changeFirmaPinObjects();
+            //changeHomeObjects();
+            tabControlMain.SelectedIndex = 10;
+
+        }
+
+        private void goToSignPin(string pdfPath)
+        {
+            lblPath4.Text = pdfPath;
+            tabControlMain.SelectedIndex = 14;
+        }
+
+        private void btnProseguiPreview_Click(object sender, EventArgs e)
+        {
+            goToSignPin(lblPath3.Text);
+        }
+
+        private void btnFirma_Click(object sender, EventArgs e)
+        {
+            string pin = "";
+
+            for (int i = 9; i < 13; i++)
+            {
+                TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
+
+                pin += txtField.Text;
+            }
+
+            if (pin.Length != 4)
+            {
+                MessageBox.Show("Inserire le ultime 4 cifre del PIN", "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            string fileName = Path.GetFileNameWithoutExtension(lblPath4.Text);
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.FileName = fileName + "-signed";
+            Console.WriteLine("{0}, {1}", fileName, fileName + "-signed");
+
+            if(signOp == opSelectedState.FIRMA_PADES)
+            {
+                saveFileDialog1.Filter = "File (*.pdf) | *.pdf";
+            }
+            else
+            {
+                saveFileDialog1.Filter = "File (*.p7m) | *.p7m";
+            }
+            string sfdname = saveFileDialog1.FileName;
+            string pathToSaveFile = "";
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                pathToSaveFile = Path.GetFullPath(saveFileDialog1.FileName);
+                Console.WriteLine("Path save file: {0}", pathToSaveFile);
+            }
+            else
+            {
+                return;
+            }
+
+            //Nascondere le textbox contenente il pin (svuotandole prima)
+            for (int i = 9; i < 13; i++)
+            {
+                TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
+
+                txtField.Hide();
+            }
+
+            //disabilitare i pulsanti
+            btnAnullaFirmaPin.Enabled = false;
+            btnFirma.Enabled = false;
+
+            //mostrare progress al posto delle textbox
+            progressFirmaPina.Value = 0;
+            progressFirmaPina.Show();
+            lblFirmaPin.TextAlign = ContentAlignment.MiddleCenter;
+            lblFirmaPin.Text = "Firma in corso...";
+            lblFirmaPin.Update();
+
+            ((Control)sender).Enabled = false;
+            ThreadStart processTaskThread = delegate
+            {
+                var model = carouselControl.ActiveCieModel;
+                int ret = 0;
+                if (cbFirmaGrafica.Checked && (signOp == opSelectedState.FIRMA_PADES))
+                {
+                    Console.WriteLine("Pades con grafica");
+                    Dictionary<string, float> signImageInfo = pdfPreview.getSignImageInfos();
+                    ret = firmaConCIE(lblPath4.Text, "pdf", pin, model.Pan, (int)signImageInfo["pageNumber"], signImageInfo["x"], signImageInfo["y"], signImageInfo["w"], signImageInfo["h"],
+                        pdfPreview.getSignImagePath(), pathToSaveFile, new ProgressCallback(ProgressFirma), new SignCompletedCallback(CompletedFirma));
+
+                }
+                else if (signOp == opSelectedState.FIRMA_PADES)
+                {
+                    Console.WriteLine("Pades senza grafica");
+
+                    ret = firmaConCIE(lblPath4.Text, "pdf", pin, model.Pan, 0, 0.0f, 0.0f, 0.0f, 0.0f, null, pathToSaveFile, new ProgressCallback(ProgressFirma), new SignCompletedCallback(CompletedFirma));
+                }
+                else if (signOp == opSelectedState.FIRMA_CADES)
+                {
+                    Console.WriteLine("Cades");
+
+                    ret = firmaConCIE(lblPath4.Text, "p7m", pin, model.Pan, 0, 0.0f, 0.0f, 0.0f, 0.0f, null, pathToSaveFile, new ProgressCallback(ProgressFirma), new SignCompletedCallback(CompletedFirma));
+                }
+                
+                this.Invoke((MethodInvoker)delegate
+                {
+                    ((Control)sender).Enabled = true;
+                    switch (ret)
+                    {
+                        case CKR_TOKEN_NOT_RECOGNIZED:
+                            MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            changeFirmaPinObjects();
+                            break;
+
+                        case CKR_TOKEN_NOT_PRESENT:
+                            MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            changeFirmaPinObjects();
+                            break;
+
+                        case CKR_PIN_INCORRECT:
+                            MessageBox.Show(String.Format("Il PIN digitato è errato."), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            changeFirmaPinObjects();
+                            break;
+
+                        case CKR_PIN_LOCKED:
+                            MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            changeFirmaPinObjects();
+                            break;
+
+                        case CARD_PAN_MISMATCH:
+                            MessageBox.Show("CIE selezionata diversa da quella presente sul lettore", "CIE non corrispondente", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            changeFirmaPinObjects();
+                            break;
+                    }
+                });
+
+            };
+
+            new Thread(processTaskThread).Start();
+        }
+       
+        /*
+        private void firma(object sender, String inFilePath, String outFilePath, String fileType, String pin, String pan, int page, float x, float y, float w, float h,  String signImgPath )
+        {
+            firmaConCIE(inFilePath, fileType, pin, pan, page, x, y, w, h, signImgPath, outFilePath, new ProgressCallback(ProgressFirma), new SignCompletedCallback(CompletedFirma));
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                ((Control)sender).Enabled = true;
+            });
+        }
+        */
+
+        private void btnPersonalizzaAnnulla_Click(object sender, EventArgs e)
+        {
+
+            var model = carouselControl.ActiveCieModel;
+
+            if (model.isCustomSign)
+            {
+                lbPeronalizza.Text = "Aggiorna";
+                label29.Text = "Firma personalizzata correttamente";
+            }
+
+            tabControlMain.SelectedIndex = 10;
+        }
+
+        private void btnPersonalizzaSelect_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+
+            openFile.Filter = "File (*.png) | *.png";
+
+            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string file_name = openFile.FileName;
+                Console.WriteLine("PNG Selected file: {0}", file_name);
+
+                var model = carouselControl.ActiveCieModel;
+
+                File.Copy(file_name, getSignImagePath(model.SerialNumber), true);
+                CieColl.MyDictionary[model.Pan].isCustomSign = true;
+                Properties.Settings.Default.cieList = JsonConvert.SerializeObject(CieColl.MyDictionary);
+                Properties.Settings.Default.Save();
+
+                Image image;
+                using (Stream stream = File.OpenRead(getSignImagePath(model.SerialNumber)))
+                {
+                    image = System.Drawing.Image.FromStream(stream);
+                }
+
+                PictureBox signPicture = (PictureBox)pnFirmaGrafica.Controls[0];
+                Bitmap signImage = new Bitmap(image, signPicture.Width, signPicture.Height);
+                signImage.MakeTransparent();
+                signPicture.Image = signImage;
+                signPicture.Update();
+
+                lblPersonalizzaPreambolo.Text = "Una tua firma grafica personalizzata è già stata caricata. Vuoi aggiornarla?";
+                lblPersonalizzaPreambolo.Update();
+
+
+                btnCreaFirma.Enabled = true;
+            }
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            //changeHomeObjects();
+            var model = carouselControl.ActiveCieModel;
+
+            if (model.isCustomSign)
+            {
+                lbPeronalizza.Text = "Aggiorna";
+                label29.Text = "Firma personalizzata correttamente";
+
+            }
+            else
+            {
+                lbPeronalizza.Text = "Personalizza";
+                label29.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. Questo passaggio non è indispensabile, " +
+                                "ma ti consentirà di dare un tocco personale ai documenti firmati.";
+                
+            }
+
+            tabControlMain.SelectedIndex = 10;
+        }
+
+        private void btnSigSelectCie_Click(object sender, EventArgs e)
+        {
+
+            var model = carouselControl.ActiveCieModel;
+
+            if (model.isCustomSign)
+            {
+                lbPeronalizza.Text = "Aggiorna";
+                label29.Text = "Firma personalizzata correttamente";
+            }
+            else
+            {
+                lbPeronalizza.Text = "Personalizza";
+                label29.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
+                                "Questo passaggio non è indispensabile, ma ti consentirà di dare un tocco personale ai documenti firmati.";
+            }
+            tabControlMain.SelectedIndex = 10;
+
+        }
+
+        private void btnCreaFirma_Click(object sender, EventArgs e)
+        {
+
+            var model = carouselControl.ActiveCieModel;
+
+            string defaultSignImagePath = getSignImagePath(model.SerialNumber);
+
+            Console.WriteLine("Immagine firma salvata in: {0}", defaultSignImagePath);
+
+            TextInfo nameInfo = new CultureInfo("it-IT", false).TextInfo;
+            DrawText(nameInfo.ToTitleCase(model.Owner.ToLower()), Color.Black, defaultSignImagePath);
+
+            Image image;
+            using (Stream stream = File.OpenRead(getSignImagePath(model.SerialNumber)))
+            {
+                image = System.Drawing.Image.FromStream(stream);
+            }
+
+            PictureBox signPicture = (PictureBox)pnFirmaGrafica.Controls[0];
+            Bitmap signImage = new Bitmap(image, signPicture.Width, signPicture.Height);
+            signImage.MakeTransparent();
+            signPicture.Image = signImage;
+            signPicture.Update();
+
+            CieColl.MyDictionary[model.Pan].isCustomSign = false;
+            Properties.Settings.Default.cieList = JsonConvert.SerializeObject(CieColl.MyDictionary);
+            Properties.Settings.Default.Save();
+
+
+            label29.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
+                            "Questo passaggio non è indispensabile, ma ti consentirà di dare un tocco personale ai documenti firmati.";
+
+            lbPeronalizza.Text = "Personalizza";
+
+            lblPersonalizzaPreambolo.Text = label29.Text;
+            lblPersonalizzaPreambolo.Update();
+
+            btnCreaFirma.Enabled = false;
+        }
+
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+
+            buttonHome.BackColor = Color.Transparent;
+            buttonChangePIN.BackColor = Color.Transparent;
+            buttonUnlock.BackColor = Color.Transparent;
+            buttonTutorial.BackColor = Color.Transparent;
+            buttonInfo.BackColor = Color.Transparent;
+            buttonHelp.BackColor = Color.Transparent;
+            buttonFirma.BackColor = Color.Transparent;
+            btnSettings.BackColor = Color.LightGray;
+
+            btnModificaProxy.Enabled = false;
+
+            cbShowPsw.Checked = false;
+
+            if(Properties.Settings.Default.proxyURL == "")
+            {
+                txtUrl.Enabled = true;
+                txtUsername.Enabled = true;
+                txtPassword.Enabled = true;
+                txtPort.Enabled = true;
+                cbShowPsw.Enabled = true;
+                cbShowPsw.Checked = false;
+                btnSalvaProxy.Enabled = true;
+                btnModificaProxy.Enabled = false;
+
+
+                tabControlMain.SelectedIndex = 17;
+            }
+            else
+            {
+                if (Properties.Settings.Default.credentials == "")
+                {
+                    txtUsername.Text = "";
+                    txtPassword.Text = "";
+                }
+                else
+                {
+                    string encryptedCredentials = Properties.Settings.Default.credentials;
+                    ProxyInfoManager proxyInfoManager = new ProxyInfoManager();
+
+                    //Console.WriteLine("encryptedCredentials -> {0}", encryptedCredentials);
+                    string credentials = proxyInfoManager.getDecryptedCredentials(encryptedCredentials);
+                    //Console.WriteLine("Credentials -> {0}", credentials);
+
+                    if (credentials.Substring(0, 5) == "cred=")
+                    {
+                        string[] infos = credentials.Substring(5).Split(':');
+                        txtUsername.Text = infos[0];
+                        txtPassword.Text = infos[1];
+                    }
+
+                }
+
+
+                txtUrl.Text = Properties.Settings.Default.proxyURL;
+                txtPort.Text = Properties.Settings.Default.proxyPort.ToString();
+
+                txtUrl.Enabled = false;
+                txtUsername.Enabled = false;
+                txtPassword.Enabled = false;
+                txtPort.Enabled = false;
+                cbShowPsw.Enabled = false;
+                cbShowPsw.Checked = false;
+                btnSalvaProxy.Enabled = false;
+                btnModificaProxy.Enabled = true;
+
+                tabControlMain.SelectedIndex = 17;
+
+            }
+
+        }
+
+        private void cbShowPsw_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cbShowPsw.Checked == true)
+            {
+                txtPassword.UseSystemPasswordChar = false;
+            }
+            else
+            {
+                txtPassword.UseSystemPasswordChar = true;
+            }
+        }
+
+        private void btnSalvaProxy_Click(object sender, EventArgs e)
+        {
+
+
+            if((String.IsNullOrEmpty(txtUsername.Text) && !String.IsNullOrEmpty(txtPassword.Text)) || (!String.IsNullOrEmpty(txtUsername.Text) && String.IsNullOrEmpty(txtPassword.Text)))
+            {
+                MessageBox.Show("Campo username o password mancante", "Credenziali proxy mancanti", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            if((String.IsNullOrEmpty(txtPort.Text) && !String.IsNullOrEmpty(txtUrl.Text)) || (!String.IsNullOrEmpty(txtPort.Text) && String.IsNullOrEmpty(txtUrl.Text)))
+            {
+                MessageBox.Show("Indirizzo o porta del proxy mancante", "Informazioni proxy mancanti", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            if((String.IsNullOrEmpty(txtUsername.Text)))
+            {
+                Properties.Settings.Default.credentials = "";
+            }
+            else
+            {
+                string credentials = String.Format("cred={0}:{1}", txtUsername.Text, txtPassword.Text);
+                //Console.WriteLine("Credentials: {0}", credentials);
+
+                ProxyInfoManager proxyInfoManager = new ProxyInfoManager();
+                string encryptedCredentials = proxyInfoManager.getEncryptedCredentials(credentials);
+                //Console.WriteLine("Credentials: {0}", credentials);
+                Properties.Settings.Default.credentials = encryptedCredentials;
+            }
+
+            Properties.Settings.Default.proxyURL = txtUrl.Text;
+
+            if(String.IsNullOrEmpty(txtPort.Text))
+            {
+                Properties.Settings.Default.proxyPort = 0;
+            }
+            else
+            {
+                Properties.Settings.Default.proxyPort = Int32.Parse(txtPort.Text);
+            }
+
+            if(txtUrl.Text.Equals(""))
+            {
+                txtUrl.Enabled = true;
+                txtUsername.Enabled = true;
+                txtPassword.Enabled = true;
+                txtPort.Enabled = true;
+                cbShowPsw.Enabled = true;
+                cbShowPsw.Checked = false;
+                btnSalvaProxy.Enabled = true;
+                btnModificaProxy.Enabled = false;
+            }
+            else
+            {
+                txtUrl.Enabled = false;
+                txtUsername.Enabled = false;
+                txtPassword.Enabled = false;
+                txtPort.Enabled = false;
+                cbShowPsw.Enabled = false;
+                cbShowPsw.Checked = false;
+                btnSalvaProxy.Enabled = false;
+                btnModificaProxy.Enabled = true;
+            }
+
+
+
+            Properties.Settings.Default.Save();
+        }
+
+        private void btnModificaProxy_Click(object sender, EventArgs e)
+        {
+            txtUrl.Enabled = true;
+            txtUsername.Enabled = true;
+            txtPassword.Enabled = true;
+            txtPort.Enabled = true;
+            cbShowPsw.Enabled = true;
+            cbShowPsw.Checked = false;
+            btnSalvaProxy.Enabled = true;
+            btnModificaProxy.Enabled = false;
+        }
+
+        private void txtPort_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
     }
         //long ret = VerificaCIEAbilitata();
 

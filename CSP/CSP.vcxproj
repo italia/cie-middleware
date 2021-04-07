@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -188,7 +188,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)CSP\cryptopp\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
+      <Command>"$(SolutionDir)sign_sha256.bat" "$(TargetPath)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -201,22 +201,22 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>F:\Projects\IPZS\cie-middleware\CSP\Sign\;$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)CSP\cryptopp\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Crypt32.lib;shlwapi.lib;winscard.lib;zlib.lib;podofo.lib;freetype.lib;libpng16.lib;bz2.lib;cie_sign_sdk.lib;libcurl.lib;libcrypto.lib;libssl.lib;libxml2_a.lib;iconv.lib;charset.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)CSP\Dependencies\libcurl\;$(SolutionDir)CSP\Sign;$(SolutionDir)CSP\cryptopp\x64;$(SolutionDir)cie_sign_sdk\Dependencies\podofo\;$(SolutionDir)cie_sign_sdk\Dependencies\zlib;$(SolutionDir)cie_sign_sdk\Dependencies\freetype\;$(SolutionDir)cie_sign_sdk\Dependencies\openssl;$(SolutionDir)cie_sign_sdk\Dependencies\libpng\;$(SolutionDir)cie_sign_sdk\Dependencies\bzip;$(SolutionDir)cie_sign_sdk\Dependencies\libxml2;$(SolutionDir)cie_sign_sdk\Dependencies\libiconv;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 $(TargetPath)</Command>
+      <Command>"$(SolutionDir)sign_sha256.bat" "$(TargetPath)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -229,6 +229,8 @@
     <ClCompile Include="CSP\PINManager.cpp" />
     <ClCompile Include="PCSC\APDU.cpp" />
     <ClCompile Include="CSP\cambioPIN.cpp" />
+    <ClCompile Include="Sign\CIESign.cpp" />
+    <ClCompile Include="Sign\CIEVerify.cpp" />
     <ClCompile Include="UI\Message.cpp" />
     <ClCompile Include="crypto\ASNParser.cpp" />
     <ClCompile Include="crypto\Base64.cpp" />
@@ -288,6 +290,10 @@
     <ClInclude Include="CSP\CSP.h" />
     <ClInclude Include="CSP\PINManager.h" />
     <ClInclude Include="PCSC\APDU.h" />
+    <ClInclude Include="Sign\CIESign.h" />
+    <ClInclude Include="Sign\CIEVerify.h" />
+    <ClInclude Include="Sign\definitions.h" />
+    <ClInclude Include="Sign\disigonsdk.h" />
     <ClInclude Include="Util\Array.h" />
     <ClInclude Include="PCSC\CardLocker.h" />
     <ClInclude Include="Util\defines.h" />
@@ -314,7 +320,6 @@
     <ClInclude Include="PKCS11\Slot.h" />
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="UI/safeDesktop.h" />
-    <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Util\SyncroEvent.h" />
     <ClInclude Include="UI\SystemTray.h" />
     <ClInclude Include="Util\TLV.h" />

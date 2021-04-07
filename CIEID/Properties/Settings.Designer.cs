@@ -82,5 +82,41 @@ namespace CIEID.Properties {
                 this["efSeriale"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string proxyURL {
+            get {
+                return ((string)(this["proxyURL"]));
+            }
+            set {
+                this["proxyURL"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string credentials {
+            get {
+                return ((string)(this["credentials"]));
+            }
+            set {
+                this["credentials"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int proxyPort {
+            get {
+                return ((int)(this["proxyPort"]));
+            }
+            set {
+                this["proxyPort"] = value;
+            }
+        }
     }
 }

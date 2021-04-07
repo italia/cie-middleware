@@ -11,6 +11,7 @@ namespace CIEID
         public String SerialNumber { get; set; }
         public String Owner { get; set; }
         public String Pan { get; set; }
+        public bool isCustomSign { get; set; }
 
         public bool IsEmpty
         {
@@ -29,6 +30,7 @@ namespace CIEID
         {
             this.SerialNumber = serialNumber;
             this.Owner = owner;
+            this.isCustomSign = false;
         }
 
         public CieModel(String serialNumber, String owner, String pan)
@@ -36,6 +38,7 @@ namespace CIEID
             this.SerialNumber = serialNumber;
             this.Owner = owner;
             this.Pan = pan;
+            this.isCustomSign = false;
         }
     }
 }

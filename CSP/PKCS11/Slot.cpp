@@ -404,6 +404,8 @@ namespace p11 {
 			manifacturer = "STM";
 		else if ((baATR.indexOf(baSTM2_ATR, position)))
 			manifacturer = "STM2";
+		else if ((baATR.indexOf(baSTM3_ATR, position)))
+			manifacturer = "STM3";
 		else
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
 

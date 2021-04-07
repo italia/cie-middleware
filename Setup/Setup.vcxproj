@@ -65,28 +65,31 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeBuildCommandLine>"$(ProgramFiles)\NSIS\makensis.exe" /DConfig=$(Configuration) "$(ProjectDir)CIEMiddleware.nsi"
+"$(SolutionDir)sign_sha256.bat" "$(ProjectDir)$(Configuration)\CIE-Middleware.exe"
 </NMakeBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)CIEMiddleware.exe</NMakeOutput>
-    <NMakeCleanCommandLine>del "$(ProjectDir)CIEMiddleware.exe"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)$(Configuration)\CIE-Middleware.exe</NMakeOutput>
+    <NMakeCleanCommandLine>del "$(ProjectDir)$(Configuration)\CIE-Middleware.exe"</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeBuildCommandLine>"$(ProgramFiles)\NSIS\makensis.exe" "$(ProjectDir)CIEMiddleware.nsi"</NMakeBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)CIEMiddleware.exe</NMakeOutput>
-    <NMakeCleanCommandLine>del "$(ProjectDir)CIEMiddleware.exe"</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>"$(ProgramFiles)\NSIS\makensis.exe" /DConfig=$(Configuration) "$(ProjectDir)CIEMiddleware.nsi"
+"$(SolutionDir)sign_sha256.bat" "$(ProjectDir)$(Configuration)\CIE-Middleware.exe"
+</NMakeBuildCommandLine>
+    <NMakeOutput>$(ProjectDir)$(Configuration)\CIE-Middleware.exe</NMakeOutput>
+    <NMakeCleanCommandLine>del "$(ProjectDir)$(Configuration)\CIE-Middleware.exe"</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeBuildCommandLine>"$(ProgramFiles)\NSIS\makensis.exe" "$(ProjectDir)CIEMiddleware.nsi"</NMakeBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)CIEMiddleware.exe</NMakeOutput>
-    <NMakeCleanCommandLine>del "$(ProjectDir)CIEMiddleware.exe"</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>"$(ProgramFiles)\NSIS\makensis.exe" /DConfig=$(Configuration) "$(ProjectDir)CIEMiddleware.nsi"</NMakeBuildCommandLine>
+    <NMakeOutput>$(ProjectDir)$(Configuration)\CIE-Middleware.exe</NMakeOutput>
+    <NMakeCleanCommandLine>del "$(ProjectDir)$(Configuration)\CIE-Middleware.exe"</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeBuildCommandLine>"$(ProgramFiles)\NSIS\makensis.exe" /DConfig=$(Configuration) "$(ProjectDir)CIEMiddleware.nsi"
-"C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" sign /fd sha256 /sha1 e0402d01f6292e55540e018df14130234ec08306 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td sha256 "$(ProjectDir)$(Configuration)\CIE-Middleware.exe"</NMakeBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)CIEMiddleware.exe</NMakeOutput>
-    <NMakeCleanCommandLine>del "$(ProjectDir)CIEMiddleware.exe"</NMakeCleanCommandLine>
+"$(SolutionDir)sign_sha256.bat" "$(ProjectDir)$(Configuration)\CIE-Middleware.exe"</NMakeBuildCommandLine>
+    <NMakeOutput>$(ProjectDir)$(Configuration)\CIE-Middleware.exe</NMakeOutput>
+    <NMakeCleanCommandLine>del "$(ProjectDir)$(Configuration)\CIE-Middleware.exe"</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemDefinitionGroup>

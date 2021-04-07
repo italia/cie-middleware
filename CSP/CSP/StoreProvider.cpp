@@ -96,6 +96,7 @@ extern "C" HRESULT __stdcall DllUnregisterServer(void) {
 	SCardForgetCardType(hSC, "CIE_3");
 	SCardForgetCardType(hSC, "CIE_4");
 	SCardForgetCardType(hSC, "CIE_5");
+	SCardForgetCardType(hSC, "CIE_6");
 	SCardReleaseContext(hSC);
 
 	CertUnregisterPhysicalStore(L"MY", CERT_SYSTEM_STORE_CURRENT_USER, L"CIEStore");
@@ -153,6 +154,7 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 	BYTE ATR3_Mask[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 };
 	BYTE ATR4[] = {0x3B, 0x8B, 0x80, 0x01, 0x80, 0x66, 0x47, 0x50, 0x00, 0xB8, 0x00, 0x7F, 0x82, 0x90, 0x00, 0x2E};
 	BYTE ATR5[] = { 0x3B, 0x80, 0x80, 0x01, 0x01 };
+	BYTE ATR6[] = { 0x3B, 0x8B, 0x80, 0x01, 0x80, 0x66, 0x47, 0x50, 0x00, 0xB8, 0x00, 0x94, 0x82, 0x90, 0x00, 0xC5 };
 	LONG ris;
 	if (ris = RegisterCard(hSC, "CIE_1", ATR, sizeof(ATR), nullptr) != SCARD_S_SUCCESS)
 		return E_UNEXPECTED;
@@ -164,6 +166,8 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 	if (ris = RegisterCard(hSC, "CIE_4", ATR4, sizeof(ATR4), nullptr) != SCARD_S_SUCCESS)
 		return E_UNEXPECTED;
 	if (ris = RegisterCard(hSC, "CIE_5", ATR5, sizeof(ATR5), nullptr) != SCARD_S_SUCCESS)
+		return E_UNEXPECTED;
+	if (ris = RegisterCard(hSC, "CIE_6", ATR6, sizeof(ATR6), nullptr) != SCARD_S_SUCCESS)
 		return E_UNEXPECTED;
 
 	SCardReleaseContext(hSC);

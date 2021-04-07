@@ -52,6 +52,12 @@
     <Filter Include="Source Files\PCSC">
       <UniqueIdentifier>{49992170-328e-47f2-86dc-c4b5dbdb081d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Sign">
+      <UniqueIdentifier>{c9d4ba41-8bfd-4cc9-82d3-5f63e2fca6f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Sign">
+      <UniqueIdentifier>{04d1ecc8-4d54-4caf-ada7-780722585446}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -204,11 +210,14 @@
     <ClCompile Include="CSP\PINManager.cpp">
       <Filter>Source Files\CSP</Filter>
     </ClCompile>
+    <ClCompile Include="Sign\CIESign.cpp">
+      <Filter>Source Files\Sign</Filter>
+    </ClCompile>
+    <ClCompile Include="Sign\CIEVerify.cpp">
+      <Filter>Source Files\Sign</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="StdAfx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PKCS11\CardContext.h">
       <Filter>Header Files\PKCS11</Filter>
     </ClInclude>
@@ -352,6 +361,18 @@
     </ClInclude>
     <ClInclude Include="CSP\PINManager.h">
       <Filter>Header Files\CSP</Filter>
+    </ClInclude>
+    <ClInclude Include="Sign\CIESign.h">
+      <Filter>Header Files\Sign</Filter>
+    </ClInclude>
+    <ClInclude Include="Sign\disigonsdk.h">
+      <Filter>Header Files\Sign</Filter>
+    </ClInclude>
+    <ClInclude Include="Sign\definitions.h">
+      <Filter>Header Files\Sign</Filter>
+    </ClInclude>
+    <ClInclude Include="Sign\CIEVerify.h">
+      <Filter>Header Files\Sign</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
