@@ -210,6 +210,7 @@ namespace CIEID
             this.btnPersonalizzaAnnulla = new System.Windows.Forms.Button();
             this.label33 = new System.Windows.Forms.Label();
             this.tbVerifica = new System.Windows.Forms.TabPage();
+            this.btnEstraiP7M = new System.Windows.Forms.Button();
             this.pnVerifica = new System.Windows.Forms.Panel();
             this.pnSignerInfo = new System.Windows.Forms.FlowLayoutPanel();
             this.lblSottoscrittori = new System.Windows.Forms.Label();
@@ -2553,6 +2554,7 @@ namespace CIEID
             // tbVerifica
             // 
             this.tbVerifica.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.tbVerifica.Controls.Add(this.btnEstraiP7M);
             this.tbVerifica.Controls.Add(this.pnVerifica);
             this.tbVerifica.Controls.Add(this.lblVTxt);
             this.tbVerifica.Controls.Add(this.button1);
@@ -2563,6 +2565,21 @@ namespace CIEID
             this.tbVerifica.Size = new System.Drawing.Size(649, 533);
             this.tbVerifica.TabIndex = 16;
             this.tbVerifica.Text = "tabPage11";
+            // 
+            // btnEstraiP7M
+            // 
+            this.btnEstraiP7M.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnEstraiP7M.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.btnEstraiP7M.FlatAppearance.BorderSize = 0;
+            this.btnEstraiP7M.ForeColor = System.Drawing.Color.White;
+            this.btnEstraiP7M.Location = new System.Drawing.Point(85, 496);
+            this.btnEstraiP7M.Margin = new System.Windows.Forms.Padding(2);
+            this.btnEstraiP7M.Name = "btnEstraiP7M";
+            this.btnEstraiP7M.Size = new System.Drawing.Size(157, 28);
+            this.btnEstraiP7M.TabIndex = 35;
+            this.btnEstraiP7M.Text = "Estrai";
+            this.btnEstraiP7M.UseVisualStyleBackColor = false;
+            this.btnEstraiP7M.Click += new System.EventHandler(this.btnEstraiP7M_Click);
             // 
             // pnVerifica
             // 
@@ -2630,7 +2647,7 @@ namespace CIEID
             this.button1.BackColor = System.Drawing.Color.CornflowerBlue;
             this.button1.FlatAppearance.BorderSize = 0;
             this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(244, 493);
+            this.button1.Location = new System.Drawing.Point(388, 493);
             this.button1.Margin = new System.Windows.Forms.Padding(2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(157, 28);
@@ -3362,5 +3379,6 @@ namespace CIEID
         private Button btnSalvaProxy;
         private TextBox txtPort;
         private Label label47;
+        private Button btnEstraiP7M;
     }
 }

@@ -84,6 +84,8 @@ namespace CIEID
         [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
         static extern int firmaConCIE(string inFilePath, string type, string pin, string pan, int page, float x, float y, float w, float h, string imagePathFile, string outFilePath, ProgressCallback progressCallBack, SignCompletedCallback signCompletedCallBack);
 
+        [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
+        static extern int estraiP7m(string inFilePath, string outFilePath);
 
         private CieCollection cieColl;
 
@@ -155,11 +157,9 @@ namespace CIEID
         {
             this.Invoke((MethodInvoker)delegate
             {
-                Console.WriteLine("111111111111111111 {0}", retValue);
                 if (retValue != 0)
                 {
                     lblFirmaSuccess.Text = "Si è verificato un errore";
-                    //TODO cambiare immagine con X rossa
                     pbFirmaPin.Image = Properties.Resources.cross;
                     pbFirmaPin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
                 }else
@@ -1481,6 +1481,15 @@ namespace CIEID
 
                 pnVerifica.Visible = true;
 
+                if(Path.GetExtension(lblVerificaPath.Text) == ".p7m")
+                {
+                    btnEstraiP7M.Enabled = true;
+                }
+                else
+                {
+                    btnEstraiP7M.Enabled = false;
+                }
+
                 tabControlMain.SelectedIndex = 16;
 
             }
@@ -1725,19 +1734,23 @@ namespace CIEID
                 return;
             }
 
-            string fileName = Path.GetFileNameWithoutExtension(lblPath4.Text);
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.FileName = fileName + "-signed";
-            Console.WriteLine("{0}, {1}", fileName, fileName + "-signed");
+            string fileName = "";
 
-            if(signOp == opSelectedState.FIRMA_PADES)
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+            if (signOp == opSelectedState.FIRMA_PADES)
             {
+                fileName = Path.GetFileNameWithoutExtension(lblPath4.Text) + "-signed";
                 saveFileDialog1.Filter = "File (*.pdf) | *.pdf";
             }
             else
             {
+                fileName = Path.GetFileName(lblPath4.Text) + "-signed";
+                fileName = fileName.Replace(".p7m", "");
                 saveFileDialog1.Filter = "File (*.p7m) | *.p7m";
             }
+
+            saveFileDialog1.FileName = fileName;
             string sfdname = saveFileDialog1.FileName;
             string pathToSaveFile = "";
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
@@ -1750,7 +1763,6 @@ namespace CIEID
                 return;
             }
 
-            //Nascondere le textbox contenente il pin (svuotandole prima)
             for (int i = 9; i < 13; i++)
             {
                 TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
@@ -1758,11 +1770,9 @@ namespace CIEID
                 txtField.Hide();
             }
 
-            //disabilitare i pulsanti
             btnAnullaFirmaPin.Enabled = false;
             btnFirma.Enabled = false;
 
-            //mostrare progress al posto delle textbox
             progressFirmaPina.Value = 0;
             progressFirmaPina.Show();
             lblFirmaPin.TextAlign = ContentAlignment.MiddleCenter;
@@ -1832,17 +1842,6 @@ namespace CIEID
             new Thread(processTaskThread).Start();
         }
        
-        /*
-        private void firma(object sender, String inFilePath, String outFilePath, String fileType, String pin, String pan, int page, float x, float y, float w, float h,  String signImgPath )
-        {
-            firmaConCIE(inFilePath, fileType, pin, pan, page, x, y, w, h, signImgPath, outFilePath, new ProgressCallback(ProgressFirma), new SignCompletedCallback(CompletedFirma));
-
-            this.Invoke((MethodInvoker)delegate
-            {
-                ((Control)sender).Enabled = true;
-            });
-        }
-        */
 
         private void btnPersonalizzaAnnulla_Click(object sender, EventArgs e)
         {
@@ -2020,9 +2019,7 @@ namespace CIEID
                     string encryptedCredentials = Properties.Settings.Default.credentials;
                     ProxyInfoManager proxyInfoManager = new ProxyInfoManager();
 
-                    //Console.WriteLine("encryptedCredentials -> {0}", encryptedCredentials);
                     string credentials = proxyInfoManager.getDecryptedCredentials(encryptedCredentials);
-                    //Console.WriteLine("Credentials -> {0}", credentials);
 
                     if (credentials.Substring(0, 5) == "cred=")
                     {
@@ -2152,6 +2149,44 @@ namespace CIEID
             {
                 e.Handled = true;
             }
+        }
+
+        private void btnEstraiP7M_Click(object sender, EventArgs e)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(lblVerificaPath.Text);
+
+            fileName = fileName.Replace("-signed", "");
+            
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.FileName = fileName;
+            string fileExt = Path.GetExtension(fileName);
+            saveFileDialog1.Filter = string.Format("{0}{1}{2}{3}", "File(*", fileExt, ") | *", fileExt);
+
+            string pathToSaveFile = "";
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                pathToSaveFile = Path.GetFullPath(saveFileDialog1.FileName);
+
+                Console.WriteLine("File extension: {0}", fileExt);
+                long res = estraiP7m(lblVerificaPath.Text, pathToSaveFile);
+                Console.WriteLine("Res: {0}", (UInt32)res);
+
+                if(res == 0)
+                {
+                    MessageBox.Show("File estratto correttamente", "Estrazione file completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Impossibile estrarre il file", "Estrazione file completata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+            }
+            else
+            {
+                return;
+            }
+            
         }
     }
         //long ret = VerificaCIEAbilitata();

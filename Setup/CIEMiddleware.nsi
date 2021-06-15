@@ -2,7 +2,7 @@
 !include "x64.nsh"
 !include "Library.nsh"
 
-!define PRODUCT_VERSION "1.3.1.0"
+!define PRODUCT_VERSION "1.4.1.0"
 
 ;--------------------------------
 ;General
@@ -30,7 +30,7 @@ VIAddVersionKey "ProductName" "CIE-Middleware"
 VIAddVersionKey "Comments" "CIE-Middleware"
 VIAddVersionKey "CompanyName" ""
 VIAddVersionKey "LegalTrademarks" ""
-VIAddVersionKey "LegalCopyright" "Copyright (C) IPZS 2018-2020"
+VIAddVersionKey "LegalCopyright" "Copyright (C) IPZS 2018-2021"
 VIAddVersionKey "FileDescription" "CIE-Middleware"
 VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}"
 VIAddVersionKey "OriginalFilename" "CIE-Middleware.exe"
@@ -60,6 +60,13 @@ VIProductVersion "${PRODUCT_VERSION}"
 
 ;--------------------------------
 ;Installer Sections
+
+Section "Visual Studio Runtime"
+  SetOutPath "$INSTDIR"
+  File "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.16.27012\vcredist_x64.exe"
+  ExecWait "$INSTDIR\vcredist_x64.exe /install /quiet" 
+  Delete "$INSTDIR\vcredist_x64.exe"
+SectionEnd
 
 Section "Install"
 
@@ -155,11 +162,12 @@ Section "Uninstall"
   
   !echo $%LOCALAPPDATA%
 
-  RMDir /r "$%LOCALAPPDATA%\IPZS"
+  RMDir /r "$LOCALAPPDATA\IPZS"
   RMDir /r "$%PROGRAMDATA%\CIEPKI"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
   
+
   ${If} ${RunningX64}	
 	SetRegView 64
   ${EndIf}

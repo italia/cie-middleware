@@ -987,6 +987,68 @@ long verify_p7m(DISIGON_VERIFY_CONTEXT* pContext, VERIFY_INFO* pVerifyInfo)
     }
 }
 
+long disigon_get_file_from_p7m(DISIGON_CTX ctx) {
+
+
+	DISIGON_VERIFY_CONTEXT* pContext = (DISIGON_VERIFY_CONTEXT*)ctx;
+
+	LOG_MSG((0, "--> get_file_from_p7m", "Context: %p", pContext));
+
+
+
+    int nFileType = pContext->nInputFileType;
+
+    if(nFileType == DISIGON_FILETYPE_AUTO)
+        nFileType = get_file_type(pContext->szInputFile);
+
+    if(nFileType != DISIGON_FILETYPE_P7M)
+        return DISIGON_ERROR_INVALID_FILE;
+
+	UUCByteArray data;
+	BYTE buffer[BUFFERSIZE];
+	int nRead = 0;
+
+	FILE* f = fopen(pContext->szInputFile, "rb");
+	if (!f)
+	{
+		LOG_ERR((0, "<-- get_file_from_p7m", "Context: %p, Error: DISIGON_ERROR_FILE_NOT_FOUND, file: %s", pContext, pContext->szInputFile));
+		return DISIGON_ERROR_FILE_NOT_FOUND;
+	}
+
+	while (((nRead = fread(buffer, 1, BUFFERSIZE, f)) > 0))
+	{
+		data.append(buffer, nRead);
+	}
+    
+
+	fclose(f);
+
+	try
+	{
+		CSignedDocument sd(data.getContent(), data.getLength());
+
+        UUCByteArray content;
+        sd.getContent(content);
+
+        FILE* f = fopen(pContext->szOutputFile, "w+b");
+        if (!f)
+        {
+            LOG_ERR((0, "<-- get_file_from_p7m - output file", "Context: %p, Error: QDIGITSIGN_ERROR_FILE_NOT_FOUND, file: %s", pContext, pContext->szOutputFile));
+            return DISIGON_ERROR_FILE_NOT_FOUND;
+        }
+
+        fwrite(content.getContent(), 1, content.getLength(), f);
+
+        fclose(f);
+
+        return 0;
+	}
+	catch (...)
+	{
+		return DISIGON_ERROR_INVALID_FILE;
+	}
+}
+
 long verify_xml(DISIGON_VERIFY_CONTEXT* pContext, VERIFY_INFO* pVerifyInfo)
 {
     LOG_MSG((0, "--> verify_xml", "Context: %p", pContext));
