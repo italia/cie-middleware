@@ -115,6 +115,16 @@ extern "C" {
 
 	}
 
+	CK_RV CK_ENTRY __stdcall estraiP7m(const char* inFilePath, const char* outFilePath) {
+
+		CIEVerify* verifier = new CIEVerify();
+
+		long res = verifier->get_file_from_p7m(inFilePath, outFilePath);
+
+		return res;
+
+	}
+
 	CK_RV CK_ENTRY __stdcall firmaConCIE(const char* inFilePath, const char* type, const char* pin, const char* pan, int page, float x, float y, float w, float h, const char* imagePathFile, const char* outFilePath, PROGRESS_CALLBACK progressCallBack, SIGN_COMPLETED_CALLBACK completedCallBack)
 	{
 
@@ -516,6 +526,7 @@ extern "C" {
 				completedCallBack(span.c_str(), fullname.c_str(), seriale.c_str());
 
 				SCardEndTransaction(conn.hCard, SCARD_RESET_CARD);
+
 			}
 
 			if (!foundCIE) {

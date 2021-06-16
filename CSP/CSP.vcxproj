@@ -210,7 +210,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ws2_32.lib;cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Crypt32.lib;shlwapi.lib;winscard.lib;zlib.lib;podofo.lib;freetype.lib;libpng16.lib;bz2.lib;cie_sign_sdk.lib;libcurl.lib;libcrypto.lib;libssl.lib;libxml2_a.lib;iconv.lib;charset.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)CSP\Dependencies\libcurl\;$(SolutionDir)CSP\Sign;$(SolutionDir)CSP\cryptopp\x64;$(SolutionDir)cie_sign_sdk\Dependencies\podofo\;$(SolutionDir)cie_sign_sdk\Dependencies\zlib;$(SolutionDir)cie_sign_sdk\Dependencies\freetype\;$(SolutionDir)cie_sign_sdk\Dependencies\openssl;$(SolutionDir)cie_sign_sdk\Dependencies\libpng\;$(SolutionDir)cie_sign_sdk\Dependencies\bzip;$(SolutionDir)cie_sign_sdk\Dependencies\libxml2;$(SolutionDir)cie_sign_sdk\Dependencies\libiconv;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)cie_sign_sdk\Dependencies\libcurl\;$(SolutionDir)CSP\Sign;$(SolutionDir)CSP\cryptopp\x64;$(SolutionDir)cie_sign_sdk\Dependencies\podofo\;$(SolutionDir)cie_sign_sdk\Dependencies\zlib;$(SolutionDir)cie_sign_sdk\Dependencies\freetype\;$(SolutionDir)cie_sign_sdk\Dependencies\openssl;$(SolutionDir)cie_sign_sdk\Dependencies\libpng\;$(SolutionDir)cie_sign_sdk\Dependencies\bzip;$(SolutionDir)cie_sign_sdk\Dependencies\libxml2;$(SolutionDir)cie_sign_sdk\Dependencies\libiconv;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>

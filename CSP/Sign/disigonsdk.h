@@ -347,6 +347,9 @@ DISIGON_API long disigon_verify_cleanup_result(VERIFY_RESULT* pVerifyResult);
 
 // libera la memoria allocata nell'operazione di verifica
 DISIGON_API long disigon_verify_cleanup(DISIGON_CTX ctx);
+
+//estra il documento originale da un file p7m
+DISIGON_API long disigon_get_file_from_p7m(DISIGON_CTX ctx);
 // operazione di sbustamento veloce
 
 /*

@@ -19,6 +19,7 @@ class CIEVerify
 		~CIEVerify();
 
 		long verify(const char* input_file, VERIFY_RESULT* verifyResult, const char* proxy_address, int proxy_port, const char* userPass);
+		long get_file_from_p7m(const char* input_file, const char* output_file);
 
 };
 
