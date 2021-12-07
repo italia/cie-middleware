@@ -186,12 +186,10 @@ void TrayNotification(CSystemTray* tray, WPARAM uID, LPARAM lEvent) {
 		if (!SHGetSpecialFolderPath(NULL, szProgramFilesDir, CSIDL_PROGRAM_FILESX86, 0))
 			SHGetSpecialFolderPath(NULL, szProgramFilesDir, CSIDL_PROGRAM_FILES, 0);
 
-		Log.writePure("szProgramFilesDir %s", szProgramFilesDir);
+		LOG_DEBUG("TrayNotification - szProgramFilesDir %s", szProgramFilesDir);
 
 		if (!CreateProcess(NULL, (char*)std::string(szProgramFilesDir).append("\\CIEPKI\\CIEID ").append("unlock").c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
 		{
-			DWORD dwerr = GetLastError();
-			Log.writePure("error run CIEID %x", dwerr);
 			throw logged_error("Errore in creazione processo CIEID");
 		}
 		else

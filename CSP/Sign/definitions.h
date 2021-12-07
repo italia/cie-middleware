@@ -11,7 +11,8 @@
 
 
 #ifdef WIN32
-#include <../StdAfx.h>
+//#include <../StdAfx.h>
+#include "../CSP/StdAfx.h"
 #define STRICMP stricmp
 #else
 

@@ -54,7 +54,7 @@ long CIEVerify::verify(const char* input_file, VERIFY_RESULT* verifyResult, cons
 
 				if (proxy_port == 0)
 				{
-					Log.write("CIEVerify::invalid proxy port");
+					LOG_ERROR("CIEVerify - invalid proxy port");
 					return DISIGON_ERROR_INVALID_SIGOPT;
 				}
 				else
@@ -94,7 +94,7 @@ long CIEVerify::verify(const char* input_file, VERIFY_RESULT* verifyResult, cons
 
 	}
 	catch (long err) {
-		Log.write("CIEVerify::verify error: %lx", err);
+		LOG_ERROR("CIEVerify::verify error: %lx", err);
 		return err;
 	}
 
@@ -142,7 +142,7 @@ long CIEVerify::get_file_from_p7m(const char* input_file, const char* output_fil
 		return ret;
 	}
 	catch (long err) {
-		Log.write("CIEVerify::verify error: %lx", err);
+		LOG_ERROR("CIEVerify::verify - error: %lx", err);
 		return err;
 	}
 

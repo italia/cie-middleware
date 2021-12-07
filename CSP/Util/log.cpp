@@ -13,7 +13,7 @@
 #include "Aclapi.h"
 #include <VersionHelpers.h>
 
-
+#if 0
 static char *szCompiledFile=__FILE__;
 
 std::string logDirGlobal;
@@ -248,3 +248,4 @@ void CLog::writeModuleInfo() {
 	module.init(mainModule);
 	write("Applicazione chiamante: %s",module.szModuleName.c_str());
 }
+#endif

@@ -11,6 +11,7 @@ extern unsigned int GlobalDepth;
 extern bool GlobalParam;
 char szEmpty[]={NULL};
 
+#if 0
 CFuncCallInfo::CFuncCallInfo(char *name, CLog &logInfo) : log(logInfo) {
 	sName = name;
 	//OutputDebugString(fName);
@@ -28,6 +29,7 @@ CFuncCallInfo::CFuncCallInfo(char *name, CLog &logInfo) : log(logInfo) {
 	callQueue = std::unique_ptr<CFuncCallInfoList>(new CFuncCallInfoList(this));
 	callQueue->next = std::unique_ptr<CFuncCallInfoList>(head);
 }
+#endif
 
 CFuncCallInfo::~CFuncCallInfo() {
 	//OutputDebugString(stdPrintf("OUT %s", fName).c_str());

@@ -58,7 +58,6 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 		std::string mainMutexName;
 		std::string configPath;
 		configPath = moduleInfo.szModulePath + moduleInfo.szModuleName + ".ini";
-		initLog();
 		//Log.initModule("PKCS11", __DATE__ " " __TIME__);
 		p11::InitP11(configPath.c_str());
 
@@ -67,7 +66,7 @@ BOOL APIENTRY DllMainP11( HANDLE hModule,
 	if (ul_reason_for_call==DLL_PROCESS_DETACH && bModuleInit) {
 
 		if (bP11Initialized) {
-			Log.write("%s","Forzatura C_Finalize");
+			LOG_DEBUG("%s","Forzatura C_Finalize");
 			C_Finalize(NULL);
 			bP11Initialized = false;
 		}
@@ -277,9 +276,6 @@ CK_RV CK_ENTRY C_OpenSession(CK_SLOT_ID slotID, CK_FLAGS flags, CK_VOID_PTR pApp
 		logParam(notify)
 		logParam(phSession)
 
-
-
-
 		if (!bP11Initialized)
 			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
@@ -310,15 +306,13 @@ CK_RV CK_ENTRY C_OpenSession(CK_SLOT_ID slotID, CK_FLAGS flags, CK_VOID_PTR pApp
 // aggiungo la sessione all'elenco globale
 	*phSession = CSession::AddSession(std::move(pSession));
 
-	if (Log.Enabled) {
-		Log.writePure("Sessione: %i",*phSession);
-		Log.writePure("Lettore: %s",pSlot->szName.c_str());
-		Log.writePure("CardManager: %s",pSlot->pTemplate->szName.c_str());
-		std::string szModel;
-		pSlot->pTemplate->FunctionList.templateGetModel(*pSlot,szModel);
-		Log.writePure("Tipo Carta: %s",szModel.c_str());
-	}
-
+	LOG_DEBUG("Session: %i", *phSession);
+	LOG_DEBUG("Reader: %s", pSlot->szName.c_str());
+	LOG_DEBUG("CardManager: %s", pSlot->pTemplate->szName.c_str());
+	std::string szModel;
+	pSlot->pTemplate->FunctionList.templateGetModel(*pSlot, szModel);
+	LOG_DEBUG("Card type: %s", szModel.c_str());
+	
 	return CKR_OK;
 	exit_p11_func
 		return CKR_GENERAL_ERROR;
@@ -781,13 +775,10 @@ CK_RV CK_ENTRY C_FindObjects(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE_PTR phO
 
 //	checkOutBuffer(phObject, sizeof(CK_OBJECT_HANDLE)*ulMaxObjectCount)
 
-		logParam(hSession)
-		logParam(phObject)
-		logParam(ulMaxObjectCount)
-		logParam(pulObjectCount)
+	LOG_DEBUG("[PKCS11] C_FindObjects - hSession: %d, phObject: %d, ulMaxObjectCount: %d", hSession, phObject, ulMaxObjectCount);
 
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+	if (!bP11Initialized)
+		throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
 	std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
 	if (pSession == nullptr) 
@@ -807,10 +798,10 @@ CK_RV CK_ENTRY C_FindObjectsFinal(CK_SESSION_HANDLE hSession)
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	logParam(hSession)
+	LOG_DEBUG("[PKCS11] C_FindObjectsFinal - hSession: %d", hSession);
 
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+	if (!bP11Initialized)
+		throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
 	std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
 	if (pSession==nullptr)
@@ -832,11 +823,9 @@ CK_RV CK_ENTRY C_FindObjectsInit(CK_SESSION_HANDLE hSession, CK_ATTRIBUTE_PTR pT
 	logParam(pTemplate)
 	logParam(ulCount)
 
-	if (Log.LogParam) {
-		for (DWORD i=0;i<ulCount;i++) {
-			Log.writePure("Template %i:",i+1);
-			Log.writePure("Type: %s (%x)",getAttributeName(pTemplate[i].type),pTemplate[i].type);
-		}
+	for (DWORD i=0;i<ulCount;i++) {
+		LOG_DEBUG("Template %i:",i+1);
+		LOG_DEBUG("Type: %s (%x)",getAttributeName(pTemplate[i].type),pTemplate[i].type);
 	}
 
 	if (!bP11Initialized)
@@ -861,14 +850,14 @@ CK_RV CK_ENTRY C_GetAttributeValue(CK_SESSION_HANDLE hSession, CK_OBJECT_HANDLE 
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
 //	checkInArray(pTemplate, ulCount)
+	LOG_DEBUG("[PKCS11] C_GetAttributeValue - hSession: %d, pTemplate->type: %d, pTemplate->ulValueLen: %d", hSession, pTemplate->type, pTemplate->ulValueLen);
+	logParam(hSession)
+	logParam(hObject)
+	logParam(pTemplate)
+	logParam(ulCount)
 
-		logParam(hSession)
-		logParam(hObject)
-		logParam(pTemplate)
-		logParam(ulCount)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+	if (!bP11Initialized)
+		throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
 	std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
 	if (pSession==nullptr)
@@ -983,7 +972,7 @@ CK_RV CK_ENTRY C_GetSessionInfo(CK_SESSION_HANDLE hSession, CK_SESSION_INFO_PTR 
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
 //	checkOutPtr(pInfo)
-
+		
 		logParam(hSession)
 		logParam(pInfo)
 
@@ -1108,17 +1097,19 @@ CK_RV CK_ENTRY C_Sign(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ul
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
+	LOG_DEBUG("[PKCS11] C_Sign - hSession: %d");
+	LOG_DEBUG("[PKCS11] C_Sign - pData:");
+	LOG_BUFFER(pData, ulDataLen);
+	LOG_DEBUG("[PKCS11] C_Sign - pSignature (len: %d):", *pulSignatureLen);
+	LOG_BUFFER(pSignature, *pulSignatureLen);
+
 //	checkInBuffer(pData, ulDataLen)
 //		checkOutArray(pSignature, pulSignatureLen)
 //		checkInBuffer(pData, ulDataLen)
 //		checkOutArray(pSignature, pulSignatureLen)
 
-		logParam(hSession)
-		logParamBuf(pData, ulDataLen)
-		logParamBuf(pSignature, pulSignatureLen)
-
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+	if (!bP11Initialized)
+		throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
 	std::shared_ptr<CSession> pSession	=CSession::GetSessionFromID(hSession);
 		
@@ -1947,7 +1938,7 @@ CK_RV CK_ENTRY C_SetOperationState(CK_SESSION_HANDLE hSession,CK_BYTE_PTR pOpera
 #define unsupported \
 { \
 	init_p11_func \
-	Log.write("%s","Funzione non supportata!!"); \
+	LOG_ERROR("%s","Funzione non supportata!!"); \
 	throw p11_error(CKR_FUNCTION_NOT_SUPPORTED); \
 	exit_p11_func \
 	return CKR_FUNCTION_NOT_SUPPORTED; \

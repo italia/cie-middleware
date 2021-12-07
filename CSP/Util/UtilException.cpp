@@ -3,12 +3,13 @@
 #include "utilexception.h"
 #include <imagehlp.h>
 #include <stdio.h>
+#include "../LOGGER/Logger.h"
 
 extern thread_local std::unique_ptr<CFuncCallInfoList> callQueue;
 
 logged_error::logged_error(const char *message) : std::runtime_error(message) {
 	OutputDebugString(what());
-	Log.write("logged error: %s", message);
+	LOG_ERROR("%s", message);
 
 	CFuncCallInfoList *ptr = callQueue.get();
 	while (ptr != nullptr) {

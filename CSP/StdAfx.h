@@ -11,11 +11,12 @@
 #include "util/funccallinfo.h"
 #include "util/util.h"
 #include "util/utilexception.h"
+#include "../LOGGER/Logger.h"
 
 #ifdef _DEBUG
 #define ODS(s) OutputDebugString(s);Log.writePure(s)
 #else
-#define ODS(s) Log.writePure(s) /*ODS(s)*/
+#define ODS(s) LOG_DEBUG(s) /*ODS(s)*/
 #endif
 
 extern ByteArray baNXP_ATR;

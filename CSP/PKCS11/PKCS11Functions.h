@@ -19,19 +19,19 @@
 #define USER_PIN_ID 0x10
 
 #define init_p11_func \
-	CFuncCallInfo info(__FUNCTION__, Log); \
+	LOG_INFO("[PKCS11]	%s", __FUNCTION__);	\
 	try {
 
 #define exit_p11_func } \
 	catch (p11_error &p11Err) { \
-		Log.write("EXCLOG %s", p11Err.what()); \
+		LOG_ERROR("EXCLOG %d", p11Err.getP11ErrorCode()); \
 		OutputDebugString("EXCLOG->"); \
 		OutputDebugString(p11Err.what()); \
 		OutputDebugString("<-EXCLOG");\
 		return p11Err.getP11ErrorCode(); \
 	} \
 	catch (std::exception &err) { \
-			Log.write("EXCLOG %s", err.what()); \
+			LOG_ERROR("EXCLOG: CKR_GENERAL_ERROR"); \
 			OutputDebugString("EXCLOG->"); \
 		OutputDebugString(err.what()); \
 		OutputDebugString("<-EXCLOG");\

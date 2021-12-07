@@ -58,6 +58,12 @@
     <Filter Include="Header Files\Sign">
       <UniqueIdentifier>{04d1ecc8-4d54-4caf-ada7-780722585446}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\LOGGER">
+      <UniqueIdentifier>{04b7d790-e54b-4f1b-8636-6c4238756ace}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\LOGGER">
+      <UniqueIdentifier>{655a984a-86b5-464c-bfa9-14aff12f74db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -216,6 +222,9 @@
     <ClCompile Include="Sign\CIEVerify.cpp">
       <Filter>Source Files\Sign</Filter>
     </ClCompile>
+    <ClCompile Include="LOGGER\Logger.cpp">
+      <Filter>Source Files\LOGGER</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PKCS11\CardContext.h">
@@ -373,6 +382,9 @@
     </ClInclude>
     <ClInclude Include="Sign\CIEVerify.h">
       <Filter>Header Files\Sign</Filter>
+    </ClInclude>
+    <ClInclude Include="LOGGER\Logger.h">
+      <Filter>Header Files\LOGGER</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

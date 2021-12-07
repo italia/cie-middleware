@@ -18,7 +18,7 @@ class p11_error : public logged_error {
 	CK_RV p11ErrorCode;
 public:
 	p11_error(CK_RV p11ErrorCode, const char *message) : p11ErrorCode(p11ErrorCode), logged_error(message) {}
-	p11_error(CK_RV p11ErrorCode) : p11_error(p11ErrorCode,stdPrintf("%s:%08x","Errore PKCS11", p11ErrorCode).c_str()) {}
+	p11_error(CK_RV p11ErrorCode) : p11_error(p11ErrorCode,stdPrintf("%s:%08x","PKCS11 error", p11ErrorCode).c_str()) {}
 	CK_RV getP11ErrorCode() { return p11ErrorCode; }
 };
 

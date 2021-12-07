@@ -4,6 +4,7 @@
 #include "defines.h"
 #include <string>
 
+#if 0
 class CLog {
 public:
 	bool Enabled;
@@ -28,3 +29,4 @@ public:
 
 void initLog();
 extern CLog Log;
+#endif

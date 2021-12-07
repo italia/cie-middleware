@@ -44,6 +44,8 @@
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <SpectreMitigation>false</SpectreMitigation>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -143,7 +145,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
@@ -176,20 +178,26 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)PKCS11;F:\Projects\IPZS\cie-middleware\CSP\Sign</AdditionalIncludeDirectories>
+      <OmitFramePointers />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Crypt32.lib;shlwapi.lib;winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)CSP\cryptopp\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;cryptlib.lib;Urlmon.lib;bcrypt.lib;version.lib;Crypt32.lib;shlwapi.lib;winscard.lib;zlib.lib;podofo.lib;freetype.lib;libpng16.lib;bz2.lib;cie_sign_sdk.lib;libcurl.lib;libcrypto.lib;libssl.lib;libxml2_a.lib;iconv.lib;charset.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>F:\Projects\IPZS\cie-middleware\CSP\Sign\32bit;F:\Projects\IPZS\cie-middleware\cie_sign_sdk\Dependencies\bzip;F:\Projects\IPZS\cie-middleware\cie_sign_sdk\Dependencies\freetype;$(SolutionDir)CSP\cryptopp\Win32;F:\Projects\IPZS\cie-middleware\cie_sign_sdk\Dependencies\zlib;F:\Projects\IPZS\cie-middleware\cie_sign_sdk\Dependencies\libcurl;F:\Projects\IPZS\cie-middleware\cie_sign_sdk\Dependencies\libiconv;F:\Projects\IPZS\cie-middleware\cie_sign_sdk\Dependencies\libpng;F:\Projects\IPZS\cie-middleware\cie_sign_sdk\Dependencies\libxml2;F:\Projects\IPZS\cie-middleware\cie_sign_sdk\Dependencies\openssl;F:\Projects\IPZS\cie-middleware\cie_sign_sdk\Dependencies\podofo;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers />
     </Link>
     <PostBuildEvent>
       <Command>"$(SolutionDir)sign_sha256.bat" "$(TargetPath)"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -199,10 +207,12 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>F:\Projects\IPZS\cie-middleware\CSP\Sign\;$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)CSP\Sign\;$(SolutionDir)PKCS11;$(SolutionDir)LOGGER</AdditionalIncludeDirectories>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -227,6 +237,7 @@
     <ClCompile Include="CSP\CIEScaduta.cpp" />
     <ClCompile Include="CSP\ExtAuthKey.cpp" />
     <ClCompile Include="CSP\PINManager.cpp" />
+    <ClCompile Include="LOGGER\Logger.cpp" />
     <ClCompile Include="PCSC\APDU.cpp" />
     <ClCompile Include="CSP\cambioPIN.cpp" />
     <ClCompile Include="Sign\CIESign.cpp" />
@@ -289,6 +300,7 @@
     <ClInclude Include="Crypto\sha512.h" />
     <ClInclude Include="CSP\CSP.h" />
     <ClInclude Include="CSP\PINManager.h" />
+    <ClInclude Include="LOGGER\Logger.h" />
     <ClInclude Include="PCSC\APDU.h" />
     <ClInclude Include="Sign\CIESign.h" />
     <ClInclude Include="Sign\CIEVerify.h" />

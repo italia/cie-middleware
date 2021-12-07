@@ -79,6 +79,7 @@
     <Compile Include="Intro.Designer.cs">
       <DependentUpon>Intro.cs</DependentUpon>
     </Compile>
+    <Compile Include="Logger.cs" />
     <Compile Include="MoveablePictureBox.cs">
       <SubType>Component</SubType>
     </Compile>

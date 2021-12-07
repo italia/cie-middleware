@@ -3,7 +3,7 @@
 #include "PKCS11Functions.h"
 #include "../PCSC/token.h"
 #include "../PCSC/PCSC.h"
-
+#include "../LOGGER/Logger.h"
 #include "CardTemplate.h"
 #include "../util/util.h"
 #include "../util/syncroevent.h"
@@ -69,7 +69,7 @@ namespace p11 {
 					slot[i] = it->second;
 					if (ris = SCardGetStatusChange(Context, 0, &state[i], 1) != S_OK) {
 						if (ris != SCARD_E_TIMEOUT) {
-							Log.write("Errore nella SCardGetStatusChange - %08X", ris);
+							LOG_ERROR("[PKCS11] slotMonitor - Errore nella SCardGetStatusChange - %08X", ris);
 							// non uso la ExitThread!!!
 							// altrimenti non chiamo i distruttori, e mi rimane tutto appeso
 							CSlot::ThreadContext = NULL;
@@ -85,32 +85,32 @@ namespace p11 {
 				ris = SCardGetStatusChange(Context, 1000, state.data(), (DWORD)dwSlotNum);
 				if (ris != S_OK) {
 					if (CSlot::bMonitorUpdate || ris == SCARD_E_SYSTEM_CANCELLED || ris == SCARD_E_SERVICE_STOPPED || ris == SCARD_E_INVALID_HANDLE || ris == ERROR_INVALID_HANDLE) {
-						Log.write("Monitor Update");
+						LOG_INFO("[PKCS11] slotMonitor - Monitor Update");
 						break;
 					}
 					if (ris == SCARD_E_CANCELLED || bP11Terminate || !bP11Initialized) {
-						Log.write("Terminate");
+						LOG_INFO("[PKCS11] slotMonitor - Terminate");
 						p11slotEvent.set();
 						CSlot::ThreadContext = NULL;
 						// no exitThread, vedi sopra;
 						return 0;
 					}
 					if (ris != SCARD_E_TIMEOUT && ris != SCARD_E_NO_READERS_AVAILABLE) {
-						Log.write("Errore nella SCardGetStatusChange - %08X", ris);
+						LOG_ERROR("[PKCS11] slotMonitor - Errore nella SCardGetStatusChange - %08X", ris);
 						p11slotEvent.set();
 						CSlot::ThreadContext = NULL;
 						// no exitThread, vedi sopra;
 						return 1;
 					}
 					if (ris == SCARD_E_NO_READERS_AVAILABLE) {
-						Log.write("Nessun lettore connesso - %08X", ris);
+						LOG_ERROR("[PKCS11] slotMonitor - Nessun lettore connesso - %08X", ris);
 						CSlot::ThreadContext = NULL;
 						// no exitThread, vedi sopra;
 						return 1;
 					}
 				}
 				if (bP11Terminate || !bP11Initialized) {
-					Log.write("Terminate");
+					LOG_INFO("Terminate");
 					p11slotEvent.set();
 					CSlot::ThreadContext = NULL;
 					// no exitThread, vedi sopra;
@@ -152,7 +152,7 @@ namespace p11 {
 	CK_SLOT_ID CSlot::AddSlot(std::shared_ptr<CSlot> pSlot)
 	{
 		init_func
-			pSlot->hSlot = GetNewSlotID();
+		pSlot->hSlot = GetNewSlotID();
 		auto id = pSlot->hSlot;
 		g_mSlots.insert(std::make_pair(pSlot->hSlot, std::move(pSlot)));
 		return id;
@@ -255,7 +255,7 @@ namespace p11 {
 				return;
 
 			// vediamo questo slot c'era già prima
-			Log.write("reader:%s", szReaderName);
+			LOG_INFO("[PKCS11] InitSlotList - reader:%s", szReaderName);
 			std::shared_ptr<CSlot> pSlot = GetSlotFromReaderName(szReaderName);
 			if (pSlot == nullptr) {
 				std::string VendorName;
@@ -285,7 +285,7 @@ namespace p11 {
 			if (!bP11Initialized)
 				return;
 
-			Log.write("%s", it->second->szName.c_str());
+			LOG_INFO("[PKCS11] InitSlotList - %s", it->second->szName.c_str());
 			const char *name = it->second->szName.c_str();
 
 			const char *szReaderName = readers.c_str();
@@ -390,24 +390,39 @@ namespace p11 {
 		memcpy_s((char*)pInfo->label, 32, pTemplate->szName.c_str(), min(pTemplate->szName.length(), sizeof(pInfo->label)));
 		memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
 		
-		Log.write("CIE ATR:");
-		Log.writeBinData(baATR.data(), baATR.size());
+		LOG_DEBUG("[PKCS11] GetTokenInfo - CIE ATR:");
+		LOG_BUFFER(baATR.data(), baATR.size());
 
 		std::string manifacturer;
 		size_t position;
 		if (baATR.indexOf(baNXP_ATR, position))
+		{
+			LOG_INFO("[PKCS11] GetTokenInfo - CIE Detected: NXP");
 			manifacturer = "NXP";
+		}
 		else if ((baATR.indexOf(baGemalto_ATR, position)) ||
 			(baATR.indexOf(baGemalto2_ATR, position)))
+		{
+			LOG_INFO("[PKCS11] GetTokenInfo - CIE Detected: Gemalto");
 			manifacturer = "Gemalto";
+		}
 		else if ((baATR.indexOf(baSTM_ATR, position)))
+		{
+			LOG_INFO("[PKCS11] GetTokenInfo - CIE Detected: STM");
 			manifacturer = "STM";
-		else if ((baATR.indexOf(baSTM2_ATR, position)))
+		}
+		else if ((baATR.indexOf(baSTM2_ATR, position))) {
+			LOG_INFO("[PKCS11] GetTokenInfo - CIE Detected: STM2");
 			manifacturer = "STM2";
-		else if ((baATR.indexOf(baSTM3_ATR, position)))
+		}
+		else if ((baATR.indexOf(baSTM3_ATR, position))) {
+			LOG_INFO("[PKCS11] GetTokenInfo - CIE Detected: STM3");
 			manifacturer = "STM3";
+		}
 		else
-			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
+		{
+			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED, "CIE not recognized");
+		}
 
 		memcpy_s((char*)pInfo->manufacturerID, 32, manifacturer.c_str(), manifacturer.size());
 
@@ -651,8 +666,7 @@ namespace p11 {
 		Context.validate();
 		bool retry = false;
 		while (true) {
-			Log.write("Slot scelto: ");
-			Log.write(szName.c_str());
+			LOG_DEBUG("[PKCS11] Connect - Slot scelto: %s", szName);
 			DWORD ris = SCardConnect(Context, szName.c_str(), SCARD_SHARE_SHARED, SCARD_PROTOCOL_T1, &hCard, &dwProtocol);
 			if (ris == SCARD_S_SUCCESS) {
 				return;
@@ -682,12 +696,12 @@ namespace p11 {
 		state.szReader = this->szName.data();
 		SCardGetStatusChange(CSlot::Context, 0, &state, 1);
 		if (state.cbAtr > 0) {
-			Log.write("ATR Letto:");
-			Log.writeBinData(state.rgbAtr, state.cbAtr);
+			LOG_DEBUG("[PKCS11] GetATR - ATR Letto:");
+			LOG_BUFFER(state.rgbAtr, state.cbAtr);
 			return ByteArray(state.rgbAtr, state.cbAtr);
 		}
 		else {			
-			Log.write("ATR Letto: -nessuna carta inserita-");
+			LOG_ERROR("[PKCS11] GetATR - nessuna carta inserita");
 			return ByteArray();
 		}
 	}

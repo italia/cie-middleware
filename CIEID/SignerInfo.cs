@@ -375,7 +375,7 @@ namespace CIEID
 
             int n_sign = (int)verificaConCIE(filePath, proxyAddress, proxyPort, proxyCredentials);
 
-            Console.WriteLine("n_sign: {0}", n_sign);
+            Console.WriteLine("n_sign: {0}", (UInt32) n_sign);
             if (n_sign <= 0)
             {
                 return n_sign;

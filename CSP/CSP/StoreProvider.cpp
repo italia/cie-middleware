@@ -4,6 +4,7 @@
 #include "../util/moduleinfo.h"
 #include "csp.h"
 #include <vector>
+#include "../LOGGER/Logger.h"
 
 #ifdef _WIN64
 #pragma comment(linker, "/export:CertDllOpenStoreProv")
@@ -25,7 +26,11 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 	_In_          HCERTSTORE            hCertStore,
 	_Inout_       PCERT_STORE_PROV_INFO pStoreProvInfo
 ) {
-	init_CSP_func
+	//init_CSP_func
+
+	LOG_INFO("CertDllOpenStoreProv - Opening Store Provider %s", lpszStoreProvider);
+	LOG_DEBUG("CertDllOpenStoreProv - lpszStoreProvider: %s, dwEncodingType: %d, dwFlags: %d", lpszStoreProvider, dwEncodingType, dwFlags);
+
 	HCRYPTPROV prov = 0;
 	CryptAcquireContext(&prov, nullptr, MS_SCARD_PROV, PROV_RSA_FULL, CRYPT_SILENT);
 	if (prov == 0) {
@@ -81,15 +86,17 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 		}
 	}
 	CryptReleaseContext(prov, 0);
-
+	LOG_INFO("CertDllOpenStoreProv - Open Store Provider complited");
 	return TRUE;
-	exit_CSP_func
-	return FALSE;
+	//exit_CSP_func
+	//return FALSE;
 }
 
 extern "C" HRESULT __stdcall DllUnregisterServer(void) {
-	init_CSP_func
+	//init_CSP_func
 	SCARDCONTEXT hSC;
+	LOG_INFO("DllUnregisterServer - Unregistering CIE");
+
 	SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &hSC);
 	SCardForgetCardType(hSC, "CIE_1");
 	SCardForgetCardType(hSC, "CIE_2");
@@ -101,13 +108,14 @@ extern "C" HRESULT __stdcall DllUnregisterServer(void) {
 
 	CertUnregisterPhysicalStore(L"MY", CERT_SYSTEM_STORE_CURRENT_USER, L"CIEStore");
 	CryptUnregisterOIDFunction(0, CRYPT_OID_OPEN_STORE_PROV_FUNC, "CIECertProvider");
+	LOG_INFO("DllUnregisterServer - Unregistering CIE completed");
 	return S_OK;
-	exit_CSP_func
-	return E_UNEXPECTED;
+	//exit_CSP_func
+	//return E_UNEXPECTED;
 }
 
 LONG RegisterCard(SCARDCONTEXT hSC, const char *name, BYTE* ATR, int ATRLen, BYTE *Mask) {
-	init_func
+	//init_func
 	ByteDynArray ATRMask;
 	LONG ris;
 	SCardForgetCardType(hSC, name);	
@@ -141,12 +149,15 @@ LONG RegisterCard(SCARDCONTEXT hSC, const char *name, BYTE* ATR, int ATRLen, BYT
 	char pinLabel[] = "it-IT,Immettere le ultime 4 cifre del PIN";
 	RegSetKeyValueA(scardKey, NULL, "80000100", REG_SZ, pinLabel, sizeof(pinLabel));
 	return S_OK;
-	exit_func
+	//exit_func
 }
 
 extern "C" HRESULT __stdcall DllRegisterServer(void) {
-	init_CSP_func
+	//init_CSP_func
 	SCARDCONTEXT hSC;
+
+	LOG_INFO("DllRegisterServer - Registering CIE");
+
 	SCardEstablishContext(SCARD_SCOPE_SYSTEM,NULL,NULL,&hSC);
 	BYTE ATR[] = { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x03, 0x00, 0xEF, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00, 0x73 };
 	BYTE ATR2[] = { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x31, 0x80, 0x65, 0xB0, 0x85, 0x04, 0x00, 0x11, 0x12, 0x0F, 0xFF, 0x82, 0x90, 0x00, 0x8A };
@@ -156,19 +167,37 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 	BYTE ATR5[] = { 0x3B, 0x80, 0x80, 0x01, 0x01 };
 	BYTE ATR6[] = { 0x3B, 0x8B, 0x80, 0x01, 0x80, 0x66, 0x47, 0x50, 0x00, 0xB8, 0x00, 0x94, 0x82, 0x90, 0x00, 0xC5 };
 	LONG ris;
+	
 	if (ris = RegisterCard(hSC, "CIE_1", ATR, sizeof(ATR), nullptr) != SCARD_S_SUCCESS)
+	{
+		LOG_ERROR("RegisterCard - CIE_1 registration failed");
 		return E_UNEXPECTED;
-
+	}
 	if (ris = RegisterCard(hSC, "CIE_2", ATR2, sizeof(ATR2), nullptr) != SCARD_S_SUCCESS)
+	{
+		LOG_ERROR("RegisterCard - CIE_2 registration failed");
 		return E_UNEXPECTED;
+	}
 	if (ris = RegisterCard(hSC, "CIE_3", ATR3, sizeof(ATR3), ATR3_Mask) != SCARD_S_SUCCESS)
+	{
+		LOG_ERROR("RegisterCard - CIE_3 registration failed");
 		return E_UNEXPECTED;
+	}
 	if (ris = RegisterCard(hSC, "CIE_4", ATR4, sizeof(ATR4), nullptr) != SCARD_S_SUCCESS)
+	{
+		LOG_ERROR("RegisterCard - CIE_4 registration failed");
 		return E_UNEXPECTED;
+	}
 	if (ris = RegisterCard(hSC, "CIE_5", ATR5, sizeof(ATR5), nullptr) != SCARD_S_SUCCESS)
+	{
+		LOG_ERROR("RegisterCard - CIE_5 registration failed");
 		return E_UNEXPECTED;
+	}
 	if (ris = RegisterCard(hSC, "CIE_6", ATR6, sizeof(ATR6), nullptr) != SCARD_S_SUCCESS)
+	{
+		LOG_ERROR("RegisterCard - CIE_6 registration failed");
 		return E_UNEXPECTED;
+	}
 
 	SCardReleaseContext(hSC);
 
@@ -202,9 +231,13 @@ extern "C" HRESULT __stdcall DllRegisterServer(void) {
 		NULL
 		))
 	{
+		LOG_ERROR("RegisterCard - Pysical store registration failed");
 		return E_UNEXPECTED;
 	}
+
+	LOG_INFO("DllRegisterServer - CIE registered successfully");
+
 	return S_OK;
-	exit_CSP_func
-	return E_UNEXPECTED;
+	//exit_CSP_func
+	//return E_UNEXPECTED;
 }

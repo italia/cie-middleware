@@ -34,7 +34,7 @@ int TokenTransmitCallback(PCARD_DATA data, BYTE *apdu, DWORD apduSize, BYTE *res
 		}
 		if (code == 0xfffe) {
 			DWORD protocol=0;
-			ODS("UNPOWER CARD");
+			ODS("TokenTransmitCallback - UNPOWER CARD");
 			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
 			if (sw == SCARD_S_SUCCESS)
 				SCardBeginTransaction(data->hScard);
@@ -45,14 +45,14 @@ int TokenTransmitCallback(PCARD_DATA data, BYTE *apdu, DWORD apduSize, BYTE *res
 			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
 			if (sw == SCARD_S_SUCCESS)
 				SCardBeginTransaction(data->hScard);
-			ODS("RESET CARD");
+			ODS("TokenTransmitCallback - RESET CARD");
 			return 0x9000;
 		}
 	}
-	ODS(stdPrintf("APDU: %s\n",dumpHexData(ByteArray(apdu, apduSize), std::string()).c_str()).c_str());
+	//ODS(stdPrintf("APDU: %s\n",dumpHexData(ByteArray(apdu, apduSize), std::string()).c_str()).c_str());
 	auto sw=SCardTransmit(data->hScard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
 	if (sw == SCARD_S_SUCCESS) {
-		ODS(stdPrintf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), std::string()).c_str()).c_str());
+		//ODS(stdPrintf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), std::string()).c_str()).c_str());
 	}
 	return sw;
 }
@@ -87,6 +87,9 @@ DWORD WINAPI CardReadFile(
 	__deref_out_bcount_opt(*pcbData)    PBYTE       *ppbData,
 	__out                           PDWORD      pcbData) {
 	init_CSP_func
+
+	LOG_DEBUG("[CSP] CardReadFile - pszDirectoryName: %s,  pszFileName: %s, dwFlags: %d", pszDirectoryName, pszFileName, dwFlags);
+
 	*pcbData = 0;
 	*ppbData = nullptr;
 	if (dwFlags != 0)
@@ -104,7 +107,7 @@ DWORD WINAPI CardReadFile(
 	else if (lstrcmp(pszDirectoryName, DirCIE) == 0) {
 		auto ias = ((IAS*)pCardData->pvVendorSpecific);
 		if (ias == nullptr)
-			throw logged_error("IAS non inizializzato");
+			throw logged_error("[CSP] CardReadFile - IAS non inizializzato");
 		ias->SetCardContext(pCardData);
 
 		if (lstrcmp(pszFileName, EfSerial) == 0)
@@ -112,6 +115,7 @@ DWORD WINAPI CardReadFile(
 		else if (lstrcmp(pszFileName, EfCertCIE) == 0)
 			ias->ReadCertCIE(response);
 		else {
+
 			ias->SelectAID_IAS();
 			if (lstrcmp(pszFileName, EfDH) == 0)
 				ias->ReadDH(response);
@@ -134,7 +138,7 @@ DWORD WINAPI CardReadFile(
 		if (lstrcmp(pszFileName, szCONTAINER_MAP_FILE) == 0) {
 			auto ias = ((IAS*)pCardData->pvVendorSpecific);
 			if (ias == nullptr)
-				throw logged_error("IAS non inizializzato");
+				throw logged_error("[CSP] CardReadFile - IAS non inizializzato");
 			ias->SetCardContext(pCardData);
 			ByteDynArray cert;
 			ias->GetCertificate(cert);// , false);
@@ -165,12 +169,12 @@ DWORD WINAPI CardReadFile(
 				}
 
 				if (cer == nullptr)
-					throw logged_error(stdPrintf("Errore nella lettura del certificato:%08x", GetLastError()));
+					throw logged_error(stdPrintf("[CSP] CardReadFile - Errore nella lettura del certificato:%08x", GetLastError()));
 				auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(cer); });
 
 				keylen = CertGetPublicKeyLength(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, &cer->pCertInfo->SubjectPublicKeyInfo);
 				if (keylen == 0)
-					throw logged_error(stdPrintf("Errore nella lettura della lunghezza della chiave del certificato:%08x", GetLastError()));
+					throw logged_error(stdPrintf("[CSP] CardReadFile - Errore nella lettura della lunghezza della chiave del certificato:%08x", GetLastError()));
 			}
 
 			CONTAINER_MAP_RECORD value;
@@ -185,17 +189,17 @@ DWORD WINAPI CardReadFile(
 		else if (lstrcmp(pszFileName, "ksc00") == 0 || lstrcmp(pszFileName, "kxc00") == 0) {
 			auto ias = ((IAS*)pCardData->pvVendorSpecific);
 			if (ias == nullptr)
-				throw logged_error("IAS non inizializzato");
+				throw logged_error("[CSP] CardReadFile - IAS non inizializzato");
 			ias->SetCardContext(pCardData);
 			ias->GetCertificate(response);
 			if (response.isEmpty())
 				throw CSP_error(SCARD_E_FILE_NOT_FOUND);
 		}
 		else
-			throw CSP_error(SCARD_E_FILE_NOT_FOUND);
+			throw CSP_error(SCARD_E_FILE_NOT_FOUND, "File not found");
 	}
 	else
-		throw CSP_error(SCARD_E_FILE_NOT_FOUND);
+		throw CSP_error(SCARD_E_FILE_NOT_FOUND, "File not found");
 	size_t dataLen = response.size();
 	if (pcbData != nullptr && *pcbData != 0)
 		dataLen = min(dataLen, *pcbData);
@@ -217,6 +221,9 @@ DWORD WINAPI CardSignData(
 	__in    PCARD_DATA          pCardData,
 	__inout PCARD_SIGNING_INFO  pInfo) {
 	init_CSP_func
+
+	LOG_DEBUG("[CSP] CardSignData - aiHashAlgo: %d, bContainerIndex: %d, dwPaddingType: %d", pInfo->aiHashAlg, pInfo->bContainerIndex, pInfo->dwPaddingType);
+
 	if (pInfo->bContainerIndex != CIE_CONTAINER_ID)
 		throw CSP_error(SCARD_E_NO_KEY_CONTAINER);
 //	if (pInfo->dwKeySpec != AT_SIGNATURE)
@@ -231,6 +238,11 @@ DWORD WINAPI CardSignData(
 		((pInfo->dwSigningFlags & CARD_PADDING_INFO_PRESENT) == CARD_PADDING_INFO_PRESENT)) {
 		if (pInfo->dwPaddingType == CARD_PADDING_PKCS1) {
 			auto bPad = (BCRYPT_PKCS1_PADDING_INFO *)pInfo->pPaddingInfo;
+
+			char szAlgId[500];
+
+			wcstombs(szAlgId, bPad->pszAlgId, 500);
+			LOG_DEBUG("[CSP] CardSignData - Alg ID: %s", szAlgId);
 			if (bPad->pszAlgId==nullptr)
 				alg = 0;
 			else if (lstrcmpW(bPad->pszAlgId, L"SHA256") == 0)
@@ -295,6 +307,9 @@ DWORD WINAPI CardAuthenticateEx(
 	__out_opt                               PDWORD      pcbSessionPin,
 	__out_opt                               PDWORD      pcAttemptsRemaining) {
 	init_CSP_func
+
+	LOG_DEBUG("[CSP] CardAuthenticateEx - PinId: %d, dwFlags: %d", PinId, dwFlags);
+	
 	if (pcbSessionPin != nullptr)
 		pcbSessionPin = nullptr;
 	if (pcAttemptsRemaining != nullptr)
@@ -304,7 +319,6 @@ DWORD WINAPI CardAuthenticateEx(
 	int expectedLen = 8;
 	if (((dwFlags & FULL_PIN) != FULL_PIN) && PinId == ROLE_USER)
 		expectedLen = 4;
-	
 	if (cbPinData != expectedLen) {
 		if (pcAttemptsRemaining != nullptr)
 			*pcAttemptsRemaining = -1;
@@ -312,7 +326,6 @@ DWORD WINAPI CardAuthenticateEx(
 	}
 	if ((dwFlags & CARD_AUTHENTICATE_GENERATE_SESSION_PIN) == CARD_AUTHENTICATE_GENERATE_SESSION_PIN)
 		throw CSP_error(SCARD_E_INVALID_PARAMETER);
-
 	auto ias = (IAS*)pCardData->pvVendorSpecific;
 	if (ias == nullptr)
 		throw logged_error("IAS non inizializzato");
@@ -320,10 +333,10 @@ DWORD WINAPI CardAuthenticateEx(
 
 	ias->SelectAID_IAS();
 	ias->SelectAID_CIE();
-
 	// leggo i parametri di dominio DH e della chiave di extauth
-	if (ias->Callback != nullptr)
+	if (ias->Callback != nullptr) {
 		ias->Callback(0, "Init", ias->CallbackData);
+	}
 	ias->InitDHParam();
 	ias->InitExtAuthKeyParam();
 	// faccio lo scambio di chiavi DH	
@@ -339,7 +352,6 @@ DWORD WINAPI CardAuthenticateEx(
 	if (ias->Callback != nullptr)
 		ias->Callback(3, "Verify PIN", ias->CallbackData);
 	if (PinId == ROLE_USER) {
-
 		ByteDynArray PIN;
 		if ((dwFlags & FULL_PIN) != FULL_PIN)
 			ias->GetFirstPIN(PIN);
@@ -351,7 +363,6 @@ DWORD WINAPI CardAuthenticateEx(
 	}
 	else
 		throw CSP_error(SCARD_E_INVALID_PARAMETER);
-
 	if (sw == 0x6983) {
 		if (PinId == ROLE_USER)
 			ias->IconaSbloccoPIN();
@@ -449,14 +460,20 @@ DWORD WINAPI CardGetContainerProperty(
 }
 
 DWORD WINAPI CardGetProperty(
-__in                                        PCARD_DATA  pCardData,
-__in                                        LPCWSTR     wszProperty,
-__out_bcount_part_opt(cbData, *pdwDataLen)  PBYTE       pbData,
-__in                                        DWORD       cbData,
-__out                                       PDWORD      pdwDataLen,
-__in                                        DWORD       dwFlags)
+	__in                                        PCARD_DATA  pCardData,
+	__in                                        LPCWSTR     wszProperty,
+	__out_bcount_part_opt(cbData, *pdwDataLen)  PBYTE       pbData,
+	__in                                        DWORD       cbData,
+	__out                                       PDWORD      pdwDataLen,
+	__in                                        DWORD       dwFlags)
 {
 	init_CSP_func
+
+	char szProperty[500];
+	wcstombs(szProperty, wszProperty, 500);
+
+	LOG_DEBUG("[CSP] CardGetProperty - wszProperty: %s", szProperty);
+
 	*pdwDataLen = 0;
 	ByteDynArray response;
 	if (lstrcmpW(wszProperty, CP_CARD_GUID) == 0) {
@@ -490,8 +507,8 @@ __in                                        DWORD       dwFlags)
 		response = VarToByteArray(val);
 	}
 	else if (lstrcmpW(wszProperty, CP_CARD_KEYSIZES) == 0) {
-//		if (dwFlags != AT_SIGNATURE)
-//			throw CSP_error(SCARD_E_INVALID_PARAMETER);
+		//		if (dwFlags != AT_SIGNATURE)
+		//			throw CSP_error(SCARD_E_INVALID_PARAMETER);
 		CARD_KEY_SIZES val;
 		val.dwVersion = CARD_KEY_SIZES_CURRENT_VERSION;
 		val.dwDefaultBitlen = CIE_KEY_BITLEN;
@@ -513,7 +530,7 @@ __in                                        DWORD       dwFlags)
 		response = VarToByteArray(val);
 	}
 	else if (lstrcmpW(wszProperty, CP_CARD_PIN_INFO) == 0) {
-		if (dwFlags != CIE_PIN_ID && 
+		if (dwFlags != CIE_PIN_ID &&
 			dwFlags != CIE_PUK_ID) // PIN o PUK
 			throw CSP_error(SCARD_E_INVALID_PARAMETER);
 		PIN_INFO val;
@@ -586,7 +603,7 @@ __in                                        DWORD       dwFlags)
 	memcpy_s(pbData, cbData, response.data(), response.size());
 	return SCARD_S_SUCCESS;
 	exit_CSP_func
-	return E_UNEXPECTED;
+		//return E_UNEXPECTED;
 }
 
 DWORD
@@ -602,7 +619,11 @@ __in_bcount(cbTargetData)               PBYTE       pbTargetData,
 __in                                    DWORD       cbTargetData,
 __in                                    DWORD       cRetryCount,
 __out_opt                               PDWORD      pcAttemptsRemaining) {
-	init_CSP_func
+	//init_CSP_func
+
+	LOG_INFO("[CSP] CardChangeAuthenticatorEx"); 
+	LOG_DEBUG("[CSP] CardAuthenticateEx - PinId: %d, dwFlags: %d", dwAuthenticatingPinId, dwFlags);
+
 	if (pcAttemptsRemaining != nullptr)
 		*pcAttemptsRemaining = 0;
 
@@ -696,8 +717,8 @@ __out_opt                               PDWORD      pcAttemptsRemaining) {
 	}
 	else
 		throw CSP_error(SCARD_E_INVALID_PARAMETER);
-	exit_CSP_func
-	return E_UNEXPECTED;
+	//exit_CSP_func
+	//return E_UNEXPECTED;
 }
 
 //
@@ -716,6 +737,7 @@ __in                               DWORD       cbNewPinData,
 __in                               DWORD       cRetryCount,
 __in                               DWORD       dwFlags) {
 	init_CSP_func
+
 	if (dwFlags != CARD_AUTHENTICATE_PIN_PIN)
 		throw CSP_error(SCARD_E_INVALID_PARAMETER);
 	if (cRetryCount != 0)
@@ -802,14 +824,16 @@ __in    PCARD_DATA      pCardData,
 __in    BYTE            bContainerIndex,
 __in    DWORD           dwFlags,
 __inout PCONTAINER_INFO pContainerInfo){
-	init_CSP_func
+	//init_CSP_func
+	LOG_INFO("[CSP] CardGetContainerInfo");
+
 	if (dwFlags != 0)
 		throw CSP_error(SCARD_E_INVALID_PARAMETER);
 	if (bContainerIndex != CIE_CONTAINER_ID)
 		return SCARD_E_NO_KEY_CONTAINER;
 	GetContainerInfo(*pContainerInfo, pCardData);
 	return SCARD_S_SUCCESS;
-	exit_CSP_func
+	//exit_CSP_func
 	return E_UNEXPECTED;
 }
 
@@ -821,7 +845,9 @@ extern "C" DWORD WINAPI CardAcquireContext(
 	)
 
 {
-	init_CSP_func		
+	init_CSP_func
+
+	LOG_INFO("[CSP] CardAcquireContext");
 
 	if ((dwFlags & CARD_SECURE_KEY_INJECTION_NO_CARD_MODE) == CARD_SECURE_KEY_INJECTION_NO_CARD_MODE)
 		return SCARD_E_UNSUPPORTED_FEATURE;
@@ -841,7 +867,7 @@ extern "C" DWORD WINAPI CardAcquireContext(
 	CModuleInfo info;
 	info.init(info.getApplicationModule());
 	auto pid = GetCurrentProcessId();
-	OutputDebugString(stdPrintf("Process: %i %08x %s", pid, pid, info.szModuleName.c_str()).c_str());
+	LOG_DEBUG("[CSP] CardAcquireContext - %s",(stdPrintf("Process: %i %08x %s", pid, pid, info.szModuleName.c_str()).c_str()));
 
 	ByteDynArray data;
 	ias->SelectAID_IAS();

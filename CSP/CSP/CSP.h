@@ -11,19 +11,19 @@
 
 
 #define init_CSP_func \
-	CFuncCallInfo info(__FUNCTION__, Log); \
+	LOG_INFO("[CSP] %s", __FUNCTION__); \
 	try {
 
 #define exit_CSP_func } \
 	catch (CSP_error &CSPErr) { \
-		Log.write("EXCLOG %s", CSPErr.what()); \
+		LOG_ERROR("%s - EXCLOG %d", __FUNCTION__, CSPErr.getCSPErrorCode()); \
 		OutputDebugString("EXCLOG->"); \
 		OutputDebugString(CSPErr.what()); \
 		OutputDebugString("<-EXCLOG");\
 		return CSPErr.getCSPErrorCode(); \
 	} \
 	catch (std::exception &err) { \
-			Log.write("EXCLOG %s", err.what()); \
+		LOG_ERROR("%s - EXCLOG %d", __FUNCTION__, E_UNEXPECTED); \
 		OutputDebugString("EXCLOG->"); \
 		OutputDebugString(err.what()); \
 		OutputDebugString("<-EXCLOG");\
@@ -35,6 +35,6 @@ class CSP_error : public logged_error {
 	DWORD CSPErrorCode;
 public:
 	CSP_error(DWORD CSPErrorCode, const char *message) : CSPErrorCode(CSPErrorCode), logged_error(message) {}
-	CSP_error(DWORD CSPErrorCode) : CSP_error(CSPErrorCode, stdPrintf("%s:%08x", "Errore CSP", CSPErrorCode).c_str()) { }
+	CSP_error(DWORD CSPErrorCode) : CSP_error(CSPErrorCode, stdPrintf("%s:%08x", "CSP error", CSPErrorCode).c_str()) { }
 	DWORD getCSPErrorCode() { return CSPErrorCode; }
 };
