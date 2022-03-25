@@ -7,6 +7,7 @@
 #include "CardTemplate.h"
 #include "../util/util.h"
 #include "../util/syncroevent.h"
+#include "../CSP/ATR.h"
 #include <mutex>
 
 static char *szCompiledFile = __FILE__;
@@ -132,7 +133,7 @@ namespace p11 {
 					if (((state[i].dwCurrentState & SCARD_STATE_UNAVAILABLE) ||
 						(state[i].dwCurrentState & SCARD_STATE_EMPTY)) &&
 						(state[i].dwEventState & SCARD_STATE_PRESENT)) {
-						// una carta è stata inserita!!
+						// una carta ï¿½ stata inserita!!
 						std::unique_lock<std::mutex> lock(p11Mutex);
 
 						slot[i]->lastEvent = SE_Inserted;
@@ -203,7 +204,7 @@ namespace p11 {
 		if (Thread.joinable())
 			Thread.join();
 
-		// TODO: verificare se è il caso di usare un thread con join a tempo
+		// TODO: verificare se ï¿½ il caso di usare un thread con join a tempo
 
 		/*while (i<5) {
 			if (Thread.join(1000)==OK)
@@ -226,8 +227,8 @@ namespace p11 {
 	void CSlot::InitSlotList()
 	{
 		// la InitSlotList deve aggiornare la liste degli slot;
-		// cioè, deve aggiungere gli slot che non c'erano prima e
-		// cancellare quelli che non ci sono più
+		// cioï¿½, deve aggiungere gli slot che non c'erano prima e
+		// cancellare quelli che non ci sono piï¿½
 		init_func
 			bool bMapChanged = false;
 		DWORD readersLen = 0;
@@ -254,7 +255,7 @@ namespace p11 {
 			if (!bP11Initialized)
 				return;
 
-			// vediamo questo slot c'era già prima
+			// vediamo questo slot c'era giï¿½ prima
 			LOG_INFO("[PKCS11] InitSlotList - reader:%s", szReaderName);
 			std::shared_ptr<CSlot> pSlot = GetSlotFromReaderName(szReaderName);
 			if (pSlot == nullptr) {
@@ -394,6 +395,17 @@ namespace p11 {
 		LOG_BUFFER(baATR.data(), baATR.size());
 
 		std::string manifacturer;
+
+		std::vector<uint8_t> atr_vector(baATR.data(), baATR.data() + baATR.size());
+		manifacturer = get_manufacturer(atr_vector);
+
+		if (manifacturer.size() == 0){
+			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED, "CIE not recognized");
+		}
+
+		LOG_INFO("[PKCS11] GetTokenInfo - CIE Detected: %s", manifacturer.c_str());
+
+#if 0
 		size_t position;
 		if (baATR.indexOf(baNXP_ATR, position))
 		{
@@ -423,7 +435,7 @@ namespace p11 {
 		{
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED, "CIE not recognized");
 		}
-
+#endif
 		memcpy_s((char*)pInfo->manufacturerID, 32, manifacturer.c_str(), manifacturer.size());
 
 		if (baSerial.isEmpty() || pSerialTemplate != pTemplate) {
@@ -527,7 +539,7 @@ namespace p11 {
 				}
 				else it++;
 			}
-			// dwSessionCount dovrebbe essere già a 0...
+			// dwSessionCount dovrebbe essere giï¿½ a 0...
 			// ma per sicurezza lo setto a manina
 
 			User = CKU_NOBODY;
@@ -694,6 +706,7 @@ namespace p11 {
 
 			SCARD_READERSTATE state;
 		state.szReader = this->szName.data();
+		state.cbAtr = 0;
 		SCardGetStatusChange(CSlot::Context, 0, &state, 1);
 		if (state.cbAtr > 0) {
 			LOG_DEBUG("[PKCS11] GetATR - ATR Letto:");

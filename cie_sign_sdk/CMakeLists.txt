@@ -7,6 +7,8 @@ set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 set(INSTALL_DIR ${CMAKE_SOURCE_DIR}/../CSP/Sign)
 
+#set (CMAKE_GENERATOR_PLATFORM=x86 "x86")
+
 message("DEPENDENCIES_DIR: " ${DEPENDENCIES_DIR})
 message("SOURCE_DIR: " ${SOURCE_DIR})
 message("INCLUDE_DIR: " ${INCLUDE_DIR})
@@ -88,6 +90,7 @@ set(SRC_LIST
     ${SOURCE_DIR}/RSA/sha1.c
     ${SOURCE_DIR}/RSA/sha2.c
     ${SOURCE_DIR}/CSP/IAS.cpp
+    ${SOURCE_DIR}/CSP/ATR.cpp
     ${SOURCE_DIR}/CSP/ExtAuthKey.cpp
     ${SOURCE_DIR}/PCSC/APDU.cpp  
     ${SOURCE_DIR}/PCSC/CardLocker.cpp  

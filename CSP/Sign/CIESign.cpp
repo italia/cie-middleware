@@ -22,7 +22,7 @@ uint16_t CIESign::sign(const char* inFilePath, const char* type, const char* pin
 	{
 		ctx = disigon_sign_init();
 
-#if 1
+#if 0
 		ret = disigon_set(DISIGON_OPT_LOG_LEVEL, (void*)LOG_TYPE_DEBUG);
 		if (ret != 0)
 		{
@@ -144,7 +144,7 @@ uint16_t CIESign::sign(const char* inFilePath, const char* type, const char* pin
 		}
 	}
 	catch (long err) {
-		LOG_ERROR("CIESign::sign - Error %d", err);;	
+		LOG_ERROR("CIESign::sign - Error %d", err);;
 	}
 	catch (...)
 	{

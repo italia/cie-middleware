@@ -1,7 +1,11 @@
 #pragma once
 #include "../PCSC/token.h"
 #include "../CSP/Cardmod.h"
+
+#include "../CSP/ATR.h"
 #include <map>
+#include <string>
+#include <vector>
 
 #define DirCIE				"CIE"
 
@@ -19,14 +23,6 @@ extern bool switchDesktop;
 extern BOOL CheckOneInstance(char *nome);
 extern ByteArray baExtAuth_PrivExp;
 
-enum CIE_Type {
-	CIE_Unknown,
-	CIE_Gemalto,
-	CIE_NXP,
-	CIE_STM,
-	CIE_STM2,
-	CIE_STM3
-};
 
 enum CIE_DF {
 	DF_Root,
@@ -39,6 +35,8 @@ enum CIE_RequestedSM {
 	CIE_NoSM,
 	CIE_AnySM
 };
+
+
 
 class IAS
 {

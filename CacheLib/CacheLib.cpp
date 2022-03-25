@@ -29,7 +29,7 @@ std::string GetCardDir() {
 }
 
 void GetCardPath(const char *PAN, char szPath[MAX_PATH]) {
-	auto Path=GetCardDir();
+	auto Path = GetCardDir();
 
 	if (Path[Path.length()] != '\\')
 		Path += '\\';
@@ -45,7 +45,7 @@ bool CacheExists(const char *PAN) {
 	return PathFileExists(szPath);
 }
 
-bool CacheRemove(const char *PAN) 
+bool CacheRemove(const char *PAN)
 {
 	char szPath[MAX_PATH];
 	GetCardPath(PAN, szPath);
@@ -106,7 +106,7 @@ void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 	}
 	else
 		throw logged_error("CIE non abilitata");
-		
+
 }
 
 
@@ -115,12 +115,12 @@ void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, ui
 	if (PAN == nullptr)
 		throw logged_error("Il PAN è necessario");
 
-	auto szDir=GetCardDir();
+	auto szDir = GetCardDir();
 	char chDir[MAX_PATH];
 	strcpy_s(chDir, szDir.c_str());
 
 	if (!PathFileExists(chDir)) {
-		
+
 		//creo la directory dando l'accesso a Edge (utente Packege).
 		//Edge gira in low integrity quindi non potrà scrivere (enrollare) ma solo leggere il certificato
 		bool done = false;
@@ -164,10 +164,10 @@ void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, ui
 			{
 				if (TheSID != NULL)
 					LocalFree((HLOCAL)TheSID);
-			if (pSD != NULL)
-				LocalFree((HLOCAL)pSD);
-			if (pNewDACL != NULL)
-				LocalFree((HLOCAL)pNewDACL);
+				if (pSD != NULL)
+					LocalFree((HLOCAL)pSD);
+				if (pNewDACL != NULL)
+					LocalFree((HLOCAL)pNewDACL);
 				throw logged_error("Impossibile attivare la CIE nel processo corrente");
 			}
 
@@ -175,14 +175,14 @@ void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, ui
 			{
 				if (pNewDACL != NULL)
 					LocalFree((HLOCAL)pNewDACL);
-			if (TheSID != NULL)
-				LocalFree((HLOCAL)TheSID);
+				if (TheSID != NULL)
+					LocalFree((HLOCAL)TheSID);
 				if (pSD != NULL)
 					LocalFree((HLOCAL)pSD);
 				throw logged_error("Impossibile attivare la CIE nel processo corrente");
-		}
+			}
 
-	}
+		}
 	}
 	char szPath[MAX_PATH];
 	GetCardPath(PAN, szPath);

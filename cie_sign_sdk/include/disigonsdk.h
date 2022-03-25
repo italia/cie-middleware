@@ -3,7 +3,7 @@
 #define __DISIGON_H
 
 #ifndef WIN32
-#define DISIGON_API API //__declspec(dllexport)
+#define DISIGON_API //__declspec(dllexport)
 #else
 #ifdef DISIGON_STATIC
 #define DISIGON_API

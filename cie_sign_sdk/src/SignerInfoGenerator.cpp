@@ -144,7 +144,7 @@ void CSignerInfoGenerator::getSignedAttributes(UUCByteArray& signedAttribute, bo
 	
 	//CASN1Sequence sequence;
 	//sequence.addElement(CIssuerAndSerialNumber(*m_pIssuer, *m_pSerialNumber, true));
-	certidv2s.addElement(CIssuerAndSerialNumber(*m_pIssuer, *m_pSerialNumber, false));
+	certidv2s.addElement(CIssuerAndSerialNumber(*m_pIssuer, *m_pSerialNumber, true));
 	
 	CASN1Sequence signingCertificateV2;
 	

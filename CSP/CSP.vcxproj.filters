@@ -225,6 +225,9 @@
     <ClCompile Include="LOGGER\Logger.cpp">
       <Filter>Source Files\LOGGER</Filter>
     </ClCompile>
+    <ClCompile Include="CSP\ATR.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PKCS11\CardContext.h">
@@ -385,6 +388,9 @@
     </ClInclude>
     <ClInclude Include="LOGGER\Logger.h">
       <Filter>Header Files\LOGGER</Filter>
+    </ClInclude>
+    <ClInclude Include="CSP\ATR.h">
+      <Filter>Header Files\CSP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

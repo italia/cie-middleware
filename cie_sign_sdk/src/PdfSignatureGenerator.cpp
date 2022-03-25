@@ -61,9 +61,7 @@ int PdfSignatureGenerator::Load(const char* pdf, int len)
 
 	try
 	{
-		printf("PDF");
-		printf((char*)pdf);
-		printf("LENGTH");
+		printf("PDF LENGTH ");
 		printf("%i", len);
 		printf("STOP");
 
@@ -218,7 +216,7 @@ void PdfSignatureGenerator::InitSignature(int pageIndex, float left, float botto
 	//	// crea il nuovo doc con il campo di firma
 	//	int fulllen = m_actualLen * 3 + SINGNATURE_SIZE * 2;
 	//	m_pMainDocbuffer = new char[fulllen];
-	//	PdfOutputDevice pdfOutDevice(m_pMainDocbuffer, fulllen);	
+	//	PdfOutputDevice pdfOutDevice(m_pMainDocbuffer, fulllen);
 	//	m_pPdfDocument->Write(&pdfOutDevice);
 	//	int mainDoclen = pdfOutDevice.GetLength();
 

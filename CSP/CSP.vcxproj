@@ -228,12 +228,16 @@
     <PostBuildEvent>
       <Command>"$(SolutionDir)sign_sha256.bat" "$(TargetPath)"</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)cie_sign_sdk\build.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Crypto\MD5.cpp" />
     <ClCompile Include="Crypto\SHA512.cpp" />
     <ClCompile Include="CSP\abilitaCIE.cpp" />
     <ClCompile Include="crypto\AES.cpp" />
+    <ClCompile Include="CSP\ATR.cpp" />
     <ClCompile Include="CSP\CIEScaduta.cpp" />
     <ClCompile Include="CSP\ExtAuthKey.cpp" />
     <ClCompile Include="CSP\PINManager.cpp" />
@@ -298,6 +302,7 @@
     <ClInclude Include="Crypto\SHA1.h" />
     <ClInclude Include="Crypto\sha256.h" />
     <ClInclude Include="Crypto\sha512.h" />
+    <ClInclude Include="CSP\ATR.h" />
     <ClInclude Include="CSP\CSP.h" />
     <ClInclude Include="CSP\PINManager.h" />
     <ClInclude Include="LOGGER\Logger.h" />

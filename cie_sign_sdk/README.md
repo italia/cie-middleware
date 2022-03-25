@@ -32,7 +32,7 @@
     │       │   headerfile2.h
     │       │   ...
     ```
-- Creare una cartella con il nome *build* nella root del progetto che conterrò tutti i file di build. 
+- Creare una cartella con il nome *build* nella root del progetto che conterrà tutti i file di build. 
 - Aprire il terminale, spostarsi nella cartella *build* ed eseguire il seguente comando:
     
     *cmake ..*
