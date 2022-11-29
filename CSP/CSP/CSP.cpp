@@ -239,10 +239,6 @@ DWORD WINAPI CardSignData(
 		if (pInfo->dwPaddingType == CARD_PADDING_PKCS1) {
 			auto bPad = (BCRYPT_PKCS1_PADDING_INFO *)pInfo->pPaddingInfo;
 
-			char szAlgId[500];
-
-			wcstombs(szAlgId, bPad->pszAlgId, 500);
-			LOG_DEBUG("[CSP] CardSignData - Alg ID: %s", szAlgId);
 			if (bPad->pszAlgId==nullptr)
 				alg = 0;
 			else if (lstrcmpW(bPad->pszAlgId, L"SHA256") == 0)
