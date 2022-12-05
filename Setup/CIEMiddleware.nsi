@@ -2,7 +2,7 @@
 !include "x64.nsh"
 !include "Library.nsh"
 
-!define PRODUCT_VERSION "1.4.3.3"
+!define PRODUCT_VERSION "1.4.3.4"
 
 ;--------------------------------
 ;General
@@ -160,7 +160,7 @@ Section "Uninstall"
 	Delete "$SYSDIR\CIEPKI.dll"
   ${EndIf}
   
-  !echo $%LOCALAPPDATA%
+  ;!echo $%LOCALAPPDATA%
 
   RMDir /r "$LOCALAPPDATA\IPZS"
   RMDir /r "$%PROGRAMDATA%\CIEPKI"
