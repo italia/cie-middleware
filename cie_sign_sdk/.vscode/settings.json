@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "*.c": "c",
-        "*.py": "python",
-        "*kt": "kotlin",
-        "*.kt": "kotlinscript",
-        "xutility": "cpp"
-    }
-}
