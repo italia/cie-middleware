@@ -44,3 +44,5 @@ CIE_Type get_type(vector<uint8_t> atr) {
 
 	return CIE_Type::CIE_Unknown;
 }
+	return CIE_Type::CIE_Unknown;
+}
