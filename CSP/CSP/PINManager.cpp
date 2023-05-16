@@ -171,7 +171,7 @@ CK_RV CK_ENTRY __stdcall ChangePIN(const char*  szCurrentPIN, const char*  szNew
             if(isEnrolled)
                 ias.GetCertificate(cert);
             
-            
+         
             ByteArray newPINBa((BYTE*)szNewPIN, strlen(szNewPIN));
             sw = ias.ChangePIN(oldPINBa, newPINBa);
 

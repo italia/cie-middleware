@@ -29,28 +29,30 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <SpectreMitigation>false</SpectreMitigation>
+    <UseOfMfc>false</UseOfMfc>
     <SpectreMitigation>false</SpectreMitigation>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -146,6 +148,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)PKCS11</AdditionalIncludeDirectories>
@@ -181,6 +184,9 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)PKCS11;F:\Projects\IPZS\cie-middleware\CSP\Sign</AdditionalIncludeDirectories>
       <OmitFramePointers />
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)PKCS11;F:\Projects\IPZS\cie-middleware\CSP\Sign</AdditionalIncludeDirectories>
+      <OmitFramePointers />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -194,7 +200,11 @@
     </Link>
     <PostBuildEvent>
       <Command>"$(SolutionDir)sign_sha256.bat" "$(TargetPath)"</Command>
+      <Command>"$(SolutionDir)sign_sha256.bat" "$(TargetPath)"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
+    </Manifest>
     <Manifest>
       <AdditionalManifestFiles>custom.manifest</AdditionalManifestFiles>
     </Manifest>
@@ -205,10 +215,17 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>Disabled</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CSP_EXPORTS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)CSP\Sign\;$(SolutionDir)PKCS11;$(SolutionDir)LOGGER</AdditionalIncludeDirectories>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)CSP\Sign\;$(SolutionDir)PKCS11;$(SolutionDir)LOGGER</AdditionalIncludeDirectories>
       <SupportJustMyCode>true</SupportJustMyCode>
@@ -227,7 +244,11 @@
     </Manifest>
     <PostBuildEvent>
       <Command>"$(SolutionDir)sign_sha256.bat" "$(TargetPath)"</Command>
+      <Command>"$(SolutionDir)sign_sha256.bat" "$(TargetPath)"</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)cie_sign_sdk\build.bat</Command>
+    </PreBuildEvent>
     <PreBuildEvent>
       <Command>$(SolutionDir)cie_sign_sdk\build.bat</Command>
     </PreBuildEvent>
@@ -238,12 +259,16 @@
     <ClCompile Include="CSP\abilitaCIE.cpp" />
     <ClCompile Include="crypto\AES.cpp" />
     <ClCompile Include="CSP\ATR.cpp" />
+    <ClCompile Include="CSP\ATR.cpp" />
     <ClCompile Include="CSP\CIEScaduta.cpp" />
     <ClCompile Include="CSP\ExtAuthKey.cpp" />
     <ClCompile Include="CSP\PINManager.cpp" />
     <ClCompile Include="LOGGER\Logger.cpp" />
+    <ClCompile Include="LOGGER\Logger.cpp" />
     <ClCompile Include="PCSC\APDU.cpp" />
     <ClCompile Include="CSP\cambioPIN.cpp" />
+    <ClCompile Include="Sign\CIESign.cpp" />
+    <ClCompile Include="Sign\CIEVerify.cpp" />
     <ClCompile Include="Sign\CIESign.cpp" />
     <ClCompile Include="Sign\CIEVerify.cpp" />
     <ClCompile Include="UI\Message.cpp" />
@@ -303,10 +328,16 @@
     <ClInclude Include="Crypto\sha256.h" />
     <ClInclude Include="Crypto\sha512.h" />
     <ClInclude Include="CSP\ATR.h" />
+    <ClInclude Include="CSP\ATR.h" />
     <ClInclude Include="CSP\CSP.h" />
     <ClInclude Include="CSP\PINManager.h" />
     <ClInclude Include="LOGGER\Logger.h" />
+    <ClInclude Include="LOGGER\Logger.h" />
     <ClInclude Include="PCSC\APDU.h" />
+    <ClInclude Include="Sign\CIESign.h" />
+    <ClInclude Include="Sign\CIEVerify.h" />
+    <ClInclude Include="Sign\definitions.h" />
+    <ClInclude Include="Sign\disigonsdk.h" />
     <ClInclude Include="Sign\CIESign.h" />
     <ClInclude Include="Sign\CIEVerify.h" />
     <ClInclude Include="Sign\definitions.h" />

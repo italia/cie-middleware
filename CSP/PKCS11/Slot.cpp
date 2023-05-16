@@ -703,15 +703,18 @@ namespace p11 {
 	ByteDynArray CSlot::GetATR()
 	{
 		init_func
+		LPSCARD_READERSTATE state = new SCARD_READERSTATE[1];
 
-			SCARD_READERSTATE state;
-		state.szReader = this->szName.data();
-		state.cbAtr = 0;
-		SCardGetStatusChange(CSlot::Context, 0, &state, 1);
-		if (state.cbAtr > 0) {
+		state[0].szReader = this->szName.data();
+		state[0].dwCurrentState = SCARD_STATE_UNAWARE;
+			DWORD cch = SCARD_AUTOALLOCATE;
+		state[0].cbAtr = 0;
+
+		CK_RV res = SCardGetStatusChange(CSlot::Context, 0, state, 1);
+		if (state[0].cbAtr > 0) {
 			LOG_DEBUG("[PKCS11] GetATR - ATR Letto:");
-			LOG_BUFFER(state.rgbAtr, state.cbAtr);
-			return ByteArray(state.rgbAtr, state.cbAtr);
+			LOG_BUFFER(state[0].rgbAtr, state[0].cbAtr);
+			return ByteArray(state[0].rgbAtr, state[0].cbAtr);
 		}
 		else {			
 			LOG_ERROR("[PKCS11] GetATR - nessuna carta inserita");
@@ -725,6 +728,7 @@ namespace p11 {
 				ATR = baATR;
 				return;
 			}
+
 		baATR = GetATR();
 		ATR = baATR;
 	}
