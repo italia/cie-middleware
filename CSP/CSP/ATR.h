@@ -11,12 +11,15 @@ using namespace std;
 enum CIE_Type {
 	CIE_Unknown,
 	CIE_Gemalto,
+	CIE_Gemalto2,
 	CIE_STM,
 	CIE_STM2,
 	CIE_STM3,
 	CIE_NXP,
 	CIE_ACTALIS,
-	CIE_BIT4ID
+	CIE_ACTALIS2,
+	CIE_BIT4ID,
+	CIE_BIT4ID2
 };
 
 typedef struct _cie_atr {
