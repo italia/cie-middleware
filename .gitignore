@@ -59,7 +59,6 @@ x64/Release/
 NoteCIEtxt/
 cie_sign_sdk/build/
 cie_sign_sdk/build32
-cie_sign_sdk/Dependencies/
 cie_sign_sdk.lib
 hooks
 lfs
