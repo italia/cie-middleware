@@ -31,7 +31,7 @@ namespace CIEID
                 Properties.Settings.Default.Save(); // Saves settings in application configuration file                
             }
 
-            MainForm mainForm = new MainForm(null);
+            mainForm mainForm = new mainForm(null);
             mainForm.Show();
 
             Hide();

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CIEID.Controls
@@ -262,7 +259,8 @@ namespace CIEID.Controls
             if (model.IsEmpty)
             {
                 carouselItem.Hide();
-            } else
+            }
+            else
             {
                 var labelCardNumberValue = carouselItem.Controls.Find(String.Format("labelCardNumberValue{0}", index), false).FirstOrDefault();
                 var labelOwnerValue = carouselItem.Controls.Find(String.Format("labelOwnerValue{0}", index), false).FirstOrDefault();

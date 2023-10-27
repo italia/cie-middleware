@@ -69,7 +69,7 @@ namespace CIEID
             }
             else
             {
-                Application.Run(new MainForm(args.Length > 0 ? args[0] : null));
+                Application.Run(new mainForm(args.Length > 0 ? args[0] : null));
             }
 
         }
