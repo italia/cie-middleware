@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("IPZS")]
 [assembly: AssemblyProduct("CIEID")]
 [assembly: AssemblyCopyright("Copyright © IPZS 2019")]
-[assembly: AssemblyTrademark("IPZS - Author Ugo Chirico")]
+[assembly: AssemblyTrademark("IPZS")]
 [assembly: AssemblyCulture("")]
 
 // Se si imposta ComVisible su false, i tipi in questo assembly non saranno visibili
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // È possibile specificare tutti i valori oppure impostare valori predefiniti per i numeri relativi alla revisione e alla build
 // usando l'asterisco '*' come illustrato di seguito:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.1")]
-[assembly: AssemblyFileVersion("1.0.0.1")]
+[assembly: AssemblyVersion("1.4.3.6")]
+[assembly: AssemblyFileVersion("1.4.3.6")]

@@ -2,7 +2,7 @@
 !include "x64.nsh"
 !include "Library.nsh"
 
-!define PRODUCT_VERSION "1.4.3.5"
+!define PRODUCT_VERSION "1.4.3.6"
 
 ;--------------------------------
 ;General
@@ -30,7 +30,7 @@ VIAddVersionKey "ProductName" "CIE-Middleware"
 VIAddVersionKey "Comments" "CIE-Middleware"
 VIAddVersionKey "CompanyName" ""
 VIAddVersionKey "LegalTrademarks" ""
-VIAddVersionKey "LegalCopyright" "Copyright (C) IPZS 2018-2021"
+VIAddVersionKey "LegalCopyright" "Copyright (C) IPZS 2018-2023"
 VIAddVersionKey "FileDescription" "CIE-Middleware"
 VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}"
 VIAddVersionKey "OriginalFilename" "CIE-Middleware.exe"

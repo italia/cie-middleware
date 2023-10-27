@@ -1,32 +1,22 @@
-﻿/*
- * CIE ID, l'applicazione per gestire la CIE
- * Author: Ugo Chirico - http://www.ugochirico.com
- * Data: 10/04/2019
- */
-
+﻿using CIEID.Controls;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using System.Threading;
-using Newtonsoft.Json;
-using CIEID.Controls;
 using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
-using System.Management;
-using System.Security.Cryptography;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace CIEID
 {
-    public partial class MainForm : Form
+    public partial class mainForm : Form
     {
         public const int CKR_OK = 0x00000000;
         public const int CKR_CANCEL = 0x00000001;
@@ -49,16 +39,17 @@ namespace CIEID
         public const int NOT_ENROLLED = 0;
 
         private PdfPreview pdfPreview = null;
-        private enum opSelectedState
+        private enum OperationSelectedState
         {
             NO_OP = 0,
             FIRMA_PADES = 1,
             FIRMA_CADES = 2,
             VERIFY = 3,
         }
+
         private int signFontSize = 120;
 
-        private opSelectedState signOp = opSelectedState.NO_OP;
+        private OperationSelectedState signOp = OperationSelectedState.NO_OP;
 
         delegate long ProgressCallback(int progress, string message);
         delegate long CompletedCallback(string pan, string name, string ef_seriale);
@@ -88,6 +79,10 @@ namespace CIEID
         [DllImport("ciepki.dll", CallingConvention = CallingConvention.StdCall)]
         static extern int estraiP7m(string inFilePath, string outFilePath);
 
+        private bool shouldSignWithoutCIEPairing = false;
+
+        private String PANForOneShotSigning = String.Empty;
+
         private CieCollection cieColl;
 
         internal CieCollection CieColl { get => cieColl; set => cieColl = value; }
@@ -96,34 +91,24 @@ namespace CIEID
 
         private Logger Logger;
 
-        public MainForm(string arg)
+        public mainForm(string arg)
         {
             Logger = Program.Logger;
             Logger.Info("Inizializzo form principale");
 
             InitializeComponent();
 
-            //for (int i = 1; i < 9; i++)
-            //{
-            //    TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
-
-            //    txtField.Paint += new System.Windows.Forms.PaintEventHandler(this.TextBox_Paint);
-
-            //    txtField.BorderStyle = BorderStyle.None;
-            //}
-
-
             if ("unlock".Equals(arg))
             {
-                selectUnlock();
+                SelectUnlockPIN();
             }
             else if ("changepin".Equals(arg))
             {
-                selectChangePIN();
+                SelectChangePIN();
             }
             else
             {
-                selectHome();
+                SelectHome();
             }
         }
 
@@ -132,7 +117,7 @@ namespace CIEID
             ControlPaint.DrawBorder(e.Graphics, ((Control)sender).DisplayRectangle, Color.LightGray, ButtonBorderStyle.Solid);
         }
 
-        long ProgressAbbina(int progress, string message)
+        long PairingProgress(int progress, string message)
         {
             this.Invoke((MethodInvoker)delegate
             {
@@ -143,11 +128,11 @@ namespace CIEID
             return 0;
         }
 
-        long ProgressFirma(int progress, string message)
+        long SignProgress(int progress, string message)
         {
             this.Invoke((MethodInvoker)delegate
             {
-                progressFirmaPina.Value = progress;
+                signProgressBar.Value = progress;
             });
 
             return 0;
@@ -160,48 +145,51 @@ namespace CIEID
             return string.Format("{0}\\IPZS\\{1}_default.png", appdataPath, efSeriale);
         }
 
-        long CompletedFirma(int retValue)
+        long SignCompleted(int retValue)
         {
-            Logger.Info("CompletedFirma() - Inizia funzione");
+            Logger.Info("SignCompleted() - Inizia funzione");
             this.Invoke((MethodInvoker)delegate
             {
                 if (retValue != 0)
                 {
-                    lblFirmaSuccess.Text = "Si è verificato un errore";
-                    Logger.Debug(lblFirmaSuccess.Text);
-                    pbFirmaPin.Image = Properties.Resources.cross;
-                    pbFirmaPin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+                    documentSuccessfullySignedLabel.Text = "Si è verificato un errore";
+                    Logger.Debug(documentSuccessfullySignedLabel.Text);
+                    digitalSignatureCompletedPictureBox.Image = Properties.Resources.cross;
+                    digitalSignatureCompletedPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
                 }
                 else
                 {
-                    lblFirmaSuccess.Text = "File firmato con successo";
-                    Logger.Debug(lblFirmaSuccess.Text);
-                    pbFirmaPin.Image = Properties.Resources.check;
-                    pbFirmaPin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+                    documentSuccessfullySignedLabel.Text = "File firmato con successo";
+                    Logger.Debug(documentSuccessfullySignedLabel.Text);
+                    digitalSignatureCompletedPictureBox.Image = Properties.Resources.check;
+                    digitalSignatureCompletedPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
                 }
 
-                progressFirmaPina.Hide();
-                lblFirmaPin.Hide();
-                lblCartaFirmaPin.Hide();
-                btnAnullaFirmaPin.Hide();
-                btnFirma.Hide();
-                lblFirmaSuccess.Show();
-                lblFirmaSuccess.Update();
-                pbFirmaPin.Show();
-                pbFirmaPin.Update();
-                btnConcludi.Show();
-                btnConcludi.Update();
+                signProgressBar.Hide();
+                typePINLabel.Hide();
+                placeCIEOnReaderLabel.Hide();
+                cancelSigningOperationPINPanelButton.Hide();
+                signButton.Hide();
+                documentSuccessfullySignedLabel.Show();
+                documentSuccessfullySignedLabel.Update();
+                digitalSignatureCompletedPictureBox.Show();
+                digitalSignatureCompletedPictureBox.Update();
+                closeButton.Show();
+                closeButton.Update();
             });
 
             return 0;
         }
 
-        long CompletedAbbina(string pan, string name, string efSeriale)
+        long PairingCompleted(string pan, string name, string efSeriale)
         {
-            Logger.Info("CompletedAbbina() - Inizia funzione");
+            Logger.Info("PairingCompleted() - Inizia funzione");
 
             string defaultSignImagePath = getSignImagePath(efSeriale);
             CieColl.addCie(pan, new CieModel(efSeriale, name, pan));
+
+            if (shouldSignWithoutCIEPairing)
+                PANForOneShotSigning = pan;
 
             Properties.Settings.Default.cieList = JsonConvert.SerializeObject(CieColl.MyDictionary);
             Properties.Settings.Default.Save();
@@ -211,36 +199,35 @@ namespace CIEID
             TextInfo nameInfo = new CultureInfo("it-IT", false).TextInfo;
             DrawText(nameInfo.ToTitleCase(name.ToLower()), Color.Black, defaultSignImagePath);
 
-            Console.WriteLine("Cie Abbinate dopo aggiunta: " + Properties.Settings.Default.cieList);
+            Console.WriteLine("CIE abbinate dopo aggiunta: " + Properties.Settings.Default.cieList);
 
             return 0;
         }
 
-        long ProgressCambioPIN(int progress, string message)
+        long ChangePINProgress(int progress, string message)
         {
             this.Invoke((MethodInvoker)delegate
             {
-                progressBarCambioPIN.Value = progress;
-                labelProgressCambioPIN.Text = message;
+                progressBarChangePIN.Value = progress;
+                progressLabelChangePIN.Text = message;
             });
 
             return 0;
         }
 
-        long ProgressSbloccaPIN(int progress, string message)
+        long UnlockPINProgress(int progress, string message)
         {
             this.Invoke((MethodInvoker)delegate
             {
-                progressBarUnlock.Value = progress;
-                labelProgressUnlock.Text = message;
+                progressBarUnlockPIN.Value = progress;
+                progressLabelUnlockPIN.Text = message;
             });
 
             return 0;
         }
 
-        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        private void PINDigit_TextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-
             if (e.KeyChar >= '0' && e.KeyChar <= '9')
             {
                 TextBox textBox = (TextBox)sender;
@@ -253,20 +240,20 @@ namespace CIEID
                     nextTextBox.Focus();
                 }
             }
+
             else if (e.KeyChar == 8) // backspace
             {
                 TextBox textBox = (TextBox)sender;
 
                 int tag = Int16.Parse((String)textBox.Tag);
 
-
                 if (tag > 1)
                 {
                     Control previousTextBox = FindControlByTag(this.Controls, "" + (tag - 1));
                     previousTextBox.Focus();
-
                 }
             }
+
             else if (e.KeyChar == 13) // enter
             {
                 TextBox textBox = (TextBox)sender;
@@ -274,12 +261,13 @@ namespace CIEID
                 int tag = Int16.Parse((String)textBox.Tag);
 
                 if (tag == 8)
-                    buttonAbbina_Click(sender, e);
+                    PairButton_Click(sender, e);
             }
         }
 
-        private void textBoxSignPin_KeyPress(object sender, KeyPressEventArgs e)
+        private void TextBoxSignPin_KeyPress(object sender, KeyPressEventArgs e)
         {
+            byte numPINDigits = (byte)((shouldSignWithoutCIEPairing) ? 4 : 0);
 
             if (e.KeyChar >= '0' && e.KeyChar <= '9')
             {
@@ -287,42 +275,40 @@ namespace CIEID
 
                 int tag = Int16.Parse((String)textBox.Tag);
 
-                if (tag < 12)
+                if (tag < 12 + numPINDigits)
                 {
                     Control nextTextBox = FindControlByTag(this.Controls, "" + (tag + 1));
                     nextTextBox.Focus();
                 }
                 else
                 {
-                    btnFirma.Enabled = true;
+                    signButton.Enabled = true;
                 }
             }
-            else if (e.KeyChar == 8) // backspace
+
+            else if (e.KeyChar == 8) // Backspace
             {
                 TextBox textBox = (TextBox)sender;
 
                 int tag = Int16.Parse((String)textBox.Tag);
-
 
                 if (tag > 9)
                 {
                     Control previousTextBox = FindControlByTag(this.Controls, "" + (tag - 1));
                     previousTextBox.Focus();
-
                 }
             }
-            else if (e.KeyChar == 13) // enter
+
+            else if (e.KeyChar == 13) // Enter
             {
                 TextBox textBox = (TextBox)sender;
 
                 int tag = Int16.Parse((String)textBox.Tag);
 
-                if (tag == 12)
+                if (tag == 12 + numPINDigits)
                 {
-                    btnFirma_Click(sender, e);
-
+                    SignButton_Click(sender, e);
                 }
-
             }
         }
 
@@ -349,7 +335,7 @@ namespace CIEID
         }
 
 
-        private void configureHomeButtons(CieCollection cieColl)
+        private void ConfigureHomeButtons(CieCollection cieColl)
         {
             Logger.Info("configureHomeButtons() - Inizia funzione");
 
@@ -357,70 +343,71 @@ namespace CIEID
             {
                 int size_x = tableLayoutPanel1.Size.Width;
                 int size_y = tableLayoutPanel1.Size.Height;
-                int remaining_space = (size_x - (3 * (buttonDeleteCIE.Width))) / 4;
+                int remaining_space = (size_x - (3 * (deleteCIEButton.Width))) / 4;
 
-                buttonRemoveAll.Location = new Point(remaining_space, tableLayoutPanel1.Location.Y + size_y + 10);
-                buttonDeleteCIE.Location = new Point(remaining_space + buttonRemoveAll.Width + buttonRemoveAll.Location.X, buttonRemoveAll.Location.Y);
-                buttonAggiungi.Location = new Point(remaining_space + buttonRemoveAll.Width + buttonDeleteCIE.Location.X, buttonRemoveAll.Location.Y);
-                buttonRemoveAll.Visible = true;
+                removeAllButton.Location = new Point(remaining_space, tableLayoutPanel1.Location.Y + size_y + 10);
+                deleteCIEButton.Location = new Point(remaining_space + removeAllButton.Width + removeAllButton.Location.X, removeAllButton.Location.Y);
+                addButton.Location = new Point(remaining_space + removeAllButton.Width + deleteCIEButton.Location.X, removeAllButton.Location.Y);
+                removeAllButton.Visible = true;
             }
             else
             {
                 int size_x = tableLayoutPanel1.Size.Width;
                 int size_y = tableLayoutPanel1.Size.Height;
-                int remaining_space = (size_x - (2 * (buttonDeleteCIE.Width))) / 3;
+                int remaining_space = (size_x - (2 * (deleteCIEButton.Width))) / 3;
 
-                buttonRemoveAll.Visible = false;
-                buttonDeleteCIE.Location = new Point(remaining_space, tableLayoutPanel1.Location.Y + size_y + 10);
-                buttonAggiungi.Location = new Point(2 * remaining_space + buttonDeleteCIE.Width, buttonDeleteCIE.Location.Y);
+                removeAllButton.Visible = false;
+                deleteCIEButton.Location = new Point(remaining_space, tableLayoutPanel1.Location.Y + size_y + 10);
+                addButton.Location = new Point(2 * remaining_space + deleteCIEButton.Width, deleteCIEButton.Location.Y);
             }
 
             if (CieColl.MyDictionary.Count >= 1)
             {
-                int size_x = tabPage1.Size.Width;
-                int size_y = tabPage1.Size.Height;
-                int remaining_space = (size_x - 2 * ((buttonAbbina.Width))) / 3;
+                int size_x = CIEPairingTabPage.Size.Width;
+                int size_y = CIEPairingTabPage.Size.Height;
+                int remaining_space = (size_x - 2 * ((pairButton.Width))) / 3;
 
-                int height = size_y - buttonAbbina.Height - 30;
+                int height = size_y - pairButton.Height - 30;
 
-                buttonAnnulla.Location = new System.Drawing.Point(remaining_space, height);
-                buttonAbbina.Location = new System.Drawing.Point(2 * remaining_space + buttonAnnulla.Width, buttonAnnulla.Location.Y);
-                buttonAnnulla.Visible = true;
+                cancelButton.Location = new System.Drawing.Point(remaining_space, height);
+                pairButton.Location = new System.Drawing.Point(2 * remaining_space + cancelButton.Width, cancelButton.Location.Y);
+                cancelButton.Visible = true;
             }
             else
             {
-                int size_x = tabPage1.Size.Width;
-                int size_y = tabPage1.Size.Height;
-                int remaining_space = (size_x - ((buttonAbbina.Width))) / 2;
-                int height = size_y - buttonAbbina.Height - 30;
+                int size_x = CIEPairingTabPage.Size.Width;
+                int size_y = CIEPairingTabPage.Size.Height;
+                int remaining_space = (size_x - ((pairButton.Width))) / 2;
+                int height = size_y - pairButton.Height - 30;
 
-                buttonAbbina.Location = new System.Drawing.Point(remaining_space, height);
-                buttonAnnulla.Visible = false;
+                pairButton.Location = new System.Drawing.Point(remaining_space, height);
+                cancelButton.Visible = false;
             }
         }
 
-        private void buttonHome_Click(object sender, EventArgs e)
+        private void MenuHomeButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonHome_Click() - Inizia funzione");
-            selectHome();
+            Logger.Info("MenuHomeButton_Click() - Inizia funzione");
+            SelectHome();
         }
 
-        private void changeHomeObjects()
+        private void ChangeHomeObjects()
         {
-            Logger.Info("changeHomeObjects() - Inizia funzione");
+            Logger.Info("ChangeHomeObjects() - Inizia funzione");
 
-            label5.Text = "Firma Elettronica";
-            label2.Text = "Seleziona la CIE da usare";
+            appNameCIEPickerHeaderTextLabel.Text = "Firma Elettronica";
+            CIESuccessfullyPairedLabel.Text = "Seleziona la CIE da usare";
 
-            buttonDeleteCIE.Visible = false;
-            buttonRemoveAll.Visible = false;
-            buttonAggiungi.Visible = false;
-            btnSigSelectCie.Visible = true;
+            deleteCIEButton.Visible = false;
+            removeAllButton.Visible = false;
+            addButton.Visible = false;
+            selectSigningCIEButton.Visible = true;
+            signWithCIEWithoutPairingButton.Visible = true;
 
-            tabControlMain.SelectedIndex = 1;
+            mainTabControl.SelectedIndex = 1;
         }
 
-        private void createImages(CieCollection CieColl)
+        private void CreateImages(CieCollection CieColl)
         {
             Logger.Info("createImages() - Inizia funzione");
 
@@ -439,17 +426,18 @@ namespace CIEID
             */
         }
 
-        private void selectHome()
+        private void SelectHome()
         {
-            Logger.Info("selectHome() - Inizia funzione");
+            Logger.Info("SelectHome() - Inizia funzione");
 
-            buttonDeleteCIE.Visible = true;
-            buttonRemoveAll.Visible = true;
-            buttonAggiungi.Visible = true;
-            btnSigSelectCie.Visible = false;
+            deleteCIEButton.Visible = true;
+            removeAllButton.Visible = true;
+            addButton.Visible = true;
+            selectSigningCIEButton.Visible = false;
+            signWithCIEWithoutPairingButton.Visible = false;
 
-            label5.Text = "CIE ID";
-            label2.Text = "Carta d'Identità Elettronica abbinata correttamente";
+            appNameCIEPickerHeaderTextLabel.Text = "CIE ID";
+            CIESuccessfullyPairedLabel.Text = "Carta d'Identità Elettronica abbinata correttamente";
 
             CieColl = new CieCollection(Properties.Settings.Default.cieList);
 
@@ -463,43 +451,40 @@ namespace CIEID
                 Properties.Settings.Default.Save();
             }
 
-
-            configureHomeButtons(cieColl);
+            ConfigureHomeButtons(cieColl);
 
             Console.WriteLine("Lista CIE abbinate: " + Properties.Settings.Default.cieList);
 
             if (CieColl.MyDictionary.Count == 0)
             {
-                tabControlMain.SelectedIndex = 0;
-                btnFirma.Enabled = false;
+                mainTabControl.SelectedIndex = 0;
             }
             else
             {
-                btnFirma.Enabled = true;
                 if (carouselControl == null)
                 {
                     carouselControl = new CarouselControl(tableLayoutPanelCarousel, dotsGroup);
-                    carouselControl.ButtonsChanged += carouselControl_ButtonsChanged;
+                    carouselControl.ButtonsChanged += CarouselControl_ButtonsChanged;
                 }
 
                 carouselControl.LoadData(CieColl);
                 carouselControl.UpdateLayout();
 
-                tabControlMain.SelectedIndex = 1;
+                mainTabControl.SelectedIndex = 1;
             }
 
-            buttonHome.BackColor = Color.LightGray;
-            buttonChangePIN.BackColor = Color.Transparent;
-            buttonUnlock.BackColor = Color.Transparent;
-            buttonTutorial.BackColor = Color.Transparent;
-            buttonInfo.BackColor = Color.Transparent;
-            buttonHelp.BackColor = Color.Transparent;
-            buttonFirma.BackColor = Color.Transparent;
-            buttonVerifica.BackColor = Color.Transparent;
-            btnSettings.BackColor = Color.Transparent;
+            menuHomeButton.BackColor = Color.LightGray;
+            menuChangePINButton.BackColor = Color.Transparent;
+            menuUnlockPINButton.BackColor = Color.Transparent;
+            menuTutorialButton.BackColor = Color.Transparent;
+            menuInformationButton.BackColor = Color.Transparent;
+            menuHelpButton.BackColor = Color.Transparent;
+            menuDigitalSignatureButton.BackColor = Color.Transparent;
+            menuVerifyButton.BackColor = Color.Transparent;
+            menuSettingsButton.BackColor = Color.Transparent;
         }
 
-        private PrivateFontCollection loadCustomFont()
+        private PrivateFontCollection LoadCustomFont()
         {
             Logger.Info("loadCustomFont() - Inizia funzione");
             //Create your private font collection object.
@@ -526,7 +511,7 @@ namespace CIEID
 
         private void DrawText(String text, Color textColor, String path)
         {
-            PrivateFontCollection pfc = loadCustomFont();
+            PrivateFontCollection pfc = LoadCustomFont();
 
             Font font = new Font(pfc.Families[0], signFontSize);
 
@@ -563,26 +548,24 @@ namespace CIEID
             Brush textBrush = new SolidBrush(textColor);
 
             drawing.DrawString(text, font, textBrush, new RectangleF(0, 0, textSize.Width, textSize.Height), sf);
-
             drawing.Save();
 
             textBrush.Dispose();
             drawing.Dispose();
             img.Save(path, ImageFormat.Png);
             img.Dispose();
-
         }
 
-        private void selectAbbinaProgress()
+        private void SelectPairingProgress()
         {
-            tabControlMain.SelectedIndex = 2;
+            mainTabControl.SelectedIndex = 2;
             progressBar.Value = 0;
             progressBar.Maximum = 100;
         }
 
-        private void buttonAbbina_Click(object sender, EventArgs e)
+        private void PairButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonAbbina_Click() - Inizia funzione");
+            Logger.Info("PairButton_Click() - Inizia funzione");
             string pin = "";
 
             int i;
@@ -621,69 +604,73 @@ namespace CIEID
 
             ((Control)sender).Enabled = false;
 
-            tabControlMain.SelectedIndex = 2;
+            mainTabControl.SelectedIndex = 2;
 
-            ThreadStart processTaskThread = delegate { abbina(sender, pin); };
+            ThreadStart processTaskThread = delegate { CIEPairing(sender, pin, false); };
 
             new Thread(processTaskThread).Start();
-
         }
 
-        private void abbina(object sender, string pin)
+        private int CIEPairing(object sender, string pin, bool oneShotSignature)
         {
-            Logger.Info("abbina() - Inizia funzione");
+            int ret = -1;
+
+            Logger.Info("CIEPairing() - Inizia funzione");
             try
             {
                 int[] attempts = new int[1];
 
-
-                int ret = AbbinaCIE(null, pin, attempts, new ProgressCallback(ProgressAbbina), new CompletedCallback(CompletedAbbina));
+                ret = AbbinaCIE(null, pin, attempts, new ProgressCallback(PairingProgress), new CompletedCallback(PairingCompleted));
 
                 this.Invoke((MethodInvoker)delegate
                 {
                     ((Control)sender).Enabled = true;
                     switch (ret)
                     {
-                    case CKR_TOKEN_NOT_RECOGNIZED:
-                        Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_RECOGNIZED");
-                        MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        selectHome();
-                        break;
+                        case CKR_TOKEN_NOT_RECOGNIZED:
+                            Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_RECOGNIZED");
+                            MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            SelectHome();
+                            break;
 
-                    case CKR_TOKEN_NOT_PRESENT:
-                        Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_PRESENT");
-                        MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        selectHome();
-                        break;
+                        case CKR_TOKEN_NOT_PRESENT:
+                            Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_PRESENT");
+                            MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            SelectHome();
+                            break;
 
-                    case CKR_PIN_INCORRECT:
-                        Logger.Debug("Il PIN digitato è errato. - CKR_PIN_INCORRECT");
-                        MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        selectHome();
-                        break;
+                        case CKR_PIN_INCORRECT:
+                            Logger.Debug("Il PIN digitato è errato. - CKR_PIN_INCORRECT");
+                            MessageBox.Show(String.Format("Il PIN digitato è errato. Rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            SelectHome();
+                            break;
 
-                    case CKR_PIN_LOCKED:
-                        Logger.Debug("Carta bloccata - CKR_PIN_LOCKED");
-                        MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        selectHome();
-                        break;
+                        case CKR_PIN_LOCKED:
+                            Logger.Debug("Carta bloccata - CKR_PIN_LOCKED");
+                            MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            SelectHome();
+                            break;
 
-                    case CKR_GENERAL_ERROR:
-                        Logger.Debug("Errore inaspettato durante la comunicazione con la smart card - CKR_GENERAL_ERROR");
-                        MessageBox.Show("Errore inaspettato durante la comunicazione con la smart card", "Errore inaspettato", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        selectHome();
-                        break;
+                        case CKR_GENERAL_ERROR:
+                            Logger.Debug("Errore inaspettato durante la comunicazione con la smart card - CKR_GENERAL_ERROR");
+                            MessageBox.Show("Errore inaspettato durante la comunicazione con la smart card", "Errore inaspettato", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            SelectHome();
+                            break;
+                     
+                        case CKR_OK:
+                            Logger.Debug("L'abilitazione della CIE è avvenuta con successo - CKR_OK");
+                            if (!oneShotSignature)
+                            {
+                                MessageBox.Show("L'abilitazione della CIE è avvenuta con successo", "CIE abilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                SelectHome();
+                            }
+                            break;
 
-                    case CKR_OK:
-                        Logger.Debug("L'abilitazione della CIE è avvenuta con successo - CKR_OK");
-                        MessageBox.Show("L'abilitazione della CIE è avvenuta con successo", "CIE abilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        selectHome();
-                        break;
-                    case CARD_ALREADY_ENABLED:
-                        Logger.Debug("Carta già abilitata - CARD_ALREADY_ENABLED");
-                        MessageBox.Show("Carta già abilitata", "Carta già abilitata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        selectHome();
-                        break;
+                        case CARD_ALREADY_ENABLED:
+                            Logger.Debug("Carta già abilitata - CARD_ALREADY_ENABLED");
+                            MessageBox.Show("Carta già abilitata", "Carta già abilitata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            SelectHome();
+                            break;
                     }
                 });
 
@@ -692,11 +679,67 @@ namespace CIEID
             {
                 Console.WriteLine(ex);
             }
+
+            return ret;
         }
 
-        private void buttonDeleteCIE_Click(object sender, EventArgs e)
+        private void RemoveExistingGraphicSignature(String serialNumber)
         {
-            Logger.Info("buttonDeleteCIE_Click() - Inizia funzione");
+            if (File.Exists(getSignImagePath(serialNumber)))
+            {
+                File.Delete(getSignImagePath(serialNumber));
+            }
+        }
+
+        private void RemoveCIEFromCollection(string PAN)
+        {
+            int ret = DisabilitaCIE(PAN);
+
+            switch (ret)
+            {
+                case CKR_OK:
+                    Logger.Debug("CIE disabilitata con successo");
+
+                    try
+                    {
+                        var model = CieColl.MyDictionary[PAN];
+                        RemoveExistingGraphicSignature(model.SerialNumber);
+                    }
+
+                    catch
+                    {
+                        Console.WriteLine("Failed to erase graphic signature");
+                        Logger.Debug("RemoveCIEFromCollection() - Failed to remove graphic signature image for CIE PAN: " + PAN);
+                    }
+
+
+                    CieColl.removeCie(PAN);
+                    Properties.Settings.Default.cieList = JsonConvert.SerializeObject(CieColl.MyDictionary);
+                    Properties.Settings.Default.Save();
+
+                    if (!shouldSignWithoutCIEPairing)
+                    { 
+                        MessageBox.Show("CIE disabilitata con successo", "CIE disabilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        SelectHome();
+                    }
+
+                    break;
+
+                case CKR_TOKEN_NOT_PRESENT:
+                    Logger.Debug("CIE non presente sul lettore");
+                    MessageBox.Show("CIE non presente sul lettore", "Disabilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    break;
+
+                default:
+                    Logger.Debug("Impossibile disabilitare la CIE");
+                    MessageBox.Show("Impossibile disabilitare la CIE", "CIE non disabilitata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    break;
+            }
+        }
+
+        private void DeleteCIEButton_Click(object sender, EventArgs e)
+        {
+            Logger.Info("DeleteCIEButton_Click() - Inizia funzione");
             var model = carouselControl.ActiveCieModel;
 
             if (MessageBox.Show(
@@ -704,45 +747,12 @@ namespace CIEID
                         "Disabilita CIE", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.Cancel)
                 return;
 
-            int ret = DisabilitaCIE(model.Pan);
-
-            switch (ret)
-            {
-            case CKR_OK:
-                Logger.Debug("CIE disabilitata con successo");
-                MessageBox.Show("CIE disabilitata con successo", "CIE disabilitata", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                CieColl.removeCie(model.Pan);
-                Properties.Settings.Default.cieList = JsonConvert.SerializeObject(CieColl.MyDictionary);
-                Properties.Settings.Default.Save();
-
-                // Logger.Debug("Cie Rimanenti: " + Properties.Settings.Default.cieList);
-
-
-                if (System.IO.File.Exists(getSignImagePath(model.SerialNumber)))
-                {
-                    System.IO.File.Delete(getSignImagePath(model.SerialNumber));
-                }
-
-                selectHome();
-
-                break;
-
-            case CKR_TOKEN_NOT_PRESENT:
-                Logger.Debug("CIE non presente sul lettore");
-                MessageBox.Show("CIE non presente sul lettore", "Disabilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                break;
-
-            default:
-                Logger.Debug("Impossibile disabilitare la CIE");
-                MessageBox.Show("Impossibile disabilitare la CIE", "CIE non disabilitata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                break;
-            }
+            RemoveCIEFromCollection(model.Pan);
         }
 
-        private void buttonCambiaPIN_Click(object sender, EventArgs e)
+        private void ChangePINButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonCambiaPIN_Click() - Inizia funzione");
+            Logger.Info("ChangePINButton_Click() - Inizia funzione");
             string pin = textBoxPIN.Text;
             string newpin = textBoxNewPIN.Text;
             string newpin2 = textBoxNewPIN2.Text;
@@ -766,7 +776,6 @@ namespace CIEID
 
             char c = pin[0];
 
-            i = 1;
             for (i = 1; i < pin.Length && (c >= '0' && c <= '9'); i++)
             {
                 c = pin[i];
@@ -781,7 +790,6 @@ namespace CIEID
 
             c = newpin[0];
 
-            i = 1;
             for (i = 1; i < newpin.Length && (c >= '0' && c <= '9'); i++)
             {
                 c = newpin[i];
@@ -855,19 +863,19 @@ namespace CIEID
 
             ((Control)sender).Enabled = false;
 
-            tabControlMain.SelectedIndex = 4;
+            mainTabControl.SelectedIndex = 4;
 
-            ThreadStart processTaskThread = delegate { cambiaPIN(sender, pin, newpin); };
+            ThreadStart processTaskThread = delegate { ChangePIN(sender, pin, newpin); };
 
             new Thread(processTaskThread).Start();
         }
 
-        private void cambiaPIN(object sender, string pin, string newpin)
+        private void ChangePIN(object sender, string pin, string newpin)
         {
-            Logger.Info("cambiaPIN() - Inizia funzione");
+            Logger.Info("ChangePIN() - Inizia funzione");
             int[] attempts = new int[1];
 
-            int ret = ChangePIN(pin, newpin, attempts, ProgressCambioPIN);
+            int ret = ChangePIN(pin, newpin, attempts, ChangePINProgress);
 
             this.Invoke((MethodInvoker)delegate
             {
@@ -877,50 +885,50 @@ namespace CIEID
                 case CKR_TOKEN_NOT_RECOGNIZED:
                     Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_RECOGNIZED");
                     MessageBox.Show("CIE non presente sul lettore", "Cambio PIN", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     //[self showHomeFirstPage];
                     break;
 
                 case CKR_TOKEN_NOT_PRESENT:
                     Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_PRESENT");
                     MessageBox.Show("CIE non presente sul lettore", "Cambio PIN", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     break;
 
                 case CKR_PIN_INCORRECT:
                     Logger.Debug("Il PIN digitato è errato - CKR_PIN_INCORRECT");
                     MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     break;
 
                 case CKR_PIN_LOCKED:
                     Logger.Debug("Carta bloccata - CKR_PIN_LOCKED");
                     MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     break;
 
                 case CKR_GENERAL_ERROR:
                     Logger.Debug("Errore inaspettato durante la comunicazione con la smart card - CKR_GENERAL_ERROR");
                     MessageBox.Show("Errore inaspettato durante la comunicazione con la smart card", "Errore inaspettato", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     break;
 
                 case CKR_OK:
                     Logger.Debug("Il PIN è stato modificato con successo - CKR_OK");
                     MessageBox.Show("Il PIN è stato modificato con successo", "Operazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    selectHome();
+                    SelectHome();
                     new PINNotice().ShowDialog();
                     break;
                 }
             });
         }
 
-        private void sbloccaPIN(object sender, string puk, string newpin)
+        private void UnlockPIN(object sender, string puk, string newpin)
         {
-            Logger.Info("sbloccaPIN() - Inizia funzione");
+            Logger.Info("UnlockPIN() - Inizia funzione");
             int[] attempts = new int[1];
 
-            long ret = UnlockPIN(puk, newpin, attempts, ProgressSbloccaPIN);
+            long ret = UnlockPIN(puk, newpin, attempts, UnlockPINProgress);
 
             this.Invoke((MethodInvoker)delegate
             {
@@ -931,96 +939,95 @@ namespace CIEID
                 case CKR_TOKEN_NOT_RECOGNIZED:
                     Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_RECOGNIZED");
                     MessageBox.Show("CIE non presente sul lettore", "Sblocca CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     //[self showHomeFirstPage];
                     break;
 
                 case CKR_TOKEN_NOT_PRESENT:
                     Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_PRESENT");
                     MessageBox.Show("CIE non presente sul lettore", "Sblocca CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     break;
 
                 case CKR_PIN_INCORRECT:
                     Logger.Debug("Il PUK digitato è errato. - CKR_PIN_INCORRECT");
                     MessageBox.Show(String.Format("Il PUK digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     break;
 
                 case CKR_PIN_LOCKED:
                     Logger.Debug("PUK bloccato. - CKR_PIN_LOCKED");
                     MessageBox.Show("PUK bloccato. La tua CIE deve essere sostituita", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     break;
 
                 case CKR_GENERAL_ERROR:
                     Logger.Debug("Errore inaspettato durante la comunicazione con la smart card - CKR_GENERAL_ERROR");
                     MessageBox.Show("Errore inaspettato durante la comunicazione con la smart card", "Errore inaspettato", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     break;
                 case CKR_DEVICE_ERROR:
                     Logger.Debug("Errore inaspettato durante la comunicazione con la smart card - CKR_DEVICE_ERROR");
                     MessageBox.Show("Errore inaspettato durante la comunicazione con la smart card", "Errore inaspettato", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    selectHome();
+                    SelectHome();
                     break;
                 case CKR_OK:
                     Logger.Debug("La CIE è stata sbloccata con successo - CKR_OK");
                     MessageBox.Show("La CIE è stata sbloccata con successo", "Operazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    selectHome();
+                    SelectHome();
                     new PINNotice().ShowDialog();
                     break;
                 }
             });
         }
 
-        private void buttonChangePIN_Click(object sender, EventArgs e)
+        private void MenuChangePINButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonChangePIN_Click() - Inizia funzione");
-            selectChangePIN();
+            Logger.Info("MenuChangePINButton_Click() - Inizia funzione");
+            SelectChangePIN();
         }
 
-        private void selectChangePIN()
+        private void SelectChangePIN()
         {
-            Logger.Info("selectChangePIN() - Inizia funzione");
-            tabControlMain.SelectedIndex = 3;
+            Logger.Info("SelectChangePIN() - Inizia funzione");
+            mainTabControl.SelectedIndex = 3;
 
-            buttonHome.BackColor = Color.Transparent;
-            buttonChangePIN.BackColor = Color.LightGray;
-            buttonUnlock.BackColor = Color.Transparent;
-            buttonTutorial.BackColor = Color.Transparent;
-            buttonInfo.BackColor = Color.Transparent;
-            buttonHelp.BackColor = Color.Transparent;
-            buttonFirma.BackColor = Color.Transparent;
-            buttonVerifica.BackColor = Color.Transparent;
-            btnSettings.BackColor = Color.Transparent;
-
+            menuHomeButton.BackColor = Color.Transparent;
+            menuChangePINButton.BackColor = Color.LightGray;
+            menuUnlockPINButton.BackColor = Color.Transparent;
+            menuTutorialButton.BackColor = Color.Transparent;
+            menuInformationButton.BackColor = Color.Transparent;
+            menuHelpButton.BackColor = Color.Transparent;
+            menuDigitalSignatureButton.BackColor = Color.Transparent;
+            menuVerifyButton.BackColor = Color.Transparent;
+            menuSettingsButton.BackColor = Color.Transparent;
         }
 
-        private void buttonUnlock_Click(object sender, EventArgs e)
+        private void MenuUnlockPINButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonUnlock_Click() - Inizia funzione");
-            selectUnlock();
+            Logger.Info("MenuUnlockPINButton_Click() - Inizia funzione");
+            SelectUnlockPIN();
         }
 
-        private void selectUnlock()
+        private void SelectUnlockPIN()
         {
-            Logger.Info("selectUnlock() - Inizia funzione");
-            tabControlMain.SelectedIndex = 5;
+            Logger.Info("SelectUnlockPIN() - Inizia funzione");
+            mainTabControl.SelectedIndex = 5;
 
-            buttonHome.BackColor = Color.Transparent;
-            buttonChangePIN.BackColor = Color.Transparent;
-            buttonUnlock.BackColor = Color.LightGray;
-            buttonTutorial.BackColor = Color.Transparent;
-            buttonInfo.BackColor = Color.Transparent;
-            buttonHelp.BackColor = Color.Transparent;
-            buttonFirma.BackColor = Color.Transparent;
-            buttonVerifica.BackColor = Color.Transparent;
-            btnSettings.BackColor = Color.Transparent;
+            menuHomeButton.BackColor = Color.Transparent;
+            menuChangePINButton.BackColor = Color.Transparent;
+            menuUnlockPINButton.BackColor = Color.LightGray;
+            menuTutorialButton.BackColor = Color.Transparent;
+            menuInformationButton.BackColor = Color.Transparent;
+            menuHelpButton.BackColor = Color.Transparent;
+            menuDigitalSignatureButton.BackColor = Color.Transparent;
+            menuVerifyButton.BackColor = Color.Transparent;
+            menuSettingsButton.BackColor = Color.Transparent;
         }
 
-        private void buttonUnlockPIN_Click(object sender, EventArgs e)
+        private void UnlockPINButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonUnlockPIN_Click() - Inizia funzione");
+            Logger.Info("UnlockPINButton_Click() - Inizia funzione");
             string puk = textBoxPUK.Text;
             string newpin = textBoxUnlockPIN.Text;
             string newpin2 = textBoxUnlockPIN2.Text;
@@ -1133,72 +1140,62 @@ namespace CIEID
 
             ((Control)sender).Enabled = false;
 
-            tabControlMain.SelectedIndex = 6;
+            mainTabControl.SelectedIndex = 6;
 
-            ThreadStart processTaskThread = delegate { sbloccaPIN(sender, puk, newpin); };
+            ThreadStart processTaskThread = delegate { UnlockPIN(sender, puk, newpin); };
 
             new Thread(processTaskThread).Start();
         }
 
-        private void label26_Click(object sender, EventArgs e)
+        private void MenuTutorialButton_Click(object sender, EventArgs e)
         {
+            Logger.Info("MenuTutorialButton_Click() - Inizia funzione");
+            mainTabControl.SelectedIndex = 7;
 
-        }
-
-        private void label22_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void buttonTutorial_Click(object sender, EventArgs e)
-        {
-            Logger.Info("buttonTutorial_Click() - Inizia funzione");
-            tabControlMain.SelectedIndex = 7;
-
-            buttonHome.BackColor = Color.Transparent;
-            buttonChangePIN.BackColor = Color.Transparent;
-            buttonUnlock.BackColor = Color.Transparent;
-            buttonTutorial.BackColor = Color.LightGray;
-            buttonInfo.BackColor = Color.Transparent;
-            buttonHelp.BackColor = Color.Transparent;
-            buttonFirma.BackColor = Color.Transparent;
-            buttonVerifica.BackColor = Color.Transparent;
-            btnSettings.BackColor = Color.Transparent;
+            menuHomeButton.BackColor = Color.Transparent;
+            menuChangePINButton.BackColor = Color.Transparent;
+            menuUnlockPINButton.BackColor = Color.Transparent;
+            menuTutorialButton.BackColor = Color.LightGray;
+            menuInformationButton.BackColor = Color.Transparent;
+            menuHelpButton.BackColor = Color.Transparent;
+            menuDigitalSignatureButton.BackColor = Color.Transparent;
+            menuVerifyButton.BackColor = Color.Transparent;
+            menuSettingsButton.BackColor = Color.Transparent;
             webBrowserTutorial.Navigate("https://idserver.servizicie.interno.gov.it/idp/tutorial_win.jsp");
         }
 
-        private void buttonHelp_Click(object sender, EventArgs e)
+        private void MenuHelpButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonHelp_Click() - Inizia funzione");
-            tabControlMain.SelectedIndex = 8;
+            Logger.Info("MenuHelpButton_Click() - Inizia funzione");
+            mainTabControl.SelectedIndex = 8;
 
-            buttonHome.BackColor = Color.Transparent;
-            buttonChangePIN.BackColor = Color.Transparent;
-            buttonUnlock.BackColor = Color.Transparent;
-            buttonTutorial.BackColor = Color.Transparent;
-            buttonInfo.BackColor = Color.Transparent;
-            buttonHelp.BackColor = Color.LightGray;
-            buttonFirma.BackColor = Color.Transparent;
-            buttonVerifica.BackColor = Color.Transparent;
-            btnSettings.BackColor = Color.Transparent;
+            menuHomeButton.BackColor = Color.Transparent;
+            menuChangePINButton.BackColor = Color.Transparent;
+            menuUnlockPINButton.BackColor = Color.Transparent;
+            menuTutorialButton.BackColor = Color.Transparent;
+            menuInformationButton.BackColor = Color.Transparent;
+            menuHelpButton.BackColor = Color.LightGray;
+            menuDigitalSignatureButton.BackColor = Color.Transparent;
+            menuVerifyButton.BackColor = Color.Transparent;
+            menuSettingsButton.BackColor = Color.Transparent;
 
             webBrowserHelp.Navigate("https://idserver.servizicie.interno.gov.it/idp/aiuto.jsp");
         }
 
-        private void buttonInfo_Click(object sender, EventArgs e)
+        private void MenuInformationButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonInfo_Click() - Inizia funzione");
-            tabControlMain.SelectedIndex = 9;
+            Logger.Info("MenuInformationButton_Click() - Inizia funzione");
+            mainTabControl.SelectedIndex = 9;
 
-            buttonHome.BackColor = Color.Transparent;
-            buttonChangePIN.BackColor = Color.Transparent;
-            buttonUnlock.BackColor = Color.Transparent;
-            buttonTutorial.BackColor = Color.Transparent;
-            buttonInfo.BackColor = Color.LightGray;
-            buttonHelp.BackColor = Color.Transparent;
-            buttonFirma.BackColor = Color.Transparent;
-            buttonVerifica.BackColor = Color.Transparent;
-            btnSettings.BackColor = Color.Transparent;
+            menuHomeButton.BackColor = Color.Transparent;
+            menuChangePINButton.BackColor = Color.Transparent;
+            menuUnlockPINButton.BackColor = Color.Transparent;
+            menuTutorialButton.BackColor = Color.Transparent;
+            menuInformationButton.BackColor = Color.LightGray;
+            menuHelpButton.BackColor = Color.Transparent;
+            menuDigitalSignatureButton.BackColor = Color.Transparent;
+            menuVerifyButton.BackColor = Color.Transparent;
+            menuSettingsButton.BackColor = Color.Transparent;
 
             webBrowserInfo.Navigate("https://idserver.servizicie.interno.gov.it/idp/privacy.jsp");
         }
@@ -1209,33 +1206,31 @@ namespace CIEID
             Application.Exit();
         }
 
-        private void textBoxPIN_KeyPress(object sender, KeyPressEventArgs e)
+        private void PINTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-
             if (e.KeyChar == 13) // enter
             {
-                buttonCambiaPIN_Click(sender, e);
+                ChangePINButton_Click(sender, e);
             }
         }
 
-        private void textBoxPUK_KeyPress(object sender, KeyPressEventArgs e)
+        private void PUKTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-
             if (e.KeyChar == 13) // enter
             {
-                buttonUnlockPIN_Click(sender, e);
+                UnlockPINButton_Click(sender, e);
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void AddButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("button1_Click() - Inizia funzione");
-            tabControlMain.SelectedIndex = 0;
+            Logger.Info("AddButton_Click() - Inizia funzione");
+            mainTabControl.SelectedIndex = 0;
         }
 
-        private void buttonRemoveAll_Click(object sender, EventArgs e)
+        private void RemoveAllButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonRemoveAll_Click() - Inizia funzione");
+            Logger.Info("RemoveAllButton_Click() - Inizia funzione");
             if (MessageBox.Show(String.Format("Rimuovere tutte le Carte di Identità attualmente abbinate?"),
                                 "Disabilita tutte le CIE", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.Cancel)
                 return;
@@ -1258,7 +1253,7 @@ namespace CIEID
                     MessageBox.Show("Impossibile disabilitare la CIE numero " + cieModel.SerialNumber, "CIE non disabilitata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     Properties.Settings.Default.cieList = JsonConvert.SerializeObject(CieColl.MyDictionary);
                     Properties.Settings.Default.Save();
-                    selectHome();
+                    SelectHome();
                     return;
                 }
 
@@ -1272,37 +1267,37 @@ namespace CIEID
             Console.WriteLine("Cie Rimanenti: " + Properties.Settings.Default.cieList);
 
             MessageBox.Show("CIE disabilitate con successo", "CIE disabilitate", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            selectHome();
+            SelectHome();
         }
 
-        private void buttonLeft_Click(object sender, EventArgs e)
+        private void LeftButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonLeft_Click() - Inizia funzione");
+            Logger.Info("LeftButton_Click() - Inizia funzione");
             carouselControl.ShiftRight();
         }
 
-        private void buttonRight_Click(object sender, EventArgs e)
+        private void RightButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonRight_Click() - Inizia funzione");
+            Logger.Info("RightButton_Click() - Inizia funzione");
             carouselControl.ShiftLeft();
         }
 
-        private void carouselControl_ButtonsChanged(object sender, Controls.CarouselControl.ButtonsEventArgs e)
+        private void CarouselControl_ButtonsChanged(object sender, Controls.CarouselControl.ButtonsEventArgs e)
         {
-            Logger.Info("carouselControl_ButtonsChanged() - Inizia funzione");
+            Logger.Info("CarouselControl_ButtonsChanged() - Inizia funzione");
             if (e.IsRightButton)
             {
-                buttonRight.Enabled = e.IsEnabled;
-                toggleButtonVisibility(buttonRight, e.IsVisible);
+                rightButton.Enabled = e.IsEnabled;
+                ToggleButtonVisibility(rightButton, e.IsVisible);
             }
             else
             {
-                buttonLeft.Enabled = e.IsEnabled;
-                toggleButtonVisibility(buttonLeft, e.IsVisible);
+                leftButton.Enabled = e.IsEnabled;
+                ToggleButtonVisibility(leftButton, e.IsVisible);
             }
         }
 
-        private void toggleButtonVisibility(Button button, bool show)
+        private void ToggleButtonVisibility(Button button, bool show)
         {
             Logger.Info("toggleButtonVisibility() - Inizia funzione");
             if (show)
@@ -1315,38 +1310,18 @@ namespace CIEID
             }
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("label1_Click() - Inizia funzione");
-
+            Logger.Info("CancelButton_Click() - Inizia funzione");
+            SelectHome();
         }
 
-
-        private void labelOwnerValue1_Click(object sender, EventArgs e)
+        private void TabPageUnlockPIN_Click(object sender, EventArgs e)
         {
-            Logger.Info("labelOwnerValue1_Click() - Inizia funzione");
-
+            Logger.Info("TabPageUnlockPIN_Click() - Inizia funzione");
         }
 
-        private void labelOwnerValue0_Click(object sender, EventArgs e)
-        {
-            Logger.Info("labelOwnerValue0_Click() - Inizia funzione");
-
-        }
-
-        private void buttonAnnulla_Click(object sender, EventArgs e)
-        {
-            Logger.Info("buttonAnnulla_Click() - Inizia funzione");
-            selectHome();
-        }
-
-        private void tabPage6_Click(object sender, EventArgs e)
-        {
-            Logger.Info("tabPage6_Click() - Inizia funzione");
-
-        }
-
-        private void panel1_Paint(object sender, PaintEventArgs e)
+        private void Panel1_Paint(object sender, PaintEventArgs e)
         {
             Logger.Info("panel1_Paint() - Inizia funzione");
             Panel panel = (Panel)sender;
@@ -1357,79 +1332,79 @@ namespace CIEID
             e.Graphics.DrawLine(pen, 0, 0, panel.Width - 0, 0);
             e.Graphics.DrawLine(pen, panel.Width - 1, panel.Height - 1, 0, panel.Height - 1);
             e.Graphics.DrawLine(pen, panel.Width - 1, panel.Height - 1, panel.Width - 1, 0);
-
         }
 
-
-        private void buttonFirma_Click(object sender, EventArgs e)
+        private void MenuDigitalSignatureButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("buttonFirma_Click() - Inizia funzione");
-            buttonHome.BackColor = Color.Transparent;
-            buttonChangePIN.BackColor = Color.Transparent;
-            buttonUnlock.BackColor = Color.Transparent;
-            buttonTutorial.BackColor = Color.Transparent;
-            buttonInfo.BackColor = Color.Transparent;
-            buttonHelp.BackColor = Color.Transparent;
-            buttonFirma.BackColor = Color.LightGray;
-            buttonVerifica.BackColor = Color.Transparent;
-            btnSettings.BackColor = Color.Transparent;
+            Logger.Info("menuDigitalSignatureButton_Click() - Inizia funzione");
+            menuHomeButton.BackColor = Color.Transparent;
+            menuChangePINButton.BackColor = Color.Transparent;
+            menuUnlockPINButton.BackColor = Color.Transparent;
+            menuTutorialButton.BackColor = Color.Transparent;
+            menuInformationButton.BackColor = Color.Transparent;
+            menuHelpButton.BackColor = Color.Transparent;
+            menuDigitalSignatureButton.BackColor = Color.LightGray;
+            menuVerifyButton.BackColor = Color.Transparent;
+            menuSettingsButton.BackColor = Color.Transparent;
 
-            signOp = opSelectedState.NO_OP;
-            labelFirma.Text = "Firma Elettronica";
-
+            signOp = OperationSelectedState.NO_OP;
+            digitalSignatureLabel.Text = "Firma Elettronica";
+            
             if (CieColl.MyDictionary.Count > 0)
             {
-                changeHomeObjects();
+                ChangeHomeObjects();
+                Console.WriteLine("ChangeHomeObjects called");
             }
+
             else
             {
-                selectHome();
+                SignWithCIEWithoutPairingButton_Click(null, null);
+                Console.WriteLine("SignCIEW/OPairing called");
             }
         }
-        private void buttonVerifica_Click(object sender, EventArgs e)
-        {
-            Logger.Info("buttonFirma_Click() - Inizia funzione");
-            buttonHome.BackColor = Color.Transparent;
-            buttonChangePIN.BackColor = Color.Transparent;
-            buttonUnlock.BackColor = Color.Transparent;
-            buttonTutorial.BackColor = Color.Transparent;
-            buttonInfo.BackColor = Color.Transparent;
-            buttonHelp.BackColor = Color.Transparent;
-            buttonFirma.BackColor = Color.Transparent;
-            buttonVerifica.BackColor = Color.LightGray;
-            btnSettings.BackColor = Color.Transparent;
 
-            signOp = opSelectedState.VERIFY;
-            labelFirma.Text = "Verifica firma";
-            displayFileSelectionTab();
+        private void MenuVerifyButton_Click(object sender, EventArgs e)
+        {
+            Logger.Info("menuVerifyButton_Click() - Inizia funzione");
+            menuHomeButton.BackColor = Color.Transparent;
+            menuChangePINButton.BackColor = Color.Transparent;
+            menuUnlockPINButton.BackColor = Color.Transparent;
+            menuTutorialButton.BackColor = Color.Transparent;
+            menuInformationButton.BackColor = Color.Transparent;
+            menuHelpButton.BackColor = Color.Transparent;
+            menuDigitalSignatureButton.BackColor = Color.Transparent;
+            menuVerifyButton.BackColor = Color.LightGray;
+            menuSettingsButton.BackColor = Color.Transparent;
+
+            signOp = OperationSelectedState.VERIFY;
+            digitalSignatureLabel.Text = "Verifica firma";
+            DisplayFileSelectionTab();
         }
 
-        private void lbPeronalizza_Click(object sender, EventArgs e)
+        private void CustomizeGraphicSignatureLabel_Click(object sender, EventArgs e)
         {
-            Logger.Info("lbPeronalizza_Click() - Inizia funzione");
+            Logger.Info("CustomizeGraphicSignatureLabel_Click() - Inizia funzione");
 
             var model = carouselControl.ActiveCieModel;
 
             string signImagePath = getSignImagePath(model.SerialNumber);
 
-            if (pnFirmaGrafica.Controls.Count > 0 && pnFirmaGrafica.Controls[0] != null)
+            if (graphicDigitalSignaturePanel.Controls.Count > 0 && graphicDigitalSignaturePanel.Controls[0] != null)
             {
-                pnFirmaGrafica.Controls[0].Dispose();
-
+                graphicDigitalSignaturePanel.Controls[0].Dispose();
             }
 
             if (!System.IO.File.Exists(signImagePath))
             {
                 TextInfo nameInfo = new CultureInfo("it-IT", false).TextInfo;
-                //string name = CieColl.MyDictionary.ElementAt(0).Value.Owner;
                 string name = model.Owner;
                 DrawText(nameInfo.ToTitleCase(name.ToLower()), Color.Black, signImagePath);
             }
 
             PictureBox signPicture = new PictureBox();
             signPicture.BackColor = Color.Transparent;
-            signPicture.Width = pnFirmaGrafica.Width;
-            signPicture.Height = pnFirmaGrafica.Height;
+            signPicture.Width = graphicDigitalSignaturePanel.Width;
+            signPicture.Height = graphicDigitalSignaturePanel.Height;
 
             Image image;
             using (Stream stream = File.OpenRead(signImagePath))
@@ -1442,42 +1417,41 @@ namespace CIEID
             signPicture.Image = (Image)signImage.Clone();
 
             signPicture.Update();
-            pnFirmaGrafica.Controls.Add(signPicture);
+            graphicDigitalSignaturePanel.Controls.Add(signPicture);
 
 
             if (model.isCustomSign)
             {
-                lblPersonalizzaPreambolo.Text = "Una tua firma grafica personalizzata è già stata caricata. Vuoi aggiornarla?";
-                lblPersonalizzaPreambolo.Update();
+                graphicSignatureCustomizationOverviewLabel.Text = "Una tua firma grafica personalizzata è già stata caricata. Vuoi aggiornarla?";
+                graphicSignatureCustomizationOverviewLabel.Update();
 
-                btnCreaFirma.Enabled = true;
+                generateCustomGraphicSignatureButton.Enabled = true;
 
             }
             else
             {
-                lblPersonalizzaPreambolo.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
+                graphicSignatureCustomizationOverviewLabel.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
                                                 "Questo passaggio non è indispensabile, ma ti consentirà di dare un tocco personale ai documenti firmati.";
 
-                lblPersonalizzaPreambolo.Update();
+                graphicSignatureCustomizationOverviewLabel.Update();
 
-                btnCreaFirma.Enabled = false;
+                generateCustomGraphicSignatureButton.Enabled = false;
             }
 
-            tabControlMain.SelectedIndex = 15;
-
+            mainTabControl.SelectedIndex = 15;
         }
 
-
-        private void lbPeronalizza_MouseEnter(object sender, EventArgs e)
+        private void CustomizeGraphicSignatureLabel_MouseEnter(object sender, EventArgs e)
         {
-            lbPeronalizza.Font = new Font(lbPeronalizza.Font, FontStyle.Underline);
-        }
-        private void lbPeronalizza_MouseLeave(object sender, EventArgs e)
-        {
-            lbPeronalizza.Font = new Font(lbPeronalizza.Font, FontStyle.Regular);
+            customizeGraphicSignatureLabel.Font = new Font(customizeGraphicSignatureLabel.Font, FontStyle.Underline);
         }
 
-        void panelChooseDoc_dragEnter(object sender, DragEventArgs e)
+        private void CustomizeGraphicSignatureLabel_MouseLeave(object sender, EventArgs e)
+        {
+            customizeGraphicSignatureLabel.Font = new Font(customizeGraphicSignatureLabel.Font, FontStyle.Regular);
+        }
+
+        void PanelChooseDoc_dragEnter(object sender, DragEventArgs e)
         {
             Logger.Info("panelChooseDoc_dragEnter() - Inizia funzione");
             Console.WriteLine("Panel_DragEnter");
@@ -1486,42 +1460,41 @@ namespace CIEID
                 e.Effect = DragDropEffects.Copy;
         }
 
-
-        void panelChooseDoc_dragLeave(object sender, EventArgs e)
+        void PanelChooseDoc_dragLeave(object sender, EventArgs e)
         {
             Logger.Info("panelChooseDoc_dragLeave() - Inizia funzione");
             Console.WriteLine("Panel_DragLeave");
             panelChooseDoc.BackColor = Color.Transparent;
         }
 
-        private void goToSelectSignOp(string file_name)
+        private void GoToSelectSignOp(string file_name)
         {
             Logger.Info("goToSelectSignOp() - Inizia funzione");
-            lblPath.Text = file_name;
+            labelFileNamePathInOperationChooser.Text = file_name;
 
-            if (signOp == opSelectedState.VERIFY)
+            if (signOp == OperationSelectedState.VERIFY)
             {
                 pnVerificaOp_MouseClick(null, null);
             }
             else
             {
-                pnFirmaOp_MouseClick(null, null);
+                SignOperationOptionPanel_MouseClick(null, null);
             }
         }
 
-        void panelChooseDoc_dragDrop(object sender, DragEventArgs e)
+        void PanelChooseDoc_dragDrop(object sender, DragEventArgs e)
         {
-            Logger.Info("panelChooseDoc_dragDrop() - Inizia funzione");
+            Logger.Info("PanelChooseDoc_dragDrop() - Inizia funzione");
 
             panelChooseDoc.BackColor = Color.Transparent;
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             Logger.Debug($"File drop: {files[0]}");
-            goToSelectSignOp(files[0]);
+            GoToSelectSignOp(files[0]);
         }
 
-        private void selectDocument_Click(object sender, EventArgs e)
+        private void SelectDocument_Click(object sender, EventArgs e)
         {
-            Logger.Info("selectDocument_Click() - Inizia funzione");
+            Logger.Info("SelectDocument_Click() - Inizia funzione");
             OpenFileDialog openFile = new OpenFileDialog();
 
             //deleteTmpFiles();
@@ -1532,218 +1505,212 @@ namespace CIEID
                 string file_name = openFile.FileName;
                 Logger.Debug($"Selected file: {file_name}");
 
-                goToSelectSignOp(file_name);
+                GoToSelectSignOp(file_name);
             }
         }
 
-        private void displaySigningOperationTab()
+        private void DisplaySigningOperationTab()
         {
             Logger.Info("displaySigningOperationTab() - Inizia funzione");
-            lblPath2.Text = lblPath.Text;
+            labelFileNamePathInSigningFormatChooser.Text = labelFileNamePathInOperationChooser.Text;
 
-            signOp = opSelectedState.NO_OP;
-            btnSignProsegui.Enabled = false;
+            signOp = OperationSelectedState.NO_OP;
+            proceedWithSignatureButton.Enabled = false;
 
-            lblPadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            lblPadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            PAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            PAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
 
-            lblCadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            lblCadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            CAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            CAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
 
-            pbCades.Image = CIEID.Properties.Resources.p7m_2x_gray;
+            CAdESP7MPictureBox.Image = CIEID.Properties.Resources.p7m_2x_gray;
             pbPades.Image = CIEID.Properties.Resources.pdf_2x_gray;
 
-            cbFirmaGrafica.Checked = false;
+            enableGraphicSignatureCheckBox.Checked = false;
 
-            if (lblPath2.Text.EndsWith(".pdf"))
-                cbFirmaGrafica.Enabled = true;
+            if (labelFileNamePathInSigningFormatChooser.Text.EndsWith(".pdf"))
+                enableGraphicSignatureCheckBox.Enabled = true;
             else
-                cbFirmaGrafica.Enabled = false;
-            tabControlMain.SelectedIndex = 12;
+                enableGraphicSignatureCheckBox.Enabled = false;
+
+            mainTabControl.SelectedIndex = 12;
         }
 
-        private void pnFirmaOp_MouseClick(object sender, EventArgs e)
+        private void SignOperationOptionPanel_MouseClick(object sender, EventArgs e)
         {
-            Logger.Info("pnFirmaOp_MouseClick() - Inizia funzione");
-            displaySigningOperationTab();
+            Logger.Info("signOperationOptionPanel_MouseClick() - Inizia funzione");
+            DisplaySigningOperationTab();
         }
 
-        private void pnFirmaOp_MouseEnter(object sender, EventArgs e)
+        private void SignOperationOptionPanel_MouseEnter(object sender, EventArgs e)
         {
-            lblFirmaOp.ForeColor = System.Drawing.SystemColors.Highlight;
+            signOptionChooserLabel.ForeColor = System.Drawing.SystemColors.Highlight;
         }
 
-        private void pnFirmaOp_MouseLeave(object sender, EventArgs e)
+        private void SignOperationOptionPanel_MouseLeave(object sender, EventArgs e)
         {
-            lblFirmaOp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            signOptionChooserLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
         }
 
         private void pnVerificaOp_MouseClick(object sender, EventArgs e)
         {
             Logger.Info("pnVerificaOp_MouseClick() - Inizia funzione");
 
-            lblVerificaPath.Text = lblPath.Text;
-            SignerInfo sInfo = new SignerInfo(lblVerificaPath.Text, pnSignerInfo);
+            fileNamePathVerifyLabel.Text = labelFileNamePathInOperationChooser.Text;
+            SignerInfo sInfo = new SignerInfo(fileNamePathVerifyLabel.Text, pnSignerInfo);
             int n_sott = sInfo.verify();
 
             if (n_sott == 0)
             {
                 MessageBox.Show("Il file selezionato non contiene firme", "Verifica completata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                tabControlMain.SelectedIndex = 10;
+                mainTabControl.SelectedIndex = 10;
             }
 
             else if ((UInt32)n_sott == INVALID_FILE_TYPE)
             {
                 MessageBox.Show("Il file selezionato non è un file valido. E' possibile verificare solo file con estensione .p7m o .pdf", "Errore nella verifica", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                tabControlMain.SelectedIndex = 10;
+                mainTabControl.SelectedIndex = 10;
             }
 
             else if (n_sott < 0)
             {
                 MessageBox.Show("Errore nella verifica del file", "Errore nella verifica", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                tabControlMain.SelectedIndex = 10;
+                mainTabControl.SelectedIndex = 10;
             }
             else
             {
-                lblSottoscrittori.Text = string.Format("Numero di sottoscrittori: {0}", n_sott);
-                lblSottoscrittori.Update();
+                signersCounterLabel.Text = string.Format("Numero di sottoscrittori: {0}", n_sott);
+                signersCounterLabel.Update();
 
-                pnVerifica.Visible = true;
+                verifyPanel.Visible = true;
 
-                if (Path.GetExtension(lblVerificaPath.Text) == ".p7m")
+                if (Path.GetExtension(fileNamePathVerifyLabel.Text) == ".p7m")
                 {
-                    btnEstraiP7M.Enabled = true;
+                    extractP7MButton.Enabled = true;
                 }
                 else
                 {
-                    btnEstraiP7M.Enabled = false;
+                    extractP7MButton.Enabled = false;
                 }
 
-                tabControlMain.SelectedIndex = 16;
-
+                mainTabControl.SelectedIndex = 16;
             }
         }
 
         private void pnVerificaOp_MouseEnter(object sender, EventArgs e)
         {
-            lblVerificaOp.ForeColor = System.Drawing.SystemColors.Highlight;
+            verifyOptionChooserLabel.ForeColor = System.Drawing.SystemColors.Highlight;
         }
 
         private void pnVerificaOp_MouseLeave(object sender, EventArgs e)
         {
-            lblVerificaOp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            verifyOptionChooserLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
         }
 
-
-        private void btnAnnullaOp_Click(object sender, EventArgs e)
+        private void CancelOperationButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnAnnullaOp_Click() - Inizia funzione");
-            tabControlMain.SelectedIndex = 10;
+            Logger.Info("CancelOperationButton_Click() - Inizia funzione");
+            mainTabControl.SelectedIndex = 10;
         }
 
-        private void cbFirmaGrafica_CheckedChanged(object sender, EventArgs e)
+        private void EnableGraphicSignatureCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            Logger.Info("cbFirmaGrafica_CheckedChanged() - Inizia funzione");
-            if (lblPath2.Text.EndsWith(".pdf"))
+            Logger.Info("EnableGraphicSignatureCheckBox_CheckedChanged() - Inizia funzione");
+            if (labelFileNamePathInSigningFormatChooser.Text.EndsWith(".pdf"))
             {
-                if (cbFirmaGrafica.Checked == true)
+                if (enableGraphicSignatureCheckBox.Checked == true)
                 {
-                    cbFirmaGrafica.ForeColor = System.Drawing.SystemColors.Highlight;
+                    enableGraphicSignatureCheckBox.ForeColor = System.Drawing.SystemColors.Highlight;
                 }
                 else
                 {
-                    cbFirmaGrafica.ForeColor = System.Drawing.SystemColors.GrayText;
+                    enableGraphicSignatureCheckBox.ForeColor = System.Drawing.SystemColors.GrayText;
                 }
             }
-
         }
 
-        private void btnSignAnnulla_Click(object sender, EventArgs e)
+        private void CancelSigningOperationButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnSignAnnulla_Click() - Inizia funzione");
+            Logger.Info("CancelSigningOperationButton_Click() - Inizia funzione");
 
-            signOp = opSelectedState.NO_OP;
-            btnSignProsegui.Enabled = false;
+            signOp = OperationSelectedState.NO_OP;
+            proceedWithSignatureButton.Enabled = false;
 
-            lblPadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            lblPadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            PAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            PAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
 
-            lblCadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            lblCadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            CAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            CAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
 
-            pbCades.Image = CIEID.Properties.Resources.p7m_2x_gray;
+            CAdESP7MPictureBox.Image = CIEID.Properties.Resources.p7m_2x_gray;
             pbPades.Image = CIEID.Properties.Resources.pdf_2x_gray;
 
-            cbFirmaGrafica.Checked = false;
+            enableGraphicSignatureCheckBox.Checked = false;
 
-            tabControlMain.SelectedIndex = 11;
-
+            mainTabControl.SelectedIndex = 11;
         }
 
-        private void panelChoosePades_MouseEnter(object sender, EventArgs e)
+        private void PanelChoosePades_MouseEnter(object sender, EventArgs e)
         {
             panelChoosePades.BorderStyle = BorderStyle.FixedSingle;
         }
 
-        private void panelChoosePades_MouseLeave(object sender, EventArgs e)
+        private void PanelChoosePades_MouseLeave(object sender, EventArgs e)
         {
             panelChoosePades.BorderStyle = BorderStyle.None;
         }
 
-        private void panelChooseCades_MouseEnter(object sender, EventArgs e)
+        private void PanelChooseCades_MouseEnter(object sender, EventArgs e)
         {
             panelChooseCades.BorderStyle = BorderStyle.FixedSingle;
         }
 
-        private void panelChooseCades_MouseLeave(object sender, EventArgs e)
+        private void PanelChooseCades_MouseLeave(object sender, EventArgs e)
         {
             panelChooseCades.BorderStyle = BorderStyle.None;
         }
 
-        private void panelChoosePades_MouseClick(object sender, EventArgs e)
+        private void PanelChoosePades_MouseClick(object sender, EventArgs e)
         {
             Logger.Info("panelChoosePades_MouseClick() - Inizia funzione");
-            if (lblPath2.Text.EndsWith(".pdf"))
+            if (labelFileNamePathInSigningFormatChooser.Text.EndsWith(".pdf"))
             {
-                lblPadesTitle.ForeColor = Color.Red;
-                lblPadesExp.ForeColor = Color.Black;
+                PAdESSignatureLabel.ForeColor = Color.Red;
+                PAdESFormatDescriptionLabel.ForeColor = Color.Black;
 
-                lblCadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-                lblCadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+                CAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+                CAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
 
-                pbCades.Image = CIEID.Properties.Resources.p7m_2x_gray;
+                CAdESP7MPictureBox.Image = CIEID.Properties.Resources.p7m_2x_gray;
                 pbPades.Image = CIEID.Properties.Resources.pdf_2x;
 
-                signOp = opSelectedState.FIRMA_PADES;
-                btnSignProsegui.Enabled = true;
+                signOp = OperationSelectedState.FIRMA_PADES;
+                proceedWithSignatureButton.Enabled = true;
             }
-
-
         }
 
-        private void panelChooseCades_MouseClick(object sender, EventArgs e)
+        private void PanelChooseCades_MouseClick(object sender, EventArgs e)
         {
             Logger.Info("panelChooseCades_MouseClick() - Inizia funzione");
-            lblCadesTitle.ForeColor = System.Drawing.SystemColors.Highlight;
-            lblCadesExp.ForeColor = Color.Black;
+            CAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.Highlight;
+            CAdESFormatDescriptionLabel.ForeColor = Color.Black;
 
-            lblPadesTitle.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            lblPadesExp.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            cbFirmaGrafica.Checked = false;
+            PAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            PAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            enableGraphicSignatureCheckBox.Checked = false;
 
-            pbCades.Image = CIEID.Properties.Resources.p7m_2x;
+            CAdESP7MPictureBox.Image = CIEID.Properties.Resources.p7m_2x;
             pbPades.Image = CIEID.Properties.Resources.pdf_2x_gray;
 
-            signOp = opSelectedState.FIRMA_CADES;
-            btnSignProsegui.Enabled = true;
-
+            signOp = OperationSelectedState.FIRMA_CADES;
+            proceedWithSignatureButton.Enabled = true;
         }
 
-        private void btnSignProsegui_Click(object sender, EventArgs e)
+        private void ProceedWithSignatureButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnSignProsegui_Click() - Inizia funzione");
+            Logger.Info("proceedWithSignatureButton_Click() - Inizia funzione");
 
-            if ((cbFirmaGrafica.Checked == true) && (signOp == opSelectedState.FIRMA_PADES))
+            if ((enableGraphicSignatureCheckBox.Checked == true) && (signOp == OperationSelectedState.FIRMA_PADES))
             {
                 var model = carouselControl.ActiveCieModel;
                 string signImagePath = getSignImagePath(model.SerialNumber);
@@ -1755,124 +1722,123 @@ namespace CIEID
                     DrawText(nameInfo.ToTitleCase(name.ToLower()), Color.Black, signImagePath);
                 }
 
-                lblPath3.Text = lblPath2.Text;
+                labelFileNamePathInDragSignatureBox.Text = labelFileNamePathInSigningFormatChooser.Text;
 
-                btnUp.Enabled = true;
-                btnDown.Enabled = true;
+                upButton.Enabled = true;
+                downButton.Enabled = true;
 
                 if (pdfPreview != null)
                 {
                     pdfPreview.pdfPreviewRemoveObjects();
                 }
 
-                pdfPreview = new PdfPreview(panePreview, lblPath3.Text, signImagePath);
+                pdfPreview = new PdfPreview(panePreview, labelFileNamePathInDragSignatureBox.Text, signImagePath);
                 if (pdfPreview.getPdfPages() <= 1)
                 {
-                    btnUp.Enabled = false;
-                    btnDown.Enabled = false;
+                    upButton.Enabled = false;
+                    downButton.Enabled = false;
                 }
-                tabControlMain.SelectedIndex = 13;
+
+                mainTabControl.SelectedIndex = 13;
             }
             else
             {
-                lblPath4.Text = lblPath2.Text;
-                tabControlMain.SelectedIndex = 14;
+                labelFileNamePathSigningOperation.Text = labelFileNamePathInSigningFormatChooser.Text;
+                mainTabControl.SelectedIndex = 14;
             }
 
-
+            ChangeSignPINObjects();
         }
 
-        private void btnUp_Click(object sender, EventArgs e)
+        private void UpButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnUp_Click() - Inizia funzione");
+            Logger.Info("upButton_Click() - Inizia funzione");
             pdfPreview.pageUp();
         }
 
-        private void btnDown_Click(object sender, EventArgs e)
+        private void DownButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnDown_Click() - Inizia funzione");
+            Logger.Info("downButton_Click() - Inizia funzione");
             pdfPreview.pageDown();
         }
 
-        private void btnAnullaFirmaPin_Click(object sender, EventArgs e)
+        private void ChangeSignPINObjects()
         {
-            Logger.Info("btnAnullaFirmaPin_Click() - Inizia funzione");
-            for (int i = 9; i < 13; i++)
+            Logger.Info("ChangeSignPINObjects() - Inizia funzione");
+
+            Console.WriteLine("ShouldSignWithoutPairing: " + shouldSignWithoutCIEPairing);
+
+            byte tagIndexStart = 9;
+            byte tagIndexEnd = 17;
+            byte spacingDiffPINLabelAndInput = 77;
+
+            byte numDigitsPIN = (byte)((shouldSignWithoutCIEPairing) ? 8 : 4);
+            typePINLabel.Text = "Inserire le " + ((numDigitsPIN == 4) ? "ultime 4" : "8") + " cifre del PIN";
+            typePINLabel.TextAlign = ContentAlignment.MiddleLeft;
+            typePINLabel.Show();
+
+            for (int i = tagIndexStart; i < tagIndexEnd; i++)
             {
                 TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
-
+                txtField.Hide();
                 txtField.Text = "";
+
+                txtField.Location = new Point(typePINLabel.Location.X + ((shouldSignWithoutCIEPairing) ? 8 : spacingDiffPINLabelAndInput) + 24 * (i - tagIndexStart), txtField.Location.Y);
+
+                if(i < tagIndexStart + numDigitsPIN)
+                    txtField.Show();
             }
-            tabControlMain.SelectedIndex = 10;
+
+            cancelSigningOperationPINPanelButton.Show();
+            cancelSigningOperationPINPanelButton.Enabled = true;
+            signButton.Show();
+            signButton.Enabled = false;
+            closeButton.Hide();
+
+            placeCIEOnReaderLabel.Show();
+            digitalSignatureCompletedPictureBox.Hide();
+            documentSuccessfullySignedLabel.Hide();
+            signProgressBar.Hide();
         }
 
-        private void changeFirmaPinObjects()
+        private void CloseButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("changeFirmaPinObjects() - Inizia funzione");
-            lblFirmaPin.Text = "Inserisci le ultime 4 cifre del PIN";
-            lblFirmaPin.TextAlign = ContentAlignment.MiddleLeft;
-            lblFirmaPin.Show();
+            Logger.Info("CloseButton_Click() - Inizia funzione");
 
-            for (int i = 9; i < 13; i++)
+            ChangeSignPINObjects();
+
+            MenuDigitalSignatureButton_Click(null, null);
+        }
+
+        private void GoToSignPIN(string fileToSignPath)
+        {
+            Logger.Info("GoToSignPIN() - Inizia funzione");
+            labelFileNamePathSigningOperation.Text = fileToSignPath;
+            mainTabControl.SelectedIndex = 14;
+        }
+
+        private void ProceedSignPreviewButton_Click(object sender, EventArgs e)
+        {
+            Logger.Info("ProceedSignPreviewButton_Click() - Inizia funzione");
+            GoToSignPIN(labelFileNamePathInDragSignatureBox.Text);
+        }
+
+        private void SignButton_Click(object sender, EventArgs e)
+        {
+            Logger.Info("SignButton_Click() - Inizia funzione");
+            string PIN = "";
+            byte numDigitsPIN = (byte)((shouldSignWithoutCIEPairing) ? 8 : 4);
+
+            for (int i = 9; i < 9 + numDigitsPIN; i++)
             {
                 TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
 
-                txtField.Text = "";
-                txtField.Show();
+                PIN += txtField.Text;
             }
 
-            btnAnullaFirmaPin.Show();
-            btnAnullaFirmaPin.Enabled = true;
-            btnFirma.Show();
-            btnFirma.Enabled = false;
-            btnConcludi.Hide();
-
-
-            lblCartaFirmaPin.Show();
-            pbFirmaPin.Hide();
-            lblFirmaSuccess.Hide();
-            progressFirmaPina.Hide();
-
-        }
-
-        private void btnConcludi_Click(object sender, EventArgs e)
-        {
-            Logger.Info("btnConcludi_Click() - Inizia funzione");
-
-            changeFirmaPinObjects();
-            //changeHomeObjects();
-            tabControlMain.SelectedIndex = 10;
-
-        }
-
-        private void goToSignPin(string pdfPath)
-        {
-            Logger.Info("goToSignPin() - Inizia funzione");
-            lblPath4.Text = pdfPath;
-            tabControlMain.SelectedIndex = 14;
-        }
-
-        private void btnProseguiPreview_Click(object sender, EventArgs e)
-        {
-            Logger.Info("btnProseguiPreview_Click() - Inizia funzione");
-            goToSignPin(lblPath3.Text);
-        }
-
-        private void btnFirma_Click(object sender, EventArgs e)
-        {
-            Logger.Info("btnFirma_Click() - Inizia funzione");
-            string pin = "";
-
-            for (int i = 9; i < 13; i++)
+            if (PIN.Length != numDigitsPIN)
             {
-                TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
-
-                pin += txtField.Text;
-            }
-
-            if (pin.Length != 4)
-            {
-                MessageBox.Show("Inserire le ultime 4 cifre del PIN", "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Inserire le " + ((numDigitsPIN == 4) ? "ultime 4": "8") + " cifre del PIN", "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
@@ -1880,14 +1846,14 @@ namespace CIEID
 
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
 
-            if (signOp == opSelectedState.FIRMA_PADES)
+            if (signOp == OperationSelectedState.FIRMA_PADES)
             {
-                fileName = Path.GetFileNameWithoutExtension(lblPath4.Text) + "-signed";
+                fileName = Path.GetFileNameWithoutExtension(labelFileNamePathSigningOperation.Text) + "-signed";
                 saveFileDialog1.Filter = "File (*.pdf) | *.pdf";
             }
             else
             {
-                fileName = Path.GetFileName(lblPath4.Text) + "-signed";
+                fileName = Path.GetFileName(labelFileNamePathSigningOperation.Text) + "-signed";
                 fileName = fileName.Replace(".p7m", "");
                 saveFileDialog1.Filter = "File (*.p7m) | *.p7m";
             }
@@ -1901,50 +1867,71 @@ namespace CIEID
                 Console.WriteLine("Path save file: {0}", pathToSaveFile);
             }
             else
-            {
                 return;
-            }
 
-            for (int i = 9; i < 13; i++)
+            for (int i = 9; i < 9 + numDigitsPIN; i++)
             {
                 TextBox txtField = (TextBox)FindControlByTag(Controls, "" + i);
-
                 txtField.Hide();
             }
 
-            btnAnullaFirmaPin.Enabled = false;
-            btnFirma.Enabled = false;
+            cancelSigningOperationPINPanelButton.Enabled = false;
+            signButton.Enabled = false;
 
-            progressFirmaPina.Value = 0;
-            progressFirmaPina.Show();
-            lblFirmaPin.TextAlign = ContentAlignment.MiddleCenter;
-            lblFirmaPin.Text = "Firma in corso...";
-            lblFirmaPin.Update();
+            signProgressBar.Value = 0;
+            signProgressBar.Show();
+            typePINLabel.TextAlign = ContentAlignment.MiddleCenter;
+            typePINLabel.Text = "Firma in corso...";
+            typePINLabel.Update();
+
+            //PairCIE and Sign
 
             ((Control)sender).Enabled = false;
             ThreadStart processTaskThread = delegate
             {
-                var model = carouselControl.ActiveCieModel;
+                CieModel model = null;
+
+                if (shouldSignWithoutCIEPairing)
+                {
+                    int tmpPairRes = CIEPairing(sender, PIN, true);
+
+                    if (tmpPairRes == CARD_ALREADY_ENABLED)
+                    {
+                        MessageBox.Show("La CIE risulta essere già stata associata precedentemente, per cui l'operazione di firma è stata annullata. Ripetere il procedimento, selezionando la CIE dal selettore presente in 'Firma Elettronica'.", "CIE già associata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        shouldSignWithoutCIEPairing = false;
+                        return;
+                    }
+
+                    else if (tmpPairRes != CKR_OK)
+                    {
+                        MessageBox.Show("Si è verificato un errore durante la lettura dei dati della CIE.", "Errore durante la firma", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        shouldSignWithoutCIEPairing = false;
+                        return;
+                    }
+
+                    PIN = PIN.Substring(PIN.Length - 4);
+                }
+
+                else
+                    model = carouselControl.ActiveCieModel;
+
                 int ret = 0;
-                if (cbFirmaGrafica.Checked && (signOp == opSelectedState.FIRMA_PADES))
+                if (enableGraphicSignatureCheckBox.Checked && (signOp == OperationSelectedState.FIRMA_PADES))
                 {
                     Console.WriteLine("Pades con grafica");
                     Dictionary<string, float> signImageInfo = pdfPreview.getSignImageInfos();
-                    ret = firmaConCIE(lblPath4.Text, "pdf", pin, model.Pan, (int)signImageInfo["pageNumber"], signImageInfo["x"], signImageInfo["y"], signImageInfo["w"], signImageInfo["h"],
-                                      pdfPreview.getSignImagePath(), pathToSaveFile, new ProgressCallback(ProgressFirma), new SignCompletedCallback(CompletedFirma));
-
+                    ret = firmaConCIE(labelFileNamePathSigningOperation.Text, "pdf", PIN, (shouldSignWithoutCIEPairing) ? PANForOneShotSigning : model.Pan, (int)signImageInfo["pageNumber"], signImageInfo["x"], signImageInfo["y"], signImageInfo["w"], signImageInfo["h"],
+                                      pdfPreview.getSignImagePath(), pathToSaveFile, new ProgressCallback(SignProgress), new SignCompletedCallback(SignCompleted));
                 }
-                else if (signOp == opSelectedState.FIRMA_PADES)
+                else if (signOp == OperationSelectedState.FIRMA_PADES)
                 {
                     Console.WriteLine("Pades senza grafica");
-
-                    ret = firmaConCIE(lblPath4.Text, "pdf", pin, model.Pan, 0, 0.0f, 0.0f, 0.0f, 0.0f, null, pathToSaveFile, new ProgressCallback(ProgressFirma), new SignCompletedCallback(CompletedFirma));
+                    ret = firmaConCIE(labelFileNamePathSigningOperation.Text, "pdf", PIN, (shouldSignWithoutCIEPairing) ? PANForOneShotSigning : model.Pan, 0, 0.0f, 0.0f, 0.0f, 0.0f, null, pathToSaveFile, new ProgressCallback(SignProgress), new SignCompletedCallback(SignCompleted));
                 }
-                else if (signOp == opSelectedState.FIRMA_CADES)
+                else if (signOp == OperationSelectedState.FIRMA_CADES)
                 {
                     Console.WriteLine("Cades");
-
-                    ret = firmaConCIE(lblPath4.Text, "p7m", pin, model.Pan, 0, 0.0f, 0.0f, 0.0f, 0.0f, null, pathToSaveFile, new ProgressCallback(ProgressFirma), new SignCompletedCallback(CompletedFirma));
+                    ret = firmaConCIE(labelFileNamePathSigningOperation.Text, "p7m", PIN, (shouldSignWithoutCIEPairing) ? PANForOneShotSigning : model.Pan, 0, 0.0f, 0.0f, 0.0f, 0.0f, null, pathToSaveFile, new ProgressCallback(SignProgress), new SignCompletedCallback(SignCompleted));
                 }
 
                 this.Invoke((MethodInvoker)delegate
@@ -1952,57 +1939,61 @@ namespace CIEID
                     ((Control)sender).Enabled = true;
                     switch (ret)
                     {
-                    case CKR_TOKEN_NOT_RECOGNIZED:
-                        MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        changeFirmaPinObjects();
-                        break;
+                        case CKR_TOKEN_NOT_RECOGNIZED:
+                            MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            ChangeSignPINObjects();
+                            break;
 
-                    case CKR_TOKEN_NOT_PRESENT:
-                        MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        changeFirmaPinObjects();
-                        break;
+                        case CKR_TOKEN_NOT_PRESENT:
+                            MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            ChangeSignPINObjects();
+                            break;
 
-                    case CKR_PIN_INCORRECT:
-                        MessageBox.Show(String.Format("Il PIN digitato è errato."), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        changeFirmaPinObjects();
-                        break;
+                        case CKR_PIN_INCORRECT:
+                            MessageBox.Show(String.Format("Il PIN digitato è errato."), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            ChangeSignPINObjects();
+                            break;
 
-                    case CKR_PIN_LOCKED:
-                        MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        changeFirmaPinObjects();
-                        break;
+                        case CKR_PIN_LOCKED:
+                            MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            ChangeSignPINObjects();
+                            break;
 
-                    case CARD_PAN_MISMATCH:
-                        MessageBox.Show("CIE selezionata diversa da quella presente sul lettore", "CIE non corrispondente", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        changeFirmaPinObjects();
-                        break;
+                        case CARD_PAN_MISMATCH:
+                            MessageBox.Show("CIE selezionata diversa da quella presente sul lettore", "CIE non corrispondente", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            ChangeSignPINObjects();
+                            break;
                     }
-                });
 
+                    if (shouldSignWithoutCIEPairing)
+                        RemoveCIEFromCollection(PANForOneShotSigning);
+
+                    PANForOneShotSigning = String.Empty;
+                    shouldSignWithoutCIEPairing = false;
+                });
             };
 
             new Thread(processTaskThread).Start();
         }
 
-
-        private void btnPersonalizzaAnnulla_Click(object sender, EventArgs e)
+        private void CancelCustomizationButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnPersonalizzaAnnulla_Click() - Inizia funzione");
+            Logger.Info("CancelCustomizationButton_Click() - Inizia funzione");
 
             var model = carouselControl.ActiveCieModel;
 
             if (model.isCustomSign)
             {
-                lbPeronalizza.Text = "Aggiorna";
-                label29.Text = "Firma personalizzata correttamente";
+                customizeGraphicSignatureLabel.Text = "Aggiorna";
+                labelGraphicSignatureDescriptionInfoBox.Text = "Firma personalizzata correttamente";
             }
 
-            tabControlMain.SelectedIndex = 10;
+            mainTabControl.SelectedIndex = 10;
         }
 
-        private void btnPersonalizzaSelect_Click(object sender, EventArgs e)
+        private void SelectFileForGraphicSignatureCustomizationButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnPersonalizzaSelect_Click() - Inizia funzione");
+            Logger.Info("SelectFileForGraphicSignatureCustomizationButton_Click() - Inizia funzione");
             OpenFileDialog openFile = new OpenFileDialog();
 
             openFile.Filter = "File (*.png) | *.png";
@@ -2025,85 +2016,90 @@ namespace CIEID
                     image = System.Drawing.Image.FromStream(stream);
                 }
 
-                PictureBox signPicture = (PictureBox)pnFirmaGrafica.Controls[0];
+                PictureBox signPicture = (PictureBox)graphicDigitalSignaturePanel.Controls[0];
                 Bitmap signImage = new Bitmap(image, signPicture.Width, signPicture.Height);
                 signImage.MakeTransparent();
                 signPicture.Image = signImage;
                 signPicture.Update();
 
-                lblPersonalizzaPreambolo.Text = "Una tua firma grafica personalizzata è già stata caricata. Vuoi aggiornarla?";
-                lblPersonalizzaPreambolo.Update();
+                graphicSignatureCustomizationOverviewLabel.Text = "Una tua firma grafica personalizzata è già stata caricata. Vuoi aggiornarla?";
+                graphicSignatureCustomizationOverviewLabel.Update();
 
-
-                btnCreaFirma.Enabled = true;
+                generateCustomGraphicSignatureButton.Enabled = true;
             }
         }
 
-        private void button1_Click_1(object sender, EventArgs e)
+        private void CloseVerifyButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("button1_Click_1() - Inizia funzione");
+            Logger.Info("CloseVerifyButton_Click() - Inizia funzione");
             //changeHomeObjects();
             var model = carouselControl.ActiveCieModel;
 
             if (model.isCustomSign)
             {
-                lbPeronalizza.Text = "Aggiorna";
-                label29.Text = "Firma personalizzata correttamente";
-
+                customizeGraphicSignatureLabel.Text = "Aggiorna";
+                labelGraphicSignatureDescriptionInfoBox.Text = "Firma personalizzata correttamente";
             }
+
             else
             {
-                lbPeronalizza.Text = "Personalizza";
-                label29.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. Questo passaggio non è indispensabile, " +
+                customizeGraphicSignatureLabel.Text = "Personalizza";
+                labelGraphicSignatureDescriptionInfoBox.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. Questo passaggio non è indispensabile, " +
                                "ma ti consentirà di dare un tocco personale ai documenti firmati.";
-
             }
 
-            tabControlMain.SelectedIndex = 10;
+            mainTabControl.SelectedIndex = 10;
         }
 
-        private void displayFileSelectionTab()
+        private void DisplayFileSelectionTab()
         {
-            Logger.Info("displayFileSelectionTab() - Inizia funzione");
-            if (signOp == opSelectedState.VERIFY)
+            Logger.Info("DisplayFileSelectionTab() - Inizia funzione");
+
+            if (signOp == OperationSelectedState.VERIFY)
             {
                 pictureBox15.Visible = false;
-                lbPeronalizza.Visible = false;
-                label29.Visible = false;
-                label7.Text = "Trascina i tuoi documenti qui per verificare una firma elettronica esistente";
+                customizeGraphicSignatureLabel.Visible = false;
+                labelGraphicSignatureDescriptionInfoBox.Visible = false;
+                labelDragAndDropDocumentInformation.Text = "Trascina i tuoi documenti qui per verificare una firma elettronica esistente";
             }
+
             else
             {
                 var model = carouselControl.ActiveCieModel;
 
                 pictureBox15.Visible = true;
-                lbPeronalizza.Visible = true;
-                label29.Visible = true;
-                label7.Text = "Trascina i tuoi documenti qui dentro per firmarli";
+                customizeGraphicSignatureLabel.Visible = true;
+                labelGraphicSignatureDescriptionInfoBox.Visible = true;
+                labelDragAndDropDocumentInformation.Text = "Trascina i tuoi documenti qui dentro per firmarli";
+
                 if (model.isCustomSign)
                 {
-                    lbPeronalizza.Text = "Aggiorna";
-                    label29.Text = "Firma personalizzata correttamente";
+                    customizeGraphicSignatureLabel.Text = "Aggiorna";
+                    labelGraphicSignatureDescriptionInfoBox.Text = "Firma personalizzata correttamente";
                 }
+
                 else
                 {
-                    lbPeronalizza.Text = "Personalizza";
-                    label29.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
+                    customizeGraphicSignatureLabel.Text = "Personalizza";
+                    labelGraphicSignatureDescriptionInfoBox.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
                                    "Questo passaggio non è indispensabile, ma ti consentirà di dare un tocco personale ai documenti firmati.";
                 }
             }
-            tabControlMain.SelectedIndex = 10;
+
+            mainTabControl.SelectedIndex = 10;
         }
 
-        private void btnSigSelectCie_Click(object sender, EventArgs e)
+        private void SelectSigningCIEButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnSigSelectCie_Click() - Inizia funzione");
-            displayFileSelectionTab();
+            Logger.Info("SelectSigningCIEButton_Click() - Inizia funzione");
+            Console.WriteLine("Disabling flag");
+            shouldSignWithoutCIEPairing = false;
+            DisplayFileSelectionTab();
         }
 
-        private void btnCreaFirma_Click(object sender, EventArgs e)
+        private void GenerateCustomGraphicSignatureButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnCreaFirma_Click() - Inizia funzione");
+            Logger.Info("GenerateCustomGraphicSignatureButton_Click() - Inizia funzione");
 
             var model = carouselControl.ActiveCieModel;
 
@@ -2120,7 +2116,7 @@ namespace CIEID
                 image = System.Drawing.Image.FromStream(stream);
             }
 
-            PictureBox signPicture = (PictureBox)pnFirmaGrafica.Controls[0];
+            PictureBox signPicture = (PictureBox)graphicDigitalSignaturePanel.Controls[0];
             Bitmap signImage = new Bitmap(image, signPicture.Width, signPicture.Height);
             signImage.MakeTransparent();
             signPicture.Image = signImage;
@@ -2130,49 +2126,47 @@ namespace CIEID
             Properties.Settings.Default.cieList = JsonConvert.SerializeObject(CieColl.MyDictionary);
             Properties.Settings.Default.Save();
 
-
-            label29.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
+            labelGraphicSignatureDescriptionInfoBox.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
                            "Questo passaggio non è indispensabile, ma ti consentirà di dare un tocco personale ai documenti firmati.";
 
-            lbPeronalizza.Text = "Personalizza";
+            customizeGraphicSignatureLabel.Text = "Personalizza";
 
-            lblPersonalizzaPreambolo.Text = label29.Text;
-            lblPersonalizzaPreambolo.Update();
+            graphicSignatureCustomizationOverviewLabel.Text = labelGraphicSignatureDescriptionInfoBox.Text;
+            graphicSignatureCustomizationOverviewLabel.Update();
 
-            btnCreaFirma.Enabled = false;
+            generateCustomGraphicSignatureButton.Enabled = false;
         }
 
-
-        private void btnSettings_Click(object sender, EventArgs e)
+        private void menuSettingsButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnSettings_Click() - Inizia funzione");
+            Logger.Info("menuSettingsButton_Click() - Inizia funzione");
 
-            buttonHome.BackColor = Color.Transparent;
-            buttonChangePIN.BackColor = Color.Transparent;
-            buttonUnlock.BackColor = Color.Transparent;
-            buttonTutorial.BackColor = Color.Transparent;
-            buttonInfo.BackColor = Color.Transparent;
-            buttonHelp.BackColor = Color.Transparent;
-            buttonFirma.BackColor = Color.Transparent;
-            buttonVerifica.BackColor = Color.Transparent;
-            btnSettings.BackColor = Color.LightGray;
+            menuHomeButton.BackColor = Color.Transparent;
+            menuChangePINButton.BackColor = Color.Transparent;
+            menuUnlockPINButton.BackColor = Color.Transparent;
+            menuTutorialButton.BackColor = Color.Transparent;
+            menuInformationButton.BackColor = Color.Transparent;
+            menuHelpButton.BackColor = Color.Transparent;
+            menuDigitalSignatureButton.BackColor = Color.Transparent;
+            menuVerifyButton.BackColor = Color.Transparent;
+            menuSettingsButton.BackColor = Color.LightGray;
 
             // If btnEditSettings is enabled then the config pane is *not* in edit mode
-            if (btnEditSettings.Enabled)
+            if (editSettingsButton.Enabled)
             {
-                Logger.Debug("btnSettings_Click() - Configurazione non in modifica, carico valori dalle preferenze");
+                Logger.Debug("menuSettingsButton_Click() - Configurazione non in modifica, carico valori dalle preferenze");
                 if (Properties.Settings.Default.proxyURL != "")
                 {
-                    Logger.Debug("btnSettings_Click() - Impostazione proxy presente");
+                    Logger.Debug("menuSettingsButton_Click() - Impostazione proxy presente");
                     if (Properties.Settings.Default.credentials == "")
                     {
-                        Logger.Debug("btnSettings_Click() - Impostazioni credenziali presenti");
+                        Logger.Debug("menuSettingsButton_Click() - Impostazioni credenziali presenti");
                         txtUsername.Text = "";
                         txtPassword.Text = "";
                     }
                     else
                     {
-                        Logger.Debug("btnSettings_Click() - Impostazioni credenziali non presenti");
+                        Logger.Debug("menuSettingsButton_Click() - Impostazioni credenziali non presenti");
                         string encryptedCredentials = Properties.Settings.Default.credentials;
                         ProxyInfoManager proxyInfoManager = new ProxyInfoManager();
 
@@ -2190,7 +2184,7 @@ namespace CIEID
                     txtPort.Text = Properties.Settings.Default.proxyPort.ToString();
                 }
 
-                Logger.Debug($"btnSettings_Click() - radio button app: {Program.LogLevelApp}  lib: {Program.LogLevelLib}");
+                Logger.Debug($"menuSettingsButton_Click() - radio button app: {Program.LogLevelApp}  lib: {Program.LogLevelLib}");
                 rbLoggingAppNone.Checked = (Program.LogLevelApp == LogLevel.NONE);
                 rbLoggingAppError.Checked = (Program.LogLevelApp == LogLevel.ERROR);
                 rbLoggingAppInfo.Checked = (Program.LogLevelApp == LogLevel.INFO);
@@ -2202,13 +2196,13 @@ namespace CIEID
                 rbLoggingLibDebug.Checked = (Program.LogLevelLib == LogLevel.DEBUG);
             }
 
-            tabControlMain.SelectedIndex = 17;
+            mainTabControl.SelectedIndex = 17;
         }
 
-        private void cbShowPsw_CheckedChanged(object sender, EventArgs e)
+        private void ShowPasswordCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            Logger.Info("cbShowPsw_CheckedChanged() - Inizia funzione");
-            if (cbShowPsw.Checked == true)
+            Logger.Info("ShowPasswordCheckBox_CheckedChanged() - Inizia funzione");
+            if (showPasswordCheckBox.Checked == true)
             {
                 txtPassword.UseSystemPasswordChar = false;
             }
@@ -2218,31 +2212,30 @@ namespace CIEID
             }
         }
 
-        private void btnSaveSettings_Click(object sender, EventArgs e)
+        private void SaveSettingsButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnSaveSettings_Click() - Inizia funzione");
-
+            Logger.Info("SaveSettingsButton_Click() - Inizia funzione");
 
             if ((String.IsNullOrEmpty(txtUsername.Text) && !String.IsNullOrEmpty(txtPassword.Text)) || (!String.IsNullOrEmpty(txtUsername.Text) && String.IsNullOrEmpty(txtPassword.Text)))
             {
-                Logger.Debug("btnSaveSettings_Click() - Campo username o password mancante");
+                Logger.Debug("SaveSettingsButton_Click() - Campo username o password mancante");
                 MessageBox.Show("Campo username o password mancante", "Credenziali proxy mancanti", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
             if ((String.IsNullOrEmpty(txtPort.Text) && !String.IsNullOrEmpty(txtUrl.Text)) || (!String.IsNullOrEmpty(txtPort.Text) && String.IsNullOrEmpty(txtUrl.Text)))
             {
-                Logger.Debug("btnSaveSettings_Click() - Indirizzo o porta del proxy mancante");
+                Logger.Debug("SaveSettingsButton_Click() - Indirizzo o porta del proxy mancante");
                 MessageBox.Show("Indirizzo o porta del proxy mancante", "Informazioni proxy mancanti", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
             if ((String.IsNullOrEmpty(txtUsername.Text)))
             {
-                Logger.Debug("btnSaveSettings_Click() - Elimina credenziali proxy");
+                Logger.Debug("SaveSettingsButton_Click() - Elimina credenziali proxy");
                 Properties.Settings.Default.credentials = "";
             }
             else
             {
-                Logger.Debug($"btnSaveSettings_Click() - Conserva credenziali per username: '{txtUsername.Text}'");
+                Logger.Debug($"SaveSettingsButton_Click() - Conserva credenziali per username: '{txtUsername.Text}'");
                 string credentials = String.Format("cred={0}:{1}", txtUsername.Text, txtPassword.Text);
                 //Console.WriteLine("Credentials: {0}", credentials);
 
@@ -2251,23 +2244,24 @@ namespace CIEID
                 //Console.WriteLine("Credentials: {0}", credentials);
                 Properties.Settings.Default.credentials = encryptedCredentials;
             }
-            Logger.Debug($"btnSaveSettings_Click() - Conserva credenziali per proxyURL: '{txtUrl.Text}'");
+            Logger.Debug($"SaveSettingsButton_Click() - Conserva credenziali per proxyURL: '{txtUrl.Text}'");
             Properties.Settings.Default.proxyURL = txtUrl.Text;
             if (String.IsNullOrEmpty(txtPort.Text))
             {
-                Logger.Debug($"btnSaveSettings_Click() - proxyPort: {0}");
+                Logger.Debug($"SaveSettingsButton_Click() - proxyPort: {0}");
                 Properties.Settings.Default.proxyPort = 0;
             }
             else
             {
                 Int32 value = Int32.Parse(txtPort.Text);
-                Logger.Debug($"btnSaveSettings_Click() - proxyPort: {value}");
+                Logger.Debug($"SaveSettingsButton_Click() - proxyPort: {value}");
                 Properties.Settings.Default.proxyPort = value;
             }
 
-            Logger.Debug("btnSaveSettings_Click() - Registra configurazione di log");
+            Logger.Debug("SaveSettingsButton_Click() - Registra configurazione di log");
             LogLevel logLevelApp = Logger.DefaultLogLevel;
             LogLevel logLevelLib = Logger.DefaultLogLevel;
+
             if (rbLoggingAppNone.Checked == true)
             {
                 logLevelApp = LogLevel.NONE;
@@ -2301,59 +2295,59 @@ namespace CIEID
             {
                 logLevelLib = LogLevel.DEBUG;
             }
+
             Program.SetLogConfig(logLevelApp, logLevelLib);
 
-            Logger.Debug("btnSaveSettings_Click() - Esci dalla modalità di modifica");
+            Logger.Debug("SaveSettingsButton_Click() - Esci dalla modalità di modifica");
             txtUrl.Enabled = false;
             txtUsername.Enabled = false;
             txtPassword.Enabled = false;
             txtPort.Enabled = false;
-            cbShowPsw.Enabled = false;
-            cbShowPsw.Checked = false;
+            showPasswordCheckBox.Enabled = false;
+            showPasswordCheckBox.Checked = false;
 
-            gbConfigLoggingLib.Enabled = false;
-            gbConfigLoggingApp.Enabled = false;
+            configLibraryLoggingGroupBox.Enabled = false;
+            configApplicationLoggingGroupBox.Enabled = false;
 
-            btnSaveSettings.Enabled = false;
-            btnEditSettings.Enabled = true;
+            saveSettingsButton.Enabled = false;
+            editSettingsButton.Enabled = true;
 
-            Logger.Debug("btnSaveSettings_Click() - Salva configurazione");
+            Logger.Debug("SaveSettingsButton_Click() - Salva configurazione");
             Program.SaveLogConfigToFile();
             Properties.Settings.Default.Save();
-            Logger.Debug("btnSaveSettings_Click() - Configurazione salvata");
+            Logger.Debug("SaveSettingsButton_Click() - Configurazione salvata");
         }
 
-        private void btnEditSettings_Click(object sender, EventArgs e)
+        private void EditSettingsButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnEditSettings_Click() - Inizia funzione");
+            Logger.Info("editSettingsButton_Click() - Inizia funzione");
 
             txtUrl.Enabled = true;
             txtUsername.Enabled = true;
             txtPassword.Enabled = true;
             txtPort.Enabled = true;
-            cbShowPsw.Enabled = true;
-            cbShowPsw.Checked = false;
+            showPasswordCheckBox.Enabled = true;
+            showPasswordCheckBox.Checked = false;
 
-            gbConfigLoggingLib.Enabled = true;
-            gbConfigLoggingApp.Enabled = true;
+            configLibraryLoggingGroupBox.Enabled = true;
+            configApplicationLoggingGroupBox.Enabled = true;
 
-            btnSaveSettings.Enabled = true;
-            btnEditSettings.Enabled = false;
+            saveSettingsButton.Enabled = true;
+            editSettingsButton.Enabled = false;
         }
 
         private void txtPort_KeyPress(object sender, KeyPressEventArgs e)
         {
-
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
             {
                 e.Handled = true;
             }
         }
 
-        private void btnEstraiP7M_Click(object sender, EventArgs e)
+        private void ExtractP7MButton_Click(object sender, EventArgs e)
         {
-            Logger.Info("btnEstraiP7M_Click() - Inizia funzione");
-            string fileName = Path.GetFileNameWithoutExtension(lblVerificaPath.Text);
+            Logger.Info("ExtractP7MButton_Click() - Inizia funzione");
+            string fileName = Path.GetFileNameWithoutExtension(fileNamePathVerifyLabel.Text);
 
             fileName = fileName.Replace("-signed", "");
 
@@ -2369,7 +2363,7 @@ namespace CIEID
                 pathToSaveFile = Path.GetFullPath(saveFileDialog1.FileName);
 
                 Console.WriteLine("File extension: {0}", fileExt);
-                long res = estraiP7m(lblVerificaPath.Text, pathToSaveFile);
+                long res = estraiP7m(fileNamePathVerifyLabel.Text, pathToSaveFile);
                 Console.WriteLine("Res: {0}", (UInt32)res);
 
                 if (res == 0)
@@ -2380,7 +2374,6 @@ namespace CIEID
                 {
                     MessageBox.Show("Impossibile estrarre il file", "Estrazione file completata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-
             }
             else
             {
@@ -2388,26 +2381,13 @@ namespace CIEID
             }
 
         }
+
+        private void SignWithCIEWithoutPairingButton_Click(object sender, EventArgs e)
+        {
+            //Enable 8 PIN digits
+            shouldSignWithoutCIEPairing = true;
+            ChangeSignPINObjects();
+            mainTabControl.SelectedIndex = 10;
+        }
     }
-//long ret = VerificaCIEAbilitata();
-
-//            switch (ret)
-//            {
-//                case CKR_DEVICE_ERROR:
-//                    break;
-
-//                case CKR_TOKEN_NOT_PRESENT:
-//                    break;
-
-//                case CKR_GENERAL_ERROR:
-//                    break;
-
-//                case ENROLLED:
-//                    break;
-
-//                case NOT_ENROLLED:
-//                    abbina();
-//                    break;
-
-//            }
 }
