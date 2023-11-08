@@ -2,7 +2,7 @@
 !include "x64.nsh"
 !include "Library.nsh"
 
-!define PRODUCT_VERSION "1.4.3.6"
+!define PRODUCT_VERSION "1.4.3.7"
 
 ;--------------------------------
 ;General
@@ -82,8 +82,8 @@ Section "Install"
     #!insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "..\Win32\${Config}\CIEPKI.dll" "$SYSDIR\CIEPKI.dll" $SYSDIR
   ${EndIf}
 
-  RMDir /r "$LOCALAPPDATA\CIEID"
-  RMDir /r "$%LOCALAPPDATA%\IPZS"
+  # RMDir /r "$LOCALAPPDATA\CIEID"
+  # RMDir /r "$%LOCALAPPDATA%\IPZS"
  
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\CIE Middleware"

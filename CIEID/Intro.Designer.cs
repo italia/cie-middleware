@@ -90,7 +90,7 @@
             this.buttonContinue.TabIndex = 3;
             this.buttonContinue.Text = "Continua";
             this.buttonContinue.UseVisualStyleBackColor = false;
-            this.buttonContinue.Click += new System.EventHandler(this.buttonContine_Click);
+            this.buttonContinue.Click += new System.EventHandler(this.buttonContinue_Click);
             // 
             // pictureBox1
             // 

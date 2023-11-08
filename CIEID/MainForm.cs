@@ -42,8 +42,8 @@ namespace CIEID
         private enum OperationSelectedState
         {
             NO_OP = 0,
-            FIRMA_PADES = 1,
-            FIRMA_CADES = 2,
+            PADES_SIGNATURE = 1,
+            CADES_SIGNATURE = 2,
             VERIFY = 3,
         }
 
@@ -155,14 +155,14 @@ namespace CIEID
                     documentSuccessfullySignedLabel.Text = "Si è verificato un errore";
                     Logger.Debug(documentSuccessfullySignedLabel.Text);
                     digitalSignatureCompletedPictureBox.Image = Properties.Resources.cross;
-                    digitalSignatureCompletedPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+                    digitalSignatureCompletedPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
                 }
                 else
                 {
                     documentSuccessfullySignedLabel.Text = "File firmato con successo";
                     Logger.Debug(documentSuccessfullySignedLabel.Text);
                     digitalSignatureCompletedPictureBox.Image = Properties.Resources.check;
-                    digitalSignatureCompletedPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+                    digitalSignatureCompletedPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
                 }
 
                 signProgressBar.Hide();
@@ -369,8 +369,8 @@ namespace CIEID
 
                 int height = size_y - pairButton.Height - 30;
 
-                cancelButton.Location = new System.Drawing.Point(remaining_space, height);
-                pairButton.Location = new System.Drawing.Point(2 * remaining_space + cancelButton.Width, cancelButton.Location.Y);
+                cancelButton.Location = new Point(remaining_space, height);
+                pairButton.Location = new Point(2 * remaining_space + cancelButton.Width, cancelButton.Location.Y);
                 cancelButton.Visible = true;
             }
             else
@@ -380,7 +380,7 @@ namespace CIEID
                 int remaining_space = (size_x - ((pairButton.Width))) / 2;
                 int height = size_y - pairButton.Height - 30;
 
-                pairButton.Location = new System.Drawing.Point(remaining_space, height);
+                pairButton.Location = new Point(remaining_space, height);
                 cancelButton.Visible = false;
             }
         }
@@ -886,7 +886,6 @@ namespace CIEID
                     Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_RECOGNIZED");
                     MessageBox.Show("CIE non presente sul lettore", "Cambio PIN", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     SelectHome();
-                    //[self showHomeFirstPage];
                     break;
 
                 case CKR_TOKEN_NOT_PRESENT:
@@ -940,7 +939,6 @@ namespace CIEID
                     Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_RECOGNIZED");
                     MessageBox.Show("CIE non presente sul lettore", "Sblocca CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     SelectHome();
-                    //[self showHomeFirstPage];
                     break;
 
                 case CKR_TOKEN_NOT_PRESENT:
@@ -1409,7 +1407,7 @@ namespace CIEID
             Image image;
             using (Stream stream = File.OpenRead(signImagePath))
             {
-                image = System.Drawing.Image.FromStream(stream);
+                image = Image.FromStream(stream);
             }
 
             Bitmap signImage = new Bitmap(image, signPicture.Width, signPicture.Height);
@@ -1500,7 +1498,7 @@ namespace CIEID
             //deleteTmpFiles();
             //page_index = 1;
 
-            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (openFile.ShowDialog() == DialogResult.OK)
             {
                 string file_name = openFile.FileName;
                 Logger.Debug($"Selected file: {file_name}");
@@ -1517,18 +1515,18 @@ namespace CIEID
             signOp = OperationSelectedState.NO_OP;
             proceedWithSignatureButton.Enabled = false;
 
-            PAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            PAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            PAdESSignatureLabel.ForeColor = SystemColors.ControlDarkDark;
+            PAdESFormatDescriptionLabel.ForeColor = SystemColors.ControlDarkDark;
 
-            CAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            CAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            CAdESSignatureLabel.ForeColor = SystemColors.ControlDarkDark;
+            CAdESFormatDescriptionLabel.ForeColor = SystemColors.ControlDarkDark;
 
             CAdESP7MPictureBox.Image = CIEID.Properties.Resources.p7m_2x_gray;
             pbPades.Image = CIEID.Properties.Resources.pdf_2x_gray;
 
             enableGraphicSignatureCheckBox.Checked = false;
 
-            if (labelFileNamePathInSigningFormatChooser.Text.EndsWith(".pdf"))
+            if (labelFileNamePathInSigningFormatChooser.Text.EndsWith(".pdf") && !shouldSignWithoutCIEPairing)
                 enableGraphicSignatureCheckBox.Enabled = true;
             else
                 enableGraphicSignatureCheckBox.Enabled = false;
@@ -1544,12 +1542,12 @@ namespace CIEID
 
         private void SignOperationOptionPanel_MouseEnter(object sender, EventArgs e)
         {
-            signOptionChooserLabel.ForeColor = System.Drawing.SystemColors.Highlight;
+            signOptionChooserLabel.ForeColor = SystemColors.Highlight;
         }
 
         private void SignOperationOptionPanel_MouseLeave(object sender, EventArgs e)
         {
-            signOptionChooserLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            signOptionChooserLabel.ForeColor = SystemColors.ControlDarkDark;
         }
 
         private void pnVerificaOp_MouseClick(object sender, EventArgs e)
@@ -1599,12 +1597,12 @@ namespace CIEID
 
         private void pnVerificaOp_MouseEnter(object sender, EventArgs e)
         {
-            verifyOptionChooserLabel.ForeColor = System.Drawing.SystemColors.Highlight;
+            verifyOptionChooserLabel.ForeColor = SystemColors.Highlight;
         }
 
         private void pnVerificaOp_MouseLeave(object sender, EventArgs e)
         {
-            verifyOptionChooserLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            verifyOptionChooserLabel.ForeColor = SystemColors.ControlDarkDark;
         }
 
         private void CancelOperationButton_Click(object sender, EventArgs e)
@@ -1620,11 +1618,11 @@ namespace CIEID
             {
                 if (enableGraphicSignatureCheckBox.Checked == true)
                 {
-                    enableGraphicSignatureCheckBox.ForeColor = System.Drawing.SystemColors.Highlight;
+                    enableGraphicSignatureCheckBox.ForeColor = SystemColors.Highlight;
                 }
                 else
                 {
-                    enableGraphicSignatureCheckBox.ForeColor = System.Drawing.SystemColors.GrayText;
+                    enableGraphicSignatureCheckBox.ForeColor = SystemColors.GrayText;
                 }
             }
         }
@@ -1636,11 +1634,11 @@ namespace CIEID
             signOp = OperationSelectedState.NO_OP;
             proceedWithSignatureButton.Enabled = false;
 
-            PAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            PAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            PAdESSignatureLabel.ForeColor = SystemColors.ControlDarkDark;
+            PAdESFormatDescriptionLabel.ForeColor = SystemColors.ControlDarkDark;
 
-            CAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            CAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            CAdESSignatureLabel.ForeColor = SystemColors.ControlDarkDark;
+            CAdESFormatDescriptionLabel.ForeColor = SystemColors.ControlDarkDark;
 
             CAdESP7MPictureBox.Image = CIEID.Properties.Resources.p7m_2x_gray;
             pbPades.Image = CIEID.Properties.Resources.pdf_2x_gray;
@@ -1678,13 +1676,13 @@ namespace CIEID
                 PAdESSignatureLabel.ForeColor = Color.Red;
                 PAdESFormatDescriptionLabel.ForeColor = Color.Black;
 
-                CAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-                CAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+                CAdESSignatureLabel.ForeColor = SystemColors.ControlDarkDark;
+                CAdESFormatDescriptionLabel.ForeColor = SystemColors.ControlDarkDark;
 
                 CAdESP7MPictureBox.Image = CIEID.Properties.Resources.p7m_2x_gray;
                 pbPades.Image = CIEID.Properties.Resources.pdf_2x;
 
-                signOp = OperationSelectedState.FIRMA_PADES;
+                signOp = OperationSelectedState.PADES_SIGNATURE;
                 proceedWithSignatureButton.Enabled = true;
             }
         }
@@ -1692,17 +1690,17 @@ namespace CIEID
         private void PanelChooseCades_MouseClick(object sender, EventArgs e)
         {
             Logger.Info("panelChooseCades_MouseClick() - Inizia funzione");
-            CAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.Highlight;
+            CAdESSignatureLabel.ForeColor = SystemColors.Highlight;
             CAdESFormatDescriptionLabel.ForeColor = Color.Black;
 
-            PAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            PAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            PAdESSignatureLabel.ForeColor = SystemColors.ControlDarkDark;
+            PAdESFormatDescriptionLabel.ForeColor = SystemColors.ControlDarkDark;
             enableGraphicSignatureCheckBox.Checked = false;
 
             CAdESP7MPictureBox.Image = CIEID.Properties.Resources.p7m_2x;
             pbPades.Image = CIEID.Properties.Resources.pdf_2x_gray;
 
-            signOp = OperationSelectedState.FIRMA_CADES;
+            signOp = OperationSelectedState.CADES_SIGNATURE;
             proceedWithSignatureButton.Enabled = true;
         }
 
@@ -1710,7 +1708,7 @@ namespace CIEID
         {
             Logger.Info("proceedWithSignatureButton_Click() - Inizia funzione");
 
-            if ((enableGraphicSignatureCheckBox.Checked == true) && (signOp == OperationSelectedState.FIRMA_PADES))
+            if ((enableGraphicSignatureCheckBox.Checked == true) && (signOp == OperationSelectedState.PADES_SIGNATURE))
             {
                 var model = carouselControl.ActiveCieModel;
                 string signImagePath = getSignImagePath(model.SerialNumber);
@@ -1846,7 +1844,7 @@ namespace CIEID
 
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
 
-            if (signOp == OperationSelectedState.FIRMA_PADES)
+            if (signOp == OperationSelectedState.PADES_SIGNATURE)
             {
                 fileName = Path.GetFileNameWithoutExtension(labelFileNamePathSigningOperation.Text) + "-signed";
                 saveFileDialog1.Filter = "File (*.pdf) | *.pdf";
@@ -1916,19 +1914,19 @@ namespace CIEID
                     model = carouselControl.ActiveCieModel;
 
                 int ret = 0;
-                if (enableGraphicSignatureCheckBox.Checked && (signOp == OperationSelectedState.FIRMA_PADES))
+                if (enableGraphicSignatureCheckBox.Checked && (signOp == OperationSelectedState.PADES_SIGNATURE))
                 {
                     Console.WriteLine("Pades con grafica");
                     Dictionary<string, float> signImageInfo = pdfPreview.getSignImageInfos();
                     ret = firmaConCIE(labelFileNamePathSigningOperation.Text, "pdf", PIN, (shouldSignWithoutCIEPairing) ? PANForOneShotSigning : model.Pan, (int)signImageInfo["pageNumber"], signImageInfo["x"], signImageInfo["y"], signImageInfo["w"], signImageInfo["h"],
                                       pdfPreview.getSignImagePath(), pathToSaveFile, new ProgressCallback(SignProgress), new SignCompletedCallback(SignCompleted));
                 }
-                else if (signOp == OperationSelectedState.FIRMA_PADES)
+                else if (signOp == OperationSelectedState.PADES_SIGNATURE)
                 {
                     Console.WriteLine("Pades senza grafica");
                     ret = firmaConCIE(labelFileNamePathSigningOperation.Text, "pdf", PIN, (shouldSignWithoutCIEPairing) ? PANForOneShotSigning : model.Pan, 0, 0.0f, 0.0f, 0.0f, 0.0f, null, pathToSaveFile, new ProgressCallback(SignProgress), new SignCompletedCallback(SignCompleted));
                 }
-                else if (signOp == OperationSelectedState.FIRMA_CADES)
+                else if (signOp == OperationSelectedState.CADES_SIGNATURE)
                 {
                     Console.WriteLine("Cades");
                     ret = firmaConCIE(labelFileNamePathSigningOperation.Text, "p7m", PIN, (shouldSignWithoutCIEPairing) ? PANForOneShotSigning : model.Pan, 0, 0.0f, 0.0f, 0.0f, 0.0f, null, pathToSaveFile, new ProgressCallback(SignProgress), new SignCompletedCallback(SignCompleted));
@@ -1998,7 +1996,7 @@ namespace CIEID
 
             openFile.Filter = "File (*.png) | *.png";
 
-            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (openFile.ShowDialog() == DialogResult.OK)
             {
                 string file_name = openFile.FileName;
                 Console.WriteLine("PNG Selected file: {0}", file_name);
@@ -2013,7 +2011,7 @@ namespace CIEID
                 Image image;
                 using (Stream stream = File.OpenRead(getSignImagePath(model.SerialNumber)))
                 {
-                    image = System.Drawing.Image.FromStream(stream);
+                    image = Image.FromStream(stream);
                 }
 
                 PictureBox signPicture = (PictureBox)graphicDigitalSignaturePanel.Controls[0];
@@ -2032,22 +2030,6 @@ namespace CIEID
         private void CloseVerifyButton_Click(object sender, EventArgs e)
         {
             Logger.Info("CloseVerifyButton_Click() - Inizia funzione");
-            //changeHomeObjects();
-            var model = carouselControl.ActiveCieModel;
-
-            if (model.isCustomSign)
-            {
-                customizeGraphicSignatureLabel.Text = "Aggiorna";
-                labelGraphicSignatureDescriptionInfoBox.Text = "Firma personalizzata correttamente";
-            }
-
-            else
-            {
-                customizeGraphicSignatureLabel.Text = "Personalizza";
-                labelGraphicSignatureDescriptionInfoBox.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. Questo passaggio non è indispensabile, " +
-                               "ma ti consentirà di dare un tocco personale ai documenti firmati.";
-            }
-
             mainTabControl.SelectedIndex = 10;
         }
 
@@ -2065,24 +2047,36 @@ namespace CIEID
 
             else
             {
-                var model = carouselControl.ActiveCieModel;
-
-                pictureBox15.Visible = true;
-                customizeGraphicSignatureLabel.Visible = true;
-                labelGraphicSignatureDescriptionInfoBox.Visible = true;
                 labelDragAndDropDocumentInformation.Text = "Trascina i tuoi documenti qui dentro per firmarli";
 
-                if (model.isCustomSign)
+                if (shouldSignWithoutCIEPairing)
                 {
-                    customizeGraphicSignatureLabel.Text = "Aggiorna";
-                    labelGraphicSignatureDescriptionInfoBox.Text = "Firma personalizzata correttamente";
+                    pictureBox15.Visible = false;
+                    customizeGraphicSignatureLabel.Visible = false;
+                    labelGraphicSignatureDescriptionInfoBox.Visible = false;
                 }
 
                 else
                 {
-                    customizeGraphicSignatureLabel.Text = "Personalizza";
-                    labelGraphicSignatureDescriptionInfoBox.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
-                                   "Questo passaggio non è indispensabile, ma ti consentirà di dare un tocco personale ai documenti firmati.";
+                    var model = carouselControl.ActiveCieModel;
+
+                    pictureBox15.Visible = true;
+
+                    customizeGraphicSignatureLabel.Visible = true;
+                    labelGraphicSignatureDescriptionInfoBox.Visible = true;
+
+                    if (model.isCustomSign)
+                    {
+                        customizeGraphicSignatureLabel.Text = "Aggiorna";
+                        labelGraphicSignatureDescriptionInfoBox.Text = "Firma personalizzata correttamente";
+                    }
+
+                    else
+                    {
+                        customizeGraphicSignatureLabel.Text = "Personalizza";
+                        labelGraphicSignatureDescriptionInfoBox.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. " +
+                                       "Questo passaggio non è indispensabile, ma ti consentirà di dare un tocco personale ai documenti firmati.";
+                    }
                 }
             }
 
@@ -2113,7 +2107,7 @@ namespace CIEID
             Image image;
             using (Stream stream = File.OpenRead(getSignImagePath(model.SerialNumber)))
             {
-                image = System.Drawing.Image.FromStream(stream);
+                image = Image.FromStream(stream);
             }
 
             PictureBox signPicture = (PictureBox)graphicDigitalSignaturePanel.Controls[0];
@@ -2387,7 +2381,15 @@ namespace CIEID
             //Enable 8 PIN digits
             shouldSignWithoutCIEPairing = true;
             ChangeSignPINObjects();
-            mainTabControl.SelectedIndex = 10;
+            DisplayFileSelectionTab();
+        }
+
+        private void mainTabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Console.WriteLine("mainTabControl_SelectedIndex: " + mainTabControl.SelectedIndex.ToString());
+
+            if (mainTabControl.SelectedIndex == 0 || mainTabControl.SelectedIndex == 1)
+                shouldSignWithoutCIEPairing = false;
         }
     }
 }
