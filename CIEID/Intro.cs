@@ -1,16 +1,4 @@
-﻿/*
- * CIE ID, l'applicazione per gestire la CIE
- * Author: Ugo Chirico - http://www.ugochirico.com
- * Data: 10/04/2019 
- */
-
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Windows.Forms;
 
 namespace CIEID
@@ -21,7 +9,6 @@ namespace CIEID
         {
             InitializeComponent();
         }
-
 
         private void buttonStart_Click(object sender, EventArgs e)
         {
@@ -35,11 +22,9 @@ namespace CIEID
             mainForm.Show();
 
             Hide();
-            //Close();
-
         }
 
-        private void buttonContine_Click(object sender, EventArgs e)
+        private void buttonContinue_Click(object sender, EventArgs e)
         {
             tabControl.SelectedIndex = 1;
             tabControl.Refresh();

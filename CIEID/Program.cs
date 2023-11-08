@@ -1,13 +1,4 @@
-﻿/*
- * CIE ID, l'applicazione per gestire la CIE
- * Author: Ugo Chirico - http://www.ugochirico.com
- * Data: 10/04/2019
- */
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.IO;
 using System.Windows.Forms;
 using System.Threading;
@@ -62,6 +53,9 @@ namespace CIEID
             //Properties.Settings.Default.serialNumber = "";
             //Properties.Settings.Default.cardHolder = "";
             //Properties.Settings.Default.Save();
+
+            Properties.Settings.Default.Upgrade();
+            Properties.Settings.Default.Save();
 
             if (Properties.Settings.Default.firstTime)
             {
