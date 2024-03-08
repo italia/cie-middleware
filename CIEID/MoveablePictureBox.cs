@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace CIEID
 {
     public class MoveablePictureBox : PictureBox
     {
-        Point Location;
+        Point BoxLocation;
 
         public MoveablePictureBox()
         {
@@ -20,7 +14,7 @@ namespace CIEID
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            Location = e.Location;
+            BoxLocation = e.Location;
             base.OnMouseDown(e);
         }
 
@@ -28,8 +22,8 @@ namespace CIEID
         {
             if (e.Button == MouseButtons.Left)
             {
-                int tempLeft = this.Left + (e.X - Location.X);
-                int tempTop = this.Top + (e.Y - Location.Y);
+                int tempLeft = this.Left + (e.X - BoxLocation.X);
+                int tempTop = this.Top + (e.Y - BoxLocation.Y);
 
                 if (tempLeft < 0)
                     tempLeft = 0;

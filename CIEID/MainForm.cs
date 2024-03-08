@@ -228,12 +228,11 @@ namespace CIEID
 
         private void PINDigit_TextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
+            TextBox textBox = (TextBox)sender;
+            int tag = Int16.Parse((String)textBox.Tag);
+
             if (e.KeyChar >= '0' && e.KeyChar <= '9')
             {
-                TextBox textBox = (TextBox)sender;
-
-                int tag = Int16.Parse((String)textBox.Tag);
-
                 if (tag < 8)
                 {
                     Control nextTextBox = FindControlByTag(this.Controls, "" + (tag + 1));
@@ -243,10 +242,6 @@ namespace CIEID
 
             else if (e.KeyChar == 8) // backspace
             {
-                TextBox textBox = (TextBox)sender;
-
-                int tag = Int16.Parse((String)textBox.Tag);
-
                 if (tag > 1)
                 {
                     Control previousTextBox = FindControlByTag(this.Controls, "" + (tag - 1));
@@ -256,25 +251,27 @@ namespace CIEID
 
             else if (e.KeyChar == 13) // enter
             {
-                TextBox textBox = (TextBox)sender;
-
-                int tag = Int16.Parse((String)textBox.Tag);
-
                 if (tag == 8)
                     PairButton_Click(sender, e);
             }
+
+            else
+                e.Handled = true;
+
+            if (textBox.Text != String.Empty)
+                textBox.Text = String.Empty;
+
         }
 
         private void TextBoxSignPin_KeyPress(object sender, KeyPressEventArgs e)
         {
             byte numPINDigits = (byte)((shouldSignWithoutCIEPairing) ? 4 : 0);
 
+            TextBox textBox = (TextBox)sender;
+            int tag = Int16.Parse((String)textBox.Tag);
+
             if (e.KeyChar >= '0' && e.KeyChar <= '9')
             {
-                TextBox textBox = (TextBox)sender;
-
-                int tag = Int16.Parse((String)textBox.Tag);
-
                 if (tag < 12 + numPINDigits)
                 {
                     Control nextTextBox = FindControlByTag(this.Controls, "" + (tag + 1));
@@ -288,10 +285,6 @@ namespace CIEID
 
             else if (e.KeyChar == 8) // Backspace
             {
-                TextBox textBox = (TextBox)sender;
-
-                int tag = Int16.Parse((String)textBox.Tag);
-
                 if (tag > 9)
                 {
                     Control previousTextBox = FindControlByTag(this.Controls, "" + (tag - 1));
@@ -301,15 +294,17 @@ namespace CIEID
 
             else if (e.KeyChar == 13) // Enter
             {
-                TextBox textBox = (TextBox)sender;
-
-                int tag = Int16.Parse((String)textBox.Tag);
-
                 if (tag == 12 + numPINDigits)
                 {
                     SignButton_Click(sender, e);
                 }
             }
+
+            else
+                e.Handled = true;
+
+            if (textBox.Text != String.Empty)
+                textBox.Text = String.Empty;
         }
 
         private Control FindControlByTag(Control.ControlCollection controls, object tag)
@@ -896,7 +891,7 @@ namespace CIEID
 
                 case CKR_PIN_INCORRECT:
                     Logger.Debug("Il PIN digitato è errato - CKR_PIN_INCORRECT");
-                    MessageBox.Show(String.Format("Il PIN digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show(String.Format("Il PIN digitato è errato. Rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     SelectHome();
                     break;
 
@@ -949,7 +944,7 @@ namespace CIEID
 
                 case CKR_PIN_INCORRECT:
                     Logger.Debug("Il PUK digitato è errato. - CKR_PIN_INCORRECT");
-                    MessageBox.Show(String.Format("Il PUK digitato è errato. rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show(String.Format("Il PUK digitato è errato. Rimangono {0} tentativi", attempts[0]), "PIN non corretto", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     SelectHome();
                     break;
 
