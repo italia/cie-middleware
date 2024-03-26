@@ -57,7 +57,6 @@ extern "C" {
 			return 1;
 		else
 			return 0;
-
 	}
 
 
@@ -133,7 +132,6 @@ extern "C" {
 
 	CK_RV CK_ENTRY __stdcall firmaConCIE(const char* inFilePath, const char* type, const char* pin, const char* pan, int page, float x, float y, float w, float h, const char* imagePathFile, const char* outFilePath, PROGRESS_CALLBACK progressCallBack, SIGN_COMPLETED_CALLBACK completedCallBack)
 	{
-
 		printf("page: %d, x: %f, y: %f, w: %f, h: %f", page, x, y, w, h);
 
 		char* readers = NULL;
