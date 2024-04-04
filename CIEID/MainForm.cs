@@ -1522,9 +1522,15 @@ namespace CIEID
             enableGraphicSignatureCheckBox.Checked = false;
 
             if (labelFileNamePathInSigningFormatChooser.Text.EndsWith(".pdf") && !shouldSignWithoutCIEPairing)
+            {
                 enableGraphicSignatureCheckBox.Enabled = true;
+                enableGraphicSignatureCheckBox.Visible = true;
+            }
             else
+            {
                 enableGraphicSignatureCheckBox.Enabled = false;
+                enableGraphicSignatureCheckBox.Visible = false;
+            }
 
             mainTabControl.SelectedIndex = 12;
         }
@@ -1561,7 +1567,8 @@ namespace CIEID
 
             else if ((UInt32)n_sott == INVALID_FILE_TYPE)
             {
-                MessageBox.Show("Il file selezionato non è un file valido. E' possibile verificare solo file con estensione .p7m o .pdf", "Errore nella verifica", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Il file selezionato non è un file valido. È" +
+                    " possibile verificare solo file con estensione .p7m o .pdf", "Errore nella verifica", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 mainTabControl.SelectedIndex = 10;
             }
 
