@@ -330,9 +330,9 @@ int PDFVerifier::VerifySignature(const PdfMemDocument* pDoc, const PdfObject *co
 		int start1	= atoi(strtok(NULL, " []"));
 		int len1	= atoi(strtok(NULL, " []"));
 		
-		int fulllen = start1 + len1;
+		int fullLen = start1 + len1;
 		
-		//NSLog(@"content %d, %d, %d, %d, %d", start, len, start1, len1, fulllen);
+		//NSLog(@"content %d, %d, %d, %d, %d", start, len, start1, len1, fullLen);
 		
 		const char* szSignedData = strtok((char*)signdData.c_str(), "<>");
 		
@@ -351,8 +351,8 @@ int PDFVerifier::VerifySignature(const PdfMemDocument* pDoc, const PdfObject *co
 			// extract the actual content
 			
 			/*
-			char* docbuffer = new char[fulllen];
-			PdfOutputDevice pdfOutDevice(docbuffer, fulllen);	
+			char* docbuffer = new char[fullLen];
+			PdfOutputDevice pdfOutDevice(docbuffer, fullLen);	
 			m_pPdfDocument->Write(&pdfOutDevice);
 			*/
 			
@@ -369,7 +369,7 @@ int PDFVerifier::VerifySignature(const PdfMemDocument* pDoc, const PdfObject *co
 			 */
 			
 			
-			//NSLog(@"content %d, %d, %d, %d, %d, %d", baContent.getLength(), start, len, start1, len1, fulllen);
+			//NSLog(@"content %d, %d, %d, %d, %d, %d", baContent.getLength(), start, len, start1, len1, fullLen);
 			
 			
 			CASN1SetOf signerInfos = signedData.getSignerInfos();
@@ -1016,9 +1016,9 @@ int PDFVerifier::VerifySignature(const PdfMemDocument* pDoc, const PdfObject *co
 		int start1	= atoi(strtok(NULL, " []"));
 		int len1	= atoi(strtok(NULL, " []"));
 		
-		int fulllen = start1 + len1;
+		int fullLen = start1 + len1;
 		
-		//NSLog(@"content %d, %d, %d, %d, %d", start, len, start1, len1, fulllen);
+		//NSLog(@"content %d, %d, %d, %d, %d", start, len, start1, len1, fullLen);
 		
 		const char* szSignedData = strtok((char*)signdData.c_str(), "<>");
 		
@@ -1042,7 +1042,7 @@ int PDFVerifier::VerifySignature(const PdfMemDocument* pDoc, const PdfObject *co
 			//NSLog(@"content %s", baContent.toHexString());
 					
 			
-			//NSLog(@"content %d, %d, %d, %d, %d, %d", baContent.getLength(), start, len, start1, len1, fulllen);
+			//NSLog(@"content %d, %d, %d, %d, %d, %d", baContent.getLength(), start, len, start1, len1, fullLen);
 			
 			
 			CASN1SetOf signerInfos = signedData.getSignerInfos();

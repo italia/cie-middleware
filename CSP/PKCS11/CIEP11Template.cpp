@@ -169,6 +169,10 @@ void CIEtemplateInitSession(void *pTemplateData){
 			cie->privKey->addAttribute(CKA_KEY_TYPE, VarToByteArray(keyrsa));
 			cie->privKey->addAttribute(CKA_MODULUS, Module);
 			cie->privKey->addAttribute(CKA_PUBLIC_EXPONENT, Exponent);
+			cie->privKey->addAttribute(CKA_SENSITIVE, VarToByteArray(vfalse));
+			cie->privKey->addAttribute(CKA_DECRYPT, VarToByteArray(vfalse));
+			cie->privKey->addAttribute(CKA_ENCRYPT, VarToByteArray(vfalse));
+			cie->privKey->addAttribute(CKA_EXTRACTABLE, VarToByteArray(vfalse));
 			cie->privKey->addAttribute(CKA_SIGN, VarToByteArray(vtrue));
 			cie->slot.AddP11Object(cie->privKey);
 
@@ -179,6 +183,7 @@ void CIEtemplateInitSession(void *pTemplateData){
 			cie->cert->addAttribute(CKA_VALUE, ByteArray(certDS->pbCertEncoded, certDS->cbCertEncoded));
 			cie->cert->addAttribute(CKA_ISSUER, ByteArray(certDS->pCertInfo->Issuer.pbData, certDS->pCertInfo->Issuer.cbData));
 			cie->cert->addAttribute(CKA_SERIAL_NUMBER, ByteArray(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData));
+			cie->cert->addAttribute(CKA_TRUSTED, VarToByteArray(vfalse));
 			cie->cert->addAttribute(CKA_SUBJECT, ByteArray(certDS->pCertInfo->Subject.pbData, certDS->pCertInfo->Subject.cbData));
 			CK_CERTIFICATE_TYPE certx509 = CKC_X_509;
 			cie->cert->addAttribute(CKA_CERTIFICATE_TYPE, VarToByteArray(certx509));

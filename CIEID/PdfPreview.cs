@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CIEID
@@ -201,7 +198,7 @@ namespace CIEID
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = mutoolPath,
-                    Arguments = string.Format("{0} {1} \"{2}\" {3}", "draw -o", tmpFolderName + "\\page%d.png", filePath, pageNumber),
+                    Arguments = string.Format("{0} \"{1}\" \"{2}\" {3}", "draw -o", tmpFolderName + "\\page%d.png", filePath, pageNumber),
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true

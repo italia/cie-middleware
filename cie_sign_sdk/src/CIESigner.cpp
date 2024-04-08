@@ -122,7 +122,6 @@ long CCIESigner::Sign(UUCByteArray& data, UUCByteArray& id, int algo, UUCByteArr
         {
             case CKM_SHA256_RSA_PKCS:
                 makeDigestInfo(NID_sha256, (unsigned char*)data.getContent(), (size_t)data.getLength(), (unsigned char*)digestinfo, &digestinfolen);
-                
                 break;
                 
             case CKM_SHA1_RSA_PKCS:

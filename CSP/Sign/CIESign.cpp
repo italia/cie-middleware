@@ -5,14 +5,10 @@
 
 CIESign::CIESign(IAS *ias){
 	this->ias = ias;
-
 }
-
-
 
 uint16_t CIESign::sign(const char* inFilePath, const char* type, const char* pin, int page, float x, float y, float w, float h, const char* imagePathFile,const char* outFilePath)
 {
-
 	uint16_t response;
 
 	DISIGON_CTX ctx = NULL;
