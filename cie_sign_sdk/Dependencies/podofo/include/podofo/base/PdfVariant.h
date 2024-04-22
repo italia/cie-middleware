@@ -831,10 +831,10 @@ const PdfReference & PdfVariant::GetReference() const
 {
     DelayedLoad();
 
-//    if( !IsReference() )
-//    {
-//        PODOFO_RAISE_ERROR( ePdfError_InvalidDataType );
-//    }
+    if( !IsReference() )
+    {
+        PODOFO_RAISE_ERROR( ePdfError_InvalidDataType );
+    }
 
     return *(reinterpret_cast<PdfReference* const>(m_Data.pData));
 }

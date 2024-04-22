@@ -16,6 +16,19 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *                                                                         *
+ *   In addition, as a special exception, the copyright holders give       *
+ *   permission to link the code of portions of this program with the      *
+ *   OpenSSL library under certain conditions as described in each         *
+ *   individual source file, and distribute linked combinations            *
+ *   including the two.                                                    *
+ *   You must obey the GNU General Public License in all respects          *
+ *   for all of the code used other than OpenSSL.  If you modify           *
+ *   file(s) with this exception, you may extend this exception to your    *
+ *   version of the file(s), but you are not obligated to do so.  If you   *
+ *   do not wish to do so, delete this exception statement from your       *
+ *   version.  If you delete this exception statement from all source      *
+ *   files in the program, then also delete it here.                       *
  ***************************************************************************/
 
 #ifndef _PODOFO_H_
@@ -37,6 +50,7 @@
 #include "doc/PdfAcroForm.h"
 #include "doc/PdfAction.h"
 #include "doc/PdfAnnotation.h"
+#include "doc/PdfCMapEncoding.h"
 #include "doc/PdfContents.h"
 #include "doc/PdfDestination.h"
 #include "doc/PdfDifferenceEncoding.h"
@@ -48,6 +62,7 @@
 #include "doc/PdfFileSpec.h"
 #include "doc/PdfFontCache.h"
 #include "doc/PdfFontCID.h"
+#include "doc/PdfFontConfigWrapper.h"
 #include "doc/PdfFontFactoryBase14Data.h"
 #include "doc/PdfFontFactory.h"
 #include "doc/PdfFont.h"
@@ -60,6 +75,7 @@
 #include "doc/PdfFontTTFSubset.h"
 #include "doc/PdfFontType1Base14.h"
 #include "doc/PdfFontType1.h"
+#include "doc/PdfFontType3.h"
 #include "doc/PdfFunction.h"
 #include "doc/PdfHintStream.h"
 #include "doc/PdfIdentityEncoding.h"
@@ -78,6 +94,7 @@
 #include "doc/PdfSignOutputDevice.h"
 #include "doc/PdfStreamedDocument.h"
 #include "doc/PdfTable.h"
+#include "doc/PdfTilingPattern.h"
 #include "doc/PdfXObject.h"
 
 #ifdef _PODOFO_NO_NAMESPACE_

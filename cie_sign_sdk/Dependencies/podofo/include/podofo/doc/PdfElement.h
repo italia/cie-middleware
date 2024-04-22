@@ -155,6 +155,8 @@ class PODOFO_DOC_API PdfElement {
      */
     inline PdfObject* GetNonConstObject() const;
 
+    
+    
  private:
     PdfObject* m_pObject;
 };

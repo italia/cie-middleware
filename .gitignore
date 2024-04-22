@@ -57,6 +57,7 @@ x64/Release/
 /TestCIE/Release
 /CIEID/bin/Release
 NoteCIEtxt/
+cie_sign_sdk/Dependencies/podofo/podofosrc/
 cie_sign_sdk/build/
 cie_sign_sdk/build32
 cie_sign_sdk.lib
