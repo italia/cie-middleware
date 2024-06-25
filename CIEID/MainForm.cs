@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -2190,6 +2191,8 @@ namespace CIEID
                 rbLoggingLibError.Checked = (Program.LogLevelLib == LogLevel.ERROR);
                 rbLoggingLibInfo.Checked = (Program.LogLevelLib == LogLevel.INFO);
                 rbLoggingLibDebug.Checked = (Program.LogLevelLib == LogLevel.DEBUG);
+
+                showIntroductionScreens.Checked = Properties.Settings.Default.firstTime;
             }
 
             mainTabControl.SelectedIndex = 17;
@@ -2305,6 +2308,8 @@ namespace CIEID
             configLibraryLoggingGroupBox.Enabled = false;
             configApplicationLoggingGroupBox.Enabled = false;
 
+            showIntroductionScreens.Enabled = false;
+
             saveSettingsButton.Enabled = false;
             editSettingsButton.Enabled = true;
 
@@ -2327,6 +2332,8 @@ namespace CIEID
 
             configLibraryLoggingGroupBox.Enabled = true;
             configApplicationLoggingGroupBox.Enabled = true;
+
+            showIntroductionScreens.Enabled = true;
 
             saveSettingsButton.Enabled = true;
             editSettingsButton.Enabled = false;
@@ -2392,6 +2399,111 @@ namespace CIEID
 
             if (mainTabControl.SelectedIndex == 0 || mainTabControl.SelectedIndex == 1)
                 shouldSignWithoutCIEPairing = false;
+        }
+
+        private void collectLogBtn_Click(object sender, EventArgs e)
+        {
+            bool logFound = false;
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.FileName = "CIEID_" + DateTime.UtcNow.ToString("yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
+            saveFileDialog.Filter = "Archivio log CIE ID | *.zip";
+
+            if(saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    using (FileStream fileStream = new FileStream(saveFileDialog.FileName, FileMode.Create))
+                    {
+                        using (ZipArchive archive = new ZipArchive(fileStream, ZipArchiveMode.Create, true))
+                        {
+                            String[] files = Directory.GetFiles(@"C:\ProgramData\CIEPKI");
+
+                            foreach (string fileName in files)
+                            {
+                                if (Path.GetExtension(fileName).ToLower() == @".log")
+                                {
+                                    logFound = true;
+                                    ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(Path.GetFileName(fileName), CompressionLevel.Optimal);
+                                    using (Stream zipStream = zipArchiveEntry.Open())
+                                    {
+                                        Byte[] logData = File.ReadAllBytes(fileName);
+                                        zipStream.Write(logData, 0, logData.Length);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Si è verificato un errore durante l'operazione:\n\n" + ex.Message, "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Logger.Error("[ERROR] CollectLogBtn_Click() - Si è verificato un errore durante l'operazione: " + ex.Message);
+                }
+
+                if (logFound)
+                {
+                    MessageBox.Show("La raccolta dei log di diagnostica è avvenuta con successo. Puoi adesso condividere con gli sviluppatori " +
+                                    "l'archivio generato per un'analisi della problematica riscontrata.", "Raccolta completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Logger.Info("[INFO] CollectLogBtn_Click() - I file di log sono stati raccolti e zippati con successo.");
+                }
+
+                else
+                {
+                    MessageBox.Show("Non sono presenti log. Effettua prima delle operazioni con l'applicativo, quindi ripeti " +
+                                    "l'operazione di raccolta dei log.", "Raccolta log", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Logger.Info("[INFO] CollectLogBtn_Click() - Non sono presenti file di log nella cartella del programma.");
+                }
+            }
+        }
+
+        private void clearLogFolderBtn_Click(object sender, EventArgs e)
+        {
+            bool res = true;
+
+            if(MessageBox.Show("Avanzando con l'operazione, verranno eliminati tutti i file di log generati dal software CIE ID. Confermi di voler procedere?",
+                               "Eliminazione log", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+            {
+                String[] files = Directory.GetFiles(@"C:\ProgramData\CIEPKI");
+
+                foreach (string fileName in files)
+                {
+                    try
+                    {
+                        if (Path.GetExtension(fileName).ToLower() == @".log")
+                            File.Delete(fileName);
+                    }
+
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine("ClearLogFolder - Exception: " + ex.Message);
+                        Logger.Error("[ERROR] ClearLogFolderBtn_Click() - Si è verificato un errore durante l'operazione: " + ex.Message);
+                        res = false;
+                    }
+                }
+
+                if (res)
+                {
+                    MessageBox.Show("L'eliminazione dei log è avvenuta con successo. Se hai riscontrato un'anomalia nel software " +
+                                    "che intendi segnalare, puoi impostare il livello di logging su 'Debug', replicare l'operazione, " +
+                                    "raccogliere i log con l'apposito pulsante e condividerli con lo sviluppatore.",
+                                    "Eliminazione completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Logger.Info("[INFO] ClearLogFolderBtn_Click() - Log eliminati con successo.");
+                }
+
+                else
+                {
+                    MessageBox.Show("Si è verificato un errore durante la cancellazione dei log. È possibile che alcuni file siano aperti " +
+                                    "ed in uso da terze parti, per cui non è stato possibile procedere con l'eliminazione.",
+                                    "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void showIntroductionScreens_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.firstTime = showIntroductionScreens.Checked;
         }
     }
 }

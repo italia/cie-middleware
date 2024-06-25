@@ -153,7 +153,7 @@
             // 
             this.checkBoxNoMore.AutoSize = true;
             this.checkBoxNoMore.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.checkBoxNoMore.Location = new System.Drawing.Point(555, 455);
+            this.checkBoxNoMore.Location = new System.Drawing.Point(541, 461);
             this.checkBoxNoMore.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxNoMore.Name = "checkBoxNoMore";
             this.checkBoxNoMore.Size = new System.Drawing.Size(121, 19);
@@ -201,7 +201,7 @@
             this.buttonStart.BackColor = System.Drawing.Color.DodgerBlue;
             this.buttonStart.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.buttonStart.FlatAppearance.BorderSize = 0;
-            this.buttonStart.Location = new System.Drawing.Point(344, 448);
+            this.buttonStart.Location = new System.Drawing.Point(344, 454);
             this.buttonStart.Margin = new System.Windows.Forms.Padding(2);
             this.buttonStart.Name = "buttonStart";
             this.buttonStart.Size = new System.Drawing.Size(96, 32);
