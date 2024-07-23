@@ -21,7 +21,10 @@
 #ifndef _PDF_MEMORY_MANAGEMENT_H_
 #define _PDF_MEMORY_MANAGEMENT_H_
 
-#include "PdfDefines.h"
+// PdfMemoryManagement.h should not include PdfDefines.h, since it is included by it.
+// It should avoid depending on anything defined in PdfDefines.h .
+
+#include "podofoapi.h"
 #include <stdlib.h>
 
 namespace PoDoFo {
@@ -32,6 +35,13 @@ namespace PoDoFo {
  * Is used to allocate buffers inside of PoDoFo.
  */
 PODOFO_API void* podofo_malloc( size_t size );
+
+/**
+* Wrapper around calloc of the c-library used by PoDoFo.
+*
+* Is used to allocate buffers inside of PoDoFo, guarding against count*size size_t overflow.
+*/
+PODOFO_API void* podofo_calloc( size_t count, size_t size );
 
 /**
  * Wrapper around realloc of the c-library used by PoDoFo.
@@ -55,5 +65,5 @@ PODOFO_API bool podofo_is_little_endian();
 
 };
 
-#endif // _PDF_XREF_STREAM_PARSER_OBJECT_H_
+#endif // _PDF_MEMORY_MANAGEMENT_H_
 

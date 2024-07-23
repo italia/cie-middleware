@@ -33,10 +33,10 @@ using namespace std;
 
 typedef struct _ImageData
 {
-    string imageData;
-    int width;
-    int height;
-    int bitsPerComponent;
+	string imageData;
+	int width;
+	int height;
+	int bitsPerComponent;
 } ImageData;
 
 namespace PoDoFo {
@@ -48,7 +48,7 @@ class PODOFO_DOC_API PdfSignatureField :public PdfField
 {
 protected:
     PdfObject*     m_pSignatureObj;
-    PdfObject*     m_pAppearanceXObj;
+	PdfObject*     m_pAppearanceXObj;
 
     void Init();
 public:
@@ -56,9 +56,9 @@ public:
      */
     PdfSignatureField( PdfPage* pPage, const PdfRect & rRect, PdfDocument* pDoc,  const PdfString & rsText, const char* szSubFilter);
 
-    PdfSignatureField( PdfPage* pPage, const PdfRect & rRect, PdfDocument* pDoc,  const PdfString & rsText, const char* szSubFilter, const ImageData* imageData);
+	PdfSignatureField( PdfPage* pPage, const PdfRect & rRect, PdfDocument* pDoc,  const PdfString & rsText, const char* szSubFilter, const ImageData* imageData);
 
-    virtual ~PdfSignatureField();
+	virtual ~PdfSignatureField();
 
     /** Create space for signature
      *
@@ -72,46 +72,44 @@ public:
      */
     void SetSignature(const PdfData &signatureData);
 
-    void SetSignatureSize(const size_t size);
+	void SetSignatureSize(const size_t size);
     /** Set reason of the signature
      *
      *  \param rsText the reason of signature
      */
      void SetSignatureReason(const PdfString & rsLabel, const PdfString & rsText);
-    
-    void SetSignatureName(const PdfString & rsLabel, const PdfString & rsText);
-    
-    void SetSignatureLocation(const PdfString & rsLabel, const PdfString & rsText);
+	
+	void SetSignatureName(const PdfString & rsLabel, const PdfString & rsText);
+	
+	void SetSignatureLocation(const PdfString & rsLabel, const PdfString & rsText);
 
-    /** Date of signature
-     */
-    void SetSignatureDate(const PdfDate &sigDate);
-    
-    void SetAppearance(const char* szImagePath, const char* szDescription, const bool showData = FALSE);
+	/** Date of signature
+	 */
+	void SetSignatureDate(const PdfDate &sigDate);
+	
+	void SetAppearance(const char* szImagePath, const char* szDescription, const bool showData = FALSE);
 
-    void SetGraphometricData(const PdfString & rsGraphometricDataName, const PdfString & rsGraphometricData, const PdfString & rsVersion);
+	void SetGraphometricData(const PdfString & rsGraphometricDataName, const PdfString & rsGraphometricData, const PdfString & rsVersion);
 
-    void SetFontSize(int nFontSize);
-    
 private:
-    PdfString m_rsText;
-    PdfRect m_rRect;
-    const char* m_szSubFilter;
-    const ImageData* m_pImageData;
-    PdfImage* m_pImage;
-    PdfDocument* m_pDoc;
+	PdfString m_rsText;
+	PdfRect m_rRect;
+	const char* m_szSubFilter;
+	const ImageData* m_pImageData;
+	PdfImage* m_pImage;
+	PdfDocument* m_pDoc;
 
-    PdfString m_rsName;
-    PdfString m_rsLocation;
-    PdfString m_rsReason;
-    PdfString m_rsDate;
-    PdfString m_rsNameLabel;
-    PdfString m_rsLocationLabel;
-    PdfString m_rsReasonLabel;
-
-    int m_nFontSize;
-    
-    
+	PdfString m_rsName;
+	PdfString m_rsLocation;
+	PdfString m_rsReason;
+	PdfString m_rsDate;
+	PdfString m_rsNameLabel;
+	PdfString m_rsLocationLabel;
+	PdfString m_rsReasonLabel;
+	
+	
+	
+	
 };
 
 }

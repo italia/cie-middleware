@@ -34,7 +34,7 @@
 #if defined(__BORLANDC__) || defined( __TURBOC__)
 #  include <stddef.h>
 #else
-#  include <stddef.h>
+#  include <cstddef>
 #endif
 
 #if defined(TEST_BIG)
@@ -64,7 +64,7 @@
 #endif
 
 #if PODOFO_HAVE_STRINGS_H
-#include <string.h>
+#include <strings.h>
 #endif
 
 // alloca() is defined only in <cstdlib> on Mac OS X,

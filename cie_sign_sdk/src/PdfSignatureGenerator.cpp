@@ -72,7 +72,8 @@ int PdfSignatureGenerator::Load(const char* pdf, int len)
 
 		if (nSigns > 0)
 		{
-			m_pPdfDocument->SetIncrementalUpdates(true);
+			int a = 0;
+			//m_pPdfDocument->SetIncrementalUpdates(true);
 		}
 		m_actualLen = len;
 

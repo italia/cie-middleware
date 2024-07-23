@@ -16,6 +16,19 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *                                                                         *
+ *   In addition, as a special exception, the copyright holders give       *
+ *   permission to link the code of portions of this program with the      *
+ *   OpenSSL library under certain conditions as described in each         *
+ *   individual source file, and distribute linked combinations            *
+ *   including the two.                                                    *
+ *   You must obey the GNU General Public License in all respects          *
+ *   for all of the code used other than OpenSSL.  If you modify           *
+ *   file(s) with this exception, you may extend this exception to your    *
+ *   version of the file(s), but you are not obligated to do so.  If you   *
+ *   do not wish to do so, delete this exception statement from your       *
+ *   version.  If you delete this exception statement from all source      *
+ *   files in the program, then also delete it here.                       *
  ***************************************************************************/
 
 #ifndef _PDF_DEFINES_H_
@@ -47,9 +60,18 @@
 /**
  * PoDoFo version represented as a string literal, eg '0.7.99'
  */
-#define PODOFO_MAKE_VERSION_STR_REAL(M,m,p) ("\"" #M "." #m "." #p "\"")
-#define PODOFO_MAKE_VERSION_STR(M,m,p) PODOFO_MAKE_VERSION_STR_REAL(M,m,p)
+// The \0 is from Win32 example resources and the other values in PoDoFo's one
+#define PODOFO_MAKE_VERSION_STR_REAL(M,m,p) M ## . ## m ## . ## p
+#define PODOFO_STR(x) #x "\0"
+#define PODOFO_XSTR(x) PODOFO_STR(x)
+#define PODOFO_MAKE_VERSION_STR(M,m,p) PODOFO_XSTR(PODOFO_MAKE_VERSION_STR_REAL(M,m,p))
 #define PODOFO_VERSION_STR PODOFO_MAKE_VERSION_STR(PODOFO_VERSION_MAJOR, PODOFO_VERSION_MINOR, PODOFO_VERSION_PATCH)
+
+#ifndef PODOFO_COMPILE_RC
+
+#ifndef PODOFO_UNUSED_PARAM
+#define PODOFO_UNUSED_PARAM(x)
+#endif
 
 // Include common system files
 // (most are now pulled in my PdfCompilerCompat.h)
@@ -78,13 +100,6 @@
 //#define PODOFO_VERBOSE_DEBUG
 #endif //PODOFO_VERBOSE_DEBUG
 
-#ifdef DEBUG
-#include <assert.h>
-#define PODOFO_ASSERT( x ) assert( x );
-#else
-#define PODOFO_ASSERT( x )
-#endif // DEBUG
-
 // Should we do lots of extra (expensive) sanity checking?  You should not
 // define this on production builds because of the runtime cost and because it
 // might cause the library to abort() if it notices something nasty.
@@ -106,6 +121,18 @@
 // Include API macro definitions
 #include "podofoapi.h"
 
+#ifdef DEBUG
+#include <assert.h>
+#define PODOFO_ASSERT( x ) assert( x );
+#else
+#define PODOFO_ASSERT( x ) do { if (!(x)) PODOFO_RAISE_ERROR_INFO(ePdfError_InternalLogic, #x); } while (false)
+#endif // DEBUG
+
+#ifndef FALSE
+#define FALSE false
+#define TRUE true
+#endif
+
 // By default, PoDoFo will use C++ locale support to ensure that
 // it doesn't write bad PDF data - particularly floating point numbers.
 // If your standard library does not support locales this won't work, but
@@ -114,11 +141,6 @@
 // that streams used by PoDoFo will write data in a POSIX locale like manner.
 #ifndef USE_CXX_LOCALE
 #define USE_CXX_LOCALE 1
-#endif
-
-#ifndef FALSE
-#define FALSE false
-#define TRUE true
 #endif
 
 /**
@@ -201,6 +223,7 @@ enum EPdfDataType {
  * ePdfFilter_ASCIIHexDecode
  */
 enum EPdfFilter {
+    ePdfFilter_None = -1,                 /**< Do not use any filtering */
     ePdfFilter_ASCIIHexDecode,            /**< Converts data from and to hexadecimal. Increases size of the data by a factor of 2! \see PdfHexFilter */
     ePdfFilter_ASCII85Decode,             /**< Converts to and from Ascii85 encoding. \see PdfAscii85Filter */
     ePdfFilter_LZWDecode,                 
@@ -221,7 +244,8 @@ enum EPdfFontType {
     ePdfFontType_TrueType,
     ePdfFontType_Type1Pfa,
     ePdfFontType_Type1Pfb,
-	ePdfFontType_Type1Base14,
+    ePdfFontType_Type1Base14,
+    ePdfFontType_Type3,
     ePdfFontType_Unknown = 0xff
 };
 
@@ -235,7 +259,23 @@ enum EPdfColorSpace {
     ePdfColorSpace_DeviceCMYK,        /**< CMYK */
     ePdfColorSpace_Separation,        /**< Separation */
     ePdfColorSpace_CieLab,            /**< CIE-Lab */
+    ePdfColorSpace_Indexed,           /**< Indexed */
     ePdfColorSpace_Unknown = 0xff
+};
+
+/**
+ * Enum for text rendering mode (Tr)
+ */
+enum EPdfTextRenderingMode {
+    ePdfTextRenderingMode_Fill = 0,                 /**< Default mode, fill text */
+    ePdfTextRenderingMode_Stroke,                   /**< Stroke text */
+    ePdfTextRenderingMode_FillAndStroke,            /**< Fill, then stroke text */
+    ePdfTextRenderingMode_Invisible,                /**< Neither fill nor stroke text (invisible) */
+    ePdfTextRenderingMode_FillToClipPath,           /**< Fill text and add to path for clipping */
+    ePdfTextRenderingMode_StrokeToClipPath,         /**< Stroke text and add to path for clipping */
+    ePdfTextRenderingMode_FillAndStrokeToClipPath,  /**< Fill, then stroke text and add to path for clipping */
+    ePdfTextRenderingMode_ToClipPath,               /**< Add text to path for clipping */
+    ePdfTextRenderingMode_Unknown = 0xff
 };
 
 /**
@@ -249,6 +289,19 @@ enum EPdfStrokeStyle {
     ePdfStrokeStyle_DashDot,
     ePdfStrokeStyle_DashDotDot,
     ePdfStrokeStyle_Custom 
+};
+
+/**
+ * Enum for predefined tiling patterns.
+ */
+enum EPdfTilingPatternType {
+    ePdfTilingPatternType_BDiagonal = 1,
+    ePdfTilingPatternType_Cross,
+    ePdfTilingPatternType_DiagCross,
+    ePdfTilingPatternType_FDiagonal,
+    ePdfTilingPatternType_Horizontal,
+    ePdfTilingPatternType_Vertical,
+    ePdfTilingPatternType_Image
 };
 
 /**
@@ -498,5 +551,7 @@ template <typename T> const T PDF_MIN ( const T a, const T b ) {
  * \verbinclude CODINGSTYLE.txt
  *
  */
+
+#endif // !PODOFO_COMPILE_RC
 
 #endif // _PDF_DEFINES_H_

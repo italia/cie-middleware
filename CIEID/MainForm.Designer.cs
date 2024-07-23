@@ -226,7 +226,7 @@ namespace CIEID
             this.labelVerifySignature = new System.Windows.Forms.Label();
             this.labelDigitalSignatureHeaderTextVerifyDocument = new System.Windows.Forms.Label();
             this.tabSettings = new System.Windows.Forms.TabPage();
-            this.tabControlLogConfigurationOptions = new System.Windows.Forms.TabControl();
+            this.tabControlPrefConfigurationOptions = new System.Windows.Forms.TabControl();
             this.tabConfigProxy = new System.Windows.Forms.TabPage();
             this.panelProxyConfig = new System.Windows.Forms.Panel();
             this.labelPortProxyConfiguration = new System.Windows.Forms.Label();
@@ -241,6 +241,8 @@ namespace CIEID
             this.labelProxyConfigurationHeaderText = new System.Windows.Forms.Label();
             this.labelProxyConfigurationDescription = new System.Windows.Forms.Label();
             this.tabConfigLogging = new System.Windows.Forms.TabPage();
+            this.clearLogFolderBtn = new System.Windows.Forms.Button();
+            this.collectLogBtn = new System.Windows.Forms.Button();
             this.labelLogConfigurationHeaderText = new System.Windows.Forms.Label();
             this.labelLogConfigurationDescription = new System.Windows.Forms.Label();
             this.panelLogConfiguration = new System.Windows.Forms.Panel();
@@ -254,6 +256,10 @@ namespace CIEID
             this.rbLoggingAppDebug = new System.Windows.Forms.RadioButton();
             this.rbLoggingAppInfo = new System.Windows.Forms.RadioButton();
             this.rbLoggingAppNone = new System.Windows.Forms.RadioButton();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
+            this.showIntroductionScreens = new System.Windows.Forms.CheckBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.panelSetButtonsInOptions = new System.Windows.Forms.Panel();
             this.editSettingsButton = new System.Windows.Forms.Button();
             this.saveSettingsButton = new System.Windows.Forms.Button();
@@ -330,13 +336,14 @@ namespace CIEID
             this.verifyPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox23)).BeginInit();
             this.tabSettings.SuspendLayout();
-            this.tabControlLogConfigurationOptions.SuspendLayout();
+            this.tabControlPrefConfigurationOptions.SuspendLayout();
             this.tabConfigProxy.SuspendLayout();
             this.panelProxyConfig.SuspendLayout();
             this.tabConfigLogging.SuspendLayout();
             this.panelLogConfiguration.SuspendLayout();
             this.configLibraryLoggingGroupBox.SuspendLayout();
             this.configApplicationLoggingGroupBox.SuspendLayout();
+            this.tabPage1.SuspendLayout();
             this.panelSetButtonsInOptions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLogo)).BeginInit();
             this.SuspendLayout();
@@ -2787,23 +2794,24 @@ namespace CIEID
             // tabSettings
             // 
             this.tabSettings.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.tabSettings.Controls.Add(this.tabControlLogConfigurationOptions);
+            this.tabSettings.Controls.Add(this.tabControlPrefConfigurationOptions);
             this.tabSettings.Controls.Add(this.panelSetButtonsInOptions);
             this.tabSettings.Location = new System.Drawing.Point(4, 9);
             this.tabSettings.Name = "tabSettings";
             this.tabSettings.Size = new System.Drawing.Size(649, 533);
             this.tabSettings.TabIndex = 17;
             // 
-            // tabControlLogConfigurationOptions
+            // tabControlPrefConfigurationOptions
             // 
-            this.tabControlLogConfigurationOptions.Controls.Add(this.tabConfigProxy);
-            this.tabControlLogConfigurationOptions.Controls.Add(this.tabConfigLogging);
-            this.tabControlLogConfigurationOptions.Location = new System.Drawing.Point(16, 8);
-            this.tabControlLogConfigurationOptions.Margin = new System.Windows.Forms.Padding(16, 8, 16, 8);
-            this.tabControlLogConfigurationOptions.Name = "tabControlLogConfigurationOptions";
-            this.tabControlLogConfigurationOptions.SelectedIndex = 0;
-            this.tabControlLogConfigurationOptions.Size = new System.Drawing.Size(617, 477);
-            this.tabControlLogConfigurationOptions.TabIndex = 39;
+            this.tabControlPrefConfigurationOptions.Controls.Add(this.tabConfigProxy);
+            this.tabControlPrefConfigurationOptions.Controls.Add(this.tabConfigLogging);
+            this.tabControlPrefConfigurationOptions.Controls.Add(this.tabPage1);
+            this.tabControlPrefConfigurationOptions.Location = new System.Drawing.Point(16, 8);
+            this.tabControlPrefConfigurationOptions.Margin = new System.Windows.Forms.Padding(16, 8, 16, 8);
+            this.tabControlPrefConfigurationOptions.Name = "tabControlPrefConfigurationOptions";
+            this.tabControlPrefConfigurationOptions.SelectedIndex = 0;
+            this.tabControlPrefConfigurationOptions.Size = new System.Drawing.Size(617, 477);
+            this.tabControlPrefConfigurationOptions.TabIndex = 39;
             // 
             // tabConfigProxy
             // 
@@ -2931,7 +2939,7 @@ namespace CIEID
             // 
             this.labelProxyConfigurationHeaderText.AutoSize = true;
             this.labelProxyConfigurationHeaderText.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelProxyConfigurationHeaderText.Location = new System.Drawing.Point(89, 3);
+            this.labelProxyConfigurationHeaderText.Location = new System.Drawing.Point(100, 14);
             this.labelProxyConfigurationHeaderText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelProxyConfigurationHeaderText.Name = "labelProxyConfigurationHeaderText";
             this.labelProxyConfigurationHeaderText.Size = new System.Drawing.Size(416, 36);
@@ -2941,17 +2949,19 @@ namespace CIEID
             // labelProxyConfigurationDescription
             // 
             this.labelProxyConfigurationDescription.AutoSize = true;
-            this.labelProxyConfigurationDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelProxyConfigurationDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelProxyConfigurationDescription.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.labelProxyConfigurationDescription.Location = new System.Drawing.Point(52, 40);
+            this.labelProxyConfigurationDescription.Location = new System.Drawing.Point(84, 54);
             this.labelProxyConfigurationDescription.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelProxyConfigurationDescription.Name = "labelProxyConfigurationDescription";
-            this.labelProxyConfigurationDescription.Size = new System.Drawing.Size(478, 20);
+            this.labelProxyConfigurationDescription.Size = new System.Drawing.Size(453, 18);
             this.labelProxyConfigurationDescription.TabIndex = 26;
             this.labelProxyConfigurationDescription.Text = "Inserisci l\'indirizzo del server proxy ed eventuali credenziali";
             // 
             // tabConfigLogging
             // 
+            this.tabConfigLogging.Controls.Add(this.clearLogFolderBtn);
+            this.tabConfigLogging.Controls.Add(this.collectLogBtn);
             this.tabConfigLogging.Controls.Add(this.labelLogConfigurationHeaderText);
             this.tabConfigLogging.Controls.Add(this.labelLogConfigurationDescription);
             this.tabConfigLogging.Controls.Add(this.panelLogConfiguration);
@@ -2963,11 +2973,41 @@ namespace CIEID
             this.tabConfigLogging.Text = "Log";
             this.tabConfigLogging.UseVisualStyleBackColor = true;
             // 
+            // clearLogFolderBtn
+            // 
+            this.clearLogFolderBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.clearLogFolderBtn.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.clearLogFolderBtn.FlatAppearance.BorderSize = 0;
+            this.clearLogFolderBtn.ForeColor = System.Drawing.Color.White;
+            this.clearLogFolderBtn.Location = new System.Drawing.Point(326, 391);
+            this.clearLogFolderBtn.Margin = new System.Windows.Forms.Padding(2);
+            this.clearLogFolderBtn.Name = "clearLogFolderBtn";
+            this.clearLogFolderBtn.Size = new System.Drawing.Size(160, 40);
+            this.clearLogFolderBtn.TabIndex = 40;
+            this.clearLogFolderBtn.Text = "Elimina cache dei log";
+            this.clearLogFolderBtn.UseVisualStyleBackColor = false;
+            this.clearLogFolderBtn.Click += new System.EventHandler(this.clearLogFolderBtn_Click);
+            // 
+            // collectLogBtn
+            // 
+            this.collectLogBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.collectLogBtn.BackColor = System.Drawing.Color.CornflowerBlue;
+            this.collectLogBtn.FlatAppearance.BorderSize = 0;
+            this.collectLogBtn.ForeColor = System.Drawing.Color.White;
+            this.collectLogBtn.Location = new System.Drawing.Point(126, 391);
+            this.collectLogBtn.Margin = new System.Windows.Forms.Padding(2);
+            this.collectLogBtn.Name = "collectLogBtn";
+            this.collectLogBtn.Size = new System.Drawing.Size(160, 40);
+            this.collectLogBtn.TabIndex = 39;
+            this.collectLogBtn.Text = "Raccogli log per diagnostica";
+            this.collectLogBtn.UseVisualStyleBackColor = false;
+            this.collectLogBtn.Click += new System.EventHandler(this.collectLogBtn_Click);
+            // 
             // labelLogConfigurationHeaderText
             // 
             this.labelLogConfigurationHeaderText.AutoSize = true;
             this.labelLogConfigurationHeaderText.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelLogConfigurationHeaderText.Location = new System.Drawing.Point(114, 3);
+            this.labelLogConfigurationHeaderText.Location = new System.Drawing.Point(106, 14);
             this.labelLogConfigurationHeaderText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelLogConfigurationHeaderText.Name = "labelLogConfigurationHeaderText";
             this.labelLogConfigurationHeaderText.Size = new System.Drawing.Size(411, 36);
@@ -2977,12 +3017,12 @@ namespace CIEID
             // labelLogConfigurationDescription
             // 
             this.labelLogConfigurationDescription.AutoSize = true;
-            this.labelLogConfigurationDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelLogConfigurationDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelLogConfigurationDescription.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.labelLogConfigurationDescription.Location = new System.Drawing.Point(46, 39);
+            this.labelLogConfigurationDescription.Location = new System.Drawing.Point(61, 53);
             this.labelLogConfigurationDescription.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelLogConfigurationDescription.Name = "labelLogConfigurationDescription";
-            this.labelLogConfigurationDescription.Size = new System.Drawing.Size(519, 20);
+            this.labelLogConfigurationDescription.Size = new System.Drawing.Size(490, 18);
             this.labelLogConfigurationDescription.TabIndex = 28;
             this.labelLogConfigurationDescription.Text = "Seleziona il livello desiderato per applicazione desktop e libreria";
             // 
@@ -2992,7 +3032,7 @@ namespace CIEID
             this.panelLogConfiguration.Controls.Add(this.configApplicationLoggingGroupBox);
             this.panelLogConfiguration.Location = new System.Drawing.Point(56, 74);
             this.panelLogConfiguration.Name = "panelLogConfiguration";
-            this.panelLogConfiguration.Size = new System.Drawing.Size(501, 362);
+            this.panelLogConfiguration.Size = new System.Drawing.Size(501, 312);
             this.panelLogConfiguration.TabIndex = 0;
             // 
             // configLibraryLoggingGroupBox
@@ -3014,10 +3054,10 @@ namespace CIEID
             this.rbLoggingLibDebug.AutoSize = true;
             this.rbLoggingLibDebug.Location = new System.Drawing.Point(64, 202);
             this.rbLoggingLibDebug.Name = "rbLoggingLibDebug";
-            this.rbLoggingLibDebug.Size = new System.Drawing.Size(55, 17);
+            this.rbLoggingLibDebug.Size = new System.Drawing.Size(57, 17);
             this.rbLoggingLibDebug.TabIndex = 3;
             this.rbLoggingLibDebug.TabStop = true;
-            this.rbLoggingLibDebug.Text = "debug";
+            this.rbLoggingLibDebug.Text = "Debug";
             this.rbLoggingLibDebug.UseVisualStyleBackColor = true;
             // 
             // rbLoggingLibInfo
@@ -3025,10 +3065,10 @@ namespace CIEID
             this.rbLoggingLibInfo.AutoSize = true;
             this.rbLoggingLibInfo.Location = new System.Drawing.Point(64, 147);
             this.rbLoggingLibInfo.Name = "rbLoggingLibInfo";
-            this.rbLoggingLibInfo.Size = new System.Drawing.Size(42, 17);
+            this.rbLoggingLibInfo.Size = new System.Drawing.Size(43, 17);
             this.rbLoggingLibInfo.TabIndex = 2;
             this.rbLoggingLibInfo.TabStop = true;
-            this.rbLoggingLibInfo.Text = "info";
+            this.rbLoggingLibInfo.Text = "Info";
             this.rbLoggingLibInfo.UseVisualStyleBackColor = true;
             // 
             // rbLoggingLibError
@@ -3036,10 +3076,10 @@ namespace CIEID
             this.rbLoggingLibError.AutoSize = true;
             this.rbLoggingLibError.Location = new System.Drawing.Point(64, 92);
             this.rbLoggingLibError.Name = "rbLoggingLibError";
-            this.rbLoggingLibError.Size = new System.Drawing.Size(46, 17);
+            this.rbLoggingLibError.Size = new System.Drawing.Size(47, 17);
             this.rbLoggingLibError.TabIndex = 1;
             this.rbLoggingLibError.TabStop = true;
-            this.rbLoggingLibError.Text = "error";
+            this.rbLoggingLibError.Text = "Error";
             this.rbLoggingLibError.UseVisualStyleBackColor = true;
             // 
             // rbLoggingLibNone
@@ -3047,10 +3087,10 @@ namespace CIEID
             this.rbLoggingLibNone.AutoSize = true;
             this.rbLoggingLibNone.Location = new System.Drawing.Point(64, 37);
             this.rbLoggingLibNone.Name = "rbLoggingLibNone";
-            this.rbLoggingLibNone.Size = new System.Drawing.Size(65, 17);
+            this.rbLoggingLibNone.Size = new System.Drawing.Size(67, 17);
             this.rbLoggingLibNone.TabIndex = 0;
             this.rbLoggingLibNone.TabStop = true;
-            this.rbLoggingLibNone.Text = "nessuno";
+            this.rbLoggingLibNone.Text = "Nessuno";
             this.rbLoggingLibNone.UseVisualStyleBackColor = true;
             // 
             // configApplicationLoggingGroupBox
@@ -3072,10 +3112,10 @@ namespace CIEID
             this.rbLoggingAppError.AutoSize = true;
             this.rbLoggingAppError.Location = new System.Drawing.Point(64, 92);
             this.rbLoggingAppError.Name = "rbLoggingAppError";
-            this.rbLoggingAppError.Size = new System.Drawing.Size(46, 17);
+            this.rbLoggingAppError.Size = new System.Drawing.Size(47, 17);
             this.rbLoggingAppError.TabIndex = 1;
             this.rbLoggingAppError.TabStop = true;
-            this.rbLoggingAppError.Text = "error";
+            this.rbLoggingAppError.Text = "Error";
             this.rbLoggingAppError.UseVisualStyleBackColor = true;
             // 
             // rbLoggingAppDebug
@@ -3083,10 +3123,10 @@ namespace CIEID
             this.rbLoggingAppDebug.AutoSize = true;
             this.rbLoggingAppDebug.Location = new System.Drawing.Point(64, 202);
             this.rbLoggingAppDebug.Name = "rbLoggingAppDebug";
-            this.rbLoggingAppDebug.Size = new System.Drawing.Size(55, 17);
+            this.rbLoggingAppDebug.Size = new System.Drawing.Size(57, 17);
             this.rbLoggingAppDebug.TabIndex = 3;
             this.rbLoggingAppDebug.TabStop = true;
-            this.rbLoggingAppDebug.Text = "debug";
+            this.rbLoggingAppDebug.Text = "Debug";
             this.rbLoggingAppDebug.UseVisualStyleBackColor = true;
             // 
             // rbLoggingAppInfo
@@ -3094,10 +3134,10 @@ namespace CIEID
             this.rbLoggingAppInfo.AutoSize = true;
             this.rbLoggingAppInfo.Location = new System.Drawing.Point(64, 147);
             this.rbLoggingAppInfo.Name = "rbLoggingAppInfo";
-            this.rbLoggingAppInfo.Size = new System.Drawing.Size(42, 17);
+            this.rbLoggingAppInfo.Size = new System.Drawing.Size(43, 17);
             this.rbLoggingAppInfo.TabIndex = 1;
             this.rbLoggingAppInfo.TabStop = true;
-            this.rbLoggingAppInfo.Text = "info";
+            this.rbLoggingAppInfo.Text = "Info";
             this.rbLoggingAppInfo.UseVisualStyleBackColor = true;
             // 
             // rbLoggingAppNone
@@ -3105,11 +3145,57 @@ namespace CIEID
             this.rbLoggingAppNone.AutoSize = true;
             this.rbLoggingAppNone.Location = new System.Drawing.Point(64, 37);
             this.rbLoggingAppNone.Name = "rbLoggingAppNone";
-            this.rbLoggingAppNone.Size = new System.Drawing.Size(65, 17);
+            this.rbLoggingAppNone.Size = new System.Drawing.Size(67, 17);
             this.rbLoggingAppNone.TabIndex = 0;
             this.rbLoggingAppNone.TabStop = true;
-            this.rbLoggingAppNone.Text = "nessuno";
+            this.rbLoggingAppNone.Text = "Nessuno";
             this.rbLoggingAppNone.UseVisualStyleBackColor = true;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.label2);
+            this.tabPage1.Controls.Add(this.showIntroductionScreens);
+            this.tabPage1.Controls.Add(this.label1);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(609, 451);
+            this.tabPage1.TabIndex = 2;
+            this.tabPage1.Text = "Preferenze";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(29, 86);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(558, 13);
+            this.label2.TabIndex = 31;
+            this.label2.Text = "Le opzioni di seguito riportate consentono di personalizzare il comportamento di " +
+    "CIE ID secondo le proprie preferenze:";
+            // 
+            // showIntroductionScreens
+            // 
+            this.showIntroductionScreens.AutoSize = true;
+            this.showIntroductionScreens.Enabled = false;
+            this.showIntroductionScreens.Location = new System.Drawing.Point(32, 128);
+            this.showIntroductionScreens.Name = "showIntroductionScreens";
+            this.showIntroductionScreens.Size = new System.Drawing.Size(251, 17);
+            this.showIntroductionScreens.TabIndex = 30;
+            this.showIntroductionScreens.Text = "Mostra schermate introduttive all\'avvio di CIE ID";
+            this.showIntroductionScreens.UseVisualStyleBackColor = true;
+            this.showIntroductionScreens.CheckedChanged += new System.EventHandler(this.showIntroductionScreens_CheckedChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(109, 14);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(391, 36);
+            this.label1.TabIndex = 29;
+            this.label1.Text = "Configurazione preferenze";
             // 
             // panelSetButtonsInOptions
             // 
@@ -3472,7 +3558,7 @@ namespace CIEID
             this.verifyPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox23)).EndInit();
             this.tabSettings.ResumeLayout(false);
-            this.tabControlLogConfigurationOptions.ResumeLayout(false);
+            this.tabControlPrefConfigurationOptions.ResumeLayout(false);
             this.tabConfigProxy.ResumeLayout(false);
             this.tabConfigProxy.PerformLayout();
             this.panelProxyConfig.ResumeLayout(false);
@@ -3484,6 +3570,8 @@ namespace CIEID
             this.configLibraryLoggingGroupBox.PerformLayout();
             this.configApplicationLoggingGroupBox.ResumeLayout(false);
             this.configApplicationLoggingGroupBox.PerformLayout();
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
             this.panelSetButtonsInOptions.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLogo)).EndInit();
             this.ResumeLayout(false);
@@ -3684,7 +3772,7 @@ namespace CIEID
         private TextBox txtPort;
         private Label labelPortProxyConfiguration;
         private Button extractP7MButton;
-        private TabControl tabControlLogConfigurationOptions;
+        private TabControl tabControlPrefConfigurationOptions;
         private TabPage tabConfigProxy;
         private TabPage tabConfigLogging;
         private Label labelLogConfigurationHeaderText;
@@ -3728,5 +3816,11 @@ namespace CIEID
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.Label labelOwnerValue2;
         private System.Windows.Forms.PictureBox pictureBox12;
+        private Button collectLogBtn;
+        private Button clearLogFolderBtn;
+        private TabPage tabPage1;
+        private Label label1;
+        private Label label2;
+        private CheckBox showIntroductionScreens;
     }
 }
