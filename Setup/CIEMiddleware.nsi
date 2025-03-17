@@ -2,7 +2,7 @@
 !include "x64.nsh"
 !include "Library.nsh"
 
-!define PRODUCT_VERSION "1.4.3.10"
+!define PRODUCT_VERSION "1.4.3.11"
 
 ;--------------------------------
 ;General
@@ -128,7 +128,7 @@ Section "Install"
   WriteRegDWORD ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "NoModify" "1"
   ;WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMajor" "0"
   ;WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMinor" "1"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "1.4.3.10"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "1.4.3.11"
   SetRegView lastused
 
   ExecWait 'schtasks.exe /create /xml "$INSTDIR\UpdateTask.xml" /tn "CIE Middleware Update" /f'
