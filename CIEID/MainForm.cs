@@ -2434,26 +2434,29 @@ namespace CIEID
                             }
                         }
                     }
+
+                    if (logFound)
+                    {
+                        MessageBox.Show("La raccolta dei log di diagnostica è avvenuta con successo. Puoi adesso condividere con gli sviluppatori " +
+                                        "l'archivio generato per un'analisi della problematica riscontrata.", "Raccolta completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Logger.Info("[INFO] CollectLogBtn_Click() - I file di log sono stati raccolti e zippati con successo.");
+                    }
+
+                    else
+                    {
+                        MessageBox.Show("Non sono presenti log. Effettua prima delle operazioni con l'applicativo, quindi ripeti " +
+                                        "l'operazione di raccolta dei log.", "Raccolta log", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Logger.Info("[INFO] CollectLogBtn_Click() - Non sono presenti file di log nella cartella del programma.");
+
+                        if (File.Exists(saveFileDialog.FileName))
+                            File.Delete(saveFileDialog.FileName);
+                    }
                 }
 
                 catch (Exception ex)
                 {
                     MessageBox.Show("Si è verificato un errore durante l'operazione:\n\n" + ex.Message, "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Logger.Error("[ERROR] CollectLogBtn_Click() - Si è verificato un errore durante l'operazione: " + ex.Message);
-                }
-
-                if (logFound)
-                {
-                    MessageBox.Show("La raccolta dei log di diagnostica è avvenuta con successo. Puoi adesso condividere con gli sviluppatori " +
-                                    "l'archivio generato per un'analisi della problematica riscontrata.", "Raccolta completata", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    Logger.Info("[INFO] CollectLogBtn_Click() - I file di log sono stati raccolti e zippati con successo.");
-                }
-
-                else
-                {
-                    MessageBox.Show("Non sono presenti log. Effettua prima delle operazioni con l'applicativo, quindi ripeti " +
-                                    "l'operazione di raccolta dei log.", "Raccolta log", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    Logger.Info("[INFO] CollectLogBtn_Click() - Non sono presenti file di log nella cartella del programma.");
                 }
             }
         }
