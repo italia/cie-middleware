@@ -2,7 +2,7 @@
 !include "x64.nsh"
 !include "Library.nsh"
 
-!define PRODUCT_VERSION "1.4.3.9"
+!define PRODUCT_VERSION "1.4.3.11"
 
 ;--------------------------------
 ;General
@@ -30,7 +30,7 @@ VIAddVersionKey "ProductName" "CIE-Middleware"
 VIAddVersionKey "Comments" "CIE-Middleware"
 VIAddVersionKey "CompanyName" ""
 VIAddVersionKey "LegalTrademarks" ""
-VIAddVersionKey "LegalCopyright" "Copyright (C) IPZS 2018-2024"
+VIAddVersionKey "LegalCopyright" "Copyright (C) IPZS 2018-2025"
 VIAddVersionKey "FileDescription" "CIE-Middleware"
 VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}"
 VIAddVersionKey "OriginalFilename" "CIE-Middleware.exe"
@@ -128,7 +128,7 @@ Section "Install"
   WriteRegDWORD ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "NoModify" "1"
   ;WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMajor" "0"
   ;WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMinor" "1"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "1.4.3.9"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "1.4.3.11"
   SetRegView lastused
 
   ExecWait 'schtasks.exe /create /xml "$INSTDIR\UpdateTask.xml" /tn "CIE Middleware Update" /f'

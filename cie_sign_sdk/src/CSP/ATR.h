@@ -19,7 +19,8 @@ enum CIE_Type {
 	CIE_ACTALIS,
 	CIE_ACTALIS2,
 	CIE_BIT4ID,
-	CIE_BIT4ID2
+	CIE_BIT4ID2,
+	CIE_BIT4ID3
 };
 
 typedef struct _cie_atr {
