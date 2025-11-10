@@ -59,8 +59,6 @@ namespace CIEID
 
         public System.Windows.Forms.TableLayoutPanel createTable(verifyInfo_t vInfo)
         {
-
-
             System.Windows.Forms.TableLayoutPanel tbVerifyInfo;
             System.Windows.Forms.Label lblVName;
             System.Windows.Forms.Label lblSignTime;
@@ -114,6 +112,7 @@ namespace CIEID
             }
             else
             {
+                pbVName.SizeMode = PictureBoxSizeMode.CenterImage;
                 pbCertValid.Image = CIEID.Properties.Resources.orange_checkbox;
                 s_cert = "Il certificato non è valido";
             }
@@ -176,10 +175,8 @@ namespace CIEID
             tbVerifyInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
             tbVerifyInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
             tbVerifyInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            //tbVerifyInfo.Size = new System.Drawing.Size(286, 244);
             tbVerifyInfo.Size = new System.Drawing.Size(verifyPanel.Width - 20, verifyPanel.Height);
             tbVerifyInfo.TabIndex = 0;
-            //tbVerifyInfo.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
 
             // 
             // lblVName
@@ -189,8 +186,6 @@ namespace CIEID
             lblVName.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             lblVName.Location = new System.Drawing.Point(38, 0);
             lblVName.Name = "lblVName";
-            //lblVName.Padding = new System.Windows.Forms.Padding(0, 0, 0, 5);
-            //lblVName.Size = new System.Drawing.Size(245, 37);
             lblVName.TabIndex = 0;
             lblVName.Text = name;
             lblVName.AutoSize = true;
@@ -199,13 +194,12 @@ namespace CIEID
             // pbVName
             // 
             pbVName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            //pbVName.Padding = new System.Windows.Forms.Padding(15, 12, 15, 12);
             pbVName.Location = new System.Drawing.Point(3, 3);
             pbVName.Name = "pbVName";
             pbVName.Size = new System.Drawing.Size(29, 31);
             pbVName.TabIndex = 6;
             pbVName.TabStop = false;
-            pbVName.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            pbVName.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             pbVName.Image = CIEID.Properties.Resources.user;
 
             // 
@@ -215,8 +209,6 @@ namespace CIEID
             lblSignTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             lblSignTime.Location = new System.Drawing.Point(38, 43);
             lblSignTime.Name = "lblSignTime";
-            //lblSignTime.Padding = new System.Windows.Forms.Padding(0, 0, 0, 5);
-            //lblSignTime.Size = new System.Drawing.Size(245, 24);
             lblSignTime.TabIndex = 1;
             lblSignTime.AutoSize = true;
             lblSignTime.Text = s_time;
@@ -225,13 +217,12 @@ namespace CIEID
             // pbSignTime
             // 
             pbSignTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            //pbVName.Padding = new System.Windows.Forms.Padding(15, 12, 15, 12);
             pbSignTime.Location = new System.Drawing.Point(3, 3);
             pbSignTime.Name = "pbVName";
             pbSignTime.Size = new System.Drawing.Size(29, 31);
             pbSignTime.TabIndex = 6;
             pbSignTime.TabStop = false;
-            pbSignTime.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            pbSignTime.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             pbSignTime.Image = CIEID.Properties.Resources.calendar;
 
             // 
@@ -241,8 +232,6 @@ namespace CIEID
             lblSign.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             lblSign.Location = new System.Drawing.Point(38, 80);
             lblSign.Name = "lblSign";
-            //lblSign.Padding = new System.Windows.Forms.Padding(0, 0, 0, 5);
-            //lblSign.Size = new System.Drawing.Size(245, 24);
             lblSign.TabIndex = 12;
             lblSign.Text = s_sign;
             lblSignTime.AutoSize = true;
@@ -251,13 +240,12 @@ namespace CIEID
             // pbSign
             // 
             pbSign.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            //pbSign.Padding = new System.Windows.Forms.Padding(15, 12, 15, 12);
             pbSign.Location = new System.Drawing.Point(3, 77);
             pbSign.Name = "pbSign";
             pbSign.Size = new System.Drawing.Size(29, 31);
             pbSign.TabIndex = 8;
             pbSign.TabStop = false;
-            pbSign.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            pbSign.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
 
 
             // 
@@ -267,8 +255,6 @@ namespace CIEID
             lblCertValid.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             lblCertValid.Location = new System.Drawing.Point(38, 117);
             lblCertValid.Name = "lblCertValid";
-            //lblCertValid.Padding = new System.Windows.Forms.Padding(0, 0, 0, 5);
-            //lblCertValid.Size = new System.Drawing.Size(245, 24);
             lblCertValid.TabIndex = 13;
             lblCertValid.Text = s_cert;
             lblCertValid.AutoSize = true;
@@ -277,13 +263,12 @@ namespace CIEID
             // pbCertValid
             // 
             pbCertValid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            //pbCertValid.Padding = new System.Windows.Forms.Padding(15, 12, 15, 12);
             pbCertValid.Location = new System.Drawing.Point(3, 114);
             pbCertValid.Name = "pbCertValid";
             pbCertValid.Size = new System.Drawing.Size(29, 31);
             pbCertValid.TabIndex = 9;
             pbCertValid.TabStop = false;
-            pbCertValid.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            pbCertValid.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
 
             // 
             // lblCertRev
@@ -292,8 +277,6 @@ namespace CIEID
             lblCertRev.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             lblCertRev.Location = new System.Drawing.Point(38, 154);
             lblCertRev.Name = "lblCertRev";
-            //lblCertRev.Padding = new System.Windows.Forms.Padding(0, 0, 0, 5);
-            //lblCertRev.Size = new System.Drawing.Size(245, 24);
             lblCertRev.TabIndex = 14;
             lblCertRev.Text = s_revoc;
             lblCertRev.AutoSize = true;
@@ -302,13 +285,12 @@ namespace CIEID
             // pbCertRev
             // 
             pbCertRev.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            //pbCertRev.Padding = new System.Windows.Forms.Padding(15, 12, 15, 12);
             pbCertRev.Location = new System.Drawing.Point(3, 151);
             pbCertRev.Name = "pbCertRev";
             pbCertRev.Size = new System.Drawing.Size(29, 31);
             pbCertRev.TabIndex = 10;
             pbCertRev.TabStop = false;
-            pbCertRev.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            pbCertRev.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
 
             // 
             // lblCn
@@ -317,8 +299,6 @@ namespace CIEID
             lblCn.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             lblCn.Location = new System.Drawing.Point(38, 188);
             lblCn.Name = "lblCn";
-            //lblCn.Padding = new System.Windows.Forms.Padding(0, 0, 0, 5);
-            //lblCn.Size = new System.Drawing.Size(245, 48);
             lblCn.TabIndex = 15;
             lblCn.AutoSize = true;
             lblCn.Text = s_cadn;
@@ -327,13 +307,12 @@ namespace CIEID
             // pbCn
             // 
             pbCn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            //pbCn.Padding = new System.Windows.Forms.Padding(15, 28, 15, 28);
             pbCn.Location = new System.Drawing.Point(3, 188);
             pbCn.Name = "pbCn";
             pbCn.Size = new System.Drawing.Size(29, 31);
             pbCn.TabIndex = 11;
             pbCn.TabStop = false;
-            pbCn.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            pbCn.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             pbCn.Image = CIEID.Properties.Resources.medal;
 
             return tbVerifyInfo;
@@ -370,8 +349,6 @@ namespace CIEID
                     }
                 }
             }
-
-            //Console.WriteLine("Verifica con CIE - Url: {0}, Port: {1}, credentials: {2}", proxyAddress, proxyPort, proxyCredentials);
 
             int n_sign = (int)verificaConCIE(filePath, proxyAddress, proxyPort, proxyCredentials);
 

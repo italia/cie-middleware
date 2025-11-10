@@ -326,7 +326,6 @@ int CSignerInfo::verifyCountersignature(int i, CASN1SetOf& certificates, const c
 	return verifySignature(source, countersignature, certificates, szDateTime, pRevocationInfo);
 }
 
-
 int CSignerInfo::verifySignature(CASN1OctetString& source, CSignerInfo& signerInfo, CASN1SetOf& certificates, const char* szDateTime, REVOCATION_INFO* pRevocationInfo)
 {
 	LOG_DBG((0, "--> CSignerInfo::verifySignature", "Verify Revocation: %d", (pRevocationInfo != NULL)));

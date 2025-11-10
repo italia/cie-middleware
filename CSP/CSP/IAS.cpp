@@ -14,6 +14,14 @@
 #include "../res/resource.h"
 #include "../../cacheLib/cacheLib.h"
 #include <intsafe.h>
+#include <urlmon.h>
+#include <wincrypt.h>
+#include <vector>
+#include <sstream>
+#include <iomanip>
+
+#pragma comment(lib, "urlmon.lib")
+#pragma comment(lib, "crypt32.lib")
 
 using namespace CieIDLogger;
 
@@ -27,6 +35,17 @@ extern CModuleInfo moduleInfo;
 extern ByteArray SkipZero(ByteArray &ba);
 extern DWORD WINAPI _abilitaCIE(LPVOID lpThreadParameter);
 
+#define DWL_MSGRESULT 0
+
+BOOL CheckOneInstance(char* nome) {
+	auto m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, nome);
+	if (GetLastError() == ERROR_ALREADY_EXISTS && m_hStartEvent != nullptr) {
+		CloseHandle(m_hStartEvent);
+		m_hStartEvent = nullptr;
+		return FALSE;
+	}
+	return TRUE;
+}
 
 IAS::IAS(CToken::TokenTransmitCallback transmit,ByteArray ATR)
 {
@@ -42,6 +61,7 @@ IAS::IAS(CToken::TokenTransmitCallback transmit,ByteArray ATR)
 	
 	ActiveSM = false;
 	ActiveDF = DF_Root;
+	DappKeyVerified = false;
 
 	token.setTransmitCallback(transmit, nullptr);
 }
@@ -405,6 +425,8 @@ void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 	LOG_DEBUG("ReadDappPubKey - Pub Key:");
 	LOG_BUFFER(DappPubKey.data(), DappPubKey.size());
 
+	DappKeyVerified = false;
+
 	LOG_DEBUG("**** ReadDappPubKey Completed *****");
 
 	exit_func
@@ -442,7 +464,6 @@ void IAS::DAPP() {
 	ByteDynArray cert;
 
 	ByteDynArray CHR, CHA, OID;
-
 
 	uint8_t snIFD[] = { 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
 	uint8_t CPI=0x8A;
@@ -1250,7 +1271,6 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			HANDLE token = NULL;
 			OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
 
-			
 			if (token == NULL) {
 				char runDll32Path[MAX_PATH];
 				GetSystemDirectory(runDll32Path, MAX_PATH);
@@ -1260,10 +1280,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 				LOG_INFO("GetCertificate - Running AbilitaCIE process");
 
 				if (!CreateProcess(runDll32Path, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",AbilitaCIE ").append(dumpHexData(PAN.mid(5, 6), std::string(), false)).c_str(), NULL, NULL, FALSE, 0, nullptr, nullptr, &si, &pi))
-				{
-					
 					throw logged_error("GetCertificate - Can't create AbilitaCIE process");
-				}
 				else
 				{
 					LOG_INFO("GetCertificate - AbilitaCIE process created");
@@ -1272,9 +1289,9 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 				//WaitForSingleObject(pi.hProcess, INFINITE);
 				CloseHandle(pi.hProcess);
 			}
-			else {
+			else
 				CloseHandle(token);
-			}
+
 			SCardBeginTransaction(hCard);
 		}
 		else {
@@ -1282,16 +1299,298 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			return;
 		}
 	}
+
 	if (!CacheExists(PANStr.c_str()))
 		throw logged_error("GetCertificate - Cache does not exist");
+
 	std::vector<BYTE> certEncBuf;
 	CacheGetCertificate(PANStr.c_str(), certEncBuf);
 
 	CAES enc(CardEncKey, CardEncIv);
 	certificate = enc.Decode(ByteArray(certEncBuf.data(), certEncBuf.size()));
+	LOG_DEBUG("GetCertificate - Certificate loaded from cache, size=%d, cert=%s", certificate.size(), certificate);
 	Certificate = certificate;
 }
 
+static std::string GetCSCARootDir()
+{
+	CHAR pathBuf[MAX_PATH] = { 0 };
+	if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_COMMON_APPDATA, NULL, 0, pathBuf))) {
+		std::string base = std::string(pathBuf) + "\\CIEPKI\\CSCA\\";
+		// ensure directory exists
+		CreateDirectoryA((std::string(pathBuf) + "\\CIEPKI").c_str(), NULL);
+		CreateDirectoryA(base.c_str(), NULL);
+		return base;
+	}
+	// fallback to LocalAppData
+	if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, pathBuf))) {
+		std::string base = std::string(pathBuf) + "\\IPZS\\CSCA\\";
+		CreateDirectoryA((std::string(pathBuf) + "\\IPZS").c_str(), NULL);
+		CreateDirectoryA(base.c_str(), NULL);
+		return base;
+	}
+	// final fallback: temp
+	GetTempPathA(MAX_PATH, pathBuf);
+	std::string base = std::string(pathBuf) + "CSCA\\";
+	CreateDirectoryA(base.c_str(), NULL);
+	return base;
+}
+
+static bool ReadFileToByteDynArray(const std::string& path, ByteDynArray& out)
+{
+	HANDLE hFile = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE) return false;
+	DWORD fileSize = GetFileSize(hFile, NULL);
+	if (fileSize == INVALID_FILE_SIZE || fileSize == 0) { CloseHandle(hFile); return false; }
+	out.resize(fileSize);
+	DWORD bytesRead = 0;
+	BOOL ok = ReadFile(hFile, out.data(), fileSize, &bytesRead, NULL);
+	CloseHandle(hFile);
+	return ok && bytesRead == fileSize;
+}
+
+static std::string ComputeSha256HexFromBytes(const ByteDynArray& data)
+{
+	ByteDynArray tmp(data);
+	CSHA256 sha;
+	ByteDynArray h = sha.Digest(tmp);
+
+	std::ostringstream ss;
+	ss << std::hex << std::setfill('0');
+	for (size_t i = 0; i < h.size(); ++i)
+		ss << std::setw(2) << (int)h[i];
+	std::string s = ss.str();
+	for (auto& c : s) c = (char)tolower((unsigned char)c);
+	return s;
+}
+
+bool IAS::DownloadCSCACertificates(std::vector<ByteDynArray>& certificates) {
+	init_func
+
+	const char* certNames[] = {
+		"436CE3921D10922307EFD7A2F577ED7524467F1B.cer",
+		"852DF7A70A512D83103DFBC9F628CB6B1CEE5591.cer",
+		"A0F56552180CCBCC0FFD7D0DF39F8604C7C98F62.cer",
+		"B0BF3BB9ECEBC720974C1D13A5905A1A613589A0.cer",
+		"D11A505E15ADEA5A61779CA4A2A991EC3949D1F9.cer",
+		"E94A91197072CD256951790E6CFE2386EDB09D6E.cer"
+	};
+
+	certificates.clear();
+	std::string rootDir = GetCSCARootDir();
+
+	LOG_DEBUG("DownloadCSCACertificates - rootstore dir: %s", rootDir.c_str());
+
+	for (int i = 0; i < (int)(sizeof(certNames) / sizeof(certNames[0])); ++i) {
+		const std::string fname = certNames[i];
+		std::string targetPath = rootDir + fname;
+
+		ByteDynArray certData;
+
+		// 1) If file present in rootstore, load and use it (no download)
+		if (ReadFileToByteDynArray(targetPath, certData)) {
+			certificates.push_back(certData);
+			LOG_DEBUG("DownloadCSCACertificates - Using existing rootstore certificate %s", targetPath.c_str());
+			continue;
+		}
+
+		// 2) Not present in rootstore ===> download to temp and then move to rootstore
+		char tmpPath[MAX_PATH] = { 0 };
+		GetTempPathA(MAX_PATH, tmpPath);
+		std::string tmpFile = std::string(tmpPath) + fname;
+
+		std::string urlStr = "https://www.idea.ipzs.it/downloadCer.html?nomeFile=" + fname;
+		LPCSTR CSCAURL = urlStr.c_str();
+		LOG_DEBUG("DownloadCSCACertificates - Downloading %s to %s", CSCAURL, tmpFile.c_str());
+
+		HRESULT hr = URLDownloadToFileA(NULL, CSCAURL, tmpFile.c_str(), 0, NULL);
+		if (FAILED(hr)) {
+			LOG_ERROR("DownloadCSCACertificates - Download failed for %s (HR=0x%08X)", CSCAURL, hr);
+			continue;
+		}
+
+		if (!ReadFileToByteDynArray(tmpFile, certData)) {
+			LOG_ERROR("DownloadCSCACertificates - Failed to read downloaded file %s", tmpFile.c_str());
+			DeleteFileA(tmpFile.c_str());
+			continue;
+		}
+
+		CreateDirectoryA(rootDir.c_str(), NULL);
+		HANDLE hOut = CreateFileA(targetPath.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (hOut != INVALID_HANDLE_VALUE) {
+			DWORD written = 0;
+			WriteFile(hOut, certData.data(), (DWORD)certData.size(), &written, NULL);
+			CloseHandle(hOut);
+			if (written != certData.size()) {
+				LOG_ERROR("DownloadCSCACertificates - Failed to write %s to rootstore", targetPath.c_str());
+				DeleteFileA(tmpFile.c_str());
+				certificates.push_back(certData);
+				continue;
+			}
+			LOG_DEBUG("DownloadCSCACertificates - Saved certificate to rootstore %s", targetPath.c_str());
+		}
+		else {
+			LOG_ERROR("DownloadCSCACertificates - Cannot create rootstore file %s", targetPath.c_str());
+		}
+
+		DeleteFileA(tmpFile.c_str());
+		certificates.push_back(certData);
+	}
+
+	LOG_DEBUG("DownloadCSCACertificates - Available certificates: %d", (int)certificates.size());
+
+	if(certificates.size() == 0)
+		LOG_INFO("DownloadCSCACertificates - No CSCA certificates available after download attempt!");
+
+	return certificates.size() > 0;
+}
+
+bool IAS::VerifyCSCAChain(PCCERT_CONTEXT certDS, const std::vector<ByteDynArray>& cscaCertificates) {
+	init_func
+
+	if (cscaCertificates.empty()) {
+		LOG_ERROR("VerifyCSCAChain - No CSCA certificates available");
+		return false;
+	}
+
+	LOG_DEBUG("VerifyCSCAChain - Creating certificate store with %d CSCA certificates", cscaCertificates.size());
+
+	HCERTSTORE hStore = CertOpenStore(CERT_STORE_PROV_MEMORY, 0, 0, CERT_STORE_CREATE_NEW_FLAG, NULL);
+	if (!hStore) {
+		LOG_ERROR("VerifyCSCAChain - Failed to create certificate store");
+		return false;
+	}
+
+	auto storeGuard = scopeExit([&]() noexcept { CertCloseStore(hStore, 0); });
+
+	SYSTEMTIME notBeforeDS, notAfterDS;
+	FileTimeToSystemTime(&certDS->pCertInfo->NotBefore, &notBeforeDS);
+	FileTimeToSystemTime(&certDS->pCertInfo->NotAfter, &notAfterDS);
+	LOG_DEBUG("DS NotBefore: %04d-%02d-%02d NotAfter: %04d-%02d-%02d",
+		notBeforeDS.wYear, notBeforeDS.wMonth, notBeforeDS.wDay,
+		notAfterDS.wYear, notAfterDS.wMonth, notAfterDS.wDay);
+	char szName[512];
+	CertGetNameString(certDS, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0, NULL, szName, sizeof(szName));
+	LOG_DEBUG("DS Issuer: %s", szName);
+
+	int addedCerts = 0;
+	for (const auto& certData : cscaCertificates) {
+		PCCERT_CONTEXT pCert = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+			certData.data(), (DWORD)certData.size());
+		if (pCert) {
+			SYSTEMTIME notBefore, notAfter;
+			FileTimeToSystemTime(&pCert->pCertInfo->NotBefore, &notBefore);
+			FileTimeToSystemTime(&pCert->pCertInfo->NotAfter, &notAfter);
+			LOG_DEBUG("CSCA NotBefore: %04d-%02d-%02d NotAfter: %04d-%02d-%02d",
+				notBefore.wYear, notBefore.wMonth, notBefore.wDay,
+				notAfter.wYear, notAfter.wMonth, notAfter.wDay);
+
+			if (CertAddCertificateContextToStore(hStore, pCert, CERT_STORE_ADD_ALWAYS, NULL)) {
+				addedCerts++;
+				LOG_DEBUG("VerifyCSCAChain - Added CSCA certificate %d to store", addedCerts);
+			}
+			else {
+				LOG_ERROR("VerifyCSCAChain - Failed to add CSCA certificate to store");
+			}
+			CertFreeCertificateContext(pCert);
+		}
+		else {
+			LOG_ERROR("VerifyCSCAChain - Failed to create certificate context from CSCA data");
+		}
+	}
+
+	if (addedCerts == 0) {
+		LOG_ERROR("VerifyCSCAChain - No valid CSCA certificates added to store");
+		return false;
+	}
+
+	LOG_DEBUG("VerifyCSCAChain - Added %d CSCA certificates to store", addedCerts);
+
+	CERT_CHAIN_PARA chainParams = { 0 };
+	chainParams.cbSize = sizeof(CERT_CHAIN_PARA);
+	chainParams.RequestedUsage.dwType = USAGE_MATCH_TYPE_AND;
+
+	PCCERT_CHAIN_CONTEXT pChainContext = NULL;
+	BOOL result = CertGetCertificateChain(NULL, certDS, NULL, hStore, &chainParams,
+		NULL, NULL, &pChainContext);
+
+	if (!result || !pChainContext) {
+		LOG_ERROR("VerifyCSCAChain - Failed to build certificate chain");
+		return false;
+	}
+
+	auto chainGuard = scopeExit([&]() noexcept {
+		if (pChainContext) CertFreeCertificateChain(pChainContext);
+		});
+
+	if (pChainContext->TrustStatus.dwErrorStatus != CERT_TRUST_NO_ERROR) {
+		LOG_ERROR("VerifyCSCAChain dwErrorStatus - Certificate chain has errors: 0x%08X", pChainContext->TrustStatus.dwErrorStatus);
+		LOG_ERROR("VerifyCSCAChain dwInfoStatus - Certificate chain has errors: 0x%08X", pChainContext->TrustStatus.dwInfoStatus);
+		if (pChainContext->TrustStatus.dwErrorStatus == CERT_TRUST_IS_UNTRUSTED_ROOT) // 0x00000020
+			LOG_ERROR("VerifyCSCAChain - Untrusted root certificate (not in Windows Root store), but is a known CSCA");	
+		else {
+			return false;	
+		}
+	}
+
+	if (pChainContext->cChain == 0) {
+		LOG_ERROR("VerifyCSCAChain - No certificate chains found");
+		return false;
+	}
+
+	PCERT_SIMPLE_CHAIN pSimpleChain = pChainContext->rgpChain[0];
+	for (DWORD i = 0; i < pSimpleChain->cElement; ++i) {
+		PCCERT_CONTEXT ctx = pSimpleChain->rgpElement[i]->pCertContext;
+		SYSTEMTIME notBefore, notAfter;
+		FileTimeToSystemTime(&ctx->pCertInfo->NotBefore, &notBefore);
+		FileTimeToSystemTime(&ctx->pCertInfo->NotAfter, &notAfter);
+	}
+
+	if (!pSimpleChain || pSimpleChain->cElement == 0) {
+		LOG_ERROR("VerifyCSCAChain - Empty certificate chain");
+		return false;
+	}
+
+	PCERT_CHAIN_ELEMENT pRootElement = pSimpleChain->rgpElement[pSimpleChain->cElement - 1];
+	if (!pRootElement || !pRootElement->pCertContext) {
+		LOG_ERROR("VerifyCSCAChain - No root certificate found");
+		return false;
+	}
+
+	PCCERT_CONTEXT pRootCert = pRootElement->pCertContext;
+
+	if (pRootCert->pCertInfo->Subject.cbData != pRootCert->pCertInfo->Issuer.cbData ||
+		memcmp(pRootCert->pCertInfo->Subject.pbData, pRootCert->pCertInfo->Issuer.pbData,
+			pRootCert->pCertInfo->Subject.cbData) != 0) {
+		LOG_ERROR("VerifyCSCAChain - Root certificate is not self-signed");
+		return false;
+	}
+
+	LOG_DEBUG("VerifyCSCAChain - Certificate chain verification successful");
+	return true;
+}
+
+bool IAS::RunCSCAVerification(PCCERT_CONTEXT certDS) {
+	init_func
+
+	LOG_DEBUG("VerificaSOD - Starting CSCA chain verification");
+	std::vector<ByteDynArray> cscaCertificates;
+	if (DownloadCSCACertificates(cscaCertificates)) {
+		if (!VerifyCSCAChain(certDS, cscaCertificates)) {
+			throw logged_error("VerificaSOD - Il certificato di Document Signer non è valido secondo la catena CSCA");
+		}
+		LOG_DEBUG("VerificaSOD - CSCA chain verification successful");
+	}
+	else {
+		LOG_ERROR("VerificaSOD - Failed to download CSCA certificates, skipping chain verification");
+		return false;
+		// Non genero errore per permettere il funzionamento anche senza verifica CSCA
+	}
+
+	DappKeyVerified = true;
+	return true;
+	exit_func
+}
 
 uint8_t IAS::GetSODDigestAlg(ByteArray &SOD)
 {
@@ -1325,7 +1624,7 @@ uint8_t IAS::GetSODDigestAlg(ByteArray &SOD)
 	else throw logged_error("GetSODDigestAlg - Digest algorithm not supported");;
 }
 
-void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet)
+bool IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet)
 {
 	init_func
 	CASNParser parser;
@@ -1471,25 +1770,27 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 			throw logged_error(stdPrintf("VerificaSODPSS - Digest for DG does not match %02X", num));
 	}
 
+	return RunCSCAVerification(certDS);
+
 	exit_func
 }
 
-void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
+bool IAS::VerificaSOD(ByteArray& SOD, std::map<BYTE, ByteDynArray>& hashSet) {
 	init_func
-		CASNParser parser;
+	CASNParser parser;
 	parser.Parse(SOD);
 
 	std::string dump;
 	dumpHexData(SOD, dump);
 
-	CASNTag &SODTag = *parser.tags[0];
+	CASNTag& SODTag = *parser.tags[0];
 
-	CASNTag &temp = SODTag.Child(0, 0x30);
+	CASNTag& temp = SODTag.Child(0, 0x30);
 	uint8_t OID[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x02 };
 	temp.Child(0, 06).Verify(VarToByteArray(OID));
 
 	uint8_t val3 = 3;
-	CASNTag &temp2 = temp.Child(1, 0xA0).Child(0, 0x30);
+	CASNTag& temp2 = temp.Child(1, 0xA0).Child(0, 0x30);
 	temp2.Child(0, 2).Verify(VarToByteArray(val3));
 
 	uint8_t OID_SH256[] = { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01 };
@@ -1502,20 +1803,20 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 
 	CASNParser ttParser;
 	ttParser.Parse(ttData);
-	CASNTag &signedData = *ttParser.tags[0];
+	CASNTag& signedData = *ttParser.tags[0];
 	signedData.CheckTag(0x30);
 
-	CASNTag &signerCert = temp2.Child(3, 0xA0).Child(0, 0x30);
+	CASNTag& signerCert = temp2.Child(3, 0xA0).Child(0, 0x30);
 
-	CASNTag &temp3 = temp2.Child(4, 0x31).Child(0, 0x30);
+	CASNTag& temp3 = temp2.Child(4, 0x31).Child(0, 0x30);
 	uint8_t val1 = 1;
 	temp3.Child(0, 02).Verify(VarToByteArray(val1));
 
-	CASNTag &issuerName = temp3.Child(1, 0x30).Child(0, 0x30);
-	CASNTag &signerCertSerialNumber = temp3.Child(1, 0x30).Child(1, 02);
+	CASNTag& issuerName = temp3.Child(1, 0x30).Child(0, 0x30);
+	CASNTag& signerCertSerialNumber = temp3.Child(1, 0x30).Child(1, 02);
 	temp3.Child(2, 0x30).Child(0, 06).Verify(VarToByteArray(OID_SH256));
 
-	CASNTag &signerInfo = temp3.Child(3, 0xA0);
+	CASNTag& signerInfo = temp3.Child(3, 0xA0);
 
 	uint8_t OID4[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x09, 0x03 };
 	signerInfo.Child(0, 0x30).Child(0, 06).Verify(VarToByteArray(OID4));
@@ -1526,11 +1827,11 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	uint8_t OID6[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x09, 0x04 };
 	signerInfo.Child(1, 0x30).Child(0, 06).Verify(VarToByteArray(OID6));
 
-	CASNTag &digest = temp3.Child(3, 0xA0).Child(1, 0x30).Child(1, 0x31).Child(0, 04);
+	CASNTag& digest = temp3.Child(3, 0xA0).Child(1, 0x30).Child(1, 0x31).Child(0, 04);
 
 	uint8_t OID_RSAwithSHA256[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0b };
 	uint8_t OID_RSAwithSHA1[] = { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x05 };
-	auto &digestAlgo = temp3.Child(4, 0x30).Child(0, 06).content;
+	auto& digestAlgo = temp3.Child(4, 0x30).Child(0, 06).content;
 	bool isSHA1 = false;
 	bool isSHA256 = false;
 	if (digestAlgo == VarToByteArray(OID_RSAwithSHA1))
@@ -1541,7 +1842,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 		else
 			throw logged_error("VerificaSOD - Digest algorithm not valid");
 
-	CASNTag &signature = temp3.Child(5, 04);
+	CASNTag& signature = temp3.Child(5, 04);
 
 	//Calcolo del digest del SOD (signed data) con SHA256
 	CSHA256 sha256;
@@ -1559,12 +1860,12 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	ByteArray pubKeyData(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData);
 	CASNParser pubKeyParser;
 	pubKeyParser.Parse(pubKeyData);
-	CASNTag &pubKey = *pubKeyParser.tags[0];
-	CASNTag &modTag = pubKey.Child(0, 02);
+	CASNTag& pubKey = *pubKeyParser.tags[0];
+	CASNTag& modTag = pubKey.Child(0, 02);
 	ByteArray mod = modTag.content;
 	while (mod[0] == 0)
 		mod = mod.mid(1);
-	CASNTag &expTag = pubKey.Child(1, 02);
+	CASNTag& expTag = pubKey.Child(1, 02);
 	ByteArray exp = expTag.content;
 	while (exp[0] == 0)
 		exp = exp.mid(1);
@@ -1595,19 +1896,19 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	issuerName.Reparse();
 	CASNParser issuerParser;
 	issuerParser.Parse(ByteArray(certDS->pCertInfo->Issuer.pbData, certDS->pCertInfo->Issuer.cbData));
-	CASNTag &CertIssuer = *issuerParser.tags[0];
+	CASNTag& CertIssuer = *issuerParser.tags[0];
 	if (issuerName.tags.size() != CertIssuer.tags.size())
 		throw logged_error("VerificaSOD - Issuer name does not match");
 	for (std::size_t i = 0; i < issuerName.tags.size(); i++) {
-		CASNTag &certElem = *CertIssuer.tags[i]->tags[0];
-		CASNTag &SODElem = *issuerName.tags[i]->tags[0];
+		CASNTag& certElem = *CertIssuer.tags[i]->tags[0];
+		CASNTag& SODElem = *issuerName.tags[i]->tags[0];
 		certElem.tags[0]->Verify(SODElem.tags[0]->content);
 		certElem.tags[1]->Verify(SODElem.tags[1]->content);
 	}
 
 	ByteDynArray certSerial = ByteArray(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData);
 	if (certSerial.reverse() != signerCertSerialNumber.content)
-		throw logged_error("VerificaSOD - Serial Number certificat does not match");
+		throw logged_error("VerificaSOD - Serial Number certificate does not match");
 
 	// ora verifico gli hash dei DG
 	//log.Info("Verifica hash DG");
@@ -1615,11 +1916,11 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	signedData.Child(0, 02).Verify(VarToByteArray(val0));
 	signedData.Child(1, 0x30).Child(0, 06).Verify(VarToByteArray(OID_SH256));
 
-	CASNTag &hashTag = signedData.Child(2, 0x30);
+	CASNTag& hashTag = signedData.Child(2, 0x30);
 	for (std::size_t i = 0; i < hashTag.tags.size(); i++) {
-		CASNTag &hashDG = *(hashTag.tags[i]);
-		CASNTag &dgNum = hashDG.CheckTag(0x30).Child(0, 02);
-		CASNTag &dgHash = hashDG.Child(1, 04);
+		CASNTag& hashDG = *(hashTag.tags[i]);
+		CASNTag& dgNum = hashDG.CheckTag(0x30).Child(0, 02);
+		CASNTag& dgHash = hashDG.Child(1, 04);
 		uint8_t num = ByteArrayToVar(dgNum.content, BYTE);
 
 		if (hashSet.find(num) == hashSet.end() || hashSet[num].size() == 0)
@@ -1629,30 +1930,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 			throw logged_error(stdPrintf("VerificaSOD - Digest for DG does not match %02X", num));
 	}
 
-	/*if (CSCA != null && CSCA.Count > 0)
-	{
-		log.Info("Verifica catena CSCA");
-		X509CertChain chain = new X509CertChain(CSCA);
-		var certChain = chain.getPath(certDS);
-		if (certChain == null)
-			throw Exception("Il certificato di Document Signer non č valido");
-		var rootCert = certChain[0];
-		if (!new ByteArray(rootCert.SubjectName.RawData).IsEqual(rootCert.IssuerName.RawData))
-			throw Exception("Impossibile validare il certificato di Document Signer");
-	}
-	*/
+	return RunCSCAVerification(certDS);
+	
 	exit_func
-}
-
-#define DWL_MSGRESULT 0
-
-BOOL CheckOneInstance(char *nome)
-{
-	auto m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, nome);
-	if (GetLastError() == ERROR_ALREADY_EXISTS && m_hStartEvent != nullptr) {
-		CloseHandle(m_hStartEvent);
-		m_hStartEvent = nullptr;
-		return FALSE;
-	}
-	return TRUE;
 }

@@ -2,7 +2,6 @@
 #include "disigonsdk.h"
 #include <string.h>
 
-
 CIESign::CIESign(IAS *ias){
 	this->ias = ias;
 }

@@ -30,6 +30,8 @@ namespace CIEID
         public const int CKR_PIN_LEN_RANGE = 0x000000A2;
         public const int CARD_ALREADY_ENABLED = 0x000000F0;
         public const int CARD_PAN_MISMATCH = 0x000000F1;
+        public const int CARD_CSCA_VERIFY_NOT_DONE = 0x000000F2;
+        public const int CARD_CSCA_VERIFY_FAILED = 0x000000F3;
         public const UInt32 INVALID_FILE_TYPE = 0x84000005;
 
         /* CKR_PIN_EXPIRED and CKR_PIN_LOCKED are new for v2.0 */
@@ -625,7 +627,7 @@ namespace CIEID
                     {
                         case CKR_TOKEN_NOT_RECOGNIZED:
                             Logger.Debug("CIE non presente sul lettore - CKR_TOKEN_NOT_RECOGNIZED");
-                            MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            MessageBox.Show("CIE non riconosciuta o non compatibile", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                             SelectHome();
                             break;
 
@@ -667,9 +669,20 @@ namespace CIEID
                             MessageBox.Show("Carta già abilitata", "Carta già abilitata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             SelectHome();
                             break;
+
+                        case CARD_CSCA_VERIFY_FAILED:
+                            Logger.Debug("Verifica CSCA del certificato FALLITA - CARD_CSCA_VERIFY_FAILED");
+                            MessageBox.Show("La verifica di attendibilità della CIE ha riportato esito negativo. Non è presente un certificato CSCA che ne legittimi il DS (Document Signer).", "Carta non attendibile", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            SelectHome();
+                            break;
+
+                        case CARD_CSCA_VERIFY_NOT_DONE:
+                            Logger.Debug("Verifica CSCA del certificato non effettuata - CARD_CSCA_VERIFY_NOT_DONE");
+                            MessageBox.Show("L'abilitazione della CIE è avvenuta con successo, ma non è stato possibile verificare l'attendibilità della stessa. La verifica di validità verrà rimandata al successivo utilizzo.", "Carta non verificata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            SelectHome();
+                            break;
                     }
                 });
-
             }
             catch (Exception ex)
             {
@@ -704,7 +717,6 @@ namespace CIEID
 
                     catch
                     {
-                        Console.WriteLine("Failed to erase graphic signature");
                         Logger.Debug("RemoveCIEFromCollection() - Failed to remove graphic signature image for CIE PAN: " + PAN);
                     }
 
@@ -1941,12 +1953,12 @@ namespace CIEID
                     switch (ret)
                     {
                         case CKR_TOKEN_NOT_RECOGNIZED:
-                            MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            MessageBox.Show("CIE non riconosciuta o non compatibile.", "CIE non riconosciuta", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                             ChangeSignPINObjects();
                             break;
 
                         case CKR_TOKEN_NOT_PRESENT:
-                            MessageBox.Show("CIE non presente sul lettore", "Abilitazione CIE", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            MessageBox.Show("CIE non presente sul lettore.", "CIE non rilevata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                             ChangeSignPINObjects();
                             break;
 
@@ -1956,12 +1968,17 @@ namespace CIEID
                             break;
 
                         case CKR_PIN_LOCKED:
-                            MessageBox.Show("Munisciti del codice PUK e utilizza la funzione di sblocco carta per abilitarla", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            MessageBox.Show("Munisciti del codice PUK ed utilizza la funzione di sblocco carta per abilitarla.", "Carta bloccata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            ChangeSignPINObjects();
+                            break;
+
+                        case CARD_CSCA_VERIFY_NOT_DONE:
+                            MessageBox.Show("Verifica di attendibilità della carta non riuscita.", "CIE non verificata", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                             ChangeSignPINObjects();
                             break;
 
                         case CARD_PAN_MISMATCH:
-                            MessageBox.Show("CIE selezionata diversa da quella presente sul lettore", "CIE non corrispondente", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            MessageBox.Show("CIE selezionata diversa da quella presente sul lettore.", "CIE non corrispondente", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                             ChangeSignPINObjects();
                             break;
                     }

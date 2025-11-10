@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2020
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CIEPKI", "CSP\CSP.vcxproj", "{4ED5BF6B-CF39-4390-A6E4-0647D4C5B584}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestCIE", "TestCIE\TestCIE.vcxproj", "{C77134FA-CB45-4216-9D69-292DE365ADB0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CIEID", "CIEID\CIEID.csproj", "{1CD3C34D-1F6E-474E-9C54-A76B1A6C0FC3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cie_sign_sdk", "cie_sign_sdk\build\cie_sign_sdk.vcxproj", "{744029C1-DB0F-3FA0-A74E-16B40B494860}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +115,18 @@ Global
 		{1CD3C34D-1F6E-474E-9C54-A76B1A6C0FC3}.Release|Win32.Build.0 = Release|Any CPU
 		{1CD3C34D-1F6E-474E-9C54-A76B1A6C0FC3}.Release|x64.ActiveCfg = Release|Any CPU
 		{1CD3C34D-1F6E-474E-9C54-A76B1A6C0FC3}.Release|x64.Build.0 = Release|Any CPU
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Debug|Any CPU.Build.0 = Debug|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Debug|Win32.ActiveCfg = Debug|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Debug|Win32.Build.0 = Debug|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Debug|x64.ActiveCfg = Debug|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Debug|x64.Build.0 = Debug|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Release|Any CPU.ActiveCfg = Release|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Release|Any CPU.Build.0 = Release|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Release|Win32.ActiveCfg = Release|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Release|Win32.Build.0 = Release|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Release|x64.ActiveCfg = Release|x64
+		{744029C1-DB0F-3FA0-A74E-16B40B494860}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

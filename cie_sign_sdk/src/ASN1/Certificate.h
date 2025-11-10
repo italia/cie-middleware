@@ -71,4 +71,7 @@ public:
 	static CCertificate* createCertificate(UUCByteArray& contentArray);
 };
 
-#endif // !defined(AFX_CERTIFICATE_H__2DF2B808_9398_479F_9FD2_9A229517EF9D__INCLUDED_)
+#define VERIFIED_TSL_CA         0x00000100  // CA nella TSL
+#define VERIFIED_TSL_GRANTED    0x00000200  // Servizio TSL attivo
+
+#endif 

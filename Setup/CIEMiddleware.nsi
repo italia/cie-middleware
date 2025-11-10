@@ -2,14 +2,15 @@
 !include "x64.nsh"
 !include "Library.nsh"
 
-!define PRODUCT_VERSION "1.4.3.12"
+!define PRODUCT_VERSION "1.4.3.14"
+!define CONFIG "Release"
 
 ;--------------------------------
 ;General
 
   ;Name and file
   Name "CIE-Middleware"
-  OutFile "${Config}\CIE-Middleware.exe"
+  OutFile "${Config}\CIE-Middleware_v${PRODUCT_VERSION}.exe"
 
   !define MUI_ICON "..\CSP\res\CIE.ico"
   !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -30,10 +31,10 @@ VIAddVersionKey "ProductName" "CIE-Middleware"
 VIAddVersionKey "Comments" "CIE-Middleware"
 VIAddVersionKey "CompanyName" ""
 VIAddVersionKey "LegalTrademarks" ""
-VIAddVersionKey "LegalCopyright" "Copyright (C) IPZS 2018"
+VIAddVersionKey "LegalCopyright" "Copyright (C) IPZS 2018-2025"
 VIAddVersionKey "FileDescription" "CIE-Middleware"
 VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}"
-VIAddVersionKey "OriginalFilename" "CIE-Middleware.exe"
+VIAddVersionKey "OriginalFilename" "CIE-Middleware_v${PRODUCT_VERSION}.exe"
 VIProductVersion "${PRODUCT_VERSION}"
 
 
@@ -128,7 +129,7 @@ Section "Install"
   WriteRegDWORD ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "NoModify" "1"
   ;WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMajor" "0"
   ;WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "VersionMinor" "1"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "1.4.3.12"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   SetRegView lastused
 
   ExecWait 'schtasks.exe /create /xml "$INSTDIR\UpdateTask.xml" /tn "CIE Middleware Update" /f'

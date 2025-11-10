@@ -78,6 +78,7 @@ set(SRC_LIST
     ${SOURCE_DIR}/ASN1/TimeStampRequest.cpp
     ${SOURCE_DIR}/ASN1/TimeStampResponse.cpp
     ${SOURCE_DIR}/ASN1/TimeStampToken.cpp
+    ${SOURCE_DIR}/ASN1/TrustServiceList.cpp
     ${SOURCE_DIR}/ASN1/UUCBufferedReader.cpp
     ${SOURCE_DIR}/ASN1/UUCByteArray.cpp
     ${SOURCE_DIR}/RSA/desc.c

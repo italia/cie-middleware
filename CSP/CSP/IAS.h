@@ -23,7 +23,6 @@ extern bool switchDesktop;
 extern BOOL CheckOneInstance(char *nome);
 extern ByteArray baExtAuth_PrivExp;
 
-
 enum CIE_DF {
 	DF_Root,
 	DF_IAS,
@@ -35,8 +34,6 @@ enum CIE_RequestedSM {
 	CIE_NoSM,
 	CIE_AnySM
 };
-
-
 
 class IAS
 {
@@ -60,6 +57,13 @@ class IAS
 
 	void readfile_SM(uint16_t id, ByteDynArray &content);
 	void readfile(uint16_t id, ByteDynArray &content);
+	bool RunCSCAVerification(PCCERT_CONTEXT certDS);
+	bool DownloadCSCACertificates(std::vector<ByteDynArray>& certificates);
+	bool VerifyCSCAChain(PCCERT_CONTEXT certDS, const std::vector<ByteDynArray>& cscaCertificates);
+	
+	// Funzioni per verifica chiave DAPP contro certificato DS
+	bool ExtractPublicKeyFromCertificate(PCCERT_CONTEXT cert, ByteDynArray &modulus, ByteDynArray &exponent);
+	bool VerifyDappKeyAgainstDSCertificate(PCCERT_CONTEXT certDS, const ByteArray &dappModule, const ByteArray &dappExponent);
 
 	void increment(ByteArray &seq);
 	void ReadCIEType();
@@ -78,6 +82,7 @@ public:
 	ByteDynArray PAN;
 	ByteDynArray DappModule;
 	ByteDynArray DappPubKey;
+	bool DappKeyVerified;
 
 	void ReadPAN();
 	void ReadSOD(ByteDynArray &data);
@@ -110,10 +115,9 @@ public:
 	static bool Unenroll(const char *szPAN);
 	void IconaSbloccoPIN();
 	void IconaCertificatoScaduto(const char *seriale);
-
 	uint8_t GetSODDigestAlg(ByteArray &SOD);
-	void VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
-	void VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
+	bool VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
+	bool VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 
 	void(*Callback)(int progress, char *desc,void *data);
 	void* CallbackData;
@@ -123,7 +127,5 @@ public:
 
 	bool ActiveSM;
 	CIE_DF ActiveDF;
-
-	
 };
 

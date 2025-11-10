@@ -5,6 +5,7 @@
 
 #define MAX_LOG_SIZE			5000
 
+#define LOG_TYPE_NONE			0
 #define LOG_TYPE_ERROR			1
 #define LOG_TYPE_WARNING		2
 #define LOG_TYPE_MESSAGE		3
@@ -20,8 +21,6 @@
 #define LOG_ERR(params) g_log.logError params
 #define LOG_WAR(params) g_log.logWarning params
 #define LOG_DBG(params) g_log.logDebug params
-
-
 
 class UUCLogger
 {
@@ -40,6 +39,7 @@ public:
 private:
 	void log(const unsigned int nType, const char *szMsg, const unsigned int nID, const char *szModuleName);
 	void log(const unsigned int nType, const char* szMsg, const unsigned int nID, const char *szModuleName, va_list args);
+	void initializeLogFile();
 
 	char m_szLogFileName[MAX_PATH];
 	int m_nLogLevel;

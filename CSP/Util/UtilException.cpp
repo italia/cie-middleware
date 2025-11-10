@@ -18,6 +18,6 @@ logged_error::logged_error(const char *message) : std::runtime_error(message) {
 	}
 }
 
-scard_error::scard_error(StatusWord sw) : logged_error(stdPrintf("Errore smart card:%04x", sw)) { }
+scard_error::scard_error(StatusWord sw) : logged_error(stdPrintf("Errore smart card:%04x", sw)), sw(sw) { }
 
 windows_error::windows_error(long ris) : logged_error(stdPrintf("Errore windows:%s (%08x) ", WinErr(ris), ris)) {}

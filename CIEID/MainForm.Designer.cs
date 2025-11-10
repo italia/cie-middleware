@@ -373,12 +373,12 @@ namespace CIEID
             this.mainTabControl.Controls.Add(this.documentVerifyTab);
             this.mainTabControl.Controls.Add(this.tabSettings);
             this.mainTabControl.ItemSize = new System.Drawing.Size(0, 1);
-            this.mainTabControl.Location = new System.Drawing.Point(148, -11);
+            this.mainTabControl.Location = new System.Drawing.Point(197, -14);
             this.mainTabControl.Margin = new System.Windows.Forms.Padding(0);
             this.mainTabControl.Multiline = true;
             this.mainTabControl.Name = "mainTabControl";
             this.mainTabControl.SelectedIndex = 0;
-            this.mainTabControl.Size = new System.Drawing.Size(657, 546);
+            this.mainTabControl.Size = new System.Drawing.Size(876, 672);
             this.mainTabControl.TabIndex = 0;
             this.mainTabControl.SelectedIndexChanged += new System.EventHandler(this.mainTabControl_SelectedIndexChanged);
             // 
@@ -400,10 +400,10 @@ namespace CIEID
             this.CIEPairingTabPage.Controls.Add(this.CIEPairingDescriptionLabel);
             this.CIEPairingTabPage.Controls.Add(this.CIEPairingHeaderTextLabel);
             this.CIEPairingTabPage.Location = new System.Drawing.Point(4, 9);
-            this.CIEPairingTabPage.Margin = new System.Windows.Forms.Padding(2);
+            this.CIEPairingTabPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.CIEPairingTabPage.Name = "CIEPairingTabPage";
-            this.CIEPairingTabPage.Padding = new System.Windows.Forms.Padding(2);
-            this.CIEPairingTabPage.Size = new System.Drawing.Size(649, 533);
+            this.CIEPairingTabPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.CIEPairingTabPage.Size = new System.Drawing.Size(868, 659);
             this.CIEPairingTabPage.TabIndex = 0;
             this.CIEPairingTabPage.Text = "tabPage1";
             // 
@@ -412,10 +412,10 @@ namespace CIEID
             this.cancelButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.cancelButton.FlatAppearance.BorderSize = 0;
             this.cancelButton.ForeColor = System.Drawing.Color.White;
-            this.cancelButton.Location = new System.Drawing.Point(101, 484);
-            this.cancelButton.Margin = new System.Windows.Forms.Padding(2);
+            this.cancelButton.Location = new System.Drawing.Point(135, 596);
+            this.cancelButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(156, 30);
+            this.cancelButton.Size = new System.Drawing.Size(208, 37);
             this.cancelButton.TabIndex = 21;
             this.cancelButton.Text = "Annulla";
             this.cancelButton.UseVisualStyleBackColor = false;
@@ -426,10 +426,10 @@ namespace CIEID
             this.pairButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.pairButton.FlatAppearance.BorderSize = 0;
             this.pairButton.ForeColor = System.Drawing.Color.White;
-            this.pairButton.Location = new System.Drawing.Point(392, 484);
-            this.pairButton.Margin = new System.Windows.Forms.Padding(2);
+            this.pairButton.Location = new System.Drawing.Point(523, 596);
+            this.pairButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pairButton.Name = "pairButton";
-            this.pairButton.Size = new System.Drawing.Size(156, 30);
+            this.pairButton.Size = new System.Drawing.Size(208, 37);
             this.pairButton.TabIndex = 20;
             this.pairButton.Text = "Abbina";
             this.pairButton.UseVisualStyleBackColor = false;
@@ -439,10 +439,10 @@ namespace CIEID
             // 
             this.PINDigit_TextBox8.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PINDigit_TextBox8.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PINDigit_TextBox8.Location = new System.Drawing.Point(528, 300);
-            this.PINDigit_TextBox8.Margin = new System.Windows.Forms.Padding(2);
+            this.PINDigit_TextBox8.Location = new System.Drawing.Point(704, 369);
+            this.PINDigit_TextBox8.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PINDigit_TextBox8.Name = "PINDigit_TextBox8";
-            this.PINDigit_TextBox8.Size = new System.Drawing.Size(20, 23);
+            this.PINDigit_TextBox8.Size = new System.Drawing.Size(26, 26);
             this.PINDigit_TextBox8.TabIndex = 8;
             this.PINDigit_TextBox8.Tag = "8";
             this.PINDigit_TextBox8.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -453,10 +453,10 @@ namespace CIEID
             // 
             this.PINDigit_TextBox7.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PINDigit_TextBox7.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PINDigit_TextBox7.Location = new System.Drawing.Point(504, 300);
-            this.PINDigit_TextBox7.Margin = new System.Windows.Forms.Padding(2);
+            this.PINDigit_TextBox7.Location = new System.Drawing.Point(672, 369);
+            this.PINDigit_TextBox7.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PINDigit_TextBox7.Name = "PINDigit_TextBox7";
-            this.PINDigit_TextBox7.Size = new System.Drawing.Size(20, 23);
+            this.PINDigit_TextBox7.Size = new System.Drawing.Size(26, 26);
             this.PINDigit_TextBox7.TabIndex = 7;
             this.PINDigit_TextBox7.Tag = "7";
             this.PINDigit_TextBox7.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -467,10 +467,10 @@ namespace CIEID
             // 
             this.PINDigit_TextBox6.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PINDigit_TextBox6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PINDigit_TextBox6.Location = new System.Drawing.Point(480, 300);
-            this.PINDigit_TextBox6.Margin = new System.Windows.Forms.Padding(2);
+            this.PINDigit_TextBox6.Location = new System.Drawing.Point(640, 369);
+            this.PINDigit_TextBox6.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PINDigit_TextBox6.Name = "PINDigit_TextBox6";
-            this.PINDigit_TextBox6.Size = new System.Drawing.Size(20, 23);
+            this.PINDigit_TextBox6.Size = new System.Drawing.Size(26, 26);
             this.PINDigit_TextBox6.TabIndex = 6;
             this.PINDigit_TextBox6.Tag = "6";
             this.PINDigit_TextBox6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -481,10 +481,10 @@ namespace CIEID
             // 
             this.PINDigit_TextBox5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PINDigit_TextBox5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PINDigit_TextBox5.Location = new System.Drawing.Point(456, 300);
-            this.PINDigit_TextBox5.Margin = new System.Windows.Forms.Padding(2);
+            this.PINDigit_TextBox5.Location = new System.Drawing.Point(608, 369);
+            this.PINDigit_TextBox5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PINDigit_TextBox5.Name = "PINDigit_TextBox5";
-            this.PINDigit_TextBox5.Size = new System.Drawing.Size(20, 23);
+            this.PINDigit_TextBox5.Size = new System.Drawing.Size(26, 26);
             this.PINDigit_TextBox5.TabIndex = 5;
             this.PINDigit_TextBox5.Tag = "5";
             this.PINDigit_TextBox5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -495,10 +495,10 @@ namespace CIEID
             // 
             this.PINDigit_TextBox4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PINDigit_TextBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PINDigit_TextBox4.Location = new System.Drawing.Point(432, 300);
-            this.PINDigit_TextBox4.Margin = new System.Windows.Forms.Padding(2);
+            this.PINDigit_TextBox4.Location = new System.Drawing.Point(576, 369);
+            this.PINDigit_TextBox4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PINDigit_TextBox4.Name = "PINDigit_TextBox4";
-            this.PINDigit_TextBox4.Size = new System.Drawing.Size(20, 23);
+            this.PINDigit_TextBox4.Size = new System.Drawing.Size(26, 26);
             this.PINDigit_TextBox4.TabIndex = 4;
             this.PINDigit_TextBox4.Tag = "4";
             this.PINDigit_TextBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -509,10 +509,10 @@ namespace CIEID
             // 
             this.PINDigit_TextBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PINDigit_TextBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PINDigit_TextBox3.Location = new System.Drawing.Point(408, 300);
-            this.PINDigit_TextBox3.Margin = new System.Windows.Forms.Padding(2);
+            this.PINDigit_TextBox3.Location = new System.Drawing.Point(544, 369);
+            this.PINDigit_TextBox3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PINDigit_TextBox3.Name = "PINDigit_TextBox3";
-            this.PINDigit_TextBox3.Size = new System.Drawing.Size(20, 23);
+            this.PINDigit_TextBox3.Size = new System.Drawing.Size(26, 26);
             this.PINDigit_TextBox3.TabIndex = 3;
             this.PINDigit_TextBox3.Tag = "3";
             this.PINDigit_TextBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -524,10 +524,10 @@ namespace CIEID
             this.PINDigit_TextBox2.BackColor = System.Drawing.SystemColors.Window;
             this.PINDigit_TextBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PINDigit_TextBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PINDigit_TextBox2.Location = new System.Drawing.Point(384, 300);
-            this.PINDigit_TextBox2.Margin = new System.Windows.Forms.Padding(2);
+            this.PINDigit_TextBox2.Location = new System.Drawing.Point(512, 369);
+            this.PINDigit_TextBox2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PINDigit_TextBox2.Name = "PINDigit_TextBox2";
-            this.PINDigit_TextBox2.Size = new System.Drawing.Size(20, 23);
+            this.PINDigit_TextBox2.Size = new System.Drawing.Size(26, 26);
             this.PINDigit_TextBox2.TabIndex = 2;
             this.PINDigit_TextBox2.Tag = "2";
             this.PINDigit_TextBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -538,10 +538,10 @@ namespace CIEID
             // 
             this.PINDigit_TextBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PINDigit_TextBox1.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.PINDigit_TextBox1.Location = new System.Drawing.Point(360, 300);
-            this.PINDigit_TextBox1.Margin = new System.Windows.Forms.Padding(2);
+            this.PINDigit_TextBox1.Location = new System.Drawing.Point(480, 369);
+            this.PINDigit_TextBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PINDigit_TextBox1.Name = "PINDigit_TextBox1";
-            this.PINDigit_TextBox1.Size = new System.Drawing.Size(20, 23);
+            this.PINDigit_TextBox1.Size = new System.Drawing.Size(25, 26);
             this.PINDigit_TextBox1.TabIndex = 1;
             this.PINDigit_TextBox1.Tag = "1";
             this.PINDigit_TextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -551,20 +551,19 @@ namespace CIEID
             // insertPINLabel
             // 
             this.insertPINLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.insertPINLabel.Location = new System.Drawing.Point(374, 249);
-            this.insertPINLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.insertPINLabel.Location = new System.Drawing.Point(499, 306);
             this.insertPINLabel.Name = "insertPINLabel";
-            this.insertPINLabel.Size = new System.Drawing.Size(156, 20);
+            this.insertPINLabel.Size = new System.Drawing.Size(208, 25);
             this.insertPINLabel.TabIndex = 11;
             this.insertPINLabel.Text = "Inserisci il PIN";
             // 
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(89, 195);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox1.Location = new System.Drawing.Point(119, 240);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(207, 193);
+            this.pictureBox1.Size = new System.Drawing.Size(276, 238);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 10;
             this.pictureBox1.TabStop = false;
@@ -572,10 +571,9 @@ namespace CIEID
             // CIEPairingDescriptionLabel
             // 
             this.CIEPairingDescriptionLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.CIEPairingDescriptionLabel.Location = new System.Drawing.Point(172, 85);
-            this.CIEPairingDescriptionLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.CIEPairingDescriptionLabel.Location = new System.Drawing.Point(229, 105);
             this.CIEPairingDescriptionLabel.Name = "CIEPairingDescriptionLabel";
-            this.CIEPairingDescriptionLabel.Size = new System.Drawing.Size(394, 45);
+            this.CIEPairingDescriptionLabel.Size = new System.Drawing.Size(525, 55);
             this.CIEPairingDescriptionLabel.TabIndex = 9;
             this.CIEPairingDescriptionLabel.Text = "Dopo aver collegato e installato il lettore di smart card, posiziona la CIE sul l" +
     "ettore ed inserisci il PIN";
@@ -585,10 +583,9 @@ namespace CIEID
             // 
             this.CIEPairingHeaderTextLabel.AutoSize = true;
             this.CIEPairingHeaderTextLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.CIEPairingHeaderTextLabel.Location = new System.Drawing.Point(235, 49);
-            this.CIEPairingHeaderTextLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.CIEPairingHeaderTextLabel.Location = new System.Drawing.Point(313, 60);
             this.CIEPairingHeaderTextLabel.Name = "CIEPairingHeaderTextLabel";
-            this.CIEPairingHeaderTextLabel.Size = new System.Drawing.Size(264, 36);
+            this.CIEPairingHeaderTextLabel.Size = new System.Drawing.Size(324, 42);
             this.CIEPairingHeaderTextLabel.TabIndex = 8;
             this.CIEPairingHeaderTextLabel.Text = "Abbina la tua CIE";
             // 
@@ -604,9 +601,9 @@ namespace CIEID
             this.CIEPickerTabPage.Controls.Add(this.CIESuccessfullyPairedLabel);
             this.CIEPickerTabPage.Controls.Add(this.appNameCIEPickerHeaderTextLabel);
             this.CIEPickerTabPage.Location = new System.Drawing.Point(4, 9);
-            this.CIEPickerTabPage.Margin = new System.Windows.Forms.Padding(2);
+            this.CIEPickerTabPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.CIEPickerTabPage.Name = "CIEPickerTabPage";
-            this.CIEPickerTabPage.Size = new System.Drawing.Size(649, 533);
+            this.CIEPickerTabPage.Size = new System.Drawing.Size(868, 659);
             this.CIEPickerTabPage.TabIndex = 1;
             this.CIEPickerTabPage.Text = "tabPage2";
             // 
@@ -616,10 +613,10 @@ namespace CIEID
             this.signWithCIEWithoutPairingButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.signWithCIEWithoutPairingButton.FlatAppearance.BorderSize = 0;
             this.signWithCIEWithoutPairingButton.ForeColor = System.Drawing.Color.White;
-            this.signWithCIEWithoutPairingButton.Location = new System.Drawing.Point(338, 502);
-            this.signWithCIEWithoutPairingButton.Margin = new System.Windows.Forms.Padding(2);
+            this.signWithCIEWithoutPairingButton.Location = new System.Drawing.Point(451, 622);
+            this.signWithCIEWithoutPairingButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signWithCIEWithoutPairingButton.Name = "signWithCIEWithoutPairingButton";
-            this.signWithCIEWithoutPairingButton.Size = new System.Drawing.Size(200, 28);
+            this.signWithCIEWithoutPairingButton.Size = new System.Drawing.Size(267, 34);
             this.signWithCIEWithoutPairingButton.TabIndex = 23;
             this.signWithCIEWithoutPairingButton.Text = "Firma con CIE non associata";
             this.signWithCIEWithoutPairingButton.UseVisualStyleBackColor = false;
@@ -632,10 +629,10 @@ namespace CIEID
             this.selectSigningCIEButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.selectSigningCIEButton.FlatAppearance.BorderSize = 0;
             this.selectSigningCIEButton.ForeColor = System.Drawing.Color.White;
-            this.selectSigningCIEButton.Location = new System.Drawing.Point(122, 502);
-            this.selectSigningCIEButton.Margin = new System.Windows.Forms.Padding(2);
+            this.selectSigningCIEButton.Location = new System.Drawing.Point(163, 622);
+            this.selectSigningCIEButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.selectSigningCIEButton.Name = "selectSigningCIEButton";
-            this.selectSigningCIEButton.Size = new System.Drawing.Size(200, 28);
+            this.selectSigningCIEButton.Size = new System.Drawing.Size(267, 34);
             this.selectSigningCIEButton.TabIndex = 22;
             this.selectSigningCIEButton.Text = "Firma con la CIE selezionata";
             this.selectSigningCIEButton.UseVisualStyleBackColor = false;
@@ -656,12 +653,13 @@ namespace CIEID
             this.tableLayoutPanel1.Controls.Add(this.leftButton, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.dotsGroup, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanelCarousel, 1, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 101);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 124);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(643, 392);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 33F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(857, 486);
             this.tableLayoutPanel1.TabIndex = 21;
             // 
             // rightButton
@@ -670,9 +668,10 @@ namespace CIEID
             this.rightButton.FlatAppearance.BorderSize = 0;
             this.rightButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rightButton.Image = global::CIEID.Properties.Resources.forward_3x;
-            this.rightButton.Location = new System.Drawing.Point(599, 161);
+            this.rightButton.Location = new System.Drawing.Point(799, 200);
+            this.rightButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rightButton.Name = "rightButton";
-            this.rightButton.Size = new System.Drawing.Size(36, 43);
+            this.rightButton.Size = new System.Drawing.Size(48, 53);
             this.rightButton.TabIndex = 3;
             this.rightButton.UseVisualStyleBackColor = true;
             this.rightButton.Click += new System.EventHandler(this.RightButton_Click);
@@ -683,9 +682,10 @@ namespace CIEID
             this.leftButton.FlatAppearance.BorderSize = 0;
             this.leftButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.leftButton.Image = global::CIEID.Properties.Resources.back_3x;
-            this.leftButton.Location = new System.Drawing.Point(10, 161);
+            this.leftButton.Location = new System.Drawing.Point(13, 200);
+            this.leftButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.leftButton.Name = "leftButton";
-            this.leftButton.Size = new System.Drawing.Size(36, 43);
+            this.leftButton.Size = new System.Drawing.Size(48, 53);
             this.leftButton.TabIndex = 2;
             this.leftButton.UseVisualStyleBackColor = true;
             this.leftButton.Click += new System.EventHandler(this.LeftButton_Click);
@@ -694,7 +694,8 @@ namespace CIEID
             // 
             this.dotsGroup.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.dotsGroup.AutoSize = true;
-            this.dotsGroup.Location = new System.Drawing.Point(324, 378);
+            this.dotsGroup.Location = new System.Drawing.Point(431, 469);
+            this.dotsGroup.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dotsGroup.Name = "dotsGroup";
             this.dotsGroup.Size = new System.Drawing.Size(0, 0);
             this.dotsGroup.TabIndex = 5;
@@ -713,11 +714,12 @@ namespace CIEID
             this.tableLayoutPanelCarousel.Controls.Add(this.carouselItem0, 0, 0);
             this.tableLayoutPanelCarousel.Controls.Add(this.carouselItem1, 1, 0);
             this.tableLayoutPanelCarousel.Controls.Add(this.carouselItem2, 2, 0);
-            this.tableLayoutPanelCarousel.Location = new System.Drawing.Point(59, 3);
+            this.tableLayoutPanelCarousel.Location = new System.Drawing.Point(78, 4);
+            this.tableLayoutPanelCarousel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanelCarousel.Name = "tableLayoutPanelCarousel";
             this.tableLayoutPanelCarousel.RowCount = 1;
             this.tableLayoutPanelCarousel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelCarousel.Size = new System.Drawing.Size(530, 359);
+            this.tableLayoutPanelCarousel.Size = new System.Drawing.Size(707, 445);
             this.tableLayoutPanelCarousel.TabIndex = 4;
             // 
             // carouselItem0
@@ -729,18 +731,20 @@ namespace CIEID
             this.carouselItem0.Controls.Add(this.labelOwner0);
             this.carouselItem0.Controls.Add(this.labelOwnerValue0);
             this.carouselItem0.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.carouselItem0.Location = new System.Drawing.Point(4, 74);
+            this.carouselItem0.Location = new System.Drawing.Point(6, 92);
+            this.carouselItem0.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.carouselItem0.Name = "carouselItem0";
-            this.carouselItem0.Padding = new System.Windows.Forms.Padding(0, 12, 0, 12);
-            this.carouselItem0.Size = new System.Drawing.Size(142, 211);
+            this.carouselItem0.Padding = new System.Windows.Forms.Padding(0, 15, 0, 15);
+            this.carouselItem0.Size = new System.Drawing.Size(189, 260);
             this.carouselItem0.TabIndex = 0;
             // 
             // pictureBox2
             // 
             this.pictureBox2.Image = global::CIEID.Properties.Resources.cie;
-            this.pictureBox2.Location = new System.Drawing.Point(3, 15);
+            this.pictureBox2.Location = new System.Drawing.Point(4, 19);
+            this.pictureBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(134, 84);
+            this.pictureBox2.Size = new System.Drawing.Size(179, 103);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox2.TabIndex = 0;
             this.pictureBox2.TabStop = false;
@@ -750,11 +754,11 @@ namespace CIEID
             this.labelCardNumber0.AutoSize = true;
             this.labelCardNumber0.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
             this.labelCardNumber0.ForeColor = System.Drawing.Color.LightGray;
-            this.labelCardNumber0.Location = new System.Drawing.Point(3, 117);
-            this.labelCardNumber0.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
+            this.labelCardNumber0.Location = new System.Drawing.Point(4, 144);
+            this.labelCardNumber0.Margin = new System.Windows.Forms.Padding(4, 18, 4, 0);
             this.labelCardNumber0.Name = "labelCardNumber0";
-            this.labelCardNumber0.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labelCardNumber0.Size = new System.Drawing.Size(74, 12);
+            this.labelCardNumber0.Padding = new System.Windows.Forms.Padding(7, 0, 7, 0);
+            this.labelCardNumber0.Size = new System.Drawing.Size(99, 15);
             this.labelCardNumber0.TabIndex = 3;
             this.labelCardNumber0.Text = "Numero carta:";
             // 
@@ -762,10 +766,11 @@ namespace CIEID
             // 
             this.labelCardNumberValue0.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelCardNumberValue0.ForeColor = System.Drawing.Color.LightGray;
-            this.labelCardNumberValue0.Location = new System.Drawing.Point(3, 129);
+            this.labelCardNumberValue0.Location = new System.Drawing.Point(4, 159);
+            this.labelCardNumberValue0.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelCardNumberValue0.Name = "labelCardNumberValue0";
-            this.labelCardNumberValue0.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labelCardNumberValue0.Size = new System.Drawing.Size(118, 16);
+            this.labelCardNumberValue0.Padding = new System.Windows.Forms.Padding(7, 0, 7, 0);
+            this.labelCardNumberValue0.Size = new System.Drawing.Size(157, 20);
             this.labelCardNumberValue0.TabIndex = 1;
             this.labelCardNumberValue0.Text = "label6";
             // 
@@ -774,11 +779,11 @@ namespace CIEID
             this.labelOwner0.AutoSize = true;
             this.labelOwner0.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
             this.labelOwner0.ForeColor = System.Drawing.Color.LightGray;
-            this.labelOwner0.Location = new System.Drawing.Point(3, 150);
-            this.labelOwner0.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
+            this.labelOwner0.Location = new System.Drawing.Point(4, 185);
+            this.labelOwner0.Margin = new System.Windows.Forms.Padding(4, 6, 4, 0);
             this.labelOwner0.Name = "labelOwner0";
-            this.labelOwner0.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labelOwner0.Size = new System.Drawing.Size(65, 12);
+            this.labelOwner0.Padding = new System.Windows.Forms.Padding(7, 0, 7, 0);
+            this.labelOwner0.Size = new System.Drawing.Size(84, 15);
             this.labelOwner0.TabIndex = 2;
             this.labelOwner0.Text = "Intestatario:";
             // 
@@ -786,10 +791,11 @@ namespace CIEID
             // 
             this.labelOwnerValue0.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Bold);
             this.labelOwnerValue0.ForeColor = System.Drawing.Color.LightGray;
-            this.labelOwnerValue0.Location = new System.Drawing.Point(3, 162);
+            this.labelOwnerValue0.Location = new System.Drawing.Point(4, 200);
+            this.labelOwnerValue0.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelOwnerValue0.Name = "labelOwnerValue0";
-            this.labelOwnerValue0.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
-            this.labelOwnerValue0.Size = new System.Drawing.Size(148, 30);
+            this.labelOwnerValue0.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+            this.labelOwnerValue0.Size = new System.Drawing.Size(197, 37);
             this.labelOwnerValue0.TabIndex = 4;
             this.labelOwnerValue0.Text = "label27";
             // 
@@ -802,18 +808,20 @@ namespace CIEID
             this.carouselItem1.Controls.Add(this.label24);
             this.carouselItem1.Controls.Add(this.labelOwnerValue1);
             this.carouselItem1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.carouselItem1.Location = new System.Drawing.Point(156, 38);
+            this.carouselItem1.Location = new System.Drawing.Point(209, 49);
+            this.carouselItem1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.carouselItem1.Name = "carouselItem1";
-            this.carouselItem1.Padding = new System.Windows.Forms.Padding(0, 12, 0, 12);
-            this.carouselItem1.Size = new System.Drawing.Size(219, 282);
+            this.carouselItem1.Padding = new System.Windows.Forms.Padding(0, 15, 0, 15);
+            this.carouselItem1.Size = new System.Drawing.Size(292, 347);
             this.carouselItem1.TabIndex = 1;
             // 
             // pictureBox12
             // 
             this.pictureBox12.Image = global::CIEID.Properties.Resources.cie;
-            this.pictureBox12.Location = new System.Drawing.Point(3, 15);
+            this.pictureBox12.Location = new System.Drawing.Point(4, 19);
+            this.pictureBox12.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox12.Name = "pictureBox12";
-            this.pictureBox12.Size = new System.Drawing.Size(215, 136);
+            this.pictureBox12.Size = new System.Drawing.Size(287, 167);
             this.pictureBox12.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox12.TabIndex = 0;
             this.pictureBox12.TabStop = false;
@@ -822,21 +830,22 @@ namespace CIEID
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(3, 169);
-            this.label6.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
+            this.label6.Location = new System.Drawing.Point(4, 208);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 18, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.label6.Size = new System.Drawing.Size(105, 15);
+            this.label6.Padding = new System.Windows.Forms.Padding(13, 0, 13, 0);
+            this.label6.Size = new System.Drawing.Size(129, 18);
             this.label6.TabIndex = 3;
             this.label6.Text = "Numero carta:";
             // 
             // labelCardNumberValue1
             // 
             this.labelCardNumberValue1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelCardNumberValue1.Location = new System.Drawing.Point(3, 184);
+            this.labelCardNumberValue1.Location = new System.Drawing.Point(4, 226);
+            this.labelCardNumberValue1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelCardNumberValue1.Name = "labelCardNumberValue1";
-            this.labelCardNumberValue1.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.labelCardNumberValue1.Size = new System.Drawing.Size(228, 20);
+            this.labelCardNumberValue1.Padding = new System.Windows.Forms.Padding(13, 0, 13, 0);
+            this.labelCardNumberValue1.Size = new System.Drawing.Size(304, 25);
             this.labelCardNumberValue1.TabIndex = 1;
             this.labelCardNumberValue1.Text = "label6";
             // 
@@ -844,21 +853,22 @@ namespace CIEID
             // 
             this.label24.AutoSize = true;
             this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label24.Location = new System.Drawing.Point(3, 209);
-            this.label24.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
+            this.label24.Location = new System.Drawing.Point(4, 257);
+            this.label24.Margin = new System.Windows.Forms.Padding(4, 6, 4, 0);
             this.label24.Name = "label24";
-            this.label24.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.label24.Size = new System.Drawing.Size(90, 15);
+            this.label24.Padding = new System.Windows.Forms.Padding(13, 0, 13, 0);
+            this.label24.Size = new System.Drawing.Size(110, 18);
             this.label24.TabIndex = 2;
             this.label24.Text = "Intestatario:";
             // 
             // labelOwnerValue1
             // 
             this.labelOwnerValue1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelOwnerValue1.Location = new System.Drawing.Point(3, 224);
+            this.labelOwnerValue1.Location = new System.Drawing.Point(4, 275);
+            this.labelOwnerValue1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelOwnerValue1.Name = "labelOwnerValue1";
-            this.labelOwnerValue1.Padding = new System.Windows.Forms.Padding(10, 0, 5, 0);
-            this.labelOwnerValue1.Size = new System.Drawing.Size(244, 41);
+            this.labelOwnerValue1.Padding = new System.Windows.Forms.Padding(13, 0, 7, 0);
+            this.labelOwnerValue1.Size = new System.Drawing.Size(325, 50);
             this.labelOwnerValue1.TabIndex = 4;
             this.labelOwnerValue1.Text = "labelOwner";
             // 
@@ -871,18 +881,20 @@ namespace CIEID
             this.carouselItem2.Controls.Add(this.label30);
             this.carouselItem2.Controls.Add(this.labelOwnerValue2);
             this.carouselItem2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.carouselItem2.Location = new System.Drawing.Point(385, 74);
+            this.carouselItem2.Location = new System.Drawing.Point(514, 92);
+            this.carouselItem2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.carouselItem2.Name = "carouselItem2";
-            this.carouselItem2.Padding = new System.Windows.Forms.Padding(0, 12, 0, 12);
-            this.carouselItem2.Size = new System.Drawing.Size(140, 211);
+            this.carouselItem2.Padding = new System.Windows.Forms.Padding(0, 15, 0, 15);
+            this.carouselItem2.Size = new System.Drawing.Size(187, 260);
             this.carouselItem2.TabIndex = 5;
             // 
             // pictureBox14
             // 
             this.pictureBox14.Image = global::CIEID.Properties.Resources.cie;
-            this.pictureBox14.Location = new System.Drawing.Point(3, 15);
+            this.pictureBox14.Location = new System.Drawing.Point(4, 19);
+            this.pictureBox14.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox14.Name = "pictureBox14";
-            this.pictureBox14.Size = new System.Drawing.Size(134, 84);
+            this.pictureBox14.Size = new System.Drawing.Size(179, 103);
             this.pictureBox14.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox14.TabIndex = 0;
             this.pictureBox14.TabStop = false;
@@ -892,11 +904,11 @@ namespace CIEID
             this.label28.AutoSize = true;
             this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
             this.label28.ForeColor = System.Drawing.Color.LightGray;
-            this.label28.Location = new System.Drawing.Point(3, 117);
-            this.label28.Margin = new System.Windows.Forms.Padding(3, 15, 3, 0);
+            this.label28.Location = new System.Drawing.Point(4, 144);
+            this.label28.Margin = new System.Windows.Forms.Padding(4, 18, 4, 0);
             this.label28.Name = "label28";
-            this.label28.Padding = new System.Windows.Forms.Padding(4, 0, 5, 0);
-            this.label28.Size = new System.Drawing.Size(73, 12);
+            this.label28.Padding = new System.Windows.Forms.Padding(5, 0, 7, 0);
+            this.label28.Size = new System.Drawing.Size(97, 15);
             this.label28.TabIndex = 3;
             this.label28.Text = "Numero carta:";
             // 
@@ -904,10 +916,11 @@ namespace CIEID
             // 
             this.labelCardNumberValue2.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Bold);
             this.labelCardNumberValue2.ForeColor = System.Drawing.Color.LightGray;
-            this.labelCardNumberValue2.Location = new System.Drawing.Point(3, 129);
+            this.labelCardNumberValue2.Location = new System.Drawing.Point(4, 159);
+            this.labelCardNumberValue2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelCardNumberValue2.Name = "labelCardNumberValue2";
-            this.labelCardNumberValue2.Padding = new System.Windows.Forms.Padding(4, 0, 5, 0);
-            this.labelCardNumberValue2.Size = new System.Drawing.Size(118, 16);
+            this.labelCardNumberValue2.Padding = new System.Windows.Forms.Padding(5, 0, 7, 0);
+            this.labelCardNumberValue2.Size = new System.Drawing.Size(157, 20);
             this.labelCardNumberValue2.TabIndex = 1;
             this.labelCardNumberValue2.Text = "label6";
             // 
@@ -916,11 +929,11 @@ namespace CIEID
             this.label30.AutoSize = true;
             this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F);
             this.label30.ForeColor = System.Drawing.Color.LightGray;
-            this.label30.Location = new System.Drawing.Point(3, 150);
-            this.label30.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
+            this.label30.Location = new System.Drawing.Point(4, 185);
+            this.label30.Margin = new System.Windows.Forms.Padding(4, 6, 4, 0);
             this.label30.Name = "label30";
-            this.label30.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label30.Size = new System.Drawing.Size(65, 12);
+            this.label30.Padding = new System.Windows.Forms.Padding(7, 0, 7, 0);
+            this.label30.Size = new System.Drawing.Size(84, 15);
             this.label30.TabIndex = 2;
             this.label30.Text = "Intestatario:";
             // 
@@ -928,10 +941,11 @@ namespace CIEID
             // 
             this.labelOwnerValue2.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Bold);
             this.labelOwnerValue2.ForeColor = System.Drawing.Color.LightGray;
-            this.labelOwnerValue2.Location = new System.Drawing.Point(3, 162);
+            this.labelOwnerValue2.Location = new System.Drawing.Point(4, 200);
+            this.labelOwnerValue2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelOwnerValue2.Name = "labelOwnerValue2";
-            this.labelOwnerValue2.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
-            this.labelOwnerValue2.Size = new System.Drawing.Size(148, 30);
+            this.labelOwnerValue2.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+            this.labelOwnerValue2.Size = new System.Drawing.Size(197, 37);
             this.labelOwnerValue2.TabIndex = 4;
             this.labelOwnerValue2.Text = "label27";
             // 
@@ -941,10 +955,10 @@ namespace CIEID
             this.removeAllButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.removeAllButton.FlatAppearance.BorderSize = 0;
             this.removeAllButton.ForeColor = System.Drawing.Color.White;
-            this.removeAllButton.Location = new System.Drawing.Point(239, 502);
-            this.removeAllButton.Margin = new System.Windows.Forms.Padding(2);
+            this.removeAllButton.Location = new System.Drawing.Point(319, 622);
+            this.removeAllButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.removeAllButton.Name = "removeAllButton";
-            this.removeAllButton.Size = new System.Drawing.Size(157, 28);
+            this.removeAllButton.Size = new System.Drawing.Size(209, 34);
             this.removeAllButton.TabIndex = 19;
             this.removeAllButton.Text = "Rimuovi tutte";
             this.removeAllButton.UseVisualStyleBackColor = false;
@@ -956,10 +970,10 @@ namespace CIEID
             this.addButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.addButton.FlatAppearance.BorderSize = 0;
             this.addButton.ForeColor = System.Drawing.Color.White;
-            this.addButton.Location = new System.Drawing.Point(435, 502);
-            this.addButton.Margin = new System.Windows.Forms.Padding(2);
+            this.addButton.Location = new System.Drawing.Point(580, 622);
+            this.addButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.addButton.Name = "addButton";
-            this.addButton.Size = new System.Drawing.Size(157, 28);
+            this.addButton.Size = new System.Drawing.Size(209, 34);
             this.addButton.TabIndex = 18;
             this.addButton.Text = "Aggiungi Carta";
             this.addButton.UseVisualStyleBackColor = false;
@@ -971,10 +985,10 @@ namespace CIEID
             this.deleteCIEButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.deleteCIEButton.FlatAppearance.BorderSize = 0;
             this.deleteCIEButton.ForeColor = System.Drawing.Color.White;
-            this.deleteCIEButton.Location = new System.Drawing.Point(58, 502);
-            this.deleteCIEButton.Margin = new System.Windows.Forms.Padding(2);
+            this.deleteCIEButton.Location = new System.Drawing.Point(77, 622);
+            this.deleteCIEButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.deleteCIEButton.Name = "deleteCIEButton";
-            this.deleteCIEButton.Size = new System.Drawing.Size(157, 28);
+            this.deleteCIEButton.Size = new System.Drawing.Size(209, 34);
             this.deleteCIEButton.TabIndex = 17;
             this.deleteCIEButton.Text = "Rimuovi carta selezionata";
             this.deleteCIEButton.UseVisualStyleBackColor = false;
@@ -983,10 +997,9 @@ namespace CIEID
             // CIESuccessfullyPairedLabel
             // 
             this.CIESuccessfullyPairedLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.CIESuccessfullyPairedLabel.Location = new System.Drawing.Point(143, 53);
-            this.CIESuccessfullyPairedLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.CIESuccessfullyPairedLabel.Location = new System.Drawing.Point(191, 65);
             this.CIESuccessfullyPairedLabel.Name = "CIESuccessfullyPairedLabel";
-            this.CIESuccessfullyPairedLabel.Size = new System.Drawing.Size(380, 45);
+            this.CIESuccessfullyPairedLabel.Size = new System.Drawing.Size(507, 55);
             this.CIESuccessfullyPairedLabel.TabIndex = 11;
             this.CIESuccessfullyPairedLabel.Text = "Carta d\'Identità Elettronica abbinata correttamente";
             this.CIESuccessfullyPairedLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -994,10 +1007,9 @@ namespace CIEID
             // appNameCIEPickerHeaderTextLabel
             // 
             this.appNameCIEPickerHeaderTextLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.appNameCIEPickerHeaderTextLabel.Location = new System.Drawing.Point(71, 22);
-            this.appNameCIEPickerHeaderTextLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.appNameCIEPickerHeaderTextLabel.Location = new System.Drawing.Point(95, 27);
             this.appNameCIEPickerHeaderTextLabel.Name = "appNameCIEPickerHeaderTextLabel";
-            this.appNameCIEPickerHeaderTextLabel.Size = new System.Drawing.Size(513, 36);
+            this.appNameCIEPickerHeaderTextLabel.Size = new System.Drawing.Size(684, 44);
             this.appNameCIEPickerHeaderTextLabel.TabIndex = 10;
             this.appNameCIEPickerHeaderTextLabel.Text = "CIE ID";
             this.appNameCIEPickerHeaderTextLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1010,30 +1022,29 @@ namespace CIEID
             this.CIEPairingInProgressTabPage.Controls.Add(this.pictureBox3);
             this.CIEPairingInProgressTabPage.Controls.Add(this.labelPairingDescriptionPerformingOperation);
             this.CIEPairingInProgressTabPage.Controls.Add(this.labelPairYourCIE);
-            this.CIEPairingInProgressTabPage.Location = new System.Drawing.Point(4, 9);
-            this.CIEPairingInProgressTabPage.Margin = new System.Windows.Forms.Padding(2);
+            this.CIEPairingInProgressTabPage.Location = new System.Drawing.Point(4, 13);
+            this.CIEPairingInProgressTabPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.CIEPairingInProgressTabPage.Name = "CIEPairingInProgressTabPage";
-            this.CIEPairingInProgressTabPage.Size = new System.Drawing.Size(649, 533);
+            this.CIEPairingInProgressTabPage.Size = new System.Drawing.Size(868, 655);
             this.CIEPairingInProgressTabPage.TabIndex = 2;
             this.CIEPairingInProgressTabPage.Text = "tabPage3";
             // 
             // progressBar
             // 
             this.progressBar.ForeColor = System.Drawing.Color.Blue;
-            this.progressBar.Location = new System.Drawing.Point(329, 296);
-            this.progressBar.Margin = new System.Windows.Forms.Padding(2);
+            this.progressBar.Location = new System.Drawing.Point(439, 364);
+            this.progressBar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(228, 13);
+            this.progressBar.Size = new System.Drawing.Size(304, 16);
             this.progressBar.TabIndex = 16;
             this.progressBar.Value = 55;
             // 
             // labelProgressMessage
             // 
             this.labelProgressMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelProgressMessage.Location = new System.Drawing.Point(320, 267);
-            this.labelProgressMessage.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelProgressMessage.Location = new System.Drawing.Point(427, 329);
             this.labelProgressMessage.Name = "labelProgressMessage";
-            this.labelProgressMessage.Size = new System.Drawing.Size(237, 20);
+            this.labelProgressMessage.Size = new System.Drawing.Size(316, 25);
             this.labelProgressMessage.TabIndex = 15;
             this.labelProgressMessage.Text = "Abbinamento in corso";
             this.labelProgressMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1041,10 +1052,10 @@ namespace CIEID
             // pictureBox3
             // 
             this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
-            this.pictureBox3.Location = new System.Drawing.Point(64, 193);
-            this.pictureBox3.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox3.Location = new System.Drawing.Point(85, 238);
+            this.pictureBox3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(214, 214);
+            this.pictureBox3.Size = new System.Drawing.Size(285, 263);
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox3.TabIndex = 14;
             this.pictureBox3.TabStop = false;
@@ -1052,10 +1063,9 @@ namespace CIEID
             // labelPairingDescriptionPerformingOperation
             // 
             this.labelPairingDescriptionPerformingOperation.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPairingDescriptionPerformingOperation.Location = new System.Drawing.Point(121, 52);
-            this.labelPairingDescriptionPerformingOperation.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelPairingDescriptionPerformingOperation.Location = new System.Drawing.Point(161, 64);
             this.labelPairingDescriptionPerformingOperation.Name = "labelPairingDescriptionPerformingOperation";
-            this.labelPairingDescriptionPerformingOperation.Size = new System.Drawing.Size(446, 72);
+            this.labelPairingDescriptionPerformingOperation.Size = new System.Drawing.Size(595, 89);
             this.labelPairingDescriptionPerformingOperation.TabIndex = 13;
             this.labelPairingDescriptionPerformingOperation.Text = "Dopo aver collegato e installato il lettore di smart card, posiziona la CIE sul l" +
     "ettore ed inserisci il PIN";
@@ -1065,10 +1075,9 @@ namespace CIEID
             // 
             this.labelPairYourCIE.AutoSize = true;
             this.labelPairYourCIE.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPairYourCIE.Location = new System.Drawing.Point(220, 16);
-            this.labelPairYourCIE.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelPairYourCIE.Location = new System.Drawing.Point(293, 20);
             this.labelPairYourCIE.Name = "labelPairYourCIE";
-            this.labelPairYourCIE.Size = new System.Drawing.Size(264, 36);
+            this.labelPairYourCIE.Size = new System.Drawing.Size(324, 42);
             this.labelPairYourCIE.TabIndex = 12;
             this.labelPairYourCIE.Text = "Abbina la tua CIE";
             // 
@@ -1086,20 +1095,19 @@ namespace CIEID
             this.tabPageChangePIN.Controls.Add(this.pictureBox4);
             this.tabPageChangePIN.Controls.Add(this.labelChangePINDescription);
             this.tabPageChangePIN.Controls.Add(this.labelChangePINHeaderText);
-            this.tabPageChangePIN.Location = new System.Drawing.Point(4, 9);
-            this.tabPageChangePIN.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPageChangePIN.Location = new System.Drawing.Point(4, 13);
+            this.tabPageChangePIN.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPageChangePIN.Name = "tabPageChangePIN";
-            this.tabPageChangePIN.Size = new System.Drawing.Size(649, 533);
+            this.tabPageChangePIN.Size = new System.Drawing.Size(868, 655);
             this.tabPageChangePIN.TabIndex = 3;
             this.tabPageChangePIN.Text = "tabPage4";
             // 
             // labelPINPolicyDescription
             // 
             this.labelPINPolicyDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPINPolicyDescription.Location = new System.Drawing.Point(361, 345);
-            this.labelPINPolicyDescription.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelPINPolicyDescription.Location = new System.Drawing.Point(481, 425);
             this.labelPINPolicyDescription.Name = "labelPINPolicyDescription";
-            this.labelPINPolicyDescription.Size = new System.Drawing.Size(219, 98);
+            this.labelPINPolicyDescription.Size = new System.Drawing.Size(292, 121);
             this.labelPINPolicyDescription.TabIndex = 25;
             this.labelPINPolicyDescription.Text = resources.GetString("labelPINPolicyDescription.Text");
             // 
@@ -1108,10 +1116,10 @@ namespace CIEID
             this.changePINButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.changePINButton.FlatAppearance.BorderSize = 0;
             this.changePINButton.ForeColor = System.Drawing.Color.White;
-            this.changePINButton.Location = new System.Drawing.Point(249, 475);
-            this.changePINButton.Margin = new System.Windows.Forms.Padding(2);
+            this.changePINButton.Location = new System.Drawing.Point(332, 585);
+            this.changePINButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.changePINButton.Name = "changePINButton";
-            this.changePINButton.Size = new System.Drawing.Size(134, 31);
+            this.changePINButton.Size = new System.Drawing.Size(179, 38);
             this.changePINButton.TabIndex = 24;
             this.changePINButton.Text = "Cambia PIN";
             this.changePINButton.UseVisualStyleBackColor = false;
@@ -1119,9 +1127,10 @@ namespace CIEID
             // 
             // textBoxNewPIN2
             // 
-            this.textBoxNewPIN2.Location = new System.Drawing.Point(365, 301);
+            this.textBoxNewPIN2.Location = new System.Drawing.Point(487, 370);
+            this.textBoxNewPIN2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBoxNewPIN2.Name = "textBoxNewPIN2";
-            this.textBoxNewPIN2.Size = new System.Drawing.Size(217, 20);
+            this.textBoxNewPIN2.Size = new System.Drawing.Size(288, 22);
             this.textBoxNewPIN2.TabIndex = 23;
             this.textBoxNewPIN2.UseSystemPasswordChar = true;
             this.textBoxNewPIN2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PINTextBox_KeyPress);
@@ -1130,19 +1139,18 @@ namespace CIEID
             // 
             this.labelRepeatNewPIN.AutoSize = true;
             this.labelRepeatNewPIN.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelRepeatNewPIN.Location = new System.Drawing.Point(362, 278);
-            this.labelRepeatNewPIN.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelRepeatNewPIN.Location = new System.Drawing.Point(483, 342);
             this.labelRepeatNewPIN.Name = "labelRepeatNewPIN";
-            this.labelRepeatNewPIN.Size = new System.Drawing.Size(123, 17);
+            this.labelRepeatNewPIN.Size = new System.Drawing.Size(146, 20);
             this.labelRepeatNewPIN.TabIndex = 22;
             this.labelRepeatNewPIN.Text = "Ripeti il nuovo PIN";
             // 
             // textBoxNewPIN
             // 
-            this.textBoxNewPIN.Location = new System.Drawing.Point(365, 249);
-            this.textBoxNewPIN.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxNewPIN.Location = new System.Drawing.Point(487, 306);
+            this.textBoxNewPIN.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxNewPIN.Name = "textBoxNewPIN";
-            this.textBoxNewPIN.Size = new System.Drawing.Size(217, 20);
+            this.textBoxNewPIN.Size = new System.Drawing.Size(288, 22);
             this.textBoxNewPIN.TabIndex = 21;
             this.textBoxNewPIN.UseSystemPasswordChar = true;
             this.textBoxNewPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PINTextBox_KeyPress);
@@ -1151,19 +1159,18 @@ namespace CIEID
             // 
             this.labelTypeNewPIN.AutoSize = true;
             this.labelTypeNewPIN.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTypeNewPIN.Location = new System.Drawing.Point(362, 225);
-            this.labelTypeNewPIN.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelTypeNewPIN.Location = new System.Drawing.Point(483, 277);
             this.labelTypeNewPIN.Name = "labelTypeNewPIN";
-            this.labelTypeNewPIN.Size = new System.Drawing.Size(138, 17);
+            this.labelTypeNewPIN.Size = new System.Drawing.Size(166, 20);
             this.labelTypeNewPIN.TabIndex = 20;
             this.labelTypeNewPIN.Text = "Inserisci il nuovo PIN";
             // 
             // textBoxPIN
             // 
-            this.textBoxPIN.Location = new System.Drawing.Point(364, 198);
-            this.textBoxPIN.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxPIN.Location = new System.Drawing.Point(485, 244);
+            this.textBoxPIN.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxPIN.Name = "textBoxPIN";
-            this.textBoxPIN.Size = new System.Drawing.Size(217, 20);
+            this.textBoxPIN.Size = new System.Drawing.Size(288, 22);
             this.textBoxPIN.TabIndex = 19;
             this.textBoxPIN.UseSystemPasswordChar = true;
             this.textBoxPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PINTextBox_KeyPress);
@@ -1172,20 +1179,19 @@ namespace CIEID
             // 
             this.labelTypeOldPIN.AutoSize = true;
             this.labelTypeOldPIN.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTypeOldPIN.Location = new System.Drawing.Point(362, 172);
-            this.labelTypeOldPIN.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelTypeOldPIN.Location = new System.Drawing.Point(483, 212);
             this.labelTypeOldPIN.Name = "labelTypeOldPIN";
-            this.labelTypeOldPIN.Size = new System.Drawing.Size(147, 17);
+            this.labelTypeOldPIN.Size = new System.Drawing.Size(179, 20);
             this.labelTypeOldPIN.TabIndex = 18;
             this.labelTypeOldPIN.Text = "Inserisci il vecchio PIN";
             // 
             // pictureBox4
             // 
             this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
-            this.pictureBox4.Location = new System.Drawing.Point(64, 172);
-            this.pictureBox4.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox4.Location = new System.Drawing.Point(85, 212);
+            this.pictureBox4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox4.Name = "pictureBox4";
-            this.pictureBox4.Size = new System.Drawing.Size(214, 205);
+            this.pictureBox4.Size = new System.Drawing.Size(285, 252);
             this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox4.TabIndex = 17;
             this.pictureBox4.TabStop = false;
@@ -1193,10 +1199,9 @@ namespace CIEID
             // labelChangePINDescription
             // 
             this.labelChangePINDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelChangePINDescription.Location = new System.Drawing.Point(186, 66);
-            this.labelChangePINDescription.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelChangePINDescription.Location = new System.Drawing.Point(248, 81);
             this.labelChangePINDescription.Name = "labelChangePINDescription";
-            this.labelChangePINDescription.Size = new System.Drawing.Size(289, 45);
+            this.labelChangePINDescription.Size = new System.Drawing.Size(385, 55);
             this.labelChangePINDescription.TabIndex = 16;
             this.labelChangePINDescription.Text = "Il PIN della tua CIE è un dato sensibile,  trattalo con cautela";
             this.labelChangePINDescription.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1205,10 +1210,9 @@ namespace CIEID
             // 
             this.labelChangePINHeaderText.AutoSize = true;
             this.labelChangePINHeaderText.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelChangePINHeaderText.Location = new System.Drawing.Point(243, 24);
-            this.labelChangePINHeaderText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelChangePINHeaderText.Location = new System.Drawing.Point(324, 30);
             this.labelChangePINHeaderText.Name = "labelChangePINHeaderText";
-            this.labelChangePINHeaderText.Size = new System.Drawing.Size(183, 36);
+            this.labelChangePINHeaderText.Size = new System.Drawing.Size(227, 42);
             this.labelChangePINHeaderText.TabIndex = 15;
             this.labelChangePINHeaderText.Text = "Cambia PIN";
             // 
@@ -1221,29 +1225,28 @@ namespace CIEID
             this.tabPageChangePINInProgress.Controls.Add(this.labelInfoBoxAboutCIEPINSafety);
             this.tabPageChangePINInProgress.Controls.Add(this.labelChangePINPerformingOperationHeaderText);
             this.tabPageChangePINInProgress.Location = new System.Drawing.Point(4, 9);
-            this.tabPageChangePINInProgress.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPageChangePINInProgress.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPageChangePINInProgress.Name = "tabPageChangePINInProgress";
-            this.tabPageChangePINInProgress.Size = new System.Drawing.Size(649, 533);
+            this.tabPageChangePINInProgress.Size = new System.Drawing.Size(868, 659);
             this.tabPageChangePINInProgress.TabIndex = 4;
             this.tabPageChangePINInProgress.Text = "tabPage5";
             // 
             // progressBarChangePIN
             // 
             this.progressBarChangePIN.ForeColor = System.Drawing.Color.Blue;
-            this.progressBarChangePIN.Location = new System.Drawing.Point(329, 292);
-            this.progressBarChangePIN.Margin = new System.Windows.Forms.Padding(2);
+            this.progressBarChangePIN.Location = new System.Drawing.Point(439, 359);
+            this.progressBarChangePIN.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.progressBarChangePIN.Name = "progressBarChangePIN";
-            this.progressBarChangePIN.Size = new System.Drawing.Size(228, 13);
+            this.progressBarChangePIN.Size = new System.Drawing.Size(304, 16);
             this.progressBarChangePIN.TabIndex = 22;
             this.progressBarChangePIN.Value = 55;
             // 
             // progressLabelChangePIN
             // 
             this.progressLabelChangePIN.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.progressLabelChangePIN.Location = new System.Drawing.Point(300, 265);
-            this.progressLabelChangePIN.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.progressLabelChangePIN.Location = new System.Drawing.Point(400, 326);
             this.progressLabelChangePIN.Name = "progressLabelChangePIN";
-            this.progressLabelChangePIN.Size = new System.Drawing.Size(257, 20);
+            this.progressLabelChangePIN.Size = new System.Drawing.Size(343, 25);
             this.progressLabelChangePIN.TabIndex = 21;
             this.progressLabelChangePIN.Text = "Abbinamento in corso";
             this.progressLabelChangePIN.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1251,10 +1254,10 @@ namespace CIEID
             // pictureBox5
             // 
             this.pictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
-            this.pictureBox5.Location = new System.Drawing.Point(64, 192);
-            this.pictureBox5.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox5.Location = new System.Drawing.Point(85, 236);
+            this.pictureBox5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox5.Name = "pictureBox5";
-            this.pictureBox5.Size = new System.Drawing.Size(214, 214);
+            this.pictureBox5.Size = new System.Drawing.Size(285, 263);
             this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox5.TabIndex = 20;
             this.pictureBox5.TabStop = false;
@@ -1262,10 +1265,9 @@ namespace CIEID
             // labelInfoBoxAboutCIEPINSafety
             // 
             this.labelInfoBoxAboutCIEPINSafety.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelInfoBoxAboutCIEPINSafety.Location = new System.Drawing.Point(209, 60);
-            this.labelInfoBoxAboutCIEPINSafety.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelInfoBoxAboutCIEPINSafety.Location = new System.Drawing.Point(279, 74);
             this.labelInfoBoxAboutCIEPINSafety.Name = "labelInfoBoxAboutCIEPINSafety";
-            this.labelInfoBoxAboutCIEPINSafety.Size = new System.Drawing.Size(244, 45);
+            this.labelInfoBoxAboutCIEPINSafety.Size = new System.Drawing.Size(325, 55);
             this.labelInfoBoxAboutCIEPINSafety.TabIndex = 18;
             this.labelInfoBoxAboutCIEPINSafety.Text = "Il PIN della tua CIE è un dato sensibile,  trattalo con cautela";
             this.labelInfoBoxAboutCIEPINSafety.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1274,10 +1276,9 @@ namespace CIEID
             // 
             this.labelChangePINPerformingOperationHeaderText.AutoSize = true;
             this.labelChangePINPerformingOperationHeaderText.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelChangePINPerformingOperationHeaderText.Location = new System.Drawing.Point(235, 16);
-            this.labelChangePINPerformingOperationHeaderText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelChangePINPerformingOperationHeaderText.Location = new System.Drawing.Point(313, 20);
             this.labelChangePINPerformingOperationHeaderText.Name = "labelChangePINPerformingOperationHeaderText";
-            this.labelChangePINPerformingOperationHeaderText.Size = new System.Drawing.Size(183, 36);
+            this.labelChangePINPerformingOperationHeaderText.Size = new System.Drawing.Size(227, 42);
             this.labelChangePINPerformingOperationHeaderText.TabIndex = 17;
             this.labelChangePINPerformingOperationHeaderText.Text = "Cambia PIN";
             // 
@@ -1295,10 +1296,10 @@ namespace CIEID
             this.tabPageUnlockPIN.Controls.Add(this.pictureBox6);
             this.tabPageUnlockPIN.Controls.Add(this.labelUnlockPINDescription);
             this.tabPageUnlockPIN.Controls.Add(this.labelUnlockPINHeaderText);
-            this.tabPageUnlockPIN.Location = new System.Drawing.Point(4, 9);
-            this.tabPageUnlockPIN.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPageUnlockPIN.Location = new System.Drawing.Point(4, 13);
+            this.tabPageUnlockPIN.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPageUnlockPIN.Name = "tabPageUnlockPIN";
-            this.tabPageUnlockPIN.Size = new System.Drawing.Size(649, 533);
+            this.tabPageUnlockPIN.Size = new System.Drawing.Size(868, 655);
             this.tabPageUnlockPIN.TabIndex = 5;
             this.tabPageUnlockPIN.Text = "tabPage6";
             this.tabPageUnlockPIN.Click += new System.EventHandler(this.TabPageUnlockPIN_Click);
@@ -1306,10 +1307,9 @@ namespace CIEID
             // labelPINPolicyInPINUnlock
             // 
             this.labelPINPolicyInPINUnlock.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPINPolicyInPINUnlock.Location = new System.Drawing.Point(361, 345);
-            this.labelPINPolicyInPINUnlock.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelPINPolicyInPINUnlock.Location = new System.Drawing.Point(481, 425);
             this.labelPINPolicyInPINUnlock.Name = "labelPINPolicyInPINUnlock";
-            this.labelPINPolicyInPINUnlock.Size = new System.Drawing.Size(219, 98);
+            this.labelPINPolicyInPINUnlock.Size = new System.Drawing.Size(292, 121);
             this.labelPINPolicyInPINUnlock.TabIndex = 36;
             this.labelPINPolicyInPINUnlock.Text = resources.GetString("labelPINPolicyInPINUnlock.Text");
             // 
@@ -1318,10 +1318,10 @@ namespace CIEID
             this.unlockPINButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.unlockPINButton.FlatAppearance.BorderSize = 0;
             this.unlockPINButton.ForeColor = System.Drawing.Color.White;
-            this.unlockPINButton.Location = new System.Drawing.Point(249, 475);
-            this.unlockPINButton.Margin = new System.Windows.Forms.Padding(2);
+            this.unlockPINButton.Location = new System.Drawing.Point(332, 585);
+            this.unlockPINButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.unlockPINButton.Name = "unlockPINButton";
-            this.unlockPINButton.Size = new System.Drawing.Size(134, 31);
+            this.unlockPINButton.Size = new System.Drawing.Size(179, 38);
             this.unlockPINButton.TabIndex = 35;
             this.unlockPINButton.Text = "Sblocca carta";
             this.unlockPINButton.UseVisualStyleBackColor = false;
@@ -1329,10 +1329,10 @@ namespace CIEID
             // 
             // textBoxUnlockPIN2
             // 
-            this.textBoxUnlockPIN2.Location = new System.Drawing.Point(365, 301);
-            this.textBoxUnlockPIN2.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxUnlockPIN2.Location = new System.Drawing.Point(487, 370);
+            this.textBoxUnlockPIN2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxUnlockPIN2.Name = "textBoxUnlockPIN2";
-            this.textBoxUnlockPIN2.Size = new System.Drawing.Size(217, 20);
+            this.textBoxUnlockPIN2.Size = new System.Drawing.Size(288, 22);
             this.textBoxUnlockPIN2.TabIndex = 34;
             this.textBoxUnlockPIN2.UseSystemPasswordChar = true;
             this.textBoxUnlockPIN2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PUKTextBox_KeyPress);
@@ -1341,19 +1341,18 @@ namespace CIEID
             // 
             this.labelRepeatNewPINUnlockPIN.AutoSize = true;
             this.labelRepeatNewPINUnlockPIN.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelRepeatNewPINUnlockPIN.Location = new System.Drawing.Point(362, 278);
-            this.labelRepeatNewPINUnlockPIN.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelRepeatNewPINUnlockPIN.Location = new System.Drawing.Point(483, 342);
             this.labelRepeatNewPINUnlockPIN.Name = "labelRepeatNewPINUnlockPIN";
-            this.labelRepeatNewPINUnlockPIN.Size = new System.Drawing.Size(123, 17);
+            this.labelRepeatNewPINUnlockPIN.Size = new System.Drawing.Size(146, 20);
             this.labelRepeatNewPINUnlockPIN.TabIndex = 33;
             this.labelRepeatNewPINUnlockPIN.Text = "Ripeti il nuovo PIN";
             // 
             // textBoxUnlockPIN
             // 
-            this.textBoxUnlockPIN.Location = new System.Drawing.Point(365, 249);
-            this.textBoxUnlockPIN.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxUnlockPIN.Location = new System.Drawing.Point(487, 306);
+            this.textBoxUnlockPIN.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxUnlockPIN.Name = "textBoxUnlockPIN";
-            this.textBoxUnlockPIN.Size = new System.Drawing.Size(217, 20);
+            this.textBoxUnlockPIN.Size = new System.Drawing.Size(288, 22);
             this.textBoxUnlockPIN.TabIndex = 32;
             this.textBoxUnlockPIN.UseSystemPasswordChar = true;
             this.textBoxUnlockPIN.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PUKTextBox_KeyPress);
@@ -1362,19 +1361,18 @@ namespace CIEID
             // 
             this.labelTypeNewPINUnlockPIN.AutoSize = true;
             this.labelTypeNewPINUnlockPIN.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTypeNewPINUnlockPIN.Location = new System.Drawing.Point(362, 225);
-            this.labelTypeNewPINUnlockPIN.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelTypeNewPINUnlockPIN.Location = new System.Drawing.Point(483, 277);
             this.labelTypeNewPINUnlockPIN.Name = "labelTypeNewPINUnlockPIN";
-            this.labelTypeNewPINUnlockPIN.Size = new System.Drawing.Size(138, 17);
+            this.labelTypeNewPINUnlockPIN.Size = new System.Drawing.Size(166, 20);
             this.labelTypeNewPINUnlockPIN.TabIndex = 31;
             this.labelTypeNewPINUnlockPIN.Text = "Inserisci il nuovo PIN";
             // 
             // textBoxPUK
             // 
-            this.textBoxPUK.Location = new System.Drawing.Point(364, 198);
-            this.textBoxPUK.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxPUK.Location = new System.Drawing.Point(485, 244);
+            this.textBoxPUK.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxPUK.Name = "textBoxPUK";
-            this.textBoxPUK.Size = new System.Drawing.Size(217, 20);
+            this.textBoxPUK.Size = new System.Drawing.Size(288, 22);
             this.textBoxPUK.TabIndex = 30;
             this.textBoxPUK.UseSystemPasswordChar = true;
             this.textBoxPUK.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PUKTextBox_KeyPress);
@@ -1383,20 +1381,19 @@ namespace CIEID
             // 
             this.labelTypePUK.AutoSize = true;
             this.labelTypePUK.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTypePUK.Location = new System.Drawing.Point(362, 172);
-            this.labelTypePUK.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelTypePUK.Location = new System.Drawing.Point(483, 212);
             this.labelTypePUK.Name = "labelTypePUK";
-            this.labelTypePUK.Size = new System.Drawing.Size(101, 17);
+            this.labelTypePUK.Size = new System.Drawing.Size(124, 20);
             this.labelTypePUK.TabIndex = 29;
             this.labelTypePUK.Text = "Inserisci il PUK";
             // 
             // pictureBox6
             // 
             this.pictureBox6.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox6.Image")));
-            this.pictureBox6.Location = new System.Drawing.Point(64, 172);
-            this.pictureBox6.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox6.Location = new System.Drawing.Point(85, 212);
+            this.pictureBox6.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox6.Name = "pictureBox6";
-            this.pictureBox6.Size = new System.Drawing.Size(214, 205);
+            this.pictureBox6.Size = new System.Drawing.Size(285, 252);
             this.pictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox6.TabIndex = 28;
             this.pictureBox6.TabStop = false;
@@ -1404,10 +1401,9 @@ namespace CIEID
             // labelUnlockPINDescription
             // 
             this.labelUnlockPINDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUnlockPINDescription.Location = new System.Drawing.Point(186, 60);
-            this.labelUnlockPINDescription.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelUnlockPINDescription.Location = new System.Drawing.Point(248, 74);
             this.labelUnlockPINDescription.Name = "labelUnlockPINDescription";
-            this.labelUnlockPINDescription.Size = new System.Drawing.Size(266, 45);
+            this.labelUnlockPINDescription.Size = new System.Drawing.Size(355, 55);
             this.labelUnlockPINDescription.TabIndex = 27;
             this.labelUnlockPINDescription.Text = "Utilizza il codice PUK ricevuto con la CIE";
             this.labelUnlockPINDescription.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1416,10 +1412,9 @@ namespace CIEID
             // 
             this.labelUnlockPINHeaderText.AutoSize = true;
             this.labelUnlockPINHeaderText.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUnlockPINHeaderText.Location = new System.Drawing.Point(212, 24);
-            this.labelUnlockPINHeaderText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelUnlockPINHeaderText.Location = new System.Drawing.Point(283, 30);
             this.labelUnlockPINHeaderText.Name = "labelUnlockPINHeaderText";
-            this.labelUnlockPINHeaderText.Size = new System.Drawing.Size(215, 36);
+            this.labelUnlockPINHeaderText.Size = new System.Drawing.Size(266, 42);
             this.labelUnlockPINHeaderText.TabIndex = 26;
             this.labelUnlockPINHeaderText.Text = "Sblocco Carta";
             // 
@@ -1432,29 +1427,28 @@ namespace CIEID
             this.tabPageUnlockPINInProgress.Controls.Add(this.labelUnlockPINDescriptionPerformingOperation);
             this.tabPageUnlockPINInProgress.Controls.Add(this.labelUnlockPINHeaderTextPerformingOperation);
             this.tabPageUnlockPINInProgress.Location = new System.Drawing.Point(4, 9);
-            this.tabPageUnlockPINInProgress.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPageUnlockPINInProgress.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPageUnlockPINInProgress.Name = "tabPageUnlockPINInProgress";
-            this.tabPageUnlockPINInProgress.Size = new System.Drawing.Size(649, 533);
+            this.tabPageUnlockPINInProgress.Size = new System.Drawing.Size(868, 659);
             this.tabPageUnlockPINInProgress.TabIndex = 6;
             this.tabPageUnlockPINInProgress.Text = "tabPage7";
             // 
             // progressBarUnlockPIN
             // 
             this.progressBarUnlockPIN.ForeColor = System.Drawing.Color.Blue;
-            this.progressBarUnlockPIN.Location = new System.Drawing.Point(329, 292);
-            this.progressBarUnlockPIN.Margin = new System.Windows.Forms.Padding(2);
+            this.progressBarUnlockPIN.Location = new System.Drawing.Point(439, 359);
+            this.progressBarUnlockPIN.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.progressBarUnlockPIN.Name = "progressBarUnlockPIN";
-            this.progressBarUnlockPIN.Size = new System.Drawing.Size(228, 13);
+            this.progressBarUnlockPIN.Size = new System.Drawing.Size(304, 16);
             this.progressBarUnlockPIN.TabIndex = 27;
             this.progressBarUnlockPIN.Value = 55;
             // 
             // progressLabelUnlockPIN
             // 
             this.progressLabelUnlockPIN.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.progressLabelUnlockPIN.Location = new System.Drawing.Point(321, 265);
-            this.progressLabelUnlockPIN.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.progressLabelUnlockPIN.Location = new System.Drawing.Point(428, 326);
             this.progressLabelUnlockPIN.Name = "progressLabelUnlockPIN";
-            this.progressLabelUnlockPIN.Size = new System.Drawing.Size(236, 20);
+            this.progressLabelUnlockPIN.Size = new System.Drawing.Size(315, 25);
             this.progressLabelUnlockPIN.TabIndex = 26;
             this.progressLabelUnlockPIN.Text = "Abbinamento in corso";
             this.progressLabelUnlockPIN.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1462,10 +1456,10 @@ namespace CIEID
             // pictureBox7
             // 
             this.pictureBox7.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox7.Image")));
-            this.pictureBox7.Location = new System.Drawing.Point(63, 180);
-            this.pictureBox7.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox7.Location = new System.Drawing.Point(84, 222);
+            this.pictureBox7.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox7.Name = "pictureBox7";
-            this.pictureBox7.Size = new System.Drawing.Size(214, 205);
+            this.pictureBox7.Size = new System.Drawing.Size(285, 252);
             this.pictureBox7.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox7.TabIndex = 25;
             this.pictureBox7.TabStop = false;
@@ -1473,10 +1467,9 @@ namespace CIEID
             // labelUnlockPINDescriptionPerformingOperation
             // 
             this.labelUnlockPINDescriptionPerformingOperation.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUnlockPINDescriptionPerformingOperation.Location = new System.Drawing.Point(186, 66);
-            this.labelUnlockPINDescriptionPerformingOperation.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelUnlockPINDescriptionPerformingOperation.Location = new System.Drawing.Point(248, 81);
             this.labelUnlockPINDescriptionPerformingOperation.Name = "labelUnlockPINDescriptionPerformingOperation";
-            this.labelUnlockPINDescriptionPerformingOperation.Size = new System.Drawing.Size(257, 44);
+            this.labelUnlockPINDescriptionPerformingOperation.Size = new System.Drawing.Size(343, 54);
             this.labelUnlockPINDescriptionPerformingOperation.TabIndex = 24;
             this.labelUnlockPINDescriptionPerformingOperation.Text = "Utilizza il codice PUK ricevuto con la CIE";
             this.labelUnlockPINDescriptionPerformingOperation.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1485,10 +1478,9 @@ namespace CIEID
             // 
             this.labelUnlockPINHeaderTextPerformingOperation.AutoSize = true;
             this.labelUnlockPINHeaderTextPerformingOperation.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUnlockPINHeaderTextPerformingOperation.Location = new System.Drawing.Point(217, 22);
-            this.labelUnlockPINHeaderTextPerformingOperation.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelUnlockPINHeaderTextPerformingOperation.Location = new System.Drawing.Point(289, 27);
             this.labelUnlockPINHeaderTextPerformingOperation.Name = "labelUnlockPINHeaderTextPerformingOperation";
-            this.labelUnlockPINHeaderTextPerformingOperation.Size = new System.Drawing.Size(209, 36);
+            this.labelUnlockPINHeaderTextPerformingOperation.Size = new System.Drawing.Size(258, 42);
             this.labelUnlockPINHeaderTextPerformingOperation.TabIndex = 23;
             this.labelUnlockPINHeaderTextPerformingOperation.Text = "Sblocco carta";
             // 
@@ -1496,10 +1488,10 @@ namespace CIEID
             // 
             this.tabPageTutorialWebBrowser.BackColor = System.Drawing.Color.White;
             this.tabPageTutorialWebBrowser.Controls.Add(this.webBrowserTutorial);
-            this.tabPageTutorialWebBrowser.Location = new System.Drawing.Point(4, 9);
-            this.tabPageTutorialWebBrowser.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPageTutorialWebBrowser.Location = new System.Drawing.Point(4, 13);
+            this.tabPageTutorialWebBrowser.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPageTutorialWebBrowser.Name = "tabPageTutorialWebBrowser";
-            this.tabPageTutorialWebBrowser.Size = new System.Drawing.Size(649, 533);
+            this.tabPageTutorialWebBrowser.Size = new System.Drawing.Size(868, 655);
             this.tabPageTutorialWebBrowser.TabIndex = 7;
             this.tabPageTutorialWebBrowser.Text = "tabPage8";
             // 
@@ -1507,10 +1499,10 @@ namespace CIEID
             // 
             this.webBrowserTutorial.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowserTutorial.Location = new System.Drawing.Point(0, 0);
-            this.webBrowserTutorial.Margin = new System.Windows.Forms.Padding(2);
-            this.webBrowserTutorial.MinimumSize = new System.Drawing.Size(15, 16);
+            this.webBrowserTutorial.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.webBrowserTutorial.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowserTutorial.Name = "webBrowserTutorial";
-            this.webBrowserTutorial.Size = new System.Drawing.Size(649, 533);
+            this.webBrowserTutorial.Size = new System.Drawing.Size(868, 655);
             this.webBrowserTutorial.TabIndex = 0;
             // 
             // tabPageHelpWebBrowser
@@ -1520,19 +1512,19 @@ namespace CIEID
             this.tabPageHelpWebBrowser.Controls.Add(this.pictureBox13);
             this.tabPageHelpWebBrowser.Controls.Add(this.webBrowserHelp);
             this.tabPageHelpWebBrowser.Location = new System.Drawing.Point(4, 9);
-            this.tabPageHelpWebBrowser.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPageHelpWebBrowser.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPageHelpWebBrowser.Name = "tabPageHelpWebBrowser";
-            this.tabPageHelpWebBrowser.Size = new System.Drawing.Size(649, 533);
+            this.tabPageHelpWebBrowser.Size = new System.Drawing.Size(868, 659);
             this.tabPageHelpWebBrowser.TabIndex = 8;
             this.tabPageHelpWebBrowser.Text = "tabPage9";
             // 
             // pictureBox11
             // 
             this.pictureBox11.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox11.Image")));
-            this.pictureBox11.Location = new System.Drawing.Point(360, 444);
-            this.pictureBox11.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox11.Location = new System.Drawing.Point(480, 546);
+            this.pictureBox11.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox11.Name = "pictureBox11";
-            this.pictureBox11.Size = new System.Drawing.Size(150, 67);
+            this.pictureBox11.Size = new System.Drawing.Size(200, 82);
             this.pictureBox11.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox11.TabIndex = 7;
             this.pictureBox11.TabStop = false;
@@ -1540,10 +1532,10 @@ namespace CIEID
             // pictureBox13
             // 
             this.pictureBox13.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox13.Image")));
-            this.pictureBox13.Location = new System.Drawing.Point(138, 444);
-            this.pictureBox13.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox13.Location = new System.Drawing.Point(184, 546);
+            this.pictureBox13.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox13.Name = "pictureBox13";
-            this.pictureBox13.Size = new System.Drawing.Size(174, 67);
+            this.pictureBox13.Size = new System.Drawing.Size(232, 82);
             this.pictureBox13.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox13.TabIndex = 5;
             this.pictureBox13.TabStop = false;
@@ -1551,10 +1543,10 @@ namespace CIEID
             // webBrowserHelp
             // 
             this.webBrowserHelp.Location = new System.Drawing.Point(0, 0);
-            this.webBrowserHelp.Margin = new System.Windows.Forms.Padding(2);
-            this.webBrowserHelp.MinimumSize = new System.Drawing.Size(15, 16);
+            this.webBrowserHelp.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.webBrowserHelp.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowserHelp.Name = "webBrowserHelp";
-            this.webBrowserHelp.Size = new System.Drawing.Size(652, 425);
+            this.webBrowserHelp.Size = new System.Drawing.Size(869, 523);
             this.webBrowserHelp.TabIndex = 0;
             // 
             // tabPageInformationWebBrowser
@@ -1565,19 +1557,19 @@ namespace CIEID
             this.tabPageInformationWebBrowser.Controls.Add(this.pictureBox8);
             this.tabPageInformationWebBrowser.Controls.Add(this.webBrowserInfo);
             this.tabPageInformationWebBrowser.Location = new System.Drawing.Point(4, 9);
-            this.tabPageInformationWebBrowser.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPageInformationWebBrowser.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPageInformationWebBrowser.Name = "tabPageInformationWebBrowser";
-            this.tabPageInformationWebBrowser.Size = new System.Drawing.Size(649, 533);
+            this.tabPageInformationWebBrowser.Size = new System.Drawing.Size(868, 659);
             this.tabPageInformationWebBrowser.TabIndex = 9;
             this.tabPageInformationWebBrowser.Text = "tabPage10";
             // 
             // pictureBox10
             // 
             this.pictureBox10.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox10.Image")));
-            this.pictureBox10.Location = new System.Drawing.Point(410, 439);
-            this.pictureBox10.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox10.Location = new System.Drawing.Point(547, 540);
+            this.pictureBox10.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox10.Name = "pictureBox10";
-            this.pictureBox10.Size = new System.Drawing.Size(125, 65);
+            this.pictureBox10.Size = new System.Drawing.Size(167, 80);
             this.pictureBox10.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox10.TabIndex = 4;
             this.pictureBox10.TabStop = false;
@@ -1585,10 +1577,10 @@ namespace CIEID
             // pictureBox9
             // 
             this.pictureBox9.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox9.Image")));
-            this.pictureBox9.Location = new System.Drawing.Point(266, 439);
-            this.pictureBox9.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox9.Location = new System.Drawing.Point(355, 540);
+            this.pictureBox9.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox9.Name = "pictureBox9";
-            this.pictureBox9.Size = new System.Drawing.Size(125, 65);
+            this.pictureBox9.Size = new System.Drawing.Size(167, 80);
             this.pictureBox9.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox9.TabIndex = 3;
             this.pictureBox9.TabStop = false;
@@ -1596,10 +1588,10 @@ namespace CIEID
             // pictureBox8
             // 
             this.pictureBox8.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox8.Image")));
-            this.pictureBox8.Location = new System.Drawing.Point(121, 439);
-            this.pictureBox8.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox8.Location = new System.Drawing.Point(161, 540);
+            this.pictureBox8.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox8.Name = "pictureBox8";
-            this.pictureBox8.Size = new System.Drawing.Size(125, 65);
+            this.pictureBox8.Size = new System.Drawing.Size(167, 80);
             this.pictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox8.TabIndex = 2;
             this.pictureBox8.TabStop = false;
@@ -1607,10 +1599,10 @@ namespace CIEID
             // webBrowserInfo
             // 
             this.webBrowserInfo.Location = new System.Drawing.Point(0, 2);
-            this.webBrowserInfo.Margin = new System.Windows.Forms.Padding(2);
-            this.webBrowserInfo.MinimumSize = new System.Drawing.Size(15, 16);
+            this.webBrowserInfo.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.webBrowserInfo.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowserInfo.Name = "webBrowserInfo";
-            this.webBrowserInfo.Size = new System.Drawing.Size(652, 421);
+            this.webBrowserInfo.Size = new System.Drawing.Size(869, 518);
             this.webBrowserInfo.TabIndex = 1;
             // 
             // tabSelectFile
@@ -1622,8 +1614,9 @@ namespace CIEID
             this.tabSelectFile.Controls.Add(this.panelChooseDoc);
             this.tabSelectFile.Controls.Add(this.digitalSignatureLabel);
             this.tabSelectFile.Location = new System.Drawing.Point(4, 9);
+            this.tabSelectFile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabSelectFile.Name = "tabSelectFile";
-            this.tabSelectFile.Size = new System.Drawing.Size(649, 533);
+            this.tabSelectFile.Size = new System.Drawing.Size(868, 659);
             this.tabSelectFile.TabIndex = 10;
             this.tabSelectFile.Text = "tabPage11";
             // 
@@ -1632,9 +1625,10 @@ namespace CIEID
             this.customizeGraphicSignatureLabel.AutoSize = true;
             this.customizeGraphicSignatureLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.customizeGraphicSignatureLabel.ForeColor = System.Drawing.SystemColors.Highlight;
-            this.customizeGraphicSignatureLabel.Location = new System.Drawing.Point(469, 452);
+            this.customizeGraphicSignatureLabel.Location = new System.Drawing.Point(625, 556);
+            this.customizeGraphicSignatureLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.customizeGraphicSignatureLabel.Name = "customizeGraphicSignatureLabel";
-            this.customizeGraphicSignatureLabel.Size = new System.Drawing.Size(89, 17);
+            this.customizeGraphicSignatureLabel.Size = new System.Drawing.Size(106, 20);
             this.customizeGraphicSignatureLabel.TabIndex = 22;
             this.customizeGraphicSignatureLabel.Text = "Personalizza";
             this.customizeGraphicSignatureLabel.Click += new System.EventHandler(this.CustomizeGraphicSignatureLabel_Click);
@@ -1645,9 +1639,10 @@ namespace CIEID
             // 
             this.pictureBox15.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox15.Image")));
             this.pictureBox15.InitialImage = null;
-            this.pictureBox15.Location = new System.Drawing.Point(23, 440);
+            this.pictureBox15.Location = new System.Drawing.Point(31, 542);
+            this.pictureBox15.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox15.Name = "pictureBox15";
-            this.pictureBox15.Size = new System.Drawing.Size(79, 41);
+            this.pictureBox15.Size = new System.Drawing.Size(105, 50);
             this.pictureBox15.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox15.TabIndex = 21;
             this.pictureBox15.TabStop = false;
@@ -1655,10 +1650,9 @@ namespace CIEID
             // labelGraphicSignatureDescriptionInfoBox
             // 
             this.labelGraphicSignatureDescriptionInfoBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelGraphicSignatureDescriptionInfoBox.Location = new System.Drawing.Point(107, 423);
-            this.labelGraphicSignatureDescriptionInfoBox.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelGraphicSignatureDescriptionInfoBox.Location = new System.Drawing.Point(143, 521);
             this.labelGraphicSignatureDescriptionInfoBox.Name = "labelGraphicSignatureDescriptionInfoBox";
-            this.labelGraphicSignatureDescriptionInfoBox.Size = new System.Drawing.Size(357, 73);
+            this.labelGraphicSignatureDescriptionInfoBox.Size = new System.Drawing.Size(476, 90);
             this.labelGraphicSignatureDescriptionInfoBox.TabIndex = 20;
             this.labelGraphicSignatureDescriptionInfoBox.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. Q" +
     "uesto passaggio non è indispensabile, ma ti consentirà di dare un tocco personal" +
@@ -1672,9 +1666,10 @@ namespace CIEID
             this.panelChooseDoc.Controls.Add(this.labelChooseBetweenDragOrSelection);
             this.panelChooseDoc.Controls.Add(this.labelDragAndDropDocumentInformation);
             this.panelChooseDoc.Controls.Add(this.pbFolder);
-            this.panelChooseDoc.Location = new System.Drawing.Point(77, 116);
+            this.panelChooseDoc.Location = new System.Drawing.Point(103, 143);
+            this.panelChooseDoc.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelChooseDoc.Name = "panelChooseDoc";
-            this.panelChooseDoc.Size = new System.Drawing.Size(481, 275);
+            this.panelChooseDoc.Size = new System.Drawing.Size(641, 338);
             this.panelChooseDoc.TabIndex = 17;
             this.panelChooseDoc.DragDrop += new System.Windows.Forms.DragEventHandler(this.PanelChooseDoc_dragDrop);
             this.panelChooseDoc.DragEnter += new System.Windows.Forms.DragEventHandler(this.PanelChooseDoc_dragEnter);
@@ -1688,10 +1683,10 @@ namespace CIEID
             this.selectDocument.BackColor = System.Drawing.Color.CornflowerBlue;
             this.selectDocument.FlatAppearance.BorderSize = 0;
             this.selectDocument.ForeColor = System.Drawing.Color.White;
-            this.selectDocument.Location = new System.Drawing.Point(171, 229);
-            this.selectDocument.Margin = new System.Windows.Forms.Padding(2);
+            this.selectDocument.Location = new System.Drawing.Point(228, 282);
+            this.selectDocument.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.selectDocument.Name = "selectDocument";
-            this.selectDocument.Size = new System.Drawing.Size(157, 28);
+            this.selectDocument.Size = new System.Drawing.Size(209, 34);
             this.selectDocument.TabIndex = 21;
             this.selectDocument.Text = "Seleziona un documento";
             this.selectDocument.UseVisualStyleBackColor = false;
@@ -1702,10 +1697,9 @@ namespace CIEID
             this.labelChooseBetweenDragOrSelection.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.labelChooseBetweenDragOrSelection.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelChooseBetweenDragOrSelection.Location = new System.Drawing.Point(58, 184);
-            this.labelChooseBetweenDragOrSelection.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelChooseBetweenDragOrSelection.Location = new System.Drawing.Point(77, 226);
             this.labelChooseBetweenDragOrSelection.Name = "labelChooseBetweenDragOrSelection";
-            this.labelChooseBetweenDragOrSelection.Size = new System.Drawing.Size(377, 25);
+            this.labelChooseBetweenDragOrSelection.Size = new System.Drawing.Size(503, 31);
             this.labelChooseBetweenDragOrSelection.TabIndex = 20;
             this.labelChooseBetweenDragOrSelection.Text = "oppure";
             this.labelChooseBetweenDragOrSelection.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1713,10 +1707,9 @@ namespace CIEID
             // labelDragAndDropDocumentInformation
             // 
             this.labelDragAndDropDocumentInformation.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelDragAndDropDocumentInformation.Location = new System.Drawing.Point(58, 124);
-            this.labelDragAndDropDocumentInformation.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelDragAndDropDocumentInformation.Location = new System.Drawing.Point(77, 153);
             this.labelDragAndDropDocumentInformation.Name = "labelDragAndDropDocumentInformation";
-            this.labelDragAndDropDocumentInformation.Size = new System.Drawing.Size(377, 45);
+            this.labelDragAndDropDocumentInformation.Size = new System.Drawing.Size(503, 55);
             this.labelDragAndDropDocumentInformation.TabIndex = 19;
             this.labelDragAndDropDocumentInformation.Text = "Trascina i tuoi documenti qui dentro per firmarli o per verificare una firma elet" +
     "tronica esistente";
@@ -1726,9 +1719,10 @@ namespace CIEID
             // 
             this.pbFolder.Image = ((System.Drawing.Image)(resources.GetObject("pbFolder.Image")));
             this.pbFolder.InitialImage = null;
-            this.pbFolder.Location = new System.Drawing.Point(201, 14);
+            this.pbFolder.Location = new System.Drawing.Point(268, 17);
+            this.pbFolder.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pbFolder.Name = "pbFolder";
-            this.pbFolder.Size = new System.Drawing.Size(85, 104);
+            this.pbFolder.Size = new System.Drawing.Size(113, 128);
             this.pbFolder.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pbFolder.TabIndex = 0;
             this.pbFolder.TabStop = false;
@@ -1737,10 +1731,9 @@ namespace CIEID
             // 
             this.digitalSignatureLabel.AutoSize = true;
             this.digitalSignatureLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.digitalSignatureLabel.Location = new System.Drawing.Point(200, 18);
-            this.digitalSignatureLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.digitalSignatureLabel.Location = new System.Drawing.Point(267, 22);
             this.digitalSignatureLabel.Name = "digitalSignatureLabel";
-            this.digitalSignatureLabel.Size = new System.Drawing.Size(255, 36);
+            this.digitalSignatureLabel.Size = new System.Drawing.Size(315, 42);
             this.digitalSignatureLabel.TabIndex = 16;
             this.digitalSignatureLabel.Text = "Firma Elettronica";
             // 
@@ -1751,8 +1744,9 @@ namespace CIEID
             this.tabSelectOp.Controls.Add(this.panelChooseSignOrVerify);
             this.tabSelectOp.Controls.Add(this.labelDigitalSignatureHeaderTextChoosingOperation);
             this.tabSelectOp.Location = new System.Drawing.Point(4, 9);
+            this.tabSelectOp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabSelectOp.Name = "tabSelectOp";
-            this.tabSelectOp.Size = new System.Drawing.Size(649, 533);
+            this.tabSelectOp.Size = new System.Drawing.Size(868, 659);
             this.tabSelectOp.TabIndex = 11;
             this.tabSelectOp.Text = "tabPage11";
             // 
@@ -1762,10 +1756,10 @@ namespace CIEID
             this.cancelOperationButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.cancelOperationButton.FlatAppearance.BorderSize = 0;
             this.cancelOperationButton.ForeColor = System.Drawing.Color.White;
-            this.cancelOperationButton.Location = new System.Drawing.Point(256, 484);
-            this.cancelOperationButton.Margin = new System.Windows.Forms.Padding(2);
+            this.cancelOperationButton.Location = new System.Drawing.Point(341, 600);
+            this.cancelOperationButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cancelOperationButton.Name = "cancelOperationButton";
-            this.cancelOperationButton.Size = new System.Drawing.Size(157, 28);
+            this.cancelOperationButton.Size = new System.Drawing.Size(209, 34);
             this.cancelOperationButton.TabIndex = 20;
             this.cancelOperationButton.Text = "Annulla";
             this.cancelOperationButton.UseVisualStyleBackColor = false;
@@ -1777,18 +1771,20 @@ namespace CIEID
             this.panelChooseSignOrVerify.Controls.Add(this.verifyOptionPanel);
             this.panelChooseSignOrVerify.Controls.Add(this.labelFileNamePathInOperationChooser);
             this.panelChooseSignOrVerify.Controls.Add(this.pictureBox16);
-            this.panelChooseSignOrVerify.Location = new System.Drawing.Point(73, 104);
+            this.panelChooseSignOrVerify.Location = new System.Drawing.Point(97, 128);
+            this.panelChooseSignOrVerify.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelChooseSignOrVerify.Name = "panelChooseSignOrVerify";
-            this.panelChooseSignOrVerify.Size = new System.Drawing.Size(501, 362);
+            this.panelChooseSignOrVerify.Size = new System.Drawing.Size(668, 446);
             this.panelChooseSignOrVerify.TabIndex = 18;
             // 
             // signOperationOptionPanel
             // 
             this.signOperationOptionPanel.Controls.Add(this.signOptionChooserLabel);
             this.signOperationOptionPanel.Controls.Add(this.pictureBox17);
-            this.signOperationOptionPanel.Location = new System.Drawing.Point(133, 128);
+            this.signOperationOptionPanel.Location = new System.Drawing.Point(177, 158);
+            this.signOperationOptionPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.signOperationOptionPanel.Name = "signOperationOptionPanel";
-            this.signOperationOptionPanel.Size = new System.Drawing.Size(247, 99);
+            this.signOperationOptionPanel.Size = new System.Drawing.Size(329, 122);
             this.signOperationOptionPanel.TabIndex = 3;
             this.signOperationOptionPanel.Click += new System.EventHandler(this.SignOperationOptionPanel_MouseClick);
             this.signOperationOptionPanel.MouseEnter += new System.EventHandler(this.SignOperationOptionPanel_MouseEnter);
@@ -1799,9 +1795,10 @@ namespace CIEID
             this.signOptionChooserLabel.AutoSize = true;
             this.signOptionChooserLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.signOptionChooserLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.signOptionChooserLabel.Location = new System.Drawing.Point(116, 43);
+            this.signOptionChooserLabel.Location = new System.Drawing.Point(155, 53);
+            this.signOptionChooserLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.signOptionChooserLabel.Name = "signOptionChooserLabel";
-            this.signOptionChooserLabel.Size = new System.Drawing.Size(128, 25);
+            this.signOptionChooserLabel.Size = new System.Drawing.Size(170, 29);
             this.signOptionChooserLabel.TabIndex = 3;
             this.signOptionChooserLabel.Text = "Firma           >";
             this.signOptionChooserLabel.Click += new System.EventHandler(this.SignOperationOptionPanel_MouseClick);
@@ -1812,9 +1809,10 @@ namespace CIEID
             // 
             this.pictureBox17.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox17.Image")));
             this.pictureBox17.InitialImage = null;
-            this.pictureBox17.Location = new System.Drawing.Point(9, 14);
+            this.pictureBox17.Location = new System.Drawing.Point(12, 17);
+            this.pictureBox17.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox17.Name = "pictureBox17";
-            this.pictureBox17.Size = new System.Drawing.Size(65, 82);
+            this.pictureBox17.Size = new System.Drawing.Size(87, 101);
             this.pictureBox17.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox17.TabIndex = 2;
             this.pictureBox17.TabStop = false;
@@ -1823,9 +1821,10 @@ namespace CIEID
             // 
             this.verifyOptionPanel.Controls.Add(this.pictureBox18);
             this.verifyOptionPanel.Controls.Add(this.verifyOptionChooserLabel);
-            this.verifyOptionPanel.Location = new System.Drawing.Point(133, 242);
+            this.verifyOptionPanel.Location = new System.Drawing.Point(177, 298);
+            this.verifyOptionPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.verifyOptionPanel.Name = "verifyOptionPanel";
-            this.verifyOptionPanel.Size = new System.Drawing.Size(247, 99);
+            this.verifyOptionPanel.Size = new System.Drawing.Size(329, 122);
             this.verifyOptionPanel.TabIndex = 4;
             this.verifyOptionPanel.Click += new System.EventHandler(this.pnVerificaOp_MouseClick);
             this.verifyOptionPanel.MouseEnter += new System.EventHandler(this.pnVerificaOp_MouseEnter);
@@ -1835,9 +1834,10 @@ namespace CIEID
             // 
             this.pictureBox18.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox18.Image")));
             this.pictureBox18.InitialImage = null;
-            this.pictureBox18.Location = new System.Drawing.Point(9, 14);
+            this.pictureBox18.Location = new System.Drawing.Point(12, 17);
+            this.pictureBox18.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox18.Name = "pictureBox18";
-            this.pictureBox18.Size = new System.Drawing.Size(65, 82);
+            this.pictureBox18.Size = new System.Drawing.Size(87, 101);
             this.pictureBox18.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox18.TabIndex = 5;
             this.pictureBox18.TabStop = false;
@@ -1847,9 +1847,10 @@ namespace CIEID
             this.verifyOptionChooserLabel.AutoSize = true;
             this.verifyOptionChooserLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.verifyOptionChooserLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.verifyOptionChooserLabel.Location = new System.Drawing.Point(116, 43);
+            this.verifyOptionChooserLabel.Location = new System.Drawing.Point(155, 53);
+            this.verifyOptionChooserLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.verifyOptionChooserLabel.Name = "verifyOptionChooserLabel";
-            this.verifyOptionChooserLabel.Size = new System.Drawing.Size(129, 25);
+            this.verifyOptionChooserLabel.Size = new System.Drawing.Size(169, 29);
             this.verifyOptionChooserLabel.TabIndex = 4;
             this.verifyOptionChooserLabel.Text = "Verifica        >";
             this.verifyOptionChooserLabel.Click += new System.EventHandler(this.pnVerificaOp_MouseClick);
@@ -1860,9 +1861,10 @@ namespace CIEID
             // 
             this.labelFileNamePathInOperationChooser.AutoEllipsis = true;
             this.labelFileNamePathInOperationChooser.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelFileNamePathInOperationChooser.Location = new System.Drawing.Point(142, 23);
+            this.labelFileNamePathInOperationChooser.Location = new System.Drawing.Point(189, 28);
+            this.labelFileNamePathInOperationChooser.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelFileNamePathInOperationChooser.Name = "labelFileNamePathInOperationChooser";
-            this.labelFileNamePathInOperationChooser.Size = new System.Drawing.Size(320, 51);
+            this.labelFileNamePathInOperationChooser.Size = new System.Drawing.Size(427, 63);
             this.labelFileNamePathInOperationChooser.TabIndex = 2;
             this.labelFileNamePathInOperationChooser.Text = "label32label32label32label32label32label32label32label32label32label32label32labe" +
     "l32label32label32label32label32label32label32";
@@ -1871,9 +1873,10 @@ namespace CIEID
             // 
             this.pictureBox16.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox16.Image")));
             this.pictureBox16.InitialImage = null;
-            this.pictureBox16.Location = new System.Drawing.Point(61, 3);
+            this.pictureBox16.Location = new System.Drawing.Point(81, 4);
+            this.pictureBox16.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox16.Name = "pictureBox16";
-            this.pictureBox16.Size = new System.Drawing.Size(75, 89);
+            this.pictureBox16.Size = new System.Drawing.Size(100, 110);
             this.pictureBox16.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox16.TabIndex = 1;
             this.pictureBox16.TabStop = false;
@@ -1882,10 +1885,9 @@ namespace CIEID
             // 
             this.labelDigitalSignatureHeaderTextChoosingOperation.AutoSize = true;
             this.labelDigitalSignatureHeaderTextChoosingOperation.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelDigitalSignatureHeaderTextChoosingOperation.Location = new System.Drawing.Point(200, 18);
-            this.labelDigitalSignatureHeaderTextChoosingOperation.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelDigitalSignatureHeaderTextChoosingOperation.Location = new System.Drawing.Point(267, 22);
             this.labelDigitalSignatureHeaderTextChoosingOperation.Name = "labelDigitalSignatureHeaderTextChoosingOperation";
-            this.labelDigitalSignatureHeaderTextChoosingOperation.Size = new System.Drawing.Size(255, 36);
+            this.labelDigitalSignatureHeaderTextChoosingOperation.Size = new System.Drawing.Size(315, 42);
             this.labelDigitalSignatureHeaderTextChoosingOperation.TabIndex = 17;
             this.labelDigitalSignatureHeaderTextChoosingOperation.Text = "Firma Elettronica";
             // 
@@ -1898,8 +1900,9 @@ namespace CIEID
             this.tabSelectSignOp.Controls.Add(this.panelChooseSignatureType);
             this.tabSelectSignOp.Controls.Add(this.labelDigitalSignatureHeaderTextChoosingFormat);
             this.tabSelectSignOp.Location = new System.Drawing.Point(4, 9);
+            this.tabSelectSignOp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabSelectSignOp.Name = "tabSelectSignOp";
-            this.tabSelectSignOp.Size = new System.Drawing.Size(649, 533);
+            this.tabSelectSignOp.Size = new System.Drawing.Size(868, 659);
             this.tabSelectSignOp.TabIndex = 12;
             this.tabSelectSignOp.Text = "tabPage11";
             // 
@@ -1910,10 +1913,10 @@ namespace CIEID
             this.proceedWithSignatureButton.Enabled = false;
             this.proceedWithSignatureButton.FlatAppearance.BorderSize = 0;
             this.proceedWithSignatureButton.ForeColor = System.Drawing.Color.White;
-            this.proceedWithSignatureButton.Location = new System.Drawing.Point(392, 484);
-            this.proceedWithSignatureButton.Margin = new System.Windows.Forms.Padding(2);
+            this.proceedWithSignatureButton.Location = new System.Drawing.Point(523, 600);
+            this.proceedWithSignatureButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.proceedWithSignatureButton.Name = "proceedWithSignatureButton";
-            this.proceedWithSignatureButton.Size = new System.Drawing.Size(157, 28);
+            this.proceedWithSignatureButton.Size = new System.Drawing.Size(209, 34);
             this.proceedWithSignatureButton.TabIndex = 25;
             this.proceedWithSignatureButton.Text = "PROSEGUI";
             this.proceedWithSignatureButton.UseVisualStyleBackColor = false;
@@ -1924,10 +1927,9 @@ namespace CIEID
             this.labelDigitalSignatureDescriptionChoosingFormat.AutoSize = true;
             this.labelDigitalSignatureDescriptionChoosingFormat.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelDigitalSignatureDescriptionChoosingFormat.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.labelDigitalSignatureDescriptionChoosingFormat.Location = new System.Drawing.Point(250, 65);
-            this.labelDigitalSignatureDescriptionChoosingFormat.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelDigitalSignatureDescriptionChoosingFormat.Location = new System.Drawing.Point(333, 80);
             this.labelDigitalSignatureDescriptionChoosingFormat.Name = "labelDigitalSignatureDescriptionChoosingFormat";
-            this.labelDigitalSignatureDescriptionChoosingFormat.Size = new System.Drawing.Size(148, 20);
+            this.labelDigitalSignatureDescriptionChoosingFormat.Size = new System.Drawing.Size(178, 25);
             this.labelDigitalSignatureDescriptionChoosingFormat.TabIndex = 24;
             this.labelDigitalSignatureDescriptionChoosingFormat.Text = "Firma documento";
             // 
@@ -1937,10 +1939,10 @@ namespace CIEID
             this.cancelSigningOperationButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.cancelSigningOperationButton.FlatAppearance.BorderSize = 0;
             this.cancelSigningOperationButton.ForeColor = System.Drawing.Color.White;
-            this.cancelSigningOperationButton.Location = new System.Drawing.Point(101, 484);
-            this.cancelSigningOperationButton.Margin = new System.Windows.Forms.Padding(2);
+            this.cancelSigningOperationButton.Location = new System.Drawing.Point(135, 600);
+            this.cancelSigningOperationButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cancelSigningOperationButton.Name = "cancelSigningOperationButton";
-            this.cancelSigningOperationButton.Size = new System.Drawing.Size(157, 28);
+            this.cancelSigningOperationButton.Size = new System.Drawing.Size(209, 34);
             this.cancelSigningOperationButton.TabIndex = 23;
             this.cancelSigningOperationButton.Text = "Annulla";
             this.cancelSigningOperationButton.UseVisualStyleBackColor = false;
@@ -1953,9 +1955,10 @@ namespace CIEID
             this.panelChooseSignatureType.Controls.Add(this.panelChooseCades);
             this.panelChooseSignatureType.Controls.Add(this.labelFileNamePathInSigningFormatChooser);
             this.panelChooseSignatureType.Controls.Add(this.pictureBox21);
-            this.panelChooseSignatureType.Location = new System.Drawing.Point(73, 104);
+            this.panelChooseSignatureType.Location = new System.Drawing.Point(97, 128);
+            this.panelChooseSignatureType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelChooseSignatureType.Name = "panelChooseSignatureType";
-            this.panelChooseSignatureType.Size = new System.Drawing.Size(501, 362);
+            this.panelChooseSignatureType.Size = new System.Drawing.Size(668, 446);
             this.panelChooseSignatureType.TabIndex = 22;
             // 
             // panelChoosePades
@@ -1964,9 +1967,10 @@ namespace CIEID
             this.panelChoosePades.Controls.Add(this.PAdESFormatDescriptionLabel);
             this.panelChoosePades.Controls.Add(this.PAdESSignatureLabel);
             this.panelChoosePades.Controls.Add(this.pbPades);
-            this.panelChoosePades.Location = new System.Drawing.Point(256, 160);
+            this.panelChoosePades.Location = new System.Drawing.Point(341, 197);
+            this.panelChoosePades.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelChoosePades.Name = "panelChoosePades";
-            this.panelChoosePades.Size = new System.Drawing.Size(220, 180);
+            this.panelChoosePades.Size = new System.Drawing.Size(293, 222);
             this.panelChoosePades.TabIndex = 26;
             this.panelChoosePades.Click += new System.EventHandler(this.PanelChoosePades_MouseClick);
             this.panelChoosePades.MouseEnter += new System.EventHandler(this.PanelChoosePades_MouseEnter);
@@ -1976,9 +1980,10 @@ namespace CIEID
             // 
             this.enableGraphicSignatureCheckBox.AutoSize = true;
             this.enableGraphicSignatureCheckBox.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.enableGraphicSignatureCheckBox.Location = new System.Drawing.Point(21, 160);
+            this.enableGraphicSignatureCheckBox.Location = new System.Drawing.Point(28, 197);
+            this.enableGraphicSignatureCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.enableGraphicSignatureCheckBox.Name = "enableGraphicSignatureCheckBox";
-            this.enableGraphicSignatureCheckBox.Size = new System.Drawing.Size(127, 17);
+            this.enableGraphicSignatureCheckBox.Size = new System.Drawing.Size(158, 20);
             this.enableGraphicSignatureCheckBox.TabIndex = 6;
             this.enableGraphicSignatureCheckBox.Text = "Aggiungi firma grafica";
             this.enableGraphicSignatureCheckBox.UseVisualStyleBackColor = true;
@@ -1991,9 +1996,10 @@ namespace CIEID
             // 
             this.PAdESFormatDescriptionLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.PAdESFormatDescriptionLabel.Location = new System.Drawing.Point(59, 51);
+            this.PAdESFormatDescriptionLabel.Location = new System.Drawing.Point(79, 63);
+            this.PAdESFormatDescriptionLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.PAdESFormatDescriptionLabel.Name = "PAdESFormatDescriptionLabel";
-            this.PAdESFormatDescriptionLabel.Size = new System.Drawing.Size(155, 106);
+            this.PAdESFormatDescriptionLabel.Size = new System.Drawing.Size(207, 130);
             this.PAdESFormatDescriptionLabel.TabIndex = 4;
             this.PAdESFormatDescriptionLabel.Text = "Si appone su documenti PDF nella versione grafica oppure in maniera invisibile. I" +
     "l documento firmato avrà estensione .pdf.";
@@ -2006,9 +2012,10 @@ namespace CIEID
             this.PAdESSignatureLabel.AutoSize = true;
             this.PAdESSignatureLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.PAdESSignatureLabel.Location = new System.Drawing.Point(59, 23);
+            this.PAdESSignatureLabel.Location = new System.Drawing.Point(79, 28);
+            this.PAdESSignatureLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.PAdESSignatureLabel.Name = "PAdESSignatureLabel";
-            this.PAdESSignatureLabel.Size = new System.Drawing.Size(100, 18);
+            this.PAdESSignatureLabel.Size = new System.Drawing.Size(126, 24);
             this.PAdESSignatureLabel.TabIndex = 3;
             this.PAdESSignatureLabel.Text = "Firma PADES";
             this.PAdESSignatureLabel.Click += new System.EventHandler(this.PanelChoosePades_MouseClick);
@@ -2019,9 +2026,10 @@ namespace CIEID
             // 
             this.pbPades.Image = global::CIEID.Properties.Resources.pdf_2x_gray;
             this.pbPades.InitialImage = null;
-            this.pbPades.Location = new System.Drawing.Point(3, 11);
+            this.pbPades.Location = new System.Drawing.Point(4, 14);
+            this.pbPades.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pbPades.Name = "pbPades";
-            this.pbPades.Size = new System.Drawing.Size(47, 59);
+            this.pbPades.Size = new System.Drawing.Size(63, 73);
             this.pbPades.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pbPades.TabIndex = 2;
             this.pbPades.TabStop = false;
@@ -2034,10 +2042,9 @@ namespace CIEID
             this.labelSelectSignatureFormatType.AutoSize = true;
             this.labelSelectSignatureFormatType.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelSelectSignatureFormatType.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.labelSelectSignatureFormatType.Location = new System.Drawing.Point(156, 121);
-            this.labelSelectSignatureFormatType.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelSelectSignatureFormatType.Location = new System.Drawing.Point(208, 149);
             this.labelSelectSignatureFormatType.Name = "labelSelectSignatureFormatType";
-            this.labelSelectSignatureFormatType.Size = new System.Drawing.Size(200, 20);
+            this.labelSelectSignatureFormatType.Size = new System.Drawing.Size(241, 25);
             this.labelSelectSignatureFormatType.TabIndex = 25;
             this.labelSelectSignatureFormatType.Text = "Seleziona il tipo di firma";
             // 
@@ -2046,9 +2053,10 @@ namespace CIEID
             this.panelChooseCades.Controls.Add(this.CAdESFormatDescriptionLabel);
             this.panelChooseCades.Controls.Add(this.CAdESSignatureLabel);
             this.panelChooseCades.Controls.Add(this.CAdESP7MPictureBox);
-            this.panelChooseCades.Location = new System.Drawing.Point(25, 160);
+            this.panelChooseCades.Location = new System.Drawing.Point(33, 197);
+            this.panelChooseCades.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelChooseCades.Name = "panelChooseCades";
-            this.panelChooseCades.Size = new System.Drawing.Size(210, 180);
+            this.panelChooseCades.Size = new System.Drawing.Size(280, 222);
             this.panelChooseCades.TabIndex = 3;
             this.panelChooseCades.Click += new System.EventHandler(this.PanelChooseCades_MouseClick);
             this.panelChooseCades.MouseEnter += new System.EventHandler(this.PanelChooseCades_MouseEnter);
@@ -2058,9 +2066,10 @@ namespace CIEID
             // 
             this.CAdESFormatDescriptionLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CAdESFormatDescriptionLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.CAdESFormatDescriptionLabel.Location = new System.Drawing.Point(56, 51);
+            this.CAdESFormatDescriptionLabel.Location = new System.Drawing.Point(75, 63);
+            this.CAdESFormatDescriptionLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.CAdESFormatDescriptionLabel.Name = "CAdESFormatDescriptionLabel";
-            this.CAdESFormatDescriptionLabel.Size = new System.Drawing.Size(145, 108);
+            this.CAdESFormatDescriptionLabel.Size = new System.Drawing.Size(193, 133);
             this.CAdESFormatDescriptionLabel.TabIndex = 4;
             this.CAdESFormatDescriptionLabel.Text = "Si appone su una qualsiasi tipologia di documento e prevede la generazione di una" +
     " busta crittografica. Il documento firmato avrà estensione .p7m.";
@@ -2073,9 +2082,10 @@ namespace CIEID
             this.CAdESSignatureLabel.AutoSize = true;
             this.CAdESSignatureLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CAdESSignatureLabel.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.CAdESSignatureLabel.Location = new System.Drawing.Point(59, 23);
+            this.CAdESSignatureLabel.Location = new System.Drawing.Point(79, 28);
+            this.CAdESSignatureLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.CAdESSignatureLabel.Name = "CAdESSignatureLabel";
-            this.CAdESSignatureLabel.Size = new System.Drawing.Size(101, 18);
+            this.CAdESSignatureLabel.Size = new System.Drawing.Size(127, 24);
             this.CAdESSignatureLabel.TabIndex = 3;
             this.CAdESSignatureLabel.Text = "Firma CADES";
             // 
@@ -2083,9 +2093,10 @@ namespace CIEID
             // 
             this.CAdESP7MPictureBox.Image = global::CIEID.Properties.Resources.p7m_2x_gray;
             this.CAdESP7MPictureBox.InitialImage = null;
-            this.CAdESP7MPictureBox.Location = new System.Drawing.Point(3, 11);
+            this.CAdESP7MPictureBox.Location = new System.Drawing.Point(4, 14);
+            this.CAdESP7MPictureBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.CAdESP7MPictureBox.Name = "CAdESP7MPictureBox";
-            this.CAdESP7MPictureBox.Size = new System.Drawing.Size(47, 59);
+            this.CAdESP7MPictureBox.Size = new System.Drawing.Size(63, 73);
             this.CAdESP7MPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.CAdESP7MPictureBox.TabIndex = 2;
             this.CAdESP7MPictureBox.TabStop = false;
@@ -2097,9 +2108,10 @@ namespace CIEID
             // 
             this.labelFileNamePathInSigningFormatChooser.AutoEllipsis = true;
             this.labelFileNamePathInSigningFormatChooser.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelFileNamePathInSigningFormatChooser.Location = new System.Drawing.Point(142, 23);
+            this.labelFileNamePathInSigningFormatChooser.Location = new System.Drawing.Point(189, 28);
+            this.labelFileNamePathInSigningFormatChooser.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelFileNamePathInSigningFormatChooser.Name = "labelFileNamePathInSigningFormatChooser";
-            this.labelFileNamePathInSigningFormatChooser.Size = new System.Drawing.Size(320, 51);
+            this.labelFileNamePathInSigningFormatChooser.Size = new System.Drawing.Size(427, 63);
             this.labelFileNamePathInSigningFormatChooser.TabIndex = 2;
             this.labelFileNamePathInSigningFormatChooser.Text = "label32";
             // 
@@ -2107,9 +2119,10 @@ namespace CIEID
             // 
             this.pictureBox21.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox21.Image")));
             this.pictureBox21.InitialImage = null;
-            this.pictureBox21.Location = new System.Drawing.Point(61, 3);
+            this.pictureBox21.Location = new System.Drawing.Point(81, 4);
+            this.pictureBox21.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox21.Name = "pictureBox21";
-            this.pictureBox21.Size = new System.Drawing.Size(75, 89);
+            this.pictureBox21.Size = new System.Drawing.Size(100, 110);
             this.pictureBox21.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox21.TabIndex = 1;
             this.pictureBox21.TabStop = false;
@@ -2118,10 +2131,9 @@ namespace CIEID
             // 
             this.labelDigitalSignatureHeaderTextChoosingFormat.AutoSize = true;
             this.labelDigitalSignatureHeaderTextChoosingFormat.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelDigitalSignatureHeaderTextChoosingFormat.Location = new System.Drawing.Point(200, 18);
-            this.labelDigitalSignatureHeaderTextChoosingFormat.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelDigitalSignatureHeaderTextChoosingFormat.Location = new System.Drawing.Point(267, 22);
             this.labelDigitalSignatureHeaderTextChoosingFormat.Name = "labelDigitalSignatureHeaderTextChoosingFormat";
-            this.labelDigitalSignatureHeaderTextChoosingFormat.Size = new System.Drawing.Size(255, 36);
+            this.labelDigitalSignatureHeaderTextChoosingFormat.Size = new System.Drawing.Size(315, 42);
             this.labelDigitalSignatureHeaderTextChoosingFormat.TabIndex = 21;
             this.labelDigitalSignatureHeaderTextChoosingFormat.Text = "Firma Elettronica";
             // 
@@ -2133,8 +2145,9 @@ namespace CIEID
             this.graphicDigitalSignatureTab.Controls.Add(this.labelDigitalSignaturePlaceGraphicSignatureHeaderText);
             this.graphicDigitalSignatureTab.Controls.Add(this.proceedSignPreviewButton);
             this.graphicDigitalSignatureTab.Location = new System.Drawing.Point(4, 9);
+            this.graphicDigitalSignatureTab.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.graphicDigitalSignatureTab.Name = "graphicDigitalSignatureTab";
-            this.graphicDigitalSignatureTab.Size = new System.Drawing.Size(649, 533);
+            this.graphicDigitalSignatureTab.Size = new System.Drawing.Size(868, 659);
             this.graphicDigitalSignatureTab.TabIndex = 13;
             this.graphicDigitalSignatureTab.Text = "tabPage11";
             // 
@@ -2143,10 +2156,9 @@ namespace CIEID
             this.labelDigitalSignatureDragSignatureBox.AutoSize = true;
             this.labelDigitalSignatureDragSignatureBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelDigitalSignatureDragSignatureBox.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.labelDigitalSignatureDragSignatureBox.Location = new System.Drawing.Point(53, 65);
-            this.labelDigitalSignatureDragSignatureBox.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelDigitalSignatureDragSignatureBox.Location = new System.Drawing.Point(71, 80);
             this.labelDigitalSignatureDragSignatureBox.Name = "labelDigitalSignatureDragSignatureBox";
-            this.labelDigitalSignatureDragSignatureBox.Size = new System.Drawing.Size(532, 20);
+            this.labelDigitalSignatureDragSignatureBox.Size = new System.Drawing.Size(638, 25);
             this.labelDigitalSignatureDragSignatureBox.TabIndex = 28;
             this.labelDigitalSignatureDragSignatureBox.Text = "Trascina la firma in un punto desiderato all\'interno del documento";
             // 
@@ -2157,9 +2169,10 @@ namespace CIEID
             this.panelPreviewGraphicSignature.Controls.Add(this.panePreview);
             this.panelPreviewGraphicSignature.Controls.Add(this.labelFileNamePathInDragSignatureBox);
             this.panelPreviewGraphicSignature.Controls.Add(this.pictureBox22);
-            this.panelPreviewGraphicSignature.Location = new System.Drawing.Point(73, 104);
+            this.panelPreviewGraphicSignature.Location = new System.Drawing.Point(97, 128);
+            this.panelPreviewGraphicSignature.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelPreviewGraphicSignature.Name = "panelPreviewGraphicSignature";
-            this.panelPreviewGraphicSignature.Size = new System.Drawing.Size(501, 375);
+            this.panelPreviewGraphicSignature.Size = new System.Drawing.Size(668, 462);
             this.panelPreviewGraphicSignature.TabIndex = 27;
             // 
             // downButton
@@ -2170,10 +2183,10 @@ namespace CIEID
             this.downButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.downButton.ForeColor = System.Drawing.Color.White;
             this.downButton.Image = ((System.Drawing.Image)(resources.GetObject("downButton.Image")));
-            this.downButton.Location = new System.Drawing.Point(450, 298);
-            this.downButton.Margin = new System.Windows.Forms.Padding(2);
+            this.downButton.Location = new System.Drawing.Point(600, 367);
+            this.downButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.downButton.Name = "downButton";
-            this.downButton.Size = new System.Drawing.Size(34, 35);
+            this.downButton.Size = new System.Drawing.Size(45, 43);
             this.downButton.TabIndex = 31;
             this.downButton.UseVisualStyleBackColor = false;
             this.downButton.Click += new System.EventHandler(this.DownButton_Click);
@@ -2186,10 +2199,10 @@ namespace CIEID
             this.upButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.upButton.ForeColor = System.Drawing.Color.White;
             this.upButton.Image = ((System.Drawing.Image)(resources.GetObject("upButton.Image")));
-            this.upButton.Location = new System.Drawing.Point(450, 168);
-            this.upButton.Margin = new System.Windows.Forms.Padding(2);
+            this.upButton.Location = new System.Drawing.Point(600, 207);
+            this.upButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.upButton.Name = "upButton";
-            this.upButton.Size = new System.Drawing.Size(34, 26);
+            this.upButton.Size = new System.Drawing.Size(45, 32);
             this.upButton.TabIndex = 30;
             this.upButton.UseVisualStyleBackColor = false;
             this.upButton.Click += new System.EventHandler(this.UpButton_Click);
@@ -2197,18 +2210,20 @@ namespace CIEID
             // panePreview
             // 
             this.panePreview.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.panePreview.Location = new System.Drawing.Point(44, 108);
+            this.panePreview.Location = new System.Drawing.Point(59, 133);
+            this.panePreview.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panePreview.Name = "panePreview";
-            this.panePreview.Size = new System.Drawing.Size(401, 264);
+            this.panePreview.Size = new System.Drawing.Size(535, 325);
             this.panePreview.TabIndex = 0;
             // 
             // labelFileNamePathInDragSignatureBox
             // 
             this.labelFileNamePathInDragSignatureBox.AutoEllipsis = true;
             this.labelFileNamePathInDragSignatureBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelFileNamePathInDragSignatureBox.Location = new System.Drawing.Point(142, 23);
+            this.labelFileNamePathInDragSignatureBox.Location = new System.Drawing.Point(189, 28);
+            this.labelFileNamePathInDragSignatureBox.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelFileNamePathInDragSignatureBox.Name = "labelFileNamePathInDragSignatureBox";
-            this.labelFileNamePathInDragSignatureBox.Size = new System.Drawing.Size(320, 51);
+            this.labelFileNamePathInDragSignatureBox.Size = new System.Drawing.Size(427, 63);
             this.labelFileNamePathInDragSignatureBox.TabIndex = 2;
             this.labelFileNamePathInDragSignatureBox.Text = "label32";
             // 
@@ -2216,9 +2231,10 @@ namespace CIEID
             // 
             this.pictureBox22.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox22.Image")));
             this.pictureBox22.InitialImage = null;
-            this.pictureBox22.Location = new System.Drawing.Point(61, 3);
+            this.pictureBox22.Location = new System.Drawing.Point(81, 4);
+            this.pictureBox22.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox22.Name = "pictureBox22";
-            this.pictureBox22.Size = new System.Drawing.Size(75, 89);
+            this.pictureBox22.Size = new System.Drawing.Size(100, 110);
             this.pictureBox22.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox22.TabIndex = 1;
             this.pictureBox22.TabStop = false;
@@ -2227,10 +2243,9 @@ namespace CIEID
             // 
             this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.AutoSize = true;
             this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.Location = new System.Drawing.Point(200, 18);
-            this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.Location = new System.Drawing.Point(267, 22);
             this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.Name = "labelDigitalSignaturePlaceGraphicSignatureHeaderText";
-            this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.Size = new System.Drawing.Size(255, 36);
+            this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.Size = new System.Drawing.Size(315, 42);
             this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.TabIndex = 26;
             this.labelDigitalSignaturePlaceGraphicSignatureHeaderText.Text = "Firma Elettronica";
             // 
@@ -2240,10 +2255,10 @@ namespace CIEID
             this.proceedSignPreviewButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.proceedSignPreviewButton.FlatAppearance.BorderSize = 0;
             this.proceedSignPreviewButton.ForeColor = System.Drawing.Color.White;
-            this.proceedSignPreviewButton.Location = new System.Drawing.Point(233, 484);
-            this.proceedSignPreviewButton.Margin = new System.Windows.Forms.Padding(2);
+            this.proceedSignPreviewButton.Location = new System.Drawing.Point(311, 600);
+            this.proceedSignPreviewButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.proceedSignPreviewButton.Name = "proceedSignPreviewButton";
-            this.proceedSignPreviewButton.Size = new System.Drawing.Size(157, 28);
+            this.proceedSignPreviewButton.Size = new System.Drawing.Size(209, 34);
             this.proceedSignPreviewButton.TabIndex = 29;
             this.proceedSignPreviewButton.Text = "PROSEGUI";
             this.proceedSignPreviewButton.UseVisualStyleBackColor = false;
@@ -2259,8 +2274,9 @@ namespace CIEID
             this.signPanelTabPage.Controls.Add(this.panelTypePINAndSign);
             this.signPanelTabPage.Controls.Add(this.labelDigitalSignatureHeaderText);
             this.signPanelTabPage.Location = new System.Drawing.Point(4, 9);
+            this.signPanelTabPage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.signPanelTabPage.Name = "signPanelTabPage";
-            this.signPanelTabPage.Size = new System.Drawing.Size(649, 533);
+            this.signPanelTabPage.Size = new System.Drawing.Size(868, 659);
             this.signPanelTabPage.TabIndex = 14;
             // 
             // closeButton
@@ -2268,10 +2284,10 @@ namespace CIEID
             this.closeButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.closeButton.FlatAppearance.BorderSize = 0;
             this.closeButton.ForeColor = System.Drawing.Color.White;
-            this.closeButton.Location = new System.Drawing.Point(240, 484);
-            this.closeButton.Margin = new System.Windows.Forms.Padding(2);
+            this.closeButton.Location = new System.Drawing.Point(320, 596);
+            this.closeButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(156, 30);
+            this.closeButton.Size = new System.Drawing.Size(208, 37);
             this.closeButton.TabIndex = 32;
             this.closeButton.Text = "CONCLUDI";
             this.closeButton.UseVisualStyleBackColor = false;
@@ -2284,10 +2300,10 @@ namespace CIEID
             this.signButton.Enabled = false;
             this.signButton.FlatAppearance.BorderSize = 0;
             this.signButton.ForeColor = System.Drawing.Color.White;
-            this.signButton.Location = new System.Drawing.Point(392, 484);
-            this.signButton.Margin = new System.Windows.Forms.Padding(2);
+            this.signButton.Location = new System.Drawing.Point(523, 596);
+            this.signButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signButton.Name = "signButton";
-            this.signButton.Size = new System.Drawing.Size(156, 30);
+            this.signButton.Size = new System.Drawing.Size(208, 37);
             this.signButton.TabIndex = 31;
             this.signButton.Text = "FIRMA";
             this.signButton.UseVisualStyleBackColor = false;
@@ -2298,10 +2314,10 @@ namespace CIEID
             this.cancelSigningOperationPINPanelButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.cancelSigningOperationPINPanelButton.FlatAppearance.BorderSize = 0;
             this.cancelSigningOperationPINPanelButton.ForeColor = System.Drawing.Color.White;
-            this.cancelSigningOperationPINPanelButton.Location = new System.Drawing.Point(101, 484);
-            this.cancelSigningOperationPINPanelButton.Margin = new System.Windows.Forms.Padding(2);
+            this.cancelSigningOperationPINPanelButton.Location = new System.Drawing.Point(135, 596);
+            this.cancelSigningOperationPINPanelButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cancelSigningOperationPINPanelButton.Name = "cancelSigningOperationPINPanelButton";
-            this.cancelSigningOperationPINPanelButton.Size = new System.Drawing.Size(156, 30);
+            this.cancelSigningOperationPINPanelButton.Size = new System.Drawing.Size(208, 37);
             this.cancelSigningOperationPINPanelButton.TabIndex = 30;
             this.cancelSigningOperationPINPanelButton.Text = "Annulla";
             this.cancelSigningOperationPINPanelButton.UseVisualStyleBackColor = false;
@@ -2312,10 +2328,9 @@ namespace CIEID
             this.placeCIEOnReaderLabel.AutoSize = true;
             this.placeCIEOnReaderLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.placeCIEOnReaderLabel.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.placeCIEOnReaderLabel.Location = new System.Drawing.Point(210, 65);
-            this.placeCIEOnReaderLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.placeCIEOnReaderLabel.Location = new System.Drawing.Point(280, 80);
             this.placeCIEOnReaderLabel.Name = "placeCIEOnReaderLabel";
-            this.placeCIEOnReaderLabel.Size = new System.Drawing.Size(235, 20);
+            this.placeCIEOnReaderLabel.Size = new System.Drawing.Size(281, 25);
             this.placeCIEOnReaderLabel.TabIndex = 31;
             this.placeCIEOnReaderLabel.Text = "Appoggia la carta sul lettore";
             // 
@@ -2324,9 +2339,10 @@ namespace CIEID
             this.panelTypePINAndSign.Controls.Add(this.panelSigningBoxPINArea);
             this.panelTypePINAndSign.Controls.Add(this.labelFileNamePathSigningOperation);
             this.panelTypePINAndSign.Controls.Add(this.pictureBox19);
-            this.panelTypePINAndSign.Location = new System.Drawing.Point(73, 104);
+            this.panelTypePINAndSign.Location = new System.Drawing.Point(97, 128);
+            this.panelTypePINAndSign.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelTypePINAndSign.Name = "panelTypePINAndSign";
-            this.panelTypePINAndSign.Size = new System.Drawing.Size(501, 362);
+            this.panelTypePINAndSign.Size = new System.Drawing.Size(668, 446);
             this.panelTypePINAndSign.TabIndex = 30;
             // 
             // panelSigningBoxPINArea
@@ -2344,18 +2360,19 @@ namespace CIEID
             this.panelSigningBoxPINArea.Controls.Add(this.signPINDigit_TextBox6);
             this.panelSigningBoxPINArea.Controls.Add(this.signPINDigit_TextBox7);
             this.panelSigningBoxPINArea.Controls.Add(this.signPINDigit_TextBox8);
-            this.panelSigningBoxPINArea.Location = new System.Drawing.Point(3, 108);
+            this.panelSigningBoxPINArea.Location = new System.Drawing.Point(4, 133);
+            this.panelSigningBoxPINArea.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelSigningBoxPINArea.Name = "panelSigningBoxPINArea";
-            this.panelSigningBoxPINArea.Size = new System.Drawing.Size(495, 239);
+            this.panelSigningBoxPINArea.Size = new System.Drawing.Size(660, 294);
             this.panelSigningBoxPINArea.TabIndex = 31;
             // 
             // pictureBox20
             // 
             this.pictureBox20.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox20.Image")));
-            this.pictureBox20.Location = new System.Drawing.Point(14, 38);
-            this.pictureBox20.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox20.Location = new System.Drawing.Point(19, 47);
+            this.pictureBox20.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox20.Name = "pictureBox20";
-            this.pictureBox20.Size = new System.Drawing.Size(153, 153);
+            this.pictureBox20.Size = new System.Drawing.Size(204, 188);
             this.pictureBox20.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox20.TabIndex = 26;
             this.pictureBox20.TabStop = false;
@@ -2363,20 +2380,18 @@ namespace CIEID
             // typePINLabel
             // 
             this.typePINLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.typePINLabel.Location = new System.Drawing.Point(190, 68);
-            this.typePINLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.typePINLabel.Location = new System.Drawing.Point(253, 84);
             this.typePINLabel.Name = "typePINLabel";
-            this.typePINLabel.Size = new System.Drawing.Size(276, 20);
+            this.typePINLabel.Size = new System.Drawing.Size(368, 25);
             this.typePINLabel.TabIndex = 27;
             this.typePINLabel.Text = "Inserisci le ultime 4 cifre del PIN";
             // 
             // documentSuccessfullySignedLabel
             // 
             this.documentSuccessfullySignedLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.documentSuccessfullySignedLabel.Location = new System.Drawing.Point(240, 102);
-            this.documentSuccessfullySignedLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.documentSuccessfullySignedLabel.Location = new System.Drawing.Point(320, 126);
             this.documentSuccessfullySignedLabel.Name = "documentSuccessfullySignedLabel";
-            this.documentSuccessfullySignedLabel.Size = new System.Drawing.Size(226, 20);
+            this.documentSuccessfullySignedLabel.Size = new System.Drawing.Size(301, 25);
             this.documentSuccessfullySignedLabel.TabIndex = 30;
             this.documentSuccessfullySignedLabel.Text = "File firmato con successo";
             this.documentSuccessfullySignedLabel.Visible = false;
@@ -2385,10 +2400,10 @@ namespace CIEID
             // 
             this.signPINDigit_TextBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.signPINDigit_TextBox1.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.signPINDigit_TextBox1.Location = new System.Drawing.Point(267, 117);
-            this.signPINDigit_TextBox1.Margin = new System.Windows.Forms.Padding(2);
+            this.signPINDigit_TextBox1.Location = new System.Drawing.Point(356, 144);
+            this.signPINDigit_TextBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signPINDigit_TextBox1.Name = "signPINDigit_TextBox1";
-            this.signPINDigit_TextBox1.Size = new System.Drawing.Size(20, 23);
+            this.signPINDigit_TextBox1.Size = new System.Drawing.Size(25, 26);
             this.signPINDigit_TextBox1.TabIndex = 22;
             this.signPINDigit_TextBox1.Tag = "9";
             this.signPINDigit_TextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -2398,10 +2413,10 @@ namespace CIEID
             // signProgressBar
             // 
             this.signProgressBar.ForeColor = System.Drawing.Color.Blue;
-            this.signProgressBar.Location = new System.Drawing.Point(202, 112);
-            this.signProgressBar.Margin = new System.Windows.Forms.Padding(2);
+            this.signProgressBar.Location = new System.Drawing.Point(269, 138);
+            this.signProgressBar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signProgressBar.Name = "signProgressBar";
-            this.signProgressBar.Size = new System.Drawing.Size(228, 13);
+            this.signProgressBar.Size = new System.Drawing.Size(304, 16);
             this.signProgressBar.TabIndex = 29;
             this.signProgressBar.Value = 55;
             this.signProgressBar.Visible = false;
@@ -2411,10 +2426,10 @@ namespace CIEID
             this.signPINDigit_TextBox2.BackColor = System.Drawing.SystemColors.Window;
             this.signPINDigit_TextBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.signPINDigit_TextBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.signPINDigit_TextBox2.Location = new System.Drawing.Point(291, 117);
-            this.signPINDigit_TextBox2.Margin = new System.Windows.Forms.Padding(2);
+            this.signPINDigit_TextBox2.Location = new System.Drawing.Point(388, 144);
+            this.signPINDigit_TextBox2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signPINDigit_TextBox2.Name = "signPINDigit_TextBox2";
-            this.signPINDigit_TextBox2.Size = new System.Drawing.Size(20, 23);
+            this.signPINDigit_TextBox2.Size = new System.Drawing.Size(26, 26);
             this.signPINDigit_TextBox2.TabIndex = 23;
             this.signPINDigit_TextBox2.Tag = "10";
             this.signPINDigit_TextBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -2425,9 +2440,10 @@ namespace CIEID
             // 
             this.digitalSignatureCompletedPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("digitalSignatureCompletedPictureBox.Image")));
             this.digitalSignatureCompletedPictureBox.InitialImage = null;
-            this.digitalSignatureCompletedPictureBox.Location = new System.Drawing.Point(194, 90);
+            this.digitalSignatureCompletedPictureBox.Location = new System.Drawing.Point(259, 111);
+            this.digitalSignatureCompletedPictureBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.digitalSignatureCompletedPictureBox.Name = "digitalSignatureCompletedPictureBox";
-            this.digitalSignatureCompletedPictureBox.Size = new System.Drawing.Size(41, 42);
+            this.digitalSignatureCompletedPictureBox.Size = new System.Drawing.Size(55, 52);
             this.digitalSignatureCompletedPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.digitalSignatureCompletedPictureBox.TabIndex = 28;
             this.digitalSignatureCompletedPictureBox.TabStop = false;
@@ -2437,10 +2453,10 @@ namespace CIEID
             // 
             this.signPINDigit_TextBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.signPINDigit_TextBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.signPINDigit_TextBox3.Location = new System.Drawing.Point(315, 117);
-            this.signPINDigit_TextBox3.Margin = new System.Windows.Forms.Padding(2);
+            this.signPINDigit_TextBox3.Location = new System.Drawing.Point(420, 144);
+            this.signPINDigit_TextBox3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signPINDigit_TextBox3.Name = "signPINDigit_TextBox3";
-            this.signPINDigit_TextBox3.Size = new System.Drawing.Size(20, 23);
+            this.signPINDigit_TextBox3.Size = new System.Drawing.Size(26, 26);
             this.signPINDigit_TextBox3.TabIndex = 24;
             this.signPINDigit_TextBox3.Tag = "11";
             this.signPINDigit_TextBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -2451,10 +2467,10 @@ namespace CIEID
             // 
             this.signPINDigit_TextBox4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.signPINDigit_TextBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.signPINDigit_TextBox4.Location = new System.Drawing.Point(339, 117);
-            this.signPINDigit_TextBox4.Margin = new System.Windows.Forms.Padding(2);
+            this.signPINDigit_TextBox4.Location = new System.Drawing.Point(452, 144);
+            this.signPINDigit_TextBox4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signPINDigit_TextBox4.Name = "signPINDigit_TextBox4";
-            this.signPINDigit_TextBox4.Size = new System.Drawing.Size(20, 23);
+            this.signPINDigit_TextBox4.Size = new System.Drawing.Size(26, 26);
             this.signPINDigit_TextBox4.TabIndex = 25;
             this.signPINDigit_TextBox4.Tag = "12";
             this.signPINDigit_TextBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -2465,10 +2481,10 @@ namespace CIEID
             // 
             this.signPINDigit_TextBox5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.signPINDigit_TextBox5.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.signPINDigit_TextBox5.Location = new System.Drawing.Point(363, 117);
-            this.signPINDigit_TextBox5.Margin = new System.Windows.Forms.Padding(2);
+            this.signPINDigit_TextBox5.Location = new System.Drawing.Point(484, 144);
+            this.signPINDigit_TextBox5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signPINDigit_TextBox5.Name = "signPINDigit_TextBox5";
-            this.signPINDigit_TextBox5.Size = new System.Drawing.Size(20, 23);
+            this.signPINDigit_TextBox5.Size = new System.Drawing.Size(25, 26);
             this.signPINDigit_TextBox5.TabIndex = 26;
             this.signPINDigit_TextBox5.Tag = "13";
             this.signPINDigit_TextBox5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -2481,10 +2497,10 @@ namespace CIEID
             this.signPINDigit_TextBox6.BackColor = System.Drawing.SystemColors.Window;
             this.signPINDigit_TextBox6.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.signPINDigit_TextBox6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.signPINDigit_TextBox6.Location = new System.Drawing.Point(387, 117);
-            this.signPINDigit_TextBox6.Margin = new System.Windows.Forms.Padding(2);
+            this.signPINDigit_TextBox6.Location = new System.Drawing.Point(516, 144);
+            this.signPINDigit_TextBox6.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signPINDigit_TextBox6.Name = "signPINDigit_TextBox6";
-            this.signPINDigit_TextBox6.Size = new System.Drawing.Size(20, 23);
+            this.signPINDigit_TextBox6.Size = new System.Drawing.Size(26, 26);
             this.signPINDigit_TextBox6.TabIndex = 27;
             this.signPINDigit_TextBox6.Tag = "14";
             this.signPINDigit_TextBox6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -2496,10 +2512,10 @@ namespace CIEID
             // 
             this.signPINDigit_TextBox7.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.signPINDigit_TextBox7.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.signPINDigit_TextBox7.Location = new System.Drawing.Point(411, 117);
-            this.signPINDigit_TextBox7.Margin = new System.Windows.Forms.Padding(2);
+            this.signPINDigit_TextBox7.Location = new System.Drawing.Point(548, 144);
+            this.signPINDigit_TextBox7.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signPINDigit_TextBox7.Name = "signPINDigit_TextBox7";
-            this.signPINDigit_TextBox7.Size = new System.Drawing.Size(20, 23);
+            this.signPINDigit_TextBox7.Size = new System.Drawing.Size(26, 26);
             this.signPINDigit_TextBox7.TabIndex = 28;
             this.signPINDigit_TextBox7.Tag = "15";
             this.signPINDigit_TextBox7.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -2511,10 +2527,10 @@ namespace CIEID
             // 
             this.signPINDigit_TextBox8.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.signPINDigit_TextBox8.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.signPINDigit_TextBox8.Location = new System.Drawing.Point(435, 117);
-            this.signPINDigit_TextBox8.Margin = new System.Windows.Forms.Padding(2);
+            this.signPINDigit_TextBox8.Location = new System.Drawing.Point(580, 144);
+            this.signPINDigit_TextBox8.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.signPINDigit_TextBox8.Name = "signPINDigit_TextBox8";
-            this.signPINDigit_TextBox8.Size = new System.Drawing.Size(20, 23);
+            this.signPINDigit_TextBox8.Size = new System.Drawing.Size(26, 26);
             this.signPINDigit_TextBox8.TabIndex = 29;
             this.signPINDigit_TextBox8.Tag = "16";
             this.signPINDigit_TextBox8.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -2526,9 +2542,10 @@ namespace CIEID
             // 
             this.labelFileNamePathSigningOperation.AutoEllipsis = true;
             this.labelFileNamePathSigningOperation.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelFileNamePathSigningOperation.Location = new System.Drawing.Point(142, 23);
+            this.labelFileNamePathSigningOperation.Location = new System.Drawing.Point(189, 28);
+            this.labelFileNamePathSigningOperation.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelFileNamePathSigningOperation.Name = "labelFileNamePathSigningOperation";
-            this.labelFileNamePathSigningOperation.Size = new System.Drawing.Size(320, 51);
+            this.labelFileNamePathSigningOperation.Size = new System.Drawing.Size(427, 63);
             this.labelFileNamePathSigningOperation.TabIndex = 2;
             this.labelFileNamePathSigningOperation.Text = "label32";
             // 
@@ -2536,9 +2553,10 @@ namespace CIEID
             // 
             this.pictureBox19.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox19.Image")));
             this.pictureBox19.InitialImage = null;
-            this.pictureBox19.Location = new System.Drawing.Point(61, 3);
+            this.pictureBox19.Location = new System.Drawing.Point(81, 4);
+            this.pictureBox19.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox19.Name = "pictureBox19";
-            this.pictureBox19.Size = new System.Drawing.Size(75, 89);
+            this.pictureBox19.Size = new System.Drawing.Size(100, 110);
             this.pictureBox19.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox19.TabIndex = 1;
             this.pictureBox19.TabStop = false;
@@ -2547,10 +2565,9 @@ namespace CIEID
             // 
             this.labelDigitalSignatureHeaderText.AutoSize = true;
             this.labelDigitalSignatureHeaderText.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelDigitalSignatureHeaderText.Location = new System.Drawing.Point(200, 18);
-            this.labelDigitalSignatureHeaderText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelDigitalSignatureHeaderText.Location = new System.Drawing.Point(267, 22);
             this.labelDigitalSignatureHeaderText.Name = "labelDigitalSignatureHeaderText";
-            this.labelDigitalSignatureHeaderText.Size = new System.Drawing.Size(255, 36);
+            this.labelDigitalSignatureHeaderText.Size = new System.Drawing.Size(315, 42);
             this.labelDigitalSignatureHeaderText.TabIndex = 29;
             this.labelDigitalSignatureHeaderText.Text = "Firma Elettronica";
             // 
@@ -2562,9 +2579,10 @@ namespace CIEID
             this.graphicSignatureCustomizationTab.Controls.Add(this.selectFileForGraphicSignatureCustomizationButton);
             this.graphicSignatureCustomizationTab.Controls.Add(this.cancelCustomizationButton);
             this.graphicSignatureCustomizationTab.Controls.Add(this.labelDigitalSignatureHeaderTextCreatingGraphicSignature);
-            this.graphicSignatureCustomizationTab.Location = new System.Drawing.Point(4, 9);
+            this.graphicSignatureCustomizationTab.Location = new System.Drawing.Point(4, 13);
+            this.graphicSignatureCustomizationTab.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.graphicSignatureCustomizationTab.Name = "graphicSignatureCustomizationTab";
-            this.graphicSignatureCustomizationTab.Size = new System.Drawing.Size(649, 533);
+            this.graphicSignatureCustomizationTab.Size = new System.Drawing.Size(868, 655);
             this.graphicSignatureCustomizationTab.TabIndex = 15;
             this.graphicSignatureCustomizationTab.Text = "tabPage11";
             // 
@@ -2574,10 +2592,10 @@ namespace CIEID
             this.generateCustomGraphicSignatureButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.generateCustomGraphicSignatureButton.FlatAppearance.BorderSize = 0;
             this.generateCustomGraphicSignatureButton.ForeColor = System.Drawing.Color.White;
-            this.generateCustomGraphicSignatureButton.Location = new System.Drawing.Point(425, 484);
-            this.generateCustomGraphicSignatureButton.Margin = new System.Windows.Forms.Padding(2);
+            this.generateCustomGraphicSignatureButton.Location = new System.Drawing.Point(567, 596);
+            this.generateCustomGraphicSignatureButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.generateCustomGraphicSignatureButton.Name = "generateCustomGraphicSignatureButton";
-            this.generateCustomGraphicSignatureButton.Size = new System.Drawing.Size(130, 28);
+            this.generateCustomGraphicSignatureButton.Size = new System.Drawing.Size(173, 34);
             this.generateCustomGraphicSignatureButton.TabIndex = 36;
             this.generateCustomGraphicSignatureButton.Text = "Crea firma";
             this.generateCustomGraphicSignatureButton.UseVisualStyleBackColor = false;
@@ -2588,24 +2606,27 @@ namespace CIEID
             this.panelDefineYourGraphicSignature.Controls.Add(this.graphicDigitalSignaturePanel);
             this.panelDefineYourGraphicSignature.Controls.Add(this.graphicSignatureCustomizationOverviewLabel);
             this.panelDefineYourGraphicSignature.Controls.Add(this.labelGraphicSignatureSecondDescription);
-            this.panelDefineYourGraphicSignature.Location = new System.Drawing.Point(73, 104);
+            this.panelDefineYourGraphicSignature.Location = new System.Drawing.Point(97, 128);
+            this.panelDefineYourGraphicSignature.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelDefineYourGraphicSignature.Name = "panelDefineYourGraphicSignature";
-            this.panelDefineYourGraphicSignature.Size = new System.Drawing.Size(501, 362);
+            this.panelDefineYourGraphicSignature.Size = new System.Drawing.Size(668, 446);
             this.panelDefineYourGraphicSignature.TabIndex = 35;
             // 
             // graphicDigitalSignaturePanel
             // 
-            this.graphicDigitalSignaturePanel.Location = new System.Drawing.Point(19, 30);
+            this.graphicDigitalSignaturePanel.Location = new System.Drawing.Point(25, 37);
+            this.graphicDigitalSignaturePanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.graphicDigitalSignaturePanel.Name = "graphicDigitalSignaturePanel";
-            this.graphicDigitalSignaturePanel.Size = new System.Drawing.Size(463, 100);
+            this.graphicDigitalSignaturePanel.Size = new System.Drawing.Size(617, 123);
             this.graphicDigitalSignaturePanel.TabIndex = 32;
             // 
             // graphicSignatureCustomizationOverviewLabel
             // 
             this.graphicSignatureCustomizationOverviewLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.graphicSignatureCustomizationOverviewLabel.Location = new System.Drawing.Point(23, 191);
+            this.graphicSignatureCustomizationOverviewLabel.Location = new System.Drawing.Point(31, 235);
+            this.graphicSignatureCustomizationOverviewLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.graphicSignatureCustomizationOverviewLabel.Name = "graphicSignatureCustomizationOverviewLabel";
-            this.graphicSignatureCustomizationOverviewLabel.Size = new System.Drawing.Size(456, 49);
+            this.graphicSignatureCustomizationOverviewLabel.Size = new System.Drawing.Size(608, 60);
             this.graphicSignatureCustomizationOverviewLabel.TabIndex = 33;
             this.graphicSignatureCustomizationOverviewLabel.Text = "Abbiamo creato per te una firma grafica, ma se preferisci puoi personalizzarla. Q" +
     "uesto passaggio non è indispensabile, ma ti consentirà di dare un tocco personal" +
@@ -2614,9 +2635,10 @@ namespace CIEID
             // labelGraphicSignatureSecondDescription
             // 
             this.labelGraphicSignatureSecondDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelGraphicSignatureSecondDescription.Location = new System.Drawing.Point(23, 288);
+            this.labelGraphicSignatureSecondDescription.Location = new System.Drawing.Point(31, 354);
+            this.labelGraphicSignatureSecondDescription.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelGraphicSignatureSecondDescription.Name = "labelGraphicSignatureSecondDescription";
-            this.labelGraphicSignatureSecondDescription.Size = new System.Drawing.Size(456, 57);
+            this.labelGraphicSignatureSecondDescription.Size = new System.Drawing.Size(608, 70);
             this.labelGraphicSignatureSecondDescription.TabIndex = 34;
             this.labelGraphicSignatureSecondDescription.Text = "Puoi caricare un file in formato PNG, se non hai un file contenente una firma gra" +
     "fica puoi realizzarne uno utilizzanto l\'app CieSign disponibile per smartphone i" +
@@ -2628,10 +2650,10 @@ namespace CIEID
             this.selectFileForGraphicSignatureCustomizationButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.selectFileForGraphicSignatureCustomizationButton.FlatAppearance.BorderSize = 0;
             this.selectFileForGraphicSignatureCustomizationButton.ForeColor = System.Drawing.Color.White;
-            this.selectFileForGraphicSignatureCustomizationButton.Location = new System.Drawing.Point(264, 484);
-            this.selectFileForGraphicSignatureCustomizationButton.Margin = new System.Windows.Forms.Padding(2);
+            this.selectFileForGraphicSignatureCustomizationButton.Location = new System.Drawing.Point(352, 596);
+            this.selectFileForGraphicSignatureCustomizationButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.selectFileForGraphicSignatureCustomizationButton.Name = "selectFileForGraphicSignatureCustomizationButton";
-            this.selectFileForGraphicSignatureCustomizationButton.Size = new System.Drawing.Size(130, 28);
+            this.selectFileForGraphicSignatureCustomizationButton.Size = new System.Drawing.Size(173, 34);
             this.selectFileForGraphicSignatureCustomizationButton.TabIndex = 31;
             this.selectFileForGraphicSignatureCustomizationButton.Text = "Seleziona un file";
             this.selectFileForGraphicSignatureCustomizationButton.UseVisualStyleBackColor = false;
@@ -2643,10 +2665,10 @@ namespace CIEID
             this.cancelCustomizationButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.cancelCustomizationButton.FlatAppearance.BorderSize = 0;
             this.cancelCustomizationButton.ForeColor = System.Drawing.Color.White;
-            this.cancelCustomizationButton.Location = new System.Drawing.Point(92, 484);
-            this.cancelCustomizationButton.Margin = new System.Windows.Forms.Padding(2);
+            this.cancelCustomizationButton.Location = new System.Drawing.Point(123, 596);
+            this.cancelCustomizationButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cancelCustomizationButton.Name = "cancelCustomizationButton";
-            this.cancelCustomizationButton.Size = new System.Drawing.Size(130, 28);
+            this.cancelCustomizationButton.Size = new System.Drawing.Size(173, 34);
             this.cancelCustomizationButton.TabIndex = 30;
             this.cancelCustomizationButton.Text = "Indietro";
             this.cancelCustomizationButton.UseVisualStyleBackColor = false;
@@ -2656,10 +2678,9 @@ namespace CIEID
             // 
             this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.AutoSize = true;
             this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.Location = new System.Drawing.Point(200, 18);
-            this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.Location = new System.Drawing.Point(267, 22);
             this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.Name = "labelDigitalSignatureHeaderTextCreatingGraphicSignature";
-            this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.Size = new System.Drawing.Size(255, 36);
+            this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.Size = new System.Drawing.Size(315, 42);
             this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.TabIndex = 27;
             this.labelDigitalSignatureHeaderTextCreatingGraphicSignature.Text = "Firma Elettronica";
             // 
@@ -2673,8 +2694,9 @@ namespace CIEID
             this.documentVerifyTab.Controls.Add(this.labelVerifySignature);
             this.documentVerifyTab.Controls.Add(this.labelDigitalSignatureHeaderTextVerifyDocument);
             this.documentVerifyTab.Location = new System.Drawing.Point(4, 9);
+            this.documentVerifyTab.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.documentVerifyTab.Name = "documentVerifyTab";
-            this.documentVerifyTab.Size = new System.Drawing.Size(649, 533);
+            this.documentVerifyTab.Size = new System.Drawing.Size(868, 659);
             this.documentVerifyTab.TabIndex = 16;
             this.documentVerifyTab.Text = "tabPage11";
             // 
@@ -2684,10 +2706,10 @@ namespace CIEID
             this.extractP7MButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.extractP7MButton.FlatAppearance.BorderSize = 0;
             this.extractP7MButton.ForeColor = System.Drawing.Color.White;
-            this.extractP7MButton.Location = new System.Drawing.Point(85, 496);
-            this.extractP7MButton.Margin = new System.Windows.Forms.Padding(2);
+            this.extractP7MButton.Location = new System.Drawing.Point(113, 614);
+            this.extractP7MButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.extractP7MButton.Name = "extractP7MButton";
-            this.extractP7MButton.Size = new System.Drawing.Size(157, 28);
+            this.extractP7MButton.Size = new System.Drawing.Size(209, 34);
             this.extractP7MButton.TabIndex = 35;
             this.extractP7MButton.Text = "Estrai";
             this.extractP7MButton.UseVisualStyleBackColor = false;
@@ -2699,26 +2721,29 @@ namespace CIEID
             this.verifyPanel.Controls.Add(this.signersCounterLabel);
             this.verifyPanel.Controls.Add(this.pictureBox23);
             this.verifyPanel.Controls.Add(this.fileNamePathVerifyLabel);
-            this.verifyPanel.Location = new System.Drawing.Point(50, 104);
+            this.verifyPanel.Location = new System.Drawing.Point(67, 128);
+            this.verifyPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.verifyPanel.Name = "verifyPanel";
-            this.verifyPanel.Size = new System.Drawing.Size(547, 384);
+            this.verifyPanel.Size = new System.Drawing.Size(729, 473);
             this.verifyPanel.TabIndex = 34;
             // 
             // pnSignerInfo
             // 
             this.pnSignerInfo.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.pnSignerInfo.Location = new System.Drawing.Point(104, 123);
+            this.pnSignerInfo.Location = new System.Drawing.Point(139, 151);
+            this.pnSignerInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pnSignerInfo.Name = "pnSignerInfo";
-            this.pnSignerInfo.Size = new System.Drawing.Size(341, 258);
+            this.pnSignerInfo.Size = new System.Drawing.Size(455, 318);
             this.pnSignerInfo.TabIndex = 32;
             // 
             // signersCounterLabel
             // 
             this.signersCounterLabel.AutoSize = true;
             this.signersCounterLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.signersCounterLabel.Location = new System.Drawing.Point(335, 89);
+            this.signersCounterLabel.Location = new System.Drawing.Point(447, 110);
+            this.signersCounterLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.signersCounterLabel.Name = "signersCounterLabel";
-            this.signersCounterLabel.Size = new System.Drawing.Size(54, 17);
+            this.signersCounterLabel.Size = new System.Drawing.Size(62, 20);
             this.signersCounterLabel.TabIndex = 31;
             this.signersCounterLabel.Text = "label41";
             // 
@@ -2726,9 +2751,10 @@ namespace CIEID
             // 
             this.pictureBox23.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox23.Image")));
             this.pictureBox23.InitialImage = null;
-            this.pictureBox23.Location = new System.Drawing.Point(61, 3);
+            this.pictureBox23.Location = new System.Drawing.Point(81, 4);
+            this.pictureBox23.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox23.Name = "pictureBox23";
-            this.pictureBox23.Size = new System.Drawing.Size(75, 89);
+            this.pictureBox23.Size = new System.Drawing.Size(100, 110);
             this.pictureBox23.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox23.TabIndex = 29;
             this.pictureBox23.TabStop = false;
@@ -2737,19 +2763,19 @@ namespace CIEID
             // 
             this.fileNamePathVerifyLabel.AutoEllipsis = true;
             this.fileNamePathVerifyLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.fileNamePathVerifyLabel.Location = new System.Drawing.Point(142, 23);
+            this.fileNamePathVerifyLabel.Location = new System.Drawing.Point(189, 28);
+            this.fileNamePathVerifyLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.fileNamePathVerifyLabel.Name = "fileNamePathVerifyLabel";
-            this.fileNamePathVerifyLabel.Size = new System.Drawing.Size(320, 51);
+            this.fileNamePathVerifyLabel.Size = new System.Drawing.Size(427, 63);
             this.fileNamePathVerifyLabel.TabIndex = 30;
             this.fileNamePathVerifyLabel.Text = "label32";
             // 
             // verifyLoadingLabel
             // 
             this.verifyLoadingLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.verifyLoadingLabel.Location = new System.Drawing.Point(200, 239);
-            this.verifyLoadingLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.verifyLoadingLabel.Location = new System.Drawing.Point(267, 294);
             this.verifyLoadingLabel.Name = "verifyLoadingLabel";
-            this.verifyLoadingLabel.Size = new System.Drawing.Size(279, 47);
+            this.verifyLoadingLabel.Size = new System.Drawing.Size(372, 58);
             this.verifyLoadingLabel.TabIndex = 31;
             this.verifyLoadingLabel.Text = "Verifica in corso...";
             // 
@@ -2759,10 +2785,10 @@ namespace CIEID
             this.closeVerifyButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.closeVerifyButton.FlatAppearance.BorderSize = 0;
             this.closeVerifyButton.ForeColor = System.Drawing.Color.White;
-            this.closeVerifyButton.Location = new System.Drawing.Point(388, 493);
-            this.closeVerifyButton.Margin = new System.Windows.Forms.Padding(2);
+            this.closeVerifyButton.Location = new System.Drawing.Point(517, 611);
+            this.closeVerifyButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.closeVerifyButton.Name = "closeVerifyButton";
-            this.closeVerifyButton.Size = new System.Drawing.Size(157, 28);
+            this.closeVerifyButton.Size = new System.Drawing.Size(209, 34);
             this.closeVerifyButton.TabIndex = 28;
             this.closeVerifyButton.Text = "CONCLUDI";
             this.closeVerifyButton.UseVisualStyleBackColor = false;
@@ -2773,10 +2799,9 @@ namespace CIEID
             this.labelVerifySignature.AutoSize = true;
             this.labelVerifySignature.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelVerifySignature.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.labelVerifySignature.Location = new System.Drawing.Point(225, 65);
-            this.labelVerifySignature.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelVerifySignature.Location = new System.Drawing.Point(300, 80);
             this.labelVerifySignature.Name = "labelVerifySignature";
-            this.labelVerifySignature.Size = new System.Drawing.Size(205, 20);
+            this.labelVerifySignature.Size = new System.Drawing.Size(244, 25);
             this.labelVerifySignature.TabIndex = 27;
             this.labelVerifySignature.Text = "Verifica firma elettronica";
             // 
@@ -2784,10 +2809,9 @@ namespace CIEID
             // 
             this.labelDigitalSignatureHeaderTextVerifyDocument.AutoSize = true;
             this.labelDigitalSignatureHeaderTextVerifyDocument.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelDigitalSignatureHeaderTextVerifyDocument.Location = new System.Drawing.Point(200, 18);
-            this.labelDigitalSignatureHeaderTextVerifyDocument.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelDigitalSignatureHeaderTextVerifyDocument.Location = new System.Drawing.Point(267, 22);
             this.labelDigitalSignatureHeaderTextVerifyDocument.Name = "labelDigitalSignatureHeaderTextVerifyDocument";
-            this.labelDigitalSignatureHeaderTextVerifyDocument.Size = new System.Drawing.Size(255, 36);
+            this.labelDigitalSignatureHeaderTextVerifyDocument.Size = new System.Drawing.Size(315, 42);
             this.labelDigitalSignatureHeaderTextVerifyDocument.TabIndex = 26;
             this.labelDigitalSignatureHeaderTextVerifyDocument.Text = "Firma Elettronica";
             // 
@@ -2796,9 +2820,10 @@ namespace CIEID
             this.tabSettings.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.tabSettings.Controls.Add(this.tabControlPrefConfigurationOptions);
             this.tabSettings.Controls.Add(this.panelSetButtonsInOptions);
-            this.tabSettings.Location = new System.Drawing.Point(4, 9);
+            this.tabSettings.Location = new System.Drawing.Point(4, 13);
+            this.tabSettings.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabSettings.Name = "tabSettings";
-            this.tabSettings.Size = new System.Drawing.Size(649, 533);
+            this.tabSettings.Size = new System.Drawing.Size(868, 655);
             this.tabSettings.TabIndex = 17;
             // 
             // tabControlPrefConfigurationOptions
@@ -2806,11 +2831,11 @@ namespace CIEID
             this.tabControlPrefConfigurationOptions.Controls.Add(this.tabConfigProxy);
             this.tabControlPrefConfigurationOptions.Controls.Add(this.tabConfigLogging);
             this.tabControlPrefConfigurationOptions.Controls.Add(this.tabPage1);
-            this.tabControlPrefConfigurationOptions.Location = new System.Drawing.Point(16, 8);
-            this.tabControlPrefConfigurationOptions.Margin = new System.Windows.Forms.Padding(16, 8, 16, 8);
+            this.tabControlPrefConfigurationOptions.Location = new System.Drawing.Point(21, 10);
+            this.tabControlPrefConfigurationOptions.Margin = new System.Windows.Forms.Padding(21, 10, 21, 10);
             this.tabControlPrefConfigurationOptions.Name = "tabControlPrefConfigurationOptions";
             this.tabControlPrefConfigurationOptions.SelectedIndex = 0;
-            this.tabControlPrefConfigurationOptions.Size = new System.Drawing.Size(617, 477);
+            this.tabControlPrefConfigurationOptions.Size = new System.Drawing.Size(823, 587);
             this.tabControlPrefConfigurationOptions.TabIndex = 39;
             // 
             // tabConfigProxy
@@ -2818,10 +2843,11 @@ namespace CIEID
             this.tabConfigProxy.Controls.Add(this.panelProxyConfig);
             this.tabConfigProxy.Controls.Add(this.labelProxyConfigurationHeaderText);
             this.tabConfigProxy.Controls.Add(this.labelProxyConfigurationDescription);
-            this.tabConfigProxy.Location = new System.Drawing.Point(4, 22);
+            this.tabConfigProxy.Location = new System.Drawing.Point(4, 25);
+            this.tabConfigProxy.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabConfigProxy.Name = "tabConfigProxy";
-            this.tabConfigProxy.Padding = new System.Windows.Forms.Padding(3);
-            this.tabConfigProxy.Size = new System.Drawing.Size(609, 451);
+            this.tabConfigProxy.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabConfigProxy.Size = new System.Drawing.Size(815, 558);
             this.tabConfigProxy.TabIndex = 0;
             this.tabConfigProxy.Text = "Proxy";
             this.tabConfigProxy.UseVisualStyleBackColor = true;
@@ -2837,38 +2863,39 @@ namespace CIEID
             this.panelProxyConfig.Controls.Add(this.txtUrl);
             this.panelProxyConfig.Controls.Add(this.labelUsernameProxyConfiguration);
             this.panelProxyConfig.Controls.Add(this.txtUsername);
-            this.panelProxyConfig.Location = new System.Drawing.Point(56, 74);
+            this.panelProxyConfig.Location = new System.Drawing.Point(75, 91);
+            this.panelProxyConfig.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelProxyConfig.Name = "panelProxyConfig";
-            this.panelProxyConfig.Size = new System.Drawing.Size(501, 362);
+            this.panelProxyConfig.Size = new System.Drawing.Size(668, 446);
             this.panelProxyConfig.TabIndex = 36;
             // 
             // labelPortProxyConfiguration
             // 
             this.labelPortProxyConfiguration.AutoSize = true;
             this.labelPortProxyConfiguration.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPortProxyConfiguration.Location = new System.Drawing.Point(334, 94);
-            this.labelPortProxyConfiguration.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelPortProxyConfiguration.Location = new System.Drawing.Point(445, 116);
             this.labelPortProxyConfiguration.Name = "labelPortProxyConfiguration";
-            this.labelPortProxyConfiguration.Size = new System.Drawing.Size(47, 20);
+            this.labelPortProxyConfiguration.Size = new System.Drawing.Size(58, 25);
             this.labelPortProxyConfiguration.TabIndex = 37;
             this.labelPortProxyConfiguration.Text = "Porta";
             // 
             // txtPort
             // 
             this.txtPort.Enabled = false;
-            this.txtPort.Location = new System.Drawing.Point(338, 116);
-            this.txtPort.Margin = new System.Windows.Forms.Padding(2);
+            this.txtPort.Location = new System.Drawing.Point(451, 143);
+            this.txtPort.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtPort.Name = "txtPort";
-            this.txtPort.Size = new System.Drawing.Size(54, 20);
+            this.txtPort.Size = new System.Drawing.Size(71, 22);
             this.txtPort.TabIndex = 30;
             this.txtPort.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtPort_KeyPress);
             // 
             // txtPassword
             // 
             this.txtPassword.Enabled = false;
-            this.txtPassword.Location = new System.Drawing.Point(89, 260);
+            this.txtPassword.Location = new System.Drawing.Point(119, 320);
+            this.txtPassword.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtPassword.Name = "txtPassword";
-            this.txtPassword.Size = new System.Drawing.Size(217, 20);
+            this.txtPassword.Size = new System.Drawing.Size(288, 22);
             this.txtPassword.TabIndex = 35;
             this.txtPassword.UseSystemPasswordChar = true;
             // 
@@ -2876,9 +2903,10 @@ namespace CIEID
             // 
             this.showPasswordCheckBox.AutoSize = true;
             this.showPasswordCheckBox.Enabled = false;
-            this.showPasswordCheckBox.Location = new System.Drawing.Point(329, 263);
+            this.showPasswordCheckBox.Location = new System.Drawing.Point(439, 324);
+            this.showPasswordCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.showPasswordCheckBox.Name = "showPasswordCheckBox";
-            this.showPasswordCheckBox.Size = new System.Drawing.Size(120, 17);
+            this.showPasswordCheckBox.Size = new System.Drawing.Size(151, 20);
             this.showPasswordCheckBox.TabIndex = 36;
             this.showPasswordCheckBox.Text = "Visualizza password";
             this.showPasswordCheckBox.UseVisualStyleBackColor = true;
@@ -2888,10 +2916,9 @@ namespace CIEID
             // 
             this.labelIPAddressProxyConfiguration.AutoSize = true;
             this.labelIPAddressProxyConfiguration.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelIPAddressProxyConfiguration.Location = new System.Drawing.Point(87, 91);
-            this.labelIPAddressProxyConfiguration.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelIPAddressProxyConfiguration.Location = new System.Drawing.Point(116, 112);
             this.labelIPAddressProxyConfiguration.Name = "labelIPAddressProxyConfiguration";
-            this.labelIPAddressProxyConfiguration.Size = new System.Drawing.Size(208, 20);
+            this.labelIPAddressProxyConfiguration.Size = new System.Drawing.Size(256, 25);
             this.labelIPAddressProxyConfiguration.TabIndex = 27;
             this.labelIPAddressProxyConfiguration.Text = "Indirizzo (URL o indirizzo IP)";
             // 
@@ -2899,50 +2926,47 @@ namespace CIEID
             // 
             this.labelPasswordProxyConfiguration.AutoSize = true;
             this.labelPasswordProxyConfiguration.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPasswordProxyConfiguration.Location = new System.Drawing.Point(87, 237);
-            this.labelPasswordProxyConfiguration.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelPasswordProxyConfiguration.Location = new System.Drawing.Point(116, 292);
             this.labelPasswordProxyConfiguration.Name = "labelPasswordProxyConfiguration";
-            this.labelPasswordProxyConfiguration.Size = new System.Drawing.Size(78, 20);
+            this.labelPasswordProxyConfiguration.Size = new System.Drawing.Size(98, 25);
             this.labelPasswordProxyConfiguration.TabIndex = 34;
             this.labelPasswordProxyConfiguration.Text = "Password";
             // 
             // txtUrl
             // 
             this.txtUrl.Enabled = false;
-            this.txtUrl.Location = new System.Drawing.Point(89, 117);
-            this.txtUrl.Margin = new System.Windows.Forms.Padding(2);
+            this.txtUrl.Location = new System.Drawing.Point(119, 144);
+            this.txtUrl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtUrl.Name = "txtUrl";
-            this.txtUrl.Size = new System.Drawing.Size(217, 20);
+            this.txtUrl.Size = new System.Drawing.Size(288, 22);
             this.txtUrl.TabIndex = 28;
             // 
             // labelUsernameProxyConfiguration
             // 
             this.labelUsernameProxyConfiguration.AutoSize = true;
             this.labelUsernameProxyConfiguration.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelUsernameProxyConfiguration.Location = new System.Drawing.Point(87, 167);
-            this.labelUsernameProxyConfiguration.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelUsernameProxyConfiguration.Location = new System.Drawing.Point(116, 206);
             this.labelUsernameProxyConfiguration.Name = "labelUsernameProxyConfiguration";
-            this.labelUsernameProxyConfiguration.Size = new System.Drawing.Size(83, 20);
+            this.labelUsernameProxyConfiguration.Size = new System.Drawing.Size(102, 25);
             this.labelUsernameProxyConfiguration.TabIndex = 33;
             this.labelUsernameProxyConfiguration.Text = "Username";
             // 
             // txtUsername
             // 
             this.txtUsername.Enabled = false;
-            this.txtUsername.Location = new System.Drawing.Point(89, 189);
-            this.txtUsername.Margin = new System.Windows.Forms.Padding(2);
+            this.txtUsername.Location = new System.Drawing.Point(119, 233);
+            this.txtUsername.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtUsername.Name = "txtUsername";
-            this.txtUsername.Size = new System.Drawing.Size(217, 20);
+            this.txtUsername.Size = new System.Drawing.Size(288, 22);
             this.txtUsername.TabIndex = 32;
             // 
             // labelProxyConfigurationHeaderText
             // 
             this.labelProxyConfigurationHeaderText.AutoSize = true;
             this.labelProxyConfigurationHeaderText.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelProxyConfigurationHeaderText.Location = new System.Drawing.Point(100, 14);
-            this.labelProxyConfigurationHeaderText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelProxyConfigurationHeaderText.Location = new System.Drawing.Point(133, 17);
             this.labelProxyConfigurationHeaderText.Name = "labelProxyConfigurationHeaderText";
-            this.labelProxyConfigurationHeaderText.Size = new System.Drawing.Size(416, 36);
+            this.labelProxyConfigurationHeaderText.Size = new System.Drawing.Size(513, 42);
             this.labelProxyConfigurationHeaderText.TabIndex = 25;
             this.labelProxyConfigurationHeaderText.Text = "Configurazione server proxy";
             // 
@@ -2951,10 +2975,9 @@ namespace CIEID
             this.labelProxyConfigurationDescription.AutoSize = true;
             this.labelProxyConfigurationDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelProxyConfigurationDescription.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.labelProxyConfigurationDescription.Location = new System.Drawing.Point(84, 54);
-            this.labelProxyConfigurationDescription.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelProxyConfigurationDescription.Location = new System.Drawing.Point(112, 66);
             this.labelProxyConfigurationDescription.Name = "labelProxyConfigurationDescription";
-            this.labelProxyConfigurationDescription.Size = new System.Drawing.Size(453, 18);
+            this.labelProxyConfigurationDescription.Size = new System.Drawing.Size(566, 24);
             this.labelProxyConfigurationDescription.TabIndex = 26;
             this.labelProxyConfigurationDescription.Text = "Inserisci l\'indirizzo del server proxy ed eventuali credenziali";
             // 
@@ -2965,10 +2988,11 @@ namespace CIEID
             this.tabConfigLogging.Controls.Add(this.labelLogConfigurationHeaderText);
             this.tabConfigLogging.Controls.Add(this.labelLogConfigurationDescription);
             this.tabConfigLogging.Controls.Add(this.panelLogConfiguration);
-            this.tabConfigLogging.Location = new System.Drawing.Point(4, 22);
+            this.tabConfigLogging.Location = new System.Drawing.Point(4, 25);
+            this.tabConfigLogging.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabConfigLogging.Name = "tabConfigLogging";
-            this.tabConfigLogging.Padding = new System.Windows.Forms.Padding(3);
-            this.tabConfigLogging.Size = new System.Drawing.Size(609, 451);
+            this.tabConfigLogging.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabConfigLogging.Size = new System.Drawing.Size(815, 558);
             this.tabConfigLogging.TabIndex = 1;
             this.tabConfigLogging.Text = "Log";
             this.tabConfigLogging.UseVisualStyleBackColor = true;
@@ -2979,10 +3003,10 @@ namespace CIEID
             this.clearLogFolderBtn.BackColor = System.Drawing.Color.CornflowerBlue;
             this.clearLogFolderBtn.FlatAppearance.BorderSize = 0;
             this.clearLogFolderBtn.ForeColor = System.Drawing.Color.White;
-            this.clearLogFolderBtn.Location = new System.Drawing.Point(326, 391);
-            this.clearLogFolderBtn.Margin = new System.Windows.Forms.Padding(2);
+            this.clearLogFolderBtn.Location = new System.Drawing.Point(435, 478);
+            this.clearLogFolderBtn.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.clearLogFolderBtn.Name = "clearLogFolderBtn";
-            this.clearLogFolderBtn.Size = new System.Drawing.Size(160, 40);
+            this.clearLogFolderBtn.Size = new System.Drawing.Size(213, 49);
             this.clearLogFolderBtn.TabIndex = 40;
             this.clearLogFolderBtn.Text = "Elimina cache dei log";
             this.clearLogFolderBtn.UseVisualStyleBackColor = false;
@@ -2994,10 +3018,10 @@ namespace CIEID
             this.collectLogBtn.BackColor = System.Drawing.Color.CornflowerBlue;
             this.collectLogBtn.FlatAppearance.BorderSize = 0;
             this.collectLogBtn.ForeColor = System.Drawing.Color.White;
-            this.collectLogBtn.Location = new System.Drawing.Point(126, 391);
-            this.collectLogBtn.Margin = new System.Windows.Forms.Padding(2);
+            this.collectLogBtn.Location = new System.Drawing.Point(168, 478);
+            this.collectLogBtn.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.collectLogBtn.Name = "collectLogBtn";
-            this.collectLogBtn.Size = new System.Drawing.Size(160, 40);
+            this.collectLogBtn.Size = new System.Drawing.Size(213, 49);
             this.collectLogBtn.TabIndex = 39;
             this.collectLogBtn.Text = "Raccogli log per diagnostica";
             this.collectLogBtn.UseVisualStyleBackColor = false;
@@ -3007,10 +3031,9 @@ namespace CIEID
             // 
             this.labelLogConfigurationHeaderText.AutoSize = true;
             this.labelLogConfigurationHeaderText.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelLogConfigurationHeaderText.Location = new System.Drawing.Point(106, 14);
-            this.labelLogConfigurationHeaderText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelLogConfigurationHeaderText.Location = new System.Drawing.Point(141, 17);
             this.labelLogConfigurationHeaderText.Name = "labelLogConfigurationHeaderText";
-            this.labelLogConfigurationHeaderText.Size = new System.Drawing.Size(411, 36);
+            this.labelLogConfigurationHeaderText.Size = new System.Drawing.Size(501, 42);
             this.labelLogConfigurationHeaderText.TabIndex = 27;
             this.labelLogConfigurationHeaderText.Text = "Configurazione livello di log";
             // 
@@ -3019,10 +3042,9 @@ namespace CIEID
             this.labelLogConfigurationDescription.AutoSize = true;
             this.labelLogConfigurationDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelLogConfigurationDescription.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.labelLogConfigurationDescription.Location = new System.Drawing.Point(61, 53);
-            this.labelLogConfigurationDescription.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelLogConfigurationDescription.Location = new System.Drawing.Point(81, 65);
             this.labelLogConfigurationDescription.Name = "labelLogConfigurationDescription";
-            this.labelLogConfigurationDescription.Size = new System.Drawing.Size(490, 18);
+            this.labelLogConfigurationDescription.Size = new System.Drawing.Size(610, 24);
             this.labelLogConfigurationDescription.TabIndex = 28;
             this.labelLogConfigurationDescription.Text = "Seleziona il livello desiderato per applicazione desktop e libreria";
             // 
@@ -3030,9 +3052,10 @@ namespace CIEID
             // 
             this.panelLogConfiguration.Controls.Add(this.configLibraryLoggingGroupBox);
             this.panelLogConfiguration.Controls.Add(this.configApplicationLoggingGroupBox);
-            this.panelLogConfiguration.Location = new System.Drawing.Point(56, 74);
+            this.panelLogConfiguration.Location = new System.Drawing.Point(75, 91);
+            this.panelLogConfiguration.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelLogConfiguration.Name = "panelLogConfiguration";
-            this.panelLogConfiguration.Size = new System.Drawing.Size(501, 312);
+            this.panelLogConfiguration.Size = new System.Drawing.Size(668, 384);
             this.panelLogConfiguration.TabIndex = 0;
             // 
             // configLibraryLoggingGroupBox
@@ -3042,9 +3065,11 @@ namespace CIEID
             this.configLibraryLoggingGroupBox.Controls.Add(this.rbLoggingLibError);
             this.configLibraryLoggingGroupBox.Controls.Add(this.rbLoggingLibNone);
             this.configLibraryLoggingGroupBox.Enabled = false;
-            this.configLibraryLoggingGroupBox.Location = new System.Drawing.Point(270, 42);
+            this.configLibraryLoggingGroupBox.Location = new System.Drawing.Point(360, 52);
+            this.configLibraryLoggingGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.configLibraryLoggingGroupBox.Name = "configLibraryLoggingGroupBox";
-            this.configLibraryLoggingGroupBox.Size = new System.Drawing.Size(192, 256);
+            this.configLibraryLoggingGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.configLibraryLoggingGroupBox.Size = new System.Drawing.Size(256, 315);
             this.configLibraryLoggingGroupBox.TabIndex = 2;
             this.configLibraryLoggingGroupBox.TabStop = false;
             this.configLibraryLoggingGroupBox.Text = "Libreria";
@@ -3052,9 +3077,10 @@ namespace CIEID
             // rbLoggingLibDebug
             // 
             this.rbLoggingLibDebug.AutoSize = true;
-            this.rbLoggingLibDebug.Location = new System.Drawing.Point(64, 202);
+            this.rbLoggingLibDebug.Location = new System.Drawing.Point(85, 249);
+            this.rbLoggingLibDebug.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbLoggingLibDebug.Name = "rbLoggingLibDebug";
-            this.rbLoggingLibDebug.Size = new System.Drawing.Size(57, 17);
+            this.rbLoggingLibDebug.Size = new System.Drawing.Size(69, 20);
             this.rbLoggingLibDebug.TabIndex = 3;
             this.rbLoggingLibDebug.TabStop = true;
             this.rbLoggingLibDebug.Text = "Debug";
@@ -3063,9 +3089,10 @@ namespace CIEID
             // rbLoggingLibInfo
             // 
             this.rbLoggingLibInfo.AutoSize = true;
-            this.rbLoggingLibInfo.Location = new System.Drawing.Point(64, 147);
+            this.rbLoggingLibInfo.Location = new System.Drawing.Point(85, 181);
+            this.rbLoggingLibInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbLoggingLibInfo.Name = "rbLoggingLibInfo";
-            this.rbLoggingLibInfo.Size = new System.Drawing.Size(43, 17);
+            this.rbLoggingLibInfo.Size = new System.Drawing.Size(49, 20);
             this.rbLoggingLibInfo.TabIndex = 2;
             this.rbLoggingLibInfo.TabStop = true;
             this.rbLoggingLibInfo.Text = "Info";
@@ -3074,9 +3101,10 @@ namespace CIEID
             // rbLoggingLibError
             // 
             this.rbLoggingLibError.AutoSize = true;
-            this.rbLoggingLibError.Location = new System.Drawing.Point(64, 92);
+            this.rbLoggingLibError.Location = new System.Drawing.Point(85, 113);
+            this.rbLoggingLibError.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbLoggingLibError.Name = "rbLoggingLibError";
-            this.rbLoggingLibError.Size = new System.Drawing.Size(47, 17);
+            this.rbLoggingLibError.Size = new System.Drawing.Size(57, 20);
             this.rbLoggingLibError.TabIndex = 1;
             this.rbLoggingLibError.TabStop = true;
             this.rbLoggingLibError.Text = "Error";
@@ -3085,9 +3113,10 @@ namespace CIEID
             // rbLoggingLibNone
             // 
             this.rbLoggingLibNone.AutoSize = true;
-            this.rbLoggingLibNone.Location = new System.Drawing.Point(64, 37);
+            this.rbLoggingLibNone.Location = new System.Drawing.Point(85, 46);
+            this.rbLoggingLibNone.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbLoggingLibNone.Name = "rbLoggingLibNone";
-            this.rbLoggingLibNone.Size = new System.Drawing.Size(67, 17);
+            this.rbLoggingLibNone.Size = new System.Drawing.Size(82, 20);
             this.rbLoggingLibNone.TabIndex = 0;
             this.rbLoggingLibNone.TabStop = true;
             this.rbLoggingLibNone.Text = "Nessuno";
@@ -3100,9 +3129,11 @@ namespace CIEID
             this.configApplicationLoggingGroupBox.Controls.Add(this.rbLoggingAppInfo);
             this.configApplicationLoggingGroupBox.Controls.Add(this.rbLoggingAppNone);
             this.configApplicationLoggingGroupBox.Enabled = false;
-            this.configApplicationLoggingGroupBox.Location = new System.Drawing.Point(38, 42);
+            this.configApplicationLoggingGroupBox.Location = new System.Drawing.Point(51, 52);
+            this.configApplicationLoggingGroupBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.configApplicationLoggingGroupBox.Name = "configApplicationLoggingGroupBox";
-            this.configApplicationLoggingGroupBox.Size = new System.Drawing.Size(192, 256);
+            this.configApplicationLoggingGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.configApplicationLoggingGroupBox.Size = new System.Drawing.Size(256, 315);
             this.configApplicationLoggingGroupBox.TabIndex = 1;
             this.configApplicationLoggingGroupBox.TabStop = false;
             this.configApplicationLoggingGroupBox.Text = "Applicazione desktop";
@@ -3110,9 +3141,10 @@ namespace CIEID
             // rbLoggingAppError
             // 
             this.rbLoggingAppError.AutoSize = true;
-            this.rbLoggingAppError.Location = new System.Drawing.Point(64, 92);
+            this.rbLoggingAppError.Location = new System.Drawing.Point(85, 113);
+            this.rbLoggingAppError.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbLoggingAppError.Name = "rbLoggingAppError";
-            this.rbLoggingAppError.Size = new System.Drawing.Size(47, 17);
+            this.rbLoggingAppError.Size = new System.Drawing.Size(57, 20);
             this.rbLoggingAppError.TabIndex = 1;
             this.rbLoggingAppError.TabStop = true;
             this.rbLoggingAppError.Text = "Error";
@@ -3121,9 +3153,10 @@ namespace CIEID
             // rbLoggingAppDebug
             // 
             this.rbLoggingAppDebug.AutoSize = true;
-            this.rbLoggingAppDebug.Location = new System.Drawing.Point(64, 202);
+            this.rbLoggingAppDebug.Location = new System.Drawing.Point(85, 249);
+            this.rbLoggingAppDebug.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbLoggingAppDebug.Name = "rbLoggingAppDebug";
-            this.rbLoggingAppDebug.Size = new System.Drawing.Size(57, 17);
+            this.rbLoggingAppDebug.Size = new System.Drawing.Size(69, 20);
             this.rbLoggingAppDebug.TabIndex = 3;
             this.rbLoggingAppDebug.TabStop = true;
             this.rbLoggingAppDebug.Text = "Debug";
@@ -3132,9 +3165,10 @@ namespace CIEID
             // rbLoggingAppInfo
             // 
             this.rbLoggingAppInfo.AutoSize = true;
-            this.rbLoggingAppInfo.Location = new System.Drawing.Point(64, 147);
+            this.rbLoggingAppInfo.Location = new System.Drawing.Point(85, 181);
+            this.rbLoggingAppInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbLoggingAppInfo.Name = "rbLoggingAppInfo";
-            this.rbLoggingAppInfo.Size = new System.Drawing.Size(43, 17);
+            this.rbLoggingAppInfo.Size = new System.Drawing.Size(49, 20);
             this.rbLoggingAppInfo.TabIndex = 1;
             this.rbLoggingAppInfo.TabStop = true;
             this.rbLoggingAppInfo.Text = "Info";
@@ -3143,9 +3177,10 @@ namespace CIEID
             // rbLoggingAppNone
             // 
             this.rbLoggingAppNone.AutoSize = true;
-            this.rbLoggingAppNone.Location = new System.Drawing.Point(64, 37);
+            this.rbLoggingAppNone.Location = new System.Drawing.Point(85, 46);
+            this.rbLoggingAppNone.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbLoggingAppNone.Name = "rbLoggingAppNone";
-            this.rbLoggingAppNone.Size = new System.Drawing.Size(67, 17);
+            this.rbLoggingAppNone.Size = new System.Drawing.Size(82, 20);
             this.rbLoggingAppNone.TabIndex = 0;
             this.rbLoggingAppNone.TabStop = true;
             this.rbLoggingAppNone.Text = "Nessuno";
@@ -3156,10 +3191,11 @@ namespace CIEID
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.showIntroductionScreens);
             this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Location = new System.Drawing.Point(4, 25);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(609, 451);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage1.Size = new System.Drawing.Size(815, 558);
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "Preferenze";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -3167,9 +3203,10 @@ namespace CIEID
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(29, 86);
+            this.label2.Location = new System.Drawing.Point(39, 106);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(558, 13);
+            this.label2.Size = new System.Drawing.Size(705, 16);
             this.label2.TabIndex = 31;
             this.label2.Text = "Le opzioni di seguito riportate consentono di personalizzare il comportamento di " +
     "CIE ID secondo le proprie preferenze:";
@@ -3178,9 +3215,10 @@ namespace CIEID
             // 
             this.showIntroductionScreens.AutoSize = true;
             this.showIntroductionScreens.Enabled = false;
-            this.showIntroductionScreens.Location = new System.Drawing.Point(32, 128);
+            this.showIntroductionScreens.Location = new System.Drawing.Point(43, 158);
+            this.showIntroductionScreens.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.showIntroductionScreens.Name = "showIntroductionScreens";
-            this.showIntroductionScreens.Size = new System.Drawing.Size(251, 17);
+            this.showIntroductionScreens.Size = new System.Drawing.Size(310, 20);
             this.showIntroductionScreens.TabIndex = 30;
             this.showIntroductionScreens.Text = "Mostra schermate introduttive all\'avvio di CIE ID";
             this.showIntroductionScreens.UseVisualStyleBackColor = true;
@@ -3190,10 +3228,9 @@ namespace CIEID
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(109, 14);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(145, 17);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(391, 36);
+            this.label1.Size = new System.Drawing.Size(484, 42);
             this.label1.TabIndex = 29;
             this.label1.Text = "Configurazione preferenze";
             // 
@@ -3201,9 +3238,10 @@ namespace CIEID
             // 
             this.panelSetButtonsInOptions.Controls.Add(this.editSettingsButton);
             this.panelSetButtonsInOptions.Controls.Add(this.saveSettingsButton);
-            this.panelSetButtonsInOptions.Location = new System.Drawing.Point(107, 492);
+            this.panelSetButtonsInOptions.Location = new System.Drawing.Point(143, 606);
+            this.panelSetButtonsInOptions.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelSetButtonsInOptions.Name = "panelSetButtonsInOptions";
-            this.panelSetButtonsInOptions.Size = new System.Drawing.Size(440, 28);
+            this.panelSetButtonsInOptions.Size = new System.Drawing.Size(587, 34);
             this.panelSetButtonsInOptions.TabIndex = 38;
             // 
             // editSettingsButton
@@ -3212,10 +3250,10 @@ namespace CIEID
             this.editSettingsButton.BackColor = System.Drawing.Color.CornflowerBlue;
             this.editSettingsButton.FlatAppearance.BorderSize = 0;
             this.editSettingsButton.ForeColor = System.Drawing.Color.White;
-            this.editSettingsButton.Location = new System.Drawing.Point(271, 2);
-            this.editSettingsButton.Margin = new System.Windows.Forms.Padding(2);
+            this.editSettingsButton.Location = new System.Drawing.Point(361, 2);
+            this.editSettingsButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.editSettingsButton.Name = "editSettingsButton";
-            this.editSettingsButton.Size = new System.Drawing.Size(157, 28);
+            this.editSettingsButton.Size = new System.Drawing.Size(209, 34);
             this.editSettingsButton.TabIndex = 38;
             this.editSettingsButton.Text = "Modifica";
             this.editSettingsButton.UseVisualStyleBackColor = false;
@@ -3228,10 +3266,10 @@ namespace CIEID
             this.saveSettingsButton.Enabled = false;
             this.saveSettingsButton.FlatAppearance.BorderSize = 0;
             this.saveSettingsButton.ForeColor = System.Drawing.Color.White;
-            this.saveSettingsButton.Location = new System.Drawing.Point(16, 2);
-            this.saveSettingsButton.Margin = new System.Windows.Forms.Padding(2);
+            this.saveSettingsButton.Location = new System.Drawing.Point(21, 2);
+            this.saveSettingsButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.saveSettingsButton.Name = "saveSettingsButton";
-            this.saveSettingsButton.Size = new System.Drawing.Size(157, 28);
+            this.saveSettingsButton.Size = new System.Drawing.Size(209, 34);
             this.saveSettingsButton.TabIndex = 37;
             this.saveSettingsButton.Text = "Salva";
             this.saveSettingsButton.UseVisualStyleBackColor = false;
@@ -3248,10 +3286,10 @@ namespace CIEID
             this.menuHomeButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuHomeButton.Image = ((System.Drawing.Image)(resources.GetObject("menuHomeButton.Image")));
             this.menuHomeButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.menuHomeButton.Location = new System.Drawing.Point(6, 114);
-            this.menuHomeButton.Margin = new System.Windows.Forms.Padding(2);
+            this.menuHomeButton.Location = new System.Drawing.Point(8, 140);
+            this.menuHomeButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.menuHomeButton.Name = "menuHomeButton";
-            this.menuHomeButton.Size = new System.Drawing.Size(140, 36);
+            this.menuHomeButton.Size = new System.Drawing.Size(187, 44);
             this.menuHomeButton.TabIndex = 1;
             this.menuHomeButton.Text = "  Home";
             this.menuHomeButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -3262,10 +3300,10 @@ namespace CIEID
             // pictureBoxLogo
             // 
             this.pictureBoxLogo.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxLogo.Image")));
-            this.pictureBoxLogo.Location = new System.Drawing.Point(29, 10);
-            this.pictureBoxLogo.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBoxLogo.Location = new System.Drawing.Point(39, 12);
+            this.pictureBoxLogo.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBoxLogo.Name = "pictureBoxLogo";
-            this.pictureBoxLogo.Size = new System.Drawing.Size(82, 89);
+            this.pictureBoxLogo.Size = new System.Drawing.Size(109, 110);
             this.pictureBoxLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxLogo.TabIndex = 2;
             this.pictureBoxLogo.TabStop = false;
@@ -3281,10 +3319,10 @@ namespace CIEID
             this.menuChangePINButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuChangePINButton.Image = ((System.Drawing.Image)(resources.GetObject("menuChangePINButton.Image")));
             this.menuChangePINButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.menuChangePINButton.Location = new System.Drawing.Point(6, 234);
-            this.menuChangePINButton.Margin = new System.Windows.Forms.Padding(2);
+            this.menuChangePINButton.Location = new System.Drawing.Point(8, 288);
+            this.menuChangePINButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.menuChangePINButton.Name = "menuChangePINButton";
-            this.menuChangePINButton.Size = new System.Drawing.Size(140, 36);
+            this.menuChangePINButton.Size = new System.Drawing.Size(187, 44);
             this.menuChangePINButton.TabIndex = 3;
             this.menuChangePINButton.Text = "  Cambia PIN";
             this.menuChangePINButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -3303,10 +3341,10 @@ namespace CIEID
             this.menuUnlockPINButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuUnlockPINButton.Image = ((System.Drawing.Image)(resources.GetObject("menuUnlockPINButton.Image")));
             this.menuUnlockPINButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.menuUnlockPINButton.Location = new System.Drawing.Point(6, 277);
-            this.menuUnlockPINButton.Margin = new System.Windows.Forms.Padding(2);
+            this.menuUnlockPINButton.Location = new System.Drawing.Point(8, 341);
+            this.menuUnlockPINButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.menuUnlockPINButton.Name = "menuUnlockPINButton";
-            this.menuUnlockPINButton.Size = new System.Drawing.Size(140, 36);
+            this.menuUnlockPINButton.Size = new System.Drawing.Size(187, 44);
             this.menuUnlockPINButton.TabIndex = 4;
             this.menuUnlockPINButton.Text = "  Sblocca Carta";
             this.menuUnlockPINButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -3325,10 +3363,10 @@ namespace CIEID
             this.menuTutorialButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuTutorialButton.Image = ((System.Drawing.Image)(resources.GetObject("menuTutorialButton.Image")));
             this.menuTutorialButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.menuTutorialButton.Location = new System.Drawing.Point(6, 320);
-            this.menuTutorialButton.Margin = new System.Windows.Forms.Padding(2);
+            this.menuTutorialButton.Location = new System.Drawing.Point(8, 394);
+            this.menuTutorialButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.menuTutorialButton.Name = "menuTutorialButton";
-            this.menuTutorialButton.Size = new System.Drawing.Size(140, 36);
+            this.menuTutorialButton.Size = new System.Drawing.Size(187, 44);
             this.menuTutorialButton.TabIndex = 5;
             this.menuTutorialButton.Text = "  Tutorial";
             this.menuTutorialButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -3347,10 +3385,10 @@ namespace CIEID
             this.menuHelpButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuHelpButton.Image = ((System.Drawing.Image)(resources.GetObject("menuHelpButton.Image")));
             this.menuHelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.menuHelpButton.Location = new System.Drawing.Point(6, 363);
-            this.menuHelpButton.Margin = new System.Windows.Forms.Padding(2);
+            this.menuHelpButton.Location = new System.Drawing.Point(8, 447);
+            this.menuHelpButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.menuHelpButton.Name = "menuHelpButton";
-            this.menuHelpButton.Size = new System.Drawing.Size(140, 36);
+            this.menuHelpButton.Size = new System.Drawing.Size(187, 44);
             this.menuHelpButton.TabIndex = 6;
             this.menuHelpButton.Text = "  Aiuto";
             this.menuHelpButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -3369,10 +3407,10 @@ namespace CIEID
             this.menuInformationButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuInformationButton.Image = ((System.Drawing.Image)(resources.GetObject("menuInformationButton.Image")));
             this.menuInformationButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.menuInformationButton.Location = new System.Drawing.Point(6, 403);
-            this.menuInformationButton.Margin = new System.Windows.Forms.Padding(2);
+            this.menuInformationButton.Location = new System.Drawing.Point(8, 496);
+            this.menuInformationButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.menuInformationButton.Name = "menuInformationButton";
-            this.menuInformationButton.Size = new System.Drawing.Size(140, 36);
+            this.menuInformationButton.Size = new System.Drawing.Size(187, 44);
             this.menuInformationButton.TabIndex = 7;
             this.menuInformationButton.Text = "  Informazioni";
             this.menuInformationButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -3391,10 +3429,10 @@ namespace CIEID
             this.menuDigitalSignatureButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuDigitalSignatureButton.Image = ((System.Drawing.Image)(resources.GetObject("menuDigitalSignatureButton.Image")));
             this.menuDigitalSignatureButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.menuDigitalSignatureButton.Location = new System.Drawing.Point(6, 156);
-            this.menuDigitalSignatureButton.Margin = new System.Windows.Forms.Padding(2);
+            this.menuDigitalSignatureButton.Location = new System.Drawing.Point(8, 192);
+            this.menuDigitalSignatureButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.menuDigitalSignatureButton.Name = "menuDigitalSignatureButton";
-            this.menuDigitalSignatureButton.Size = new System.Drawing.Size(140, 38);
+            this.menuDigitalSignatureButton.Size = new System.Drawing.Size(187, 47);
             this.menuDigitalSignatureButton.TabIndex = 8;
             this.menuDigitalSignatureButton.Text = "Firma Elettronica";
             this.menuDigitalSignatureButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -3413,10 +3451,10 @@ namespace CIEID
             this.menuVerifyButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuVerifyButton.Image = ((System.Drawing.Image)(resources.GetObject("menuVerifyButton.Image")));
             this.menuVerifyButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.menuVerifyButton.Location = new System.Drawing.Point(6, 194);
-            this.menuVerifyButton.Margin = new System.Windows.Forms.Padding(2);
+            this.menuVerifyButton.Location = new System.Drawing.Point(8, 239);
+            this.menuVerifyButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.menuVerifyButton.Name = "menuVerifyButton";
-            this.menuVerifyButton.Size = new System.Drawing.Size(140, 38);
+            this.menuVerifyButton.Size = new System.Drawing.Size(187, 47);
             this.menuVerifyButton.TabIndex = 9;
             this.menuVerifyButton.Text = "Verifica firma";
             this.menuVerifyButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -3435,10 +3473,10 @@ namespace CIEID
             this.menuSettingsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.menuSettingsButton.Image = ((System.Drawing.Image)(resources.GetObject("menuSettingsButton.Image")));
             this.menuSettingsButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.menuSettingsButton.Location = new System.Drawing.Point(6, 443);
-            this.menuSettingsButton.Margin = new System.Windows.Forms.Padding(2);
+            this.menuSettingsButton.Location = new System.Drawing.Point(8, 545);
+            this.menuSettingsButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.menuSettingsButton.Name = "menuSettingsButton";
-            this.menuSettingsButton.Size = new System.Drawing.Size(140, 36);
+            this.menuSettingsButton.Size = new System.Drawing.Size(187, 44);
             this.menuSettingsButton.TabIndex = 10;
             this.menuSettingsButton.Text = "  Impostazioni";
             this.menuSettingsButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -3448,9 +3486,9 @@ namespace CIEID
             // 
             // mainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(799, 530);
+            this.ClientSize = new System.Drawing.Size(1065, 652);
             this.Controls.Add(this.menuSettingsButton);
             this.Controls.Add(this.menuDigitalSignatureButton);
             this.Controls.Add(this.menuVerifyButton);
@@ -3464,7 +3502,7 @@ namespace CIEID
             this.Controls.Add(this.mainTabControl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.MaximizeBox = false;
             this.Name = "mainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

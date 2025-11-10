@@ -86,7 +86,7 @@ extern "C" BOOL WINAPI CertDllOpenStoreProv(
 		}
 	}
 	CryptReleaseContext(prov, 0);
-	LOG_INFO("CertDllOpenStoreProv - Open Store Provider complited");
+	LOG_INFO("CertDllOpenStoreProv - Open Store Provider completed");
 	return TRUE;
 	//exit_CSP_func
 	//return FALSE;

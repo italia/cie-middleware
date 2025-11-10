@@ -25,6 +25,8 @@ using namespace CieIDLogger;
 
 #define CARD_ALREADY_ENABLED		0x000000F0;
 #define CARD_PAN_MISMATCH			(int)(0x000000F1);
+#define CARD_CSCA_VERIFY_NOT_DONE	(int)(0x000000F2);
+#define CARD_CSCA_VERIFY_FAILED		(int)(0x000000F3);
 
 typedef CK_RV(*AbilitaCIEfn)(const char*  szPAN,
 	const char*  szPIN,
@@ -117,7 +119,6 @@ extern "C" {
 			printf("Errore nella verifica: %lu\n", verifyResult.nErrorCode);
 			return verifyResult.nErrorCode;
 		}
-
 	}
 
 	CK_RV CK_ENTRY __stdcall estraiP7m(const char* inFilePath, const char* outFilePath) {
@@ -307,11 +308,11 @@ extern "C" {
 		LOG_INFO("***** Starting AbbinaCIE *****");
 		LOG_DEBUG("szPAN:%s, pin len : %d, attempts : %d", szPAN, strlen(szPIN), *attempts);
 
+		bool verified = false;
 		char* readers = NULL;
 		char* ATR = NULL;
 		try
 		{
-
 			std::map<uint8_t, ByteDynArray> hashSet;
 
 			DWORD len = 0;
@@ -422,16 +423,11 @@ extern "C" {
 				}
 
 				progressCallBack(15, "Lettura dati dalla CIE");
-				
 				LOG_INFO("AbbinaCIE - Reading data from CIE...");
 				ByteArray serviziData(IdServizi.left(12));
 				
 				ByteDynArray SOD;
 				ias.ReadSOD(SOD);
-
-
-				//LOG_DEBUG("AbbinaCIE - SOD:");
-				//LOG_BUFFER(SOD.data(), SOD.size());
 				
 				uint8_t digest = ias.GetSODDigestAlg(SOD);
 
@@ -486,47 +482,51 @@ extern "C" {
 
 				std::string seriale((char*)Serial.data(), Serial.size());
 
-
 				progressCallBack(55, "Lettura certificato");
 				LOG_INFO("AbbinaCIE - Reading certificate...");
 
 				ByteDynArray CertCIE;
 				ias.ReadCertCIE(CertCIE);
 
-				//LOG_DEBUG("AbbinaCIE - Certificate: ");
-				//LOG_BUFFER(CertCIE.data(), CertCIE.size());
-
 				ByteArray certCIEData = CertCIE.left(GetASN1DataLenght(CertCIE));
-
-
+				progressCallBack(70, "Verifica del SOD");
 				LOG_INFO("AbbinaCIE - Verifying SOD, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
-				if (digest == 1)
-				{
-					CSHA256 sha256;
-					hashSet[0xa1] = sha256.Digest(serviziData);
-					hashSet[0xa4] = sha256.Digest(intAuthData);
-					hashSet[0xa5] = sha256.Digest(intAuthServiziData);
-					hashSet[0x1b] = sha256.Digest(dhData);
-					hashSet[0xa2] = sha256.Digest(serialData);
-					hashSet[0xa3] = sha256.Digest(certCIEData);
 
-					ias.VerificaSOD(SOD, hashSet);
-				}
-				else
+				try 
 				{
-					CSHA512 sha512;
-					hashSet[0xa1] = sha512.Digest(serviziData);
-					hashSet[0xa4] = sha512.Digest(intAuthData);
-					hashSet[0xa5] = sha512.Digest(intAuthServiziData);
-					hashSet[0x1b] = sha512.Digest(dhData);
-					hashSet[0xa2] = sha512.Digest(serialData);
-					hashSet[0xa3] = sha512.Digest(certCIEData);
-					ias.VerificaSODPSS(SOD, hashSet);
+					if (digest == 1)
+					{
+						CSHA256 sha256;
+						hashSet[0xa1] = sha256.Digest(serviziData);
+						hashSet[0xa4] = sha256.Digest(intAuthData);
+						hashSet[0xa5] = sha256.Digest(intAuthServiziData);
+						hashSet[0x1b] = sha256.Digest(dhData);
+						hashSet[0xa2] = sha256.Digest(serialData);
+						hashSet[0xa3] = sha256.Digest(certCIEData);
+						verified = ias.VerificaSOD(SOD, hashSet);
+					}
+					else
+					{
+						CSHA512 sha512;
+						hashSet[0xa1] = sha512.Digest(serviziData);
+						hashSet[0xa4] = sha512.Digest(intAuthData);
+						hashSet[0xa5] = sha512.Digest(intAuthServiziData);
+						hashSet[0x1b] = sha512.Digest(dhData);
+						hashSet[0xa2] = sha512.Digest(serialData);
+						hashSet[0xa3] = sha512.Digest(certCIEData);
+						verified = ias.VerificaSODPSS(SOD, hashSet);
+					}
 				}
-				
+				catch (std::exception &ex) {
+					LOG_ERROR("AbbinaCIE - SOD verification exception: %s", ex.what());
+					free(ATR);
+					free(readers);
+					return CARD_CSCA_VERIFY_FAILED;
+				}
+
 				ByteArray pinBa((uint8_t*)szPIN, 4);
 
-				progressCallBack(85, "Memorizzazione in cache");
+				progressCallBack(90, "Memorizzazione in cache");
 				LOG_INFO("AbbinaCIE - Saving certificate in cache...");
 
 				std::string span((char*)IdServizi.data(), IdServizi.size());
@@ -552,7 +552,6 @@ extern "C" {
 				completedCallBack(span.c_str(), fullname.c_str(), seriale.c_str());
 
 				SCardEndTransaction(conn.hCard, SCARD_RESET_CARD);
-
 			}
 
 			if (!foundCIE) {
@@ -560,12 +559,9 @@ extern "C" {
 				free(ATR);
 				free(readers);
 				return CKR_TOKEN_NOT_RECOGNIZED;
-
 			}
-
 		}
 		catch (std::exception &ex) {
-
 			if (ATR)
 				free(ATR);
 			LOG_ERROR("AbbinaCIE - Exception %s ", ex.what());
@@ -585,9 +581,14 @@ extern "C" {
 		progressCallBack(100, "");
 
 		LOG_INFO("***** AbbinaCIE Ended *****");
+
+		if (!verified) {
+			LOG_ERROR("AbbinaCIE - SOD verification failed");
+			return CARD_CSCA_VERIFY_NOT_DONE;
+		}
+
 		return SCARD_S_SUCCESS;
 	}
-
 }
 
 DWORD CardAuthenticateEx(IAS*       ias,

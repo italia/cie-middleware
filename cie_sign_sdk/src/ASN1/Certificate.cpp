@@ -26,6 +26,7 @@
 #include <openssl/bio.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
+#include "TrustServiceList.h"
 
 #define PROXY_AUTHENTICATION_REQUIRED	407
 
@@ -37,6 +38,9 @@ extern char* g_szVerifyProxyUsrPass;
 extern int g_nVerifyProxyPort;
 
 USE_LOG;
+
+const string BASE_OCSP_URL = "https://ocsp.cie.interno.gov.it/";
+const string BASE_CRL_URL = "http://ldap.cie.interno.gov.it/";
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -448,6 +452,36 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 {
 	LOG_DBG((0, "--> CCertificate::verifyStatus", "Time: %s", szTime));
 
+	if (!CTrustServiceList::Initialize())
+	{
+		LOG_ERR((0, "Initialization", "Failed to initialize Trust Service List"));
+	}
+
+	CTrustServiceList* pTSL = CTrustServiceList::GetInstance();
+	if(pTSL)
+	{
+		TSL_SERVICE_STATUS status;
+		if(!pTSL->isTrustedCA(*this, &status))
+		{
+			LOG_ERR((0, "CCertificate::verifyStatus", "Certificate NOT from TSL trusted CA"));
+			return DISIGON_ERROR_CERT_INVALID;
+		}
+		else
+		{
+			LOG_DBG((0, "CCertificate::verifyStatus", "Certificate from TSL trusted CA with status: %d", status));
+			
+			if(status != TSL_STATUS_GRANTED)
+			{
+				LOG_WAR((0, "CCertificate::verifyStatus", "TSL service status is not GRANTED: %d", status));
+				// Decidi se bloccare o continuare
+			}
+		}
+	}
+	else
+	{
+		LOG_WAR((0, "CCertificate::verifyStatus", "TSL not initialized"));
+	}
+
 	int status = REVOCATION_STATUS_UNKNOWN;
 	
 	CASN1Integer serialNumber(getSerialNumber());
@@ -462,18 +496,9 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 		CASN1OctetString val(ocsp.elementAt(1));
 		UUCByteArray* pbaVal = (UUCByteArray*)val.getValue();
 		UUCBufferedReader reader(*pbaVal);
-		//CASN1Sequence sequ(reader);
 		
-		CASN1Sequence authorityInfoAccess(reader);//sequ.elementAt(0));
+		CASN1Sequence authorityInfoAccess(reader);
 		
-		//AuthorityInfoAccessSyntax  ::=
-		//SEQUENCE SIZE (1..MAX) OF AccessDescription
-		//
-		//AccessDescription  ::=  SEQUENCE {
-		//	accessMethod          OBJECT IDENTIFIER,
-		//	accessLocation        GeneralName  }
-
-		// cerca il metodo OCSP
 		CASN1ObjectIdentifier oid(szMethodOCSP);		
 		int size = authorityInfoAccess.size();
 		for(int i = 0; i < size; i++)
@@ -487,6 +512,12 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 				CASN1Object accessLocation(accessDescription.elementAt(1));				
 				UUCByteArray *pValue = (UUCByteArray*)accessLocation.getValue();
 				pValue->append((BYTE)'\0');
+
+				string ocspURL = (char*)pValue->getContent();
+				if (ocspURL.rfind(BASE_OCSP_URL, 0) != 0) {
+					LOG_ERR((0, "CCertificate::verifyStatus", "OCSP URL not recognized. Expecting: %s, found: %s", BASE_OCSP_URL.c_str(), ocspURL.c_str()));
+					throw - 1;
+				}
 				
 				LOG_DBG((0, "CCertificate::verifyStatus", "OCSP Url: %s", (char*)pValue->getContent()));
 
@@ -494,11 +525,6 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 				COCSPRequest ocspRequest(*this);
 				UUCByteArray baOcspRequest;
 				ocspRequest.toByteArray(baOcspRequest);
-				//const char* sz1 = baOcspRequest.toHexString();
-				//NSLog([NSString stringWithCString:sz1]);
-				
-				//string ocspurl;
-				//ocspurl.append((char*)accessLocation.getValue()->getContent(), accessLocation.getLength());
 
 				LOG_DBG((0, "CCertificate::verifyStatus", "POST OCSP Request"));
 
@@ -529,7 +555,6 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 				{				
 					CASN1Sequence responseBytes1(ocspResponse.elementAt(1));
 					CASN1Sequence responseBytes(responseBytes1.elementAt(0));
-					
 					CASN1ObjectIdentifier responseType(responseBytes.elementAt(0));
 					CASN1OctetString response(responseBytes.elementAt(1));
 					
@@ -537,16 +562,9 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 					
 					UUCBufferedReader reader1(*pVal);
 					CASN1Sequence basicOCSPResponse(reader1);
-					
 					CASN1Sequence responseData(basicOCSPResponse.elementAt(0));
-					
 					CASN1Sequence responses(responseData.elementAt(2));
-					
 					CASN1Sequence singleResponse(responses.elementAt(0));
-					
-					//NSLog(@"%s", ((UUCByteArray*)singleResponse.getValue())->toHexString());
-					
-					
 					CASN1Object certStatus(singleResponse.elementAt(1));
 					CASN1UTCTime thisUpdate(singleResponse.elementAt(2));
 
@@ -572,85 +590,72 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 						
 						case 1:
 							// revoked
-							
-							
 							// verifica CRLReason
-							{
-								//CASN1Sequence certStatusSeq(certStatus);	
-								//const UUCByteArray* pValue = certStatus.getValue();
-								//UUCBufferedReader reader(*pValue);
-								//CASN1Sequence crlReason(reader);
-								CASN1Sequence clrReason(certStatus);
-								
+							//CASN1Sequence certStatusSeq(certStatus);	
+							//const UUCByteArray* pValue = certStatus.getValue();
+							//UUCBufferedReader reader(*pValue);
+							//CASN1Sequence crlReason(reader);
+						{
+							CASN1Sequence clrReason(certStatus);
+
 							try
 							{
-									// verifica la data rispetto al revocation time
-									CASN1Object revocationTime(clrReason.elementAt(0));
-								
-									BYTE* btRevocationTime;
-								
-									if(revocationTime.getValue()->getLength() > 13)
+								// verifica la data rispetto al revocation time
+								CASN1Object revocationTime(clrReason.elementAt(0));
+
+								BYTE* btRevocationTime;
+
+								if (revocationTime.getValue()->getLength() > 13)
+								{
+									btRevocationTime = (BYTE*)revocationTime.getValue()->getContent() + revocationTime.getValue()->getLength() - 13;
+								}
+								else
+								{
+									btRevocationTime = (BYTE*)revocationTime.getValue()->getContent();
+								}
+
+								if (pRevocationInfo)
+								{
+									strncpy(pRevocationInfo->szRevocationDate, (char*)btRevocationTime, 13);
+									pRevocationInfo->szRevocationDate[13] = 0;
+								}
+
+								if (szTime != NULL)
+									if (memcmp(szTime, btRevocationTime, 13) < 0)
 									{
-										btRevocationTime = (BYTE*)revocationTime.getValue()->getContent() + revocationTime.getValue()->getLength() -	13;
-									}
-									else 
-									{
-										btRevocationTime = (BYTE*)revocationTime.getValue()->getContent();
+										if (pRevocationInfo)
+											pRevocationInfo->nRevocationStatus = REVOCATION_STATUS_GOOD;
+										return REVOCATION_STATUS_GOOD;
 									}
 
-									if(pRevocationInfo)
-									{
-										strncpy(pRevocationInfo->szRevocationDate, (char*)btRevocationTime, 13);
-										pRevocationInfo->szRevocationDate[13] = 0;
-									}
+								CASN1OctetString reasonCode(clrReason.elementAt(1));
+								const UUCByteArray* pVal = reasonCode.getValue();
 
-									if(szTime != NULL)
-										if(memcmp(szTime, btRevocationTime, 13) < 0)
-										{
-											if(pRevocationInfo)
-												pRevocationInfo->nRevocationStatus = REVOCATION_STATUS_GOOD;
-											return REVOCATION_STATUS_GOOD;
-										}
-									
-								
-									CASN1OctetString reasonCode(clrReason.elementAt(1));
-									const UUCByteArray *pVal = reasonCode.getValue();
-								
-									BYTE reason = pVal->getContent()[2];//reasonCode.getTag() & 0x0F;
-									if(reason == 6) //Certificate HOLD
-									{
-										LOG_DBG((0, "CCertificate::verifyStatus", "Status SUSPENDED"));
-										status = REVOCATION_STATUS_SUSPENDED;
-									}
-									else 
-									{
-										LOG_DBG((0, "CCertificate::verifyStatus", "Status REVOKED"));
-										status = REVOCATION_STATUS_REVOKED;
-									}
-									if(pRevocationInfo)
-										pRevocationInfo->nRevocationStatus = status;
-
-				/*				
-								CASN1Object reasonCode(crlReason.elementAt(0));
-								BYTE reason = reasonCode.getTag() & 0x0F;
-								if(reason == 6) //Certificate HOLD
+								BYTE reason = pVal->getContent()[2];//reasonCode.getTag() & 0x0F;
+								if (reason == 6) //Certificate HOLD
+								{
+									LOG_DBG((0, "CCertificate::verifyStatus", "Status SUSPENDED"));
 									status = REVOCATION_STATUS_SUSPENDED;
-								else 
+								}
+								else
+								{
+									LOG_DBG((0, "CCertificate::verifyStatus", "Status REVOKED"));
 									status = REVOCATION_STATUS_REVOKED;
-				*/
+								}
+								if (pRevocationInfo)
+									pRevocationInfo->nRevocationStatus = status;
+
 							}
-							catch(CASN1Exception* ex)
-							{
+							catch (CASN1Exception* ex) {
 								LOG_DBG((0, "CCertificate::verifyStatus", "Unexpected Exception"));
 								delete ex;
 								status = REVOCATION_STATUS_REVOKED;
 							}
-							}
 							break;
-							
+						}
 						case 2:
 							// unknown
-							LOG_DBG((0, "CCertificate::verifyStatus", "Status UNKNONWN"));
+							LOG_DBG((0, "CCertificate::verifyStatus", "Status UNKNOWN"));
 							status = REVOCATION_STATUS_UNKNOWN;
 							break;
 							
@@ -661,7 +666,6 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 					if(status != REVOCATION_STATUS_UNKNOWN)
 						return status;
 				}
-				
 			}
 		}					
 	}
@@ -680,86 +684,50 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 	}
 
 	try 
-	{
-		//char* sz;
-		
+	{		
 		LOG_DBG((0, "CCertificate::verifyStatus", "Try CRL"));
 
 		// verifica la crl
 		CASN1Sequence crlDP1(getExtension(szCrlDistributionPointsOID));
-		
-		//sz = (char*)((UUCByteArray*)crlDP1.getValue())->toHexString();
-		//NSLog([NSString stringWithCString:sz]);
-		
 		CASN1OctetString crlDPValue(crlDP1.elementAt(1));
-		
 		UUCBufferedReader reader(*(crlDPValue.getValue()));
-		
 		CASN1Sequence crlDP(reader);
-		
-		//sz = (char*)((UUCByteArray*)crlDP.getValue())->toHexString();
-		//NSLog([NSString stringWithCString:sz]);
 		
 		int size = crlDP.size();
 		if(size > 0)
 		{
 			for(int i = 0; i < size; i++)
 			{
-			
 				CASN1Sequence dp(crlDP.elementAt(i));
-			
 				CASN1Sequence distributionPointName(dp.elementAt(0));
-				
 				CASN1Sequence fullName(distributionPointName.elementAt(0));
-				
 				CASN1Object name3(fullName.elementAt(0));
-				
 				UUCByteArray *pValue = (UUCByteArray *)name3.getValue();
 
 				pValue->append((BYTE)'\0');
 
-				char*  szcrlurl = (char*)pValue->getContent();
+				string crlurl = (char*)pValue->getContent();
 
-				LOG_DBG((0, "CCertificate::verifyStatus", "CRL Url: %s", szcrlurl));
+				if (crlurl.rfind(BASE_CRL_URL, 0) != 0) {
+					LOG_ERR((0, "CCertificate::verifyStatus", "CRL Url not recognized. Expecting: %s, found: %s", BASE_CRL_URL.c_str(), crlurl.c_str()));
+					throw - 1;
+				}
 
-				//crlurl.append((char*)name3.getValue()->getContent(), name3.getLength());
+				LOG_DBG((0, "CCertificate::verifyStatus", "CRL Url: %s", crlurl.c_str()));
 				
 				UUCByteArray response;
-/*				
-				if(strstr(szcrlurl, "ldap") > 0)
-	 			{
-					long nRet = 1;
-#ifdef WIN32
-					nRet = getCRLFromLDAP(szcrlurl, response);
-#else
-					LOG_DBG((0, "CCertificate::verifyStatus", "CRL not available. Error: %x", 500));
-					return status = REVOCATION_STATUS_NOTLOADED;//REVOCATION_STATUS_UNKNOWN;//REVOCATION_STATUS_GOOD;
-#endif
-					if(nRet)
-					{
-						LOG_ERR((0, "CCertificate::verifyStatus", "CRL not available. Error: %x", nRet));
-						return REVOCATION_STATUS_NOTLOADED;
-					}
-					else
-					{
-						LOG_DBG((0, "CCertificate::verifyStatus", "CRL OK"));
-					}
 
+				UUCByteArray data;
+				long nRet = HTTPRequest(data, crlurl.c_str(), NULL, response);
+				if(nRet)
+				{
+					LOG_ERR((0, "CCertificate::verifyStatus", "CRL not available. Error: %x", nRet));
+					return REVOCATION_STATUS_NOTLOADED;
 				}
-				else 
-				{*/
-					UUCByteArray data;
-					long nRet = HTTPRequest(data, szcrlurl, NULL, response);
-					if(nRet)
-					{
-						LOG_ERR((0, "CCertificate::verifyStatus", "CRL not available. Error: %x", nRet));
-						return REVOCATION_STATUS_NOTLOADED;
-					}
-					else
-					{
-						LOG_DBG((0, "CCertificate::verifyStatus", "CRL OK, nRet: %d", nRet));
-					}
-			//	}
+				else
+				{
+					LOG_DBG((0, "CCertificate::verifyStatus", "CRL OK, nRet: %d", nRet));
+				}
 
 			    if(response.getLength() > 0)
 			    {				
@@ -804,38 +772,54 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 
 int CCertificate::verify()
 {
-	int bitmask = 0;
+    int bitmask = 0;
 
-	// verifica la cert chain
+    // Verifica cert chain
     CCertificate* pCert = this;
-	CCertificate* pCACert = CCertStore::GetCertificate(*pCert);
-	while(pCACert && pCert->verifySignature(*pCACert) )
-	{
-		//NSLog(@"issuer: %s, SN: %s", issuer.c_str(), serialNumber.toHexString());
-		
-		bitmask |= VERIFIED_CACERT_FOUND;
+    CCertificate* pCACert = CCertStore::GetCertificate(*pCert);
+    while(pCACert && pCert->verifySignature(*pCACert))
+    {
+        bitmask |= VERIFIED_CACERT_FOUND;
         pCert = pCACert;
         pCACert = CCertStore::GetCertificate(*pCACert);
-	}
+    }
 
     if(!pCACert)
     {
-        //NSLog(@"CA Cert valid");
         bitmask |= VERIFIED_CERT_CHAIN;
     }
-    else
+    
+    // **VERIFICA TSL**
+    CTrustServiceList* pTSL = CTrustServiceList::GetInstance();
+    if(pTSL)
     {
-        //NSLog(@"CA Cert not valid");
+        TSL_SERVICE_STATUS status;
+        if(pTSL->isTrustedCA(*this, &status))
+        {
+            LOG_DBG((0, "CCertificate::verify", "Certificate from TSL trusted CA"));
+            bitmask |= VERIFIED_TSL_CA;
+            
+            if(status == TSL_STATUS_GRANTED)
+            {
+                bitmask |= VERIFIED_TSL_GRANTED;
+            }
+        }
+        else
+        {
+            LOG_WAR((0, "CCertificate::verify", "Certificate NOT from TSL trusted CA"));
+        }
     }
     
-	return bitmask;
+    return bitmask;
 }
 
 bool CCertificate::verifySignature(CCertificate& cert)
 {
-	//NSLog(@"Verify CERT signature");
+	if (!CTrustServiceList::Initialize())
+	{
+		LOG_ERR((0, "Initialization", "Failed to initialize Trust Service List"));
+	}
 	
-    // OpenSSL
     UUCByteArray baCert;
     cert.toByteArray(baCert);
         
@@ -907,30 +891,10 @@ bool CCertificate::verifySignature(CCertificate& cert)
 				
 				BYTE hash[32];
 				BYTE hash2[32];
-	/*
-				sha256_context	ctx256;
-				sha256_starts(&ctx256);
-				sha256_update(&ctx256, buff, bufflen);	
-				sha256_finish(&ctx256, hash);
 
-				sha256_context	ctx2561;
-				sha256_starts(&ctx2561);
-				sha256_update(&ctx2561, content.getContent(), content.getLength());	
-				sha256_finish(&ctx2561, hash2);
-*/
 				sha2(buff, bufflen, hash, 0);
 				sha2(content.getContent(), content.getLength(), hash2, 0);
-/*
-				SHA256_CTX	ctx256;				
-				SHA256_Init(&ctx256);				
-				SHA256_Update(&ctx256, buff, bufflen);				
-				SHA256_Final(hash, &ctx256);
-				
-				SHA256_CTX	ctx2561;			
-				SHA256_Init(&ctx2561);				
-				SHA256_Update(&ctx2561, content.getContent(), content.getLength());				
-				SHA256_Final(hash2, &ctx2561);
-*/				
+
 				if(memcmp(hash, pDigestValue->getContent(), 32) == 0)
 				{
 					// verifica l'hash del content
@@ -948,9 +912,7 @@ bool CCertificate::verifySignature(CCertificate& cert)
 
 			}
 			else if(digestAlgo.elementAt(0) == sha1Algo.elementAt(0)) //if(digestAlgo == CAlgorithmIdentifier(szSHA1OID))
-			{
-				//NSLog(@"SHA1");
-				
+			{				
 				// calcola l'hash SHA1
 				SHA1Context sha;
 				
@@ -1007,21 +969,6 @@ bool CCertificate::verifySignature(CCertificate& cert)
 	
 	return false;
 }
-
-
-/*
-CASN1BitString& CCertificate::getSubjectPublicKeyInfo()
-{
-	return *(CASN1BitString*)getElementAt(2);	
-}
-*/											 
-/*
-CASN1BitString& CCertificate::getSignature()
-{
-	return *(CASN1BitString*)getElementAt(2);	
-}
- */
-
 
 long HTTPRequest(UUCByteArray& data, const char* szUrl, const char* szContentType, UUCByteArray& response)
 {    
