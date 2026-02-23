@@ -962,7 +962,7 @@ long verify_p7m(DISIGON_VERIFY_CONTEXT* pContext, VERIFY_INFO* pVerifyInfo)
             pVerifyInfo->pSignerInfos->pSignerInfo = new SIGNER_INFO[p7mSignatures + pdfSignatures];
 
             int i = 0;
-            for(i = 0; i < p7mSignatures; i++)
+            for(; i < p7mSignatures; i++)
             {
                 pVerifyInfo->pSignerInfos->pSignerInfo[i] = p7mSignerInfos->pSignerInfo[i];
             }
@@ -1063,8 +1063,6 @@ long verify_xml(DISIGON_VERIFY_CONTEXT* pContext, VERIFY_INFO* pVerifyInfo)
     pVerifyInfo->pSignerInfos = new SIGNER_INFOS;
     pVerifyInfo->pSignerInfos->nCount = signatureCount;
     
-
-    //pVerifyInfo->pSignerInfos->pSignerInfo = new SIGNER_INFO*;
     pVerifyInfo->pSignerInfos->pSignerInfo = new SIGNER_INFO[signatureCount];
 
 

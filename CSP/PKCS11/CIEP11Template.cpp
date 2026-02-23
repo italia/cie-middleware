@@ -5,6 +5,8 @@
 #include "../crypto/ASNParser.h"
 #include <stdio.h>
 #include "../crypto/AES.h"
+#include "../crypto/sha512.h"
+#include "../crypto/sha256.h"
 #include "../PCSC/PCSC.h"
 
 int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, DWORD *respSize) {
@@ -132,6 +134,28 @@ void CIEtemplateInitSession(void *pTemplateData){
 			cie->ias.ReadDappPubKey(resp);
 			cie->ias.InitEncKey();
 			cie->ias.GetCertificate(certRaw, true);
+
+			ByteArray intAuthData(resp.left(GetASN1DataLenght(resp)));
+
+			ByteDynArray SOD;
+			cie->ias.ReadSOD(SOD);
+			uint8_t digest = cie->ias.GetSODDigestAlg(SOD);
+
+			LOG_INFO("CIEtemplateInitSession - Verifying SOD, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
+			std::map<uint8_t, ByteDynArray> hashSet;
+			if (digest == 1)
+			{
+				CSHA256 sha256;
+				hashSet[0xa4] = sha256.Digest(intAuthData);
+				cie->ias.VerificaSOD(SOD, hashSet);
+
+			}
+			else
+			{
+				CSHA512 sha512;
+				hashSet[0xa4] = sha512.Digest(intAuthData);
+				cie->ias.VerificaSODPSS(SOD, hashSet);
+			}
 		}
 
 		CK_BBOOL vtrue = TRUE;
@@ -281,6 +305,28 @@ void CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &Pin
 		if (cie->ias.DappPubKey.isEmpty()) {
 			ByteDynArray DappKey;			
 			cie->ias.ReadDappPubKey(DappKey);
+		}
+
+		ByteDynArray IntAuth;
+		cie->ias.ReadDappPubKey(IntAuth);
+		ByteArray intAuthData(IntAuth.left(GetASN1DataLenght(IntAuth)));
+		
+		ByteDynArray SOD;
+		cie->ias.ReadSOD(SOD);
+		uint8_t digest = cie->ias.GetSODDigestAlg(SOD);
+		LOG_INFO("CIEtemplateLogin - Verifying SOD, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
+		std::map<uint8_t, ByteDynArray> hashSet;
+		if (digest == 1)
+		{
+			CSHA256 sha256;
+			hashSet[0xa4] = sha256.Digest(intAuthData);
+			cie->ias.VerificaSOD(SOD, hashSet);
+		}
+		else
+		{
+			CSHA512 sha512;
+			hashSet[0xa4] = sha512.Digest(intAuthData);
+			cie->ias.VerificaSODPSS(SOD, hashSet);
 		}
 
 		cie->ias.InitExtAuthKeyParam();

@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CIEID
@@ -112,7 +106,6 @@ namespace CIEID
             }
             else
             {
-                pbVName.SizeMode = PictureBoxSizeMode.CenterImage;
                 pbCertValid.Image = CIEID.Properties.Resources.orange_checkbox;
                 s_cert = "Il certificato non è valido";
             }
@@ -124,7 +117,6 @@ namespace CIEID
                 s_sign = "La firma è valida";
                 pbSign.Image = CIEID.Properties.Resources.green_checkbox;
             }
-
             
             string s_revoc = "Servizio di revoca non raggiungibile";
             pbCertRev.Image = CIEID.Properties.Resources.orange_checkbox;
@@ -317,7 +309,6 @@ namespace CIEID
 
             return tbVerifyInfo;
         }
-
 
         public int verify()
         {

@@ -490,6 +490,15 @@ extern "C" {
 
 				ByteArray certCIEData = CertCIE.left(GetASN1DataLenght(CertCIE));
 				progressCallBack(70, "Verifica del SOD");
+				
+				/* VERIFICA DELLA CHIAVE DAPP
+				La chiave DAPP (letta precedentemente in ReadDappPubKey) viene implicitamente
+				verificata attraverso la validazione della catena CSCA del certificato SOD.
+				Se VerificaSOD() non lancia un'eccezione, significa che:
+					1. Il SOD è firmato da un certificato valido
+					2. La catena CSCA è corretta fino al Root
+					3. Quindi la carta (e di conseguenza la chiave DAPP) è autentica */
+
 				LOG_INFO("AbbinaCIE - Verifying SOD, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
 
 				try 

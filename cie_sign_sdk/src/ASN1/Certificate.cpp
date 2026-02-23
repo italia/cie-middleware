@@ -473,7 +473,6 @@ int CCertificate::verifyStatus(const char* szTime, REVOCATION_INFO* pRevocationI
 			if(status != TSL_STATUS_GRANTED)
 			{
 				LOG_WAR((0, "CCertificate::verifyStatus", "TSL service status is not GRANTED: %d", status));
-				// Decidi se bloccare o continuare
 			}
 		}
 	}
