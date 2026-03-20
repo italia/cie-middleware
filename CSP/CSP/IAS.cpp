@@ -1713,6 +1713,8 @@ bool IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 	CASNTag &SODTag = *parser.tags[0];
 
 	CASNTag &temp = SODTag.Child(0, 0x30);
+
+	BOOL verified = FALSE;
 	
 	/* Verifica OID contentInfo */
 	uint8_t OID[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x02 };
@@ -1840,12 +1842,24 @@ bool IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 		CASNTag &dgHash = hashDG.Child(1, 04);
 		uint8_t num = ByteArrayToVar(dgNum.content, BYTE);
 
-		if (hashSet.find(num) == hashSet.end() || hashSet[num].size() == 0)
-			throw logged_error(stdPrintf("VerificaSODPSS - Digest for DG %02X not found", num));
+		if (hashSet.size() == 0)
+			throw logged_error(stdPrintf("VerificaSODPSS - No DG provided. HashSet is empty."));
+
+		if (hashSet.find(num) == hashSet.end() || hashSet[num].size() == 0) {
+			LOG_DEBUG("VerificaSODPSS - Digest for DG %02X not found", num);
+			continue;
+		}
 
 		if (hashSet[num] != dgHash.content)
 			throw logged_error(stdPrintf("VerificaSODPSS - Digest for DG does not match %02X", num));
+		else if (hashSet[num] == dgHash.content) {
+			LOG_DEBUG("VerificaSODPSS - Digest for DG %02X matches", num);
+			verified = true;
+		}
 	}
+
+	if(verified == FALSE)
+		throw logged_error("VerificaSODPSS - No provided DG hash matches the SOD hashes");
 
 	return RunCSCAVerification(certDS);
 
@@ -1863,6 +1877,8 @@ bool IAS::VerificaSOD(ByteArray& SOD, std::map<BYTE, ByteDynArray>& hashSet) {
 	CASNTag& SODTag = *parser.tags[0];
 
 	CASNTag& temp = SODTag.Child(0, 0x30);
+	BOOL verified = FALSE;
+	
 	uint8_t OID[] = { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x02 };
 	temp.Child(0, 06).Verify(VarToByteArray(OID));
 
@@ -1997,12 +2013,24 @@ bool IAS::VerificaSOD(ByteArray& SOD, std::map<BYTE, ByteDynArray>& hashSet) {
 		CASNTag &dgHash = hashDG.Child(1, 04);
 		uint8_t num = ByteArrayToVar(dgNum.content, BYTE);
 
-		if (hashSet.find(num) == hashSet.end() || hashSet[num].size() == 0)
-			throw logged_error(stdPrintf("VerificaSOD - Digest for DG %02X not found", num));
+		if (hashSet.size() == 0)
+			throw logged_error(stdPrintf("VerificaSOD - No DG provided. HashSet is empty."));
+
+		if (hashSet.find(num) == hashSet.end() || hashSet[num].size() == 0) {
+			LOG_DEBUG("VerificaSOD - Digest for DG %02X not found in hashSet, skipping", num);
+			continue;
+		}
 
 		if (hashSet[num] != dgHash.content)
 			throw logged_error(stdPrintf("VerificaSOD - Digest for DG does not match %02X", num));
+		else if (hashSet[num] == dgHash.content) {
+			LOG_DEBUG("VerificaSOD - Digest for DG %02X matches", num);
+			verified = true;
+		}
 	}
+
+	if (verified == FALSE)
+		throw logged_error("VerificaSOD - No provided DG hash matches the SOD hashes");
 
 	return RunCSCAVerification(certDS);
 	

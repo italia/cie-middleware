@@ -133,29 +133,38 @@ void CIEtemplateInitSession(void *pTemplateData){
 			cie->ias.SelectAID_CIE();
 			cie->ias.ReadDappPubKey(resp);
 			cie->ias.InitEncKey();
-			cie->ias.GetCertificate(certRaw, true);
-
-			ByteArray intAuthData(resp.left(GetASN1DataLenght(resp)));
 
 			ByteDynArray SOD;
 			cie->ias.ReadSOD(SOD);
 			uint8_t digest = cie->ias.GetSODDigestAlg(SOD);
 
-			LOG_INFO("CIEtemplateInitSession - Verifying SOD, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
+			LOG_INFO("CIEtemplateInitSession - Verifying SOD with DAPP only, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
 			std::map<uint8_t, ByteDynArray> hashSet;
+			
 			if (digest == 1)
 			{
 				CSHA256 sha256;
+				ByteArray intAuthData(resp.left(GetASN1DataLenght(resp)));
 				hashSet[0xa4] = sha256.Digest(intAuthData);
+				
 				cie->ias.VerificaSOD(SOD, hashSet);
-
 			}
 			else
 			{
 				CSHA512 sha512;
+				ByteArray intAuthData(resp.left(GetASN1DataLenght(resp)));
 				hashSet[0xa4] = sha512.Digest(intAuthData);
+				
 				cie->ias.VerificaSODPSS(SOD, hashSet);
 			}
+		}
+
+		if (cie->ias.IsEnrolled()) {
+			LOG_INFO("CIEtemplateInitSession - Certificate in cache, loading...");
+			cie->ias.GetCertificate(certRaw, false);
+		}
+		else {
+			LOG_INFO("CIEtemplateInitSession - Certificate not enrolled, skipping PKCS11 enumeration");
 		}
 
 		CK_BBOOL vtrue = TRUE;
