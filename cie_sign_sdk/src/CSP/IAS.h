@@ -57,6 +57,8 @@ class IAS
 
 	void readfile_SM(uint16_t id, ByteDynArray &content);
 	void readfile(uint16_t id, ByteDynArray &content);
+	bool RunCSCAVerification(PCCERT_CONTEXT certDS);
+	bool VerifyCSCAChain(PCCERT_CONTEXT certDS, const std::vector<ByteDynArray>& cscaCertificates);
 
 	void increment(ByteArray &seq);
 	void ReadCIEType();
@@ -75,6 +77,8 @@ public:
 	ByteDynArray PAN;
 	ByteDynArray DappModule;
 	ByteDynArray DappPubKey;
+	ByteDynArray DappPubKeyRaw;
+	bool DappKeyVerified;
 
 	void ReadPAN();
 	void ReadSOD(ByteDynArray &data);
@@ -111,6 +115,8 @@ public:
 	uint8_t GetSODDigestAlg(ByteArray &SOD);
 	void VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 	void VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
+	
+	bool VerifyAndAuthenticateDappKey();
 
 	void(*Callback)(int progress, char *desc,void *data);
 	void* CallbackData;

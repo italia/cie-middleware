@@ -60,10 +60,6 @@ class IAS
 	bool RunCSCAVerification(PCCERT_CONTEXT certDS);
 	bool DownloadCSCACertificates(std::vector<ByteDynArray>& certificates);
 	bool VerifyCSCAChain(PCCERT_CONTEXT certDS, const std::vector<ByteDynArray>& cscaCertificates);
-	
-	// Funzioni per verifica chiave DAPP contro certificato DS
-	bool ExtractPublicKeyFromCertificate(PCCERT_CONTEXT cert, ByteDynArray &modulus, ByteDynArray &exponent);
-	bool VerifyDappKeyAgainstDSCertificate(PCCERT_CONTEXT certDS, const ByteArray &dappModule, const ByteArray &dappExponent);
 
 	void increment(ByteArray &seq);
 	void ReadCIEType();
@@ -82,7 +78,7 @@ public:
 	ByteDynArray PAN;
 	ByteDynArray DappModule;
 	ByteDynArray DappPubKey;
-	bool DappKeyVerified;
+	ByteDynArray DappPubKeyRaw;
 
 	void ReadPAN();
 	void ReadSOD(ByteDynArray &data);
@@ -118,6 +114,8 @@ public:
 	uint8_t GetSODDigestAlg(ByteArray &SOD);
 	bool VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 	bool VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
+	
+	bool VerifyAndAuthenticateDappKey();
 
 	void(*Callback)(int progress, char *desc,void *data);
 	void* CallbackData;

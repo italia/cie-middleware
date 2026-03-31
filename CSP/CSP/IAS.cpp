@@ -117,7 +117,6 @@ IAS::IAS(CToken::TokenTransmitCallback transmit,ByteArray ATR)
 	
 	ActiveSM = false;
 	ActiveDF = DF_Root;
-	DappKeyVerified = false;
 
 	token.setTransmitCallback(transmit, nullptr);
 }
@@ -463,11 +462,20 @@ void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 	LOG_DEBUG("**** Starting ReadDappPubKey *****");
 		
 	ByteDynArray resp;
-	readfile(0x1004, DappKey);
+	readfile(0x1004, resp);
+
+	LOG_DEBUG("ReadDappPubKey - Raw file EF.1004 length: %zu", resp.size());
+	LOG_DEBUG("ReadDappPubKey - Raw file content (first 128 bytes):");
+	LOG_BUFFER(resp.data(), min(128, resp.size()));
+
+	DappKey = resp;
+	DappPubKeyRaw = resp;
 
 	CASNParser parser;
 	parser.Parse(DappKey);
 	LOG_DEBUG("ReadDappPubKey - Parsing OK");
+
+	LOG_DEBUG("ReadDappPubKey - Parsed structure, tags count: %zu", parser.tags.size());
 
 	ByteArray module = parser.tags[0]->tags[0]->content;
 	while (module[0] == 0)
@@ -478,23 +486,22 @@ void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 		pubKey = pubKey.mid(1);
 	DappPubKey = pubKey;
 
-	LOG_DEBUG("ReadDappPubKey - Pub Key:");
+	LOG_DEBUG("ReadDappPubKey - Extracted modulus length: %zu", module.size());
+	LOG_DEBUG("ReadDappPubKey - Extracted exponent length: %zu", pubKey.size());
+	LOG_DEBUG("ReadDappPubKey - DappPubKey (exponent) length: %zu", DappPubKey.size());
 	LOG_BUFFER(DappPubKey.data(), DappPubKey.size());
+	LOG_DEBUG("ReadDappPubKey - DappPubKeyRaw (full file) length: %zu", DappPubKeyRaw.size());
+	LOG_BUFFER(DappPubKeyRaw.data(), min(128, DappPubKeyRaw.size()));
 
     if (DappModule.isEmpty() || DappModule.size() < 256) {
-        DappKeyVerified = false;
         throw logged_error("ReadDappPubKey - Invalid DAPP modulus");
     }
     
-    if (DappPubKey.isEmpty() || DappPubKey.size() > 4) {
-        DappKeyVerified = false;
+    if (pubKey.isEmpty() || pubKey.size() > 4) {
         throw logged_error("ReadDappPubKey - Invalid DAPP exponent");
     }
 
-	LOG_DEBUG("ReadDappPubKey - DAPP RSA key format validated (CSCA verification pending)");
-	DappKeyVerified = false;
-
-	LOG_DEBUG("**** ReadDappPubKey Completed *****");
+	LOG_DEBUG("ReadDappPubKey - Exit function - DAPP RSA key format validated (CSCA verification pending)");
 
 	exit_func
 }
@@ -522,6 +529,37 @@ void IAS::DAPP() {
 
 	if (DappPubKey.isEmpty()) {
 		throw logged_error("DAPP - DAPP key not available");
+	}
+
+	LOG_DEBUG("DAPP - verifying key integrity before use");
+	try {
+		CASNParser verifyParser;
+		ByteDynArray verifyRaw = DappPubKeyRaw;
+		verifyParser.Parse(verifyRaw);
+		
+		ByteArray verifyModule = verifyParser.tags[0]->tags[0]->content;
+		while (verifyModule[0] == 0)
+			verifyModule = verifyModule.mid(1);
+		
+		ByteArray verifyPubKey = verifyParser.tags[0]->tags[1]->content;
+		while (verifyPubKey[0] == 0)
+			verifyPubKey = verifyPubKey.mid(1);
+		
+		if (verifyModule != DappModule) {
+			LOG_ERROR("DAPP - DappModule mismatch");
+			throw logged_error("DAPP - Key integrity check failed: modulus mismatch");
+		}
+		
+		if (verifyPubKey != DappPubKey) {
+			LOG_ERROR("DAPP - DappPubKey mismatch");
+			throw logged_error("DAPP - Key integrity check failed: exponent mismatch");
+		}
+		
+		LOG_DEBUG("DAPP - Key integrity verified");
+	}
+	catch (std::exception &e) {
+		LOG_ERROR("DAPP - TOCTOU protection exception: %s", e.what());
+		throw logged_error(stdPrintf("DAPP - Key integrity check failed: %s", e.what()));
 	}
 
 	ByteDynArray module = VarToByteArray(defModule);
@@ -1642,7 +1680,6 @@ bool IAS::RunCSCAVerification(PCCERT_CONTEXT certDS) {
 		LOG_INFO("VerificaSOD - Trying verification with %d embedded CSCA certificates", (int)embeddedCerts.size());
 		if (VerifyCSCAChain(certDS, embeddedCerts)) {
 			LOG_INFO("VerificaSOD - CSCA chain verification successful using EMBEDDED certificates");
-			DappKeyVerified = true;
 			return true;
 		} else {
 			LOG_INFO("VerificaSOD - Verification with embedded certificates failed, trying download...");
@@ -1658,7 +1695,6 @@ bool IAS::RunCSCAVerification(PCCERT_CONTEXT certDS) {
 			throw logged_error("VerificaSOD - Document Signer certificate is not valid according to CSCA verification chain (from both embedded and downloaded CSCAs)");
 		}
 		LOG_INFO("VerificaSOD - CSCA chain verification successful using DOWNLOADED certificates");
-		DappKeyVerified = true;
 	}
 	else {
 		LOG_ERROR("VerificaSOD - Failed to download CSCA certificates");
@@ -1850,8 +1886,17 @@ bool IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 			continue;
 		}
 
-		if (hashSet[num] != dgHash.content)
+		LOG_DEBUG("VerificaSODPSS - Checking DG %02X", num);
+		LOG_DEBUG("VerificaSODPSS - Expected hash length: %zu", hashSet[num].size());
+		LOG_BUFFER(hashSet[num].data(), hashSet[num].size());
+		LOG_DEBUG("VerificaSODPSS - SOD hash length: %zu", dgHash.content.size());
+		LOG_BUFFER(dgHash.content.data(), dgHash.content.size());
+
+		if (hashSet[num] != dgHash.content) {
+			LOG_ERROR("VerificaSODPSS - Digest for DG does not match %02X", num);
+			LOG_ERROR("VerificaSODPSS - Expected length: %zu, SOD length: %zu", hashSet[num].size(), dgHash.content.size());
 			throw logged_error(stdPrintf("VerificaSODPSS - Digest for DG does not match %02X", num));
+		}
 		else if (hashSet[num] == dgHash.content) {
 			LOG_DEBUG("VerificaSODPSS - Digest for DG %02X matches", num);
 			verified = true;
@@ -2035,4 +2080,65 @@ bool IAS::VerificaSOD(ByteArray& SOD, std::map<BYTE, ByteDynArray>& hashSet) {
 	return RunCSCAVerification(certDS);
 	
 	exit_func
+}
+
+
+bool IAS::VerifyAndAuthenticateDappKey() {
+	init_func
+
+		LOG_INFO("VerifyAndAuthenticateDappKey - Starting complete DAPP key verification");
+
+	ByteDynArray SOD;
+	LOG_DEBUG("VerifyAndAuthenticateDappKey - DAPP key not loaded, reading from card");
+	ByteDynArray DAPPKey;
+	ReadDappPubKey(DAPPKey);
+
+	if (DappPubKeyRaw.isEmpty() || DappPubKey.isEmpty() || DappModule.isEmpty()) {
+		throw logged_error("VerifyAndAuthenticateDappKey - Failed to read DAPP key from card");
+	}
+
+	LOG_DEBUG("VerifyAndAuthenticateDappKey - DAPP key loaded, size: %zu bytes", DappPubKeyRaw.size());
+
+	LOG_DEBUG("VerifyAndAuthenticateDappKey - reading SOD from card");
+	ReadSOD(SOD);
+
+	if (SOD.isEmpty()) {
+		throw logged_error("VerifyAndAuthenticateDappKey - Failed to read SOD from card");
+	}
+
+	LOG_DEBUG("VerifyAndAuthenticateDappKey - SOD loaded, size: %zu bytes", SOD.size());
+
+	uint8_t digest = GetSODDigestAlg(SOD);
+	LOG_INFO("VerifyAndAuthenticateDappKey - SOD digest algorithm: %s",
+		(digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
+
+	CSHA256 sha256;
+	CSHA512 sha512;
+	ByteDynArray hashA4 = (digest == 1) ? sha256.Digest(DappPubKeyRaw) : sha512.Digest(DappPubKeyRaw);
+
+	LOG_DEBUG("VerifyAndAuthenticateDappKey - Hash A4 calculated (%s):", (digest == 1) ? "SHA256" : "SHA512");
+	LOG_BUFFER(hashA4.data(), hashA4.size());
+
+	std::map<uint8_t, ByteDynArray> hashSet;
+	hashSet[0xa4] = hashA4;
+
+	// Verifica DAPP vs SOD con CSCA chain completa
+	LOG_INFO("VerifyAndAuthenticateDappKey - Verifying SOD with CSCA chain");
+	bool verified = false;
+	try {
+		verified = (digest == 1) ? VerificaSOD(SOD, hashSet) : VerificaSODPSS(SOD, hashSet);
+	}
+	catch (std::exception& ex) {
+		LOG_ERROR("VerifyAndAuthenticateDappKey - SOD verification failed: %s", ex.what());
+		throw logged_error(stdPrintf("VerifyAndAuthenticateDappKey - SOD verification exception: %s", ex.what()));
+	}
+
+	if (!verified) {
+		throw logged_error("VerifyAndAuthenticateDappKey - CSCA chain verification failed");
+	}
+
+	LOG_INFO("VerifyAndAuthenticateDappKey - DAPP key successfully authenticated via CSCA chain");
+
+	exit_func
+		return true;
 }

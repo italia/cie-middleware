@@ -125,8 +125,14 @@ DWORD WINAPI CardReadFile(
 					ias->ReadSOD(response);
 				else if (lstrcmp(pszFileName, EfIdServizi) == 0)
 					ias->ReadIdServizi(response);
-				else if (lstrcmp(pszFileName, EfIntAuth) == 0)
-					ias->ReadDappPubKey(response);
+				else if (lstrcmp(pszFileName, EfIntAuth) == 0) {
+					try {
+						ias->VerifyAndAuthenticateDappKey();
+					}
+					catch(...) {
+						throw CSP_error(SCARD_E_UNSUPPORTED_FEATURE, "Dapp key not found or unverified");
+					}
+				}
 				else if (lstrcmp(pszFileName, EfIntAuthServizi) == 0)
 					ias->ReadServiziPubKey(response);
 				else
@@ -329,6 +335,18 @@ DWORD WINAPI CardAuthenticateEx(
 
 	ias->SelectAID_IAS();
 	ias->SelectAID_CIE();
+	
+	LOG_INFO("[CSP] CardAuthenticateEx - Reading and verifying DAPP key before secure channel");
+	
+	try {
+		ias->VerifyAndAuthenticateDappKey();  // Verifica CSCA immediata
+	}
+	catch (std::exception &ex) {
+		LOG_ERROR("[CSP] CardAuthenticateEx - DAPP key verification failed: %s", ex.what());
+		throw CSP_error(SCARD_E_INVALID_PARAMETER);
+	}
+	LOG_INFO("[CSP] CardAuthenticateEx - DAPP key verified with CSCA chain");
+	
 	// leggo i parametri di dominio DH e della chiave di extauth
 	if (ias->Callback != nullptr) {
 		ias->Callback(0, "Init", ias->CallbackData);
@@ -339,7 +357,7 @@ DWORD WINAPI CardAuthenticateEx(
 	if (ias->Callback != nullptr)
 		ias->Callback(1, "DiffieHellman", ias->CallbackData);
 	ias->DHKeyExchange();
-	// DAPP
+	// DAPP (usa chiave verificata con TOCTOU protection interna)
 	if (ias->Callback != nullptr)
 		ias->Callback(2, "DAPP", ias->CallbackData);
 	ias->DAPP();
@@ -654,6 +672,17 @@ __out_opt                               PDWORD      pcAttemptsRemaining) {
 		ias->SelectAID_IAS();
 		ias->SelectAID_CIE();
 
+		// Verifica completa DAPP key con SOD e CSCA PRIMA di usarla
+		LOG_INFO("[CSP] CardChangeAuthenticatorEx - Verifying DAPP key with CSCA chain");
+		try {
+			ias->VerifyAndAuthenticateDappKey();
+		}
+		catch (std::exception &ex) {
+			LOG_ERROR("[CSP] CardChangeAuthenticatorEx - DAPP key verification failed: %s", ex.what());
+			throw CSP_error(SCARD_E_INVALID_PARAMETER);
+		}
+		LOG_INFO("[CSP] CardChangeAuthenticatorEx - DAPP key verified, proceeding");
+
 		// leggo i parametri di dominio DH e della chiave di extauth
 		if (ias->Callback != nullptr)
 			ias->Callback(0, "Init", ias->CallbackData);
@@ -754,6 +783,17 @@ __in                               DWORD       dwFlags) {
 
 	ias->SelectAID_IAS();
 	ias->SelectAID_CIE();
+
+	// Verifica completa DAPP key con SOD e CSCA PRIMA di usarla
+	LOG_INFO("[CSP] CardUnblockPin - Verifying DAPP key with CSCA chain");
+	try {
+		ias->VerifyAndAuthenticateDappKey();
+	}
+	catch (std::exception &ex) {
+		LOG_ERROR("[CSP] CardUnblockPin - DAPP key verification failed: %s", ex.what());
+		throw CSP_error(SCARD_E_INVALID_PARAMETER);
+	}
+	LOG_INFO("[CSP] CardUnblockPin - DAPP key verified, proceeding");
 
 	// leggo i parametri di dominio DH e della chiave di extauth
 	if (ias->Callback != nullptr)
@@ -869,7 +909,6 @@ extern "C" DWORD WINAPI CardAcquireContext(
 	ias->SelectAID_IAS();
 	ias->ReadPAN();
 
-	ByteDynArray resp;
 	ias->SelectAID_CIE();
 	ias->InitEncKey();
 
@@ -880,7 +919,13 @@ extern "C" DWORD WINAPI CardAcquireContext(
 	//		throw logged_error("CIE non abilitata");
 	//}
 
-	ias->ReadDappPubKey(resp);
+	try {
+		ias->VerifyAndAuthenticateDappKey();
+	}
+	catch (std::exception &ex) {
+		LOG_ERROR("[CSP] CardAcquireContext - DAPP key verification failed: %s", ex.what());
+		throw CSP_error(SCARD_E_INVALID_PARAMETER);
+	}
 
 	pCardData->dwVersion =
 		min(pCardData->dwVersion, 7);

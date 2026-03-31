@@ -8,6 +8,7 @@
 #include "../crypto/SHA1.h"
 #include "../crypto/DES3.h"
 #include "../crypto/MAC.h"
+#include "CSCACertificates.h"
 #include <shlwapi.h>
 #include <shlobj.h>
 #include "ModuleInfo.h"
@@ -15,7 +16,10 @@
 #include "cacheLib.h"
 #include <intsafe.h>
 #include <wincrypt.h>
+#include <vector>
 #include "ATR.h"
+#include "UUCLogger.h"
+USE_LOG;
 
 #define CIE_KEY_DH_ID 0x81
 #define CIE_KEY_ExtAuth_ID 0x84
@@ -26,6 +30,83 @@
 extern CModuleInfo moduleInfo;
 extern ByteArray SkipZero(ByteArray &ba);
 extern DWORD WINAPI _abilitaCIE(LPVOID lpThreadParameter);
+
+// Struttura per embedded CSCA certificates
+struct EmbeddedCertInfo {
+	const unsigned char* data;
+	size_t size;
+};
+
+static const EmbeddedCertInfo embeddedCSCA[] = {
+	{ EmbeddedTestCSCA_1, sizeof(EmbeddedTestCSCA_1) },
+	{ EmbeddedTestCSCA_2, sizeof(EmbeddedTestCSCA_2) },
+	{ EmbeddedTestCSCA_3, sizeof(EmbeddedTestCSCA_3) },
+	{ EmbeddedTestCSCA_4, sizeof(EmbeddedTestCSCA_4) },
+	{ EmbeddedTestCSCA_5, sizeof(EmbeddedTestCSCA_5) },
+	{ EmbeddedTestCSCA_6, sizeof(EmbeddedTestCSCA_6) },
+	{ EmbeddedProdCSCA_1, sizeof(EmbeddedProdCSCA_1) },
+	{ EmbeddedProdCSCA_2, sizeof(EmbeddedProdCSCA_2) },
+	{ EmbeddedProdCSCA_3, sizeof(EmbeddedProdCSCA_3) },
+	{ EmbeddedProdCSCA_4, sizeof(EmbeddedProdCSCA_4) },
+	{ EmbeddedProdCSCA_5, sizeof(EmbeddedProdCSCA_5) },
+	{ EmbeddedProdCSCA_6, sizeof(EmbeddedProdCSCA_6) },
+	{ nullptr, 0 } 
+};
+
+// Helper function per caricare i certificati embedded
+static bool LoadEmbeddedCSCACertificates(std::vector<ByteDynArray>& certificates) {
+	init_func
+	
+	certificates.clear();
+	int loadedCount = 0;
+	
+	LOG_DBG((0, "IAS", "LoadEmbeddedCSCACertificates - Loading embedded CSCA certificates (DER format)..."));
+	
+	for (int i = 0; embeddedCSCA[i].data != nullptr; ++i) {
+		ByteDynArray derCert;
+		derCert.resize(embeddedCSCA[i].size);
+		memcpy(derCert.data(), embeddedCSCA[i].data, embeddedCSCA[i].size);
+		certificates.push_back(derCert);
+		loadedCount++;
+	}
+	
+	LOG_DBG((0, "IAS", "LoadEmbeddedCSCACertificates - Loaded %d embedded CSCA certificates", loadedCount));
+	return loadedCount > 0;
+}
+
+static std::string GetCSCARootDir()
+{
+	CHAR pathBuf[MAX_PATH] = { 0 };
+	if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_COMMON_APPDATA, NULL, 0, pathBuf))) {
+		std::string base = std::string(pathBuf) + "\\CIEPKI\\CSCA\\";
+		CreateDirectoryA((std::string(pathBuf) + "\\CIEPKI").c_str(), NULL);
+		CreateDirectoryA(base.c_str(), NULL);
+		return base;
+	}
+	if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, pathBuf))) {
+		std::string base = std::string(pathBuf) + "\\IPZS\\CSCA\\";
+		CreateDirectoryA((std::string(pathBuf) + "\\IPZS").c_str(), NULL);
+		CreateDirectoryA(base.c_str(), NULL);
+		return base;
+	}
+	GetTempPathA(MAX_PATH, pathBuf);
+	std::string base = std::string(pathBuf) + "CSCA\\";
+	CreateDirectoryA(base.c_str(), NULL);
+	return base;
+}
+
+static bool ReadFileToByteDynArray(const std::string& path, ByteDynArray& out)
+{
+	HANDLE hFile = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE) return false;
+	DWORD fileSize = GetFileSize(hFile, NULL);
+	if (fileSize == INVALID_FILE_SIZE || fileSize == 0) { CloseHandle(hFile); return false; }
+	out.resize(fileSize);
+	DWORD bytesRead = 0;
+	BOOL ok = ReadFile(hFile, out.data(), fileSize, &bytesRead, NULL);
+	CloseHandle(hFile);
+	return ok && bytesRead == fileSize;
+}
 
 
 IAS::IAS(CToken::TokenTransmitCallback transmit,ByteArray ATR)
@@ -42,6 +123,9 @@ IAS::IAS(CToken::TokenTransmitCallback transmit,ByteArray ATR)
 	
 	ActiveSM = false;
 	ActiveDF = DF_Root;
+	
+	// Inizializza lo stato di verifica DAPP
+	DappKeyVerified = false;
 
 	token.setTransmitCallback(transmit, nullptr);
 }
@@ -51,9 +135,10 @@ IAS::~IAS()
 {
 }
 
-uint8_t defModule[] = { 0xba, 0x28, 0x37, 0xab, 0x4c, 0x6b, 0xb8, 0x27, 0x57, 0x7b, 0xff, 0x4e, 0xb7, 0xb1, 0xe4, 0x9c, 0xdd, 0xe0, 0xf1, 0x66, 0x14, 0xd1, 0xef, 0x24, 0xc1, 0xb7, 0x5c, 0xf7, 0x0f, 0xb1, 0x2c, 0xd1, 0x8f, 0x4d, 0x14, 0xe2, 0x81, 0x4b, 0xa4, 0x87, 0x7e, 0xa8, 0x00, 0xe1, 0x75, 0x90, 0x60, 0x76, 0xb5, 0x62, 0xba, 0x53, 0x59, 0x73, 0xc5, 0xd8, 0xb3, 0x78, 0x05, 0x1d, 0x8a, 0xfc, 0x74, 0x07, 0xa1, 0xd9, 0x19, 0x52, 0x9e, 0x03, 0xc1, 0x06, 0xcd, 0xa1, 0x8d, 0x69, 0x9a, 0xfb, 0x0d, 0x8a, 0xb4, 0xfd, 0xdd, 0x9d, 0xc7, 0x19, 0x15, 0x9a, 0x50, 0xde, 0x94, 0x68, 0xf0, 0x2a, 0xb1, 0x03, 0xe2, 0x82, 0xa5, 0x0e, 0x71, 0x6e, 0xc2, 0x3c, 0xda, 0x5b, 0xfc, 0x4a, 0x23, 0x2b, 0x09, 0xa4, 0xb2, 0xc7, 0x07, 0x45, 0x93, 0x95, 0x49, 0x09, 0x9b, 0x44, 0x83, 0xcb, 0xae, 0x62, 0xd0, 0x09, 0x96, 0x74, 0xdb, 0xf6, 0xf3, 0x9b, 0x72, 0x23, 0xa9, 0x9d, 0x88, 0xe3, 0x3f, 0x1a, 0x0c, 0xde, 0xde, 0xeb, 0xbd, 0xc3, 0x55, 0x17, 0xab, 0xe9, 0x88, 0x0a, 0xab, 0x24, 0x0e, 0x1e, 0xa1, 0x66, 0x28, 0x3a, 0x27, 0x4a, 0x9a, 0xd9, 0x3b, 0x4b, 0x1d, 0x19, 0xf3, 0x67, 0x9f, 0x3e, 0x8b, 0x5f, 0xf6, 0xa1, 0xe0, 0xed, 0x73, 0x6e, 0x84, 0xd5, 0xab, 0xe0, 0x3c, 0x59, 0xe7, 0x34, 0x6b, 0x42, 0x18, 0x75, 0x5d, 0x75, 0x36, 0x6c, 0xbf, 0x41, 0x36, 0xf0, 0xa2, 0x6c, 0x3d, 0xc7, 0x0a, 0x69, 0xab, 0xaa, 0xf6, 0x6e, 0x13, 0xa1, 0xb2, 0xfa, 0xad, 0x05, 0x2c, 0xa6, 0xec, 0x9c, 0x51, 0xe2, 0xae, 0xd1, 0x4d, 0x16, 0xe0, 0x90, 0x25, 0x4d, 0xc3, 0xf6, 0x4e, 0xa2, 0xbd, 0x8a, 0x83, 0x6b, 0xba, 0x99, 0xde, 0xfa, 0xcb, 0xa3, 0xa6, 0x13, 0xae, 0xed, 0xd9, 0x3a, 0x96, 0x15, 0x27, 0x3d };
-uint8_t defPrivExp[] = { 0x47, 0x16, 0xc2, 0xa3, 0x8c, 0xcc, 0x7a, 0x07, 0xb4, 0x15, 0xeb, 0x1a, 0x61, 0x75, 0xf2, 0xaa, 0xa0, 0xe4, 0x9c, 0xea, 0xf1, 0xba, 0x75, 0xcb, 0xa0, 0x9a, 0x68, 0x4b, 0x04, 0xd8, 0x11, 0x18, 0x79, 0xd3, 0xe2, 0xcc, 0xd8, 0xb9, 0x4d, 0x3c, 0x5c, 0xf6, 0xc5, 0x57, 0x53, 0xf0, 0xed, 0x95, 0x87, 0x91, 0x0b, 0x3c, 0x77, 0x25, 0x8a, 0x01, 0x46, 0x0f, 0xe8, 0x4c, 0x2e, 0xde, 0x57, 0x64, 0xee, 0xbe, 0x9c, 0x37, 0xfb, 0x95, 0xcd, 0x69, 0xce, 0xaf, 0x09, 0xf4, 0xb1, 0x35, 0x7c, 0x27, 0x63, 0x14, 0xab, 0x43, 0xec, 0x5b, 0x3c, 0xef, 0xb0, 0x40, 0x3f, 0x86, 0x8f, 0x68, 0x8e, 0x2e, 0xc0, 0x9a, 0x49, 0x73, 0xe9, 0x87, 0x75, 0x6f, 0x8d, 0xa7, 0xa1, 0x01, 0xa2, 0xca, 0x75, 0xa5, 0x4a, 0x8c, 0x4c, 0xcf, 0x9a, 0x1b, 0x61, 0x47, 0xe4, 0xde, 0x56, 0x42, 0x3a, 0xf7, 0x0b, 0x20, 0x67, 0x17, 0x9c, 0x5e, 0xeb, 0x64, 0x68, 0x67, 0x86, 0x34, 0x78, 0xd7, 0x52, 0xc7, 0xf4, 0x12, 0xdb, 0x27, 0x75, 0x41, 0x57, 0x5a, 0xa0, 0x61, 0x9d, 0x30, 0xbc, 0xcc, 0x8d, 0x87, 0xe6, 0x17, 0x0b, 0x33, 0x43, 0x9a, 0x2c, 0x93, 0xf2, 0xd9, 0x7e, 0x18, 0xc0, 0xa8, 0x23, 0x43, 0xa6, 0x01, 0x2a, 0x5b, 0xb1, 0x82, 0x28, 0x08, 0xf0, 0x1b, 0x5c, 0xfd, 0x85, 0x67, 0x3a, 0xc0, 0x96, 0x4c, 0x5f, 0x3c, 0xfd, 0x2d, 0xaf, 0x81, 0x42, 0x35, 0x97, 0x64, 0xa9, 0xad, 0xb9, 0xe3, 0xf7, 0x6d, 0xb6, 0x13, 0x46, 0x1c, 0x1b, 0xc9, 0x13, 0xdc, 0x9a, 0xc0, 0xab, 0x50, 0xd3, 0x65, 0xf7, 0x7c, 0xb9, 0x31, 0x94, 0xc9, 0x8a, 0xa9, 0x66, 0xd8, 0x9c, 0xdd, 0x55, 0x51, 0x25, 0xa5, 0xe5, 0x9e, 0xcf, 0x4f, 0xa3, 0xf0, 0xc3, 0xfd, 0x61, 0x0c, 0xd3, 0xd0, 0x56, 0x43, 0x93, 0x38, 0xfd, 0x81 };
-uint8_t defPubExp[] = { 0x00, 0x01, 0x00, 0x01 };
+// Static variables to avoid linking conflicts with main middleware
+static uint8_t defModule[] = { 0xba, 0x28, 0x37, 0xab, 0x4c, 0x6b, 0xb8, 0x27, 0x57, 0x7b, 0xff, 0x4e, 0xb7, 0xb1, 0xe4, 0x9c, 0xdd, 0xe0, 0xf1, 0x66, 0x14, 0xd1, 0xef, 0x24, 0xc1, 0xb7, 0x5c, 0xf7, 0x0f, 0xb1, 0x2c, 0xd1, 0x8f, 0x4d, 0x14, 0xe2, 0x81, 0x4b, 0xa4, 0x87, 0x7e, 0xa8, 0x00, 0xe1, 0x75, 0x90, 0x60, 0x76, 0xb5, 0x62, 0xba, 0x53, 0x59, 0x73, 0xc5, 0xd8, 0xb3, 0x78, 0x05, 0x1d, 0x8a, 0xfc, 0x74, 0x07, 0xa1, 0xd9, 0x19, 0x52, 0x9e, 0x03, 0xc1, 0x06, 0xcd, 0xa1, 0x8d, 0x69, 0x9a, 0xfb, 0x0d, 0x8a, 0xb4, 0xfd, 0xdd, 0x9d, 0xc7, 0x19, 0x15, 0x9a, 0x50, 0xde, 0x94, 0x68, 0xf0, 0x2a, 0xb1, 0x03, 0xe2, 0x82, 0xa5, 0x0e, 0x71, 0x6e, 0xc2, 0x3c, 0xda, 0x5b, 0xfc, 0x4a, 0x23, 0x2b, 0x09, 0xa4, 0xb2, 0xc7, 0x07, 0x45, 0x93, 0x95, 0x49, 0x09, 0x9b, 0x44, 0x83, 0xcb, 0xae, 0x62, 0xd0, 0x09, 0x96, 0x74, 0xdb, 0xf6, 0xf3, 0x9b, 0x72, 0x23, 0xa9, 0x9d, 0x88, 0xe3, 0x3f, 0x1a, 0x0c, 0xde, 0xde, 0xeb, 0xbd, 0xc3, 0x55, 0x17, 0xab, 0xe9, 0x88, 0x0a, 0xab, 0x24, 0x0e, 0x1e, 0xa1, 0x66, 0x28, 0x3a, 0x27, 0x4a, 0x9a, 0xd9, 0x3b, 0x4b, 0x1d, 0x19, 0xf3, 0x67, 0x9f, 0x3e, 0x8b, 0x5f, 0xf6, 0xa1, 0xe0, 0xed, 0x73, 0x6e, 0x84, 0xd5, 0xab, 0xe0, 0x3c, 0x59, 0xe7, 0x34, 0x6b, 0x42, 0x18, 0x75, 0x5d, 0x75, 0x36, 0x6c, 0xbf, 0x41, 0x36, 0xf0, 0xa2, 0x6c, 0x3d, 0xc7, 0x0a, 0x69, 0xab, 0xaa, 0xf6, 0x6e, 0x13, 0xa1, 0xb2, 0xfa, 0xad, 0x05, 0x2c, 0xa6, 0xec, 0x9c, 0x51, 0xe2, 0xae, 0xd1, 0x4d, 0x16, 0xe0, 0x90, 0x25, 0x4d, 0xc3, 0xf6, 0x4e, 0xa2, 0xbd, 0x8a, 0x83, 0x6b, 0xba, 0x99, 0xde, 0xfa, 0xcb, 0xa3, 0xa6, 0x13, 0xae, 0xed, 0xd9, 0x3a, 0x96, 0x15, 0x27, 0x3d };
+static uint8_t defPrivExp[] = { 0x47, 0x16, 0xc2, 0xa3, 0x8c, 0xcc, 0x7a, 0x07, 0xb4, 0x15, 0xeb, 0x1a, 0x61, 0x75, 0xf2, 0xaa, 0xa0, 0xe4, 0x9c, 0xea, 0xf1, 0xba, 0x75, 0xcb, 0xa0, 0x9a, 0x68, 0x4b, 0x04, 0xd8, 0x11, 0x18, 0x79, 0xd3, 0xe2, 0xcc, 0xd8, 0xb9, 0x4d, 0x3c, 0x5c, 0xf6, 0xc5, 0x57, 0x53, 0xf0, 0xed, 0x95, 0x87, 0x91, 0x0b, 0x3c, 0x77, 0x25, 0x8a, 0x01, 0x46, 0x0f, 0xe8, 0x4c, 0x2e, 0xde, 0x57, 0x64, 0xee, 0xbe, 0x9c, 0x37, 0xfb, 0x95, 0xcd, 0x69, 0xce, 0xaf, 0x09, 0xf4, 0xb1, 0x35, 0x7c, 0x27, 0x63, 0x14, 0xab, 0x43, 0xec, 0x5b, 0x3c, 0xef, 0xb0, 0x40, 0x3f, 0x86, 0x8f, 0x68, 0x8e, 0x2e, 0xc0, 0x9a, 0x49, 0x73, 0xe9, 0x87, 0x75, 0x6f, 0x8d, 0xa7, 0xa1, 0x01, 0xa2, 0xca, 0x75, 0xa5, 0x4a, 0x8c, 0x4c, 0xcf, 0x9a, 0x1b, 0x61, 0x47, 0xe4, 0xde, 0x56, 0x42, 0x3a, 0xf7, 0x0b, 0x20, 0x67, 0x17, 0x9c, 0x5e, 0xeb, 0x64, 0x68, 0x67, 0x86, 0x34, 0x78, 0xd7, 0x52, 0xc7, 0xf4, 0x12, 0xdb, 0x27, 0x75, 0x41, 0x57, 0x5a, 0xa0, 0x61, 0x9d, 0x30, 0xbc, 0xcc, 0x8d, 0x87, 0xe6, 0x17, 0x0b, 0x33, 0x43, 0x9a, 0x2c, 0x93, 0xf2, 0xd9, 0x7e, 0x18, 0xc0, 0xa8, 0x23, 0x43, 0xa6, 0x01, 0x2a, 0x5b, 0xb1, 0x82, 0x28, 0x08, 0xf0, 0x1b, 0x5c, 0xfd, 0x85, 0x67, 0x3a, 0xc0, 0x96, 0x4c, 0x5f, 0x3c, 0xfd, 0x2d, 0xaf, 0x81, 0x42, 0x35, 0x97, 0x64, 0xa9, 0xad, 0xb9, 0xe3, 0xf7, 0x6d, 0xb6, 0x13, 0x46, 0x1c, 0x1b, 0xc9, 0x13, 0xdc, 0x9a, 0xc0, 0xab, 0x50, 0xd3, 0x65, 0xf7, 0x7c, 0xb9, 0x31, 0x94, 0xc9, 0x8a, 0xa9, 0x66, 0xd8, 0x9c, 0xdd, 0x55, 0x51, 0x25, 0xa5, 0xe5, 0x9e, 0xcf, 0x4f, 0xa3, 0xf0, 0xc3, 0xfd, 0x61, 0x0c, 0xd3, 0xd0, 0x56, 0x43, 0x93, 0x38, 0xfd, 0x81 };
+static uint8_t defPubExp[] = { 0x00, 0x01, 0x00, 0x01 };
 
 void IAS::ReadSOD(ByteDynArray &data) {
 	init_func
@@ -316,7 +401,16 @@ void IAS::SelectAID_IAS(bool SM) {
 
 void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 	init_func
-		
+	
+	// TOCTOU Protection: se già letta e verificata, restituisci la versione cached
+	// Questo impedisce a un attaccante di sostituire la chiave dopo la verifica
+	if (DappKeyVerified && !DappPubKeyRaw.isEmpty()) {
+		LOG_DBG((0, "IAS", "ReadDappPubKey - Already read and verified, returning cached key (TOCTOU protection)"));
+		DappKey = DappPubKeyRaw;
+		return;
+	}
+	
+	LOG_DBG((0, "IAS", "ReadDappPubKey - Reading from card (first read or not yet verified)"));
 	ByteDynArray resp;
 	readfile(0x1004, DappKey);
 
@@ -331,6 +425,10 @@ void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 	while (pubKey[0] == 0)
 		pubKey = pubKey.mid(1);
 	DappPubKey = pubKey;
+	
+	// Salva la DAPP key raw per verifica successiva e resetta lo stato di verifica
+	DappPubKeyRaw = DappKey;
+	DappKeyVerified = false;
 
 	exit_func
 }
@@ -352,9 +450,34 @@ void IAS::DAPP() {
 	CSHA256 sha256;
 	uint8_t Val01 = 1;
 
-	if (DappPubKey.isEmpty()) {
+	// TOCTOU protection: verifica che la DAPP key sia stata autenticata via CSCA
+	if (!DappKeyVerified) {
+		throw logged_error("DAPP - DAPP key has not been verified via CSCA chain. Call VerifyAndAuthenticateDappKey first!");
+	}
+
+	if (DappPubKey.isEmpty() || DappPubKeyRaw.isEmpty()) {
 		throw logged_error("DAPP - DAPP key not available");
 	}
+	
+	// Re-parsing della DAPP key raw per verificare che non sia stata modificata dopo la verifica
+	LOG_DBG((0, "IAS", "DAPP - Re-parsing DappPubKeyRaw to verify integrity"));
+	CASNParser reParser;
+	reParser.Parse(DappPubKeyRaw);
+	
+	ByteArray reModule = reParser.tags[0]->tags[0]->content;
+	while (reModule[0] == 0)
+		reModule = reModule.mid(1);
+	ByteArray rePubKey = reParser.tags[0]->tags[1]->content;
+	while (rePubKey[0] == 0)
+		rePubKey = rePubKey.mid(1);
+	
+	// Verifica che DappModule e DappPubKey corrispondano ancora al raw verificato
+	if (reModule != DappModule || rePubKey != DappPubKey) {
+		LOG_ERR((0, "IAS", "DAPP - TOCTOU attack detected! DAPP key has been modified after CSCA verification"));
+		throw logged_error("DAPP - TOCTOU attack detected: DAPP key mismatch after verification");
+	}
+	
+	LOG_DBG((0, "IAS", "DAPP - DAPP key integrity verified, proceeding with authentication"));
 
 	ByteDynArray module = VarToByteArray(defModule);
 	ByteDynArray pubexp = VarToByteArray(defPubExp);
@@ -965,7 +1088,8 @@ void IAS::SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN)
 	CacheSetData(PAN, encCert.data(), (int)encCert.size(), encPIN.data(), (int)encPIN.size());
 }
 
-int integrity = 0;
+// Static to avoid linking conflicts with main middleware
+static int integrity = 0;
 bool IsLowIntegrity()
 {
 	if (integrity == 0) {
@@ -1237,6 +1361,221 @@ uint8_t IAS::GetSODDigestAlg(ByteArray &SOD)
 	else throw logged_error("GetSODDigestAlg - Digest algorithm not supported");;
 }
 
+bool IAS::VerifyCSCAChain(PCCERT_CONTEXT certDS, const std::vector<ByteDynArray>& cscaCertificates) {
+	init_func
+
+	if (cscaCertificates.empty()) {
+		LOG_ERR((0, "IAS", "VerifyCSCAChain - No CSCA certificates available"));
+		return false;
+	}
+
+	LOG_DBG((0, "IAS", "VerifyCSCAChain - Creating certificate store with %d CSCA certificates", cscaCertificates.size()));
+
+	HCERTSTORE hStore = CertOpenStore(CERT_STORE_PROV_MEMORY, 0, 0, CERT_STORE_CREATE_NEW_FLAG, NULL);
+	if (!hStore) {
+		LOG_ERR((0, "IAS", "VerifyCSCAChain - Failed to create certificate store"));
+		return false;
+	}
+
+	auto storeGuard = scopeExit([&]() noexcept { CertCloseStore(hStore, 0); });
+
+	SYSTEMTIME notBeforeDS, notAfterDS;
+	FileTimeToSystemTime(&certDS->pCertInfo->NotBefore, &notBeforeDS);
+	FileTimeToSystemTime(&certDS->pCertInfo->NotAfter, &notAfterDS);
+	LOG_DBG((0, "IAS", "DS NotBefore: %04d-%02d-%02d NotAfter: %04d-%02d-%02d",
+		notBeforeDS.wYear, notBeforeDS.wMonth, notBeforeDS.wDay,
+		notAfterDS.wYear, notAfterDS.wMonth, notAfterDS.wDay));
+	char szName[512];
+	CertGetNameString(certDS, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0, NULL, szName, sizeof(szName));
+	LOG_DBG((0, "IAS", "DS Issuer: %s", szName));
+
+	int addedCerts = 0;
+	for (const auto& certData : cscaCertificates) {
+		PCCERT_CONTEXT pCert = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+			certData.data(), (DWORD)certData.size());
+		if (pCert) {
+			SYSTEMTIME notBefore, notAfter;
+			FileTimeToSystemTime(&pCert->pCertInfo->NotBefore, &notBefore);
+			FileTimeToSystemTime(&pCert->pCertInfo->NotAfter, &notAfter);
+			LOG_DBG((0, "IAS", "CSCA NotBefore: %04d-%02d-%02d NotAfter: %04d-%02d-%02d",
+				notBefore.wYear, notBefore.wMonth, notBefore.wDay,
+				notAfter.wYear, notAfter.wMonth, notAfter.wDay));
+
+			if (CertAddCertificateContextToStore(hStore, pCert, CERT_STORE_ADD_ALWAYS, NULL)) {
+				addedCerts++;
+				LOG_DBG((0, "IAS", "VerifyCSCAChain - Added CSCA certificate %d to store", addedCerts));
+			}
+			else {
+				LOG_ERR((0, "IAS", "VerifyCSCAChain - Failed to add CSCA certificate to store"));
+			}
+			CertFreeCertificateContext(pCert);
+		}
+		else {
+			LOG_ERR((0, "IAS", "VerifyCSCAChain - Failed to create certificate context from CSCA data"));
+		}
+	}
+
+	if (addedCerts == 0) {
+		LOG_ERR((0, "IAS", "VerifyCSCAChain - No valid CSCA certificates added to store"));
+		return false;
+	}
+
+	LOG_DBG((0, "IAS", "VerifyCSCAChain - Added %d CSCA certificates to store", addedCerts));
+
+	CERT_CHAIN_PARA chainParams = { 0 };
+	chainParams.cbSize = sizeof(CERT_CHAIN_PARA);
+	chainParams.RequestedUsage.dwType = USAGE_MATCH_TYPE_AND;
+
+	PCCERT_CHAIN_CONTEXT pChainContext = NULL;
+	BOOL result = CertGetCertificateChain(NULL, certDS, NULL, hStore, &chainParams,
+		NULL, NULL, &pChainContext);
+
+	if (!result || !pChainContext) {
+		LOG_ERR((0, "IAS", "VerifyCSCAChain - Failed to build certificate chain"));
+		return false;
+	}
+
+	auto chainGuard = scopeExit([&]() noexcept {
+		if (pChainContext) CertFreeCertificateChain(pChainContext);
+		});
+
+	if (pChainContext->TrustStatus.dwErrorStatus != CERT_TRUST_NO_ERROR) {
+		LOG_ERR((0, "IAS", "VerifyCSCAChain dwErrorStatus - Certificate chain has errors: 0x%08X", pChainContext->TrustStatus.dwErrorStatus));
+		LOG_ERR((0, "IAS", "VerifyCSCAChain dwInfoStatus - Certificate chain has errors: 0x%08X", pChainContext->TrustStatus.dwInfoStatus));
+		if (pChainContext->TrustStatus.dwErrorStatus == CERT_TRUST_IS_UNTRUSTED_ROOT) // 0x00000020
+			LOG_ERR((0, "IAS", "VerifyCSCAChain - Untrusted root certificate (not in Windows Root store), but is a known CSCA"));	
+		else {
+			return false;	
+		}
+	}
+
+	if (pChainContext->cChain == 0) {
+		LOG_ERR((0, "IAS", "VerifyCSCAChain - No certificate chains found"));
+		return false;
+	}
+
+	PCERT_SIMPLE_CHAIN pSimpleChain = pChainContext->rgpChain[0];
+	for (DWORD i = 0; i < pSimpleChain->cElement; ++i) {
+		PCCERT_CONTEXT ctx = pSimpleChain->rgpElement[i]->pCertContext;
+		SYSTEMTIME notBefore, notAfter;
+		FileTimeToSystemTime(&ctx->pCertInfo->NotBefore, &notBefore);
+		FileTimeToSystemTime(&ctx->pCertInfo->NotAfter, &notAfter);
+	}
+
+	if (!pSimpleChain || pSimpleChain->cElement == 0) {
+		LOG_ERR((0, "IAS", "VerifyCSCAChain - Empty certificate chain"));
+		return false;
+	}
+
+	PCERT_CHAIN_ELEMENT pRootElement = pSimpleChain->rgpElement[pSimpleChain->cElement - 1];
+	if (!pRootElement || !pRootElement->pCertContext) {
+		LOG_ERR((0, "IAS", "VerifyCSCAChain - No root certificate found"));
+		return false;
+	}
+
+	PCCERT_CONTEXT pRootCert = pRootElement->pCertContext;
+
+	if (pRootCert->pCertInfo->Subject.cbData != pRootCert->pCertInfo->Issuer.cbData ||
+		memcmp(pRootCert->pCertInfo->Subject.pbData, pRootCert->pCertInfo->Issuer.pbData,
+			pRootCert->pCertInfo->Subject.cbData) != 0) {
+		LOG_ERR((0, "IAS", "VerifyCSCAChain - Root certificate is not self-signed"));
+		return false;
+	}
+
+	LOG_DBG((0, "IAS", "VerifyCSCAChain - Certificate chain verification successful"));
+	return true;
+}
+
+bool IAS::RunCSCAVerification(PCCERT_CONTEXT certDS) {
+	init_func
+
+	LOG_DBG((0, "IAS", "RunCSCAVerification - Starting CSCA chain verification using embedded certificates"));
+	
+	std::vector<ByteDynArray> embeddedCerts;
+	if (!LoadEmbeddedCSCACertificates(embeddedCerts)) {
+		LOG_ERR((0, "IAS", "RunCSCAVerification - Failed to load embedded CSCA certificates"));
+		throw logged_error("RunCSCAVerification - No embedded CSCA certificates available");
+	}
+	
+	LOG_DBG((0, "IAS", "RunCSCAVerification - Verifying with %d embedded CSCA certificates", (int)embeddedCerts.size()));
+	
+	if (!VerifyCSCAChain(certDS, embeddedCerts)) {
+		throw logged_error("RunCSCAVerification - Document Signer certificate is not valid according to CSCA verification chain");
+	}
+	
+	LOG_DBG((0, "IAS", "RunCSCAVerification - CSCA chain verification successful"));
+	DappKeyVerified = true;
+	return true;
+	
+	exit_func
+}
+
+bool IAS::VerifyAndAuthenticateDappKey(ByteArray &SOD) {
+	init_func
+	
+	LOG_DBG((0, "IAS", "VerifyAndAuthenticateDappKey - Starting complete DAPP key verification"));
+	
+	// 1. Verifica che DAPP key sia stata letta
+	if (DappPubKeyRaw.isEmpty()) {
+		LOG_DBG((0, "IAS", "VerifyAndAuthenticateDappKey - DAPP key not loaded, reading from card"));
+		ByteDynArray dummy;
+		ReadDappPubKey(dummy);
+	}
+	
+	if (DappPubKeyRaw.isEmpty() || DappPubKey.isEmpty() || DappModule.isEmpty()) {
+		throw logged_error("VerifyAndAuthenticateDappKey - Failed to read DAPP key from card");
+	}
+	
+	LOG_DBG((0, "IAS", "VerifyAndAuthenticateDappKey - DAPP key loaded, size: %zu bytes", DappPubKeyRaw.size()));
+	
+	if (SOD.isEmpty()) {
+		throw logged_error("VerifyAndAuthenticateDappKey - SOD parameter is empty");
+	}
+	
+	LOG_DBG((0, "IAS", "VerifyAndAuthenticateDappKey - SOD provided, size: %zu bytes", SOD.size()));
+	
+	// 3. Determina algoritmo digest dal SOD
+	uint8_t digest = GetSODDigestAlg(SOD);
+	LOG_DBG((0, "IAS", "VerifyAndAuthenticateDappKey - SOD digest algorithm: %s", 
+		(digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512"));
+	
+	// 4. Calcola hash A4 della DAPP key
+	CSHA256 sha256;
+	CSHA512 sha512;
+	ByteDynArray hashA4 = (digest == 1) ? sha256.Digest(DappPubKeyRaw) : sha512.Digest(DappPubKeyRaw);
+	
+	LOG_DBG((0, "IAS", "VerifyAndAuthenticateDappKey - Hash A4 calculated (%s)", (digest == 1) ? "SHA256" : "SHA512"));
+	
+	// 5. Prepara hashSet con solo A4 per verifica
+	std::map<uint8_t, ByteDynArray> hashSet;
+	hashSet[0xa4] = hashA4;
+	
+	// 6. Verifica SOD con CSCA chain completa
+	LOG_DBG((0, "IAS", "VerifyAndAuthenticateDappKey - Verifying SOD with CSCA chain"));
+	try {
+		if (digest == 1) {
+			VerificaSOD(SOD, hashSet);
+		} else {
+			VerificaSODPSS(SOD, hashSet);
+		}
+	}
+	catch (std::exception &ex) {
+		LOG_ERR((0, "IAS", "VerifyAndAuthenticateDappKey - SOD verification failed: %s", ex.what()));
+		throw logged_error(stdPrintf("VerifyAndAuthenticateDappKey - SOD verification exception: %s", ex.what()));
+	}
+	
+	// 7. Verifica risultato
+	if (!DappKeyVerified) {
+		throw logged_error("VerifyAndAuthenticateDappKey - CSCA chain verification failed");
+	}
+	
+	LOG_DBG((0, "IAS", "VerifyAndAuthenticateDappKey - DAPP key successfully authenticated via CSCA chain"));
+	LOG_DBG((0, "IAS", "VerifyAndAuthenticateDappKey - DappKeyVerified flag set to true"));
+	
+	exit_func
+	return true;
+}
+
 void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet)
 {
 	init_func
@@ -1364,6 +1703,11 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 	ByteDynArray certSerial = ByteArray(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData);
 	if (certSerial.reverse() != signerCertSerialNumber.content)
 		throw logged_error("VerificaSODPSS - Certificate Serial Number does not match");
+
+	// Verifica CSCA chain per autenticare il Document Signer certificate
+	LOG_DBG((0, "IAS", "VerificaSODPSS - Verifying Document Signer certificate via CSCA chain"));
+	RunCSCAVerification(certDS);
+	LOG_DBG((0, "IAS", "VerificaSODPSS - CSCA verification successful, DappKeyVerified set to true"));
 
 	uint8_t val = 1;
 	signedData.Child(0, 02).Verify(VarToByteArray(val));
@@ -1520,6 +1864,11 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	ByteDynArray certSerial = ByteArray(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData);
 	if (certSerial.reverse() != signerCertSerialNumber.content)
 		throw logged_error("VerificaSOD - Serial Number certificat does not match");
+
+	// Verifica CSCA chain per autenticare il Document Signer certificate
+	LOG_DBG((0, "IAS", "VerificaSOD - Verifying Document Signer certificate via CSCA chain"));
+	RunCSCAVerification(certDS);
+	LOG_DBG((0, "IAS", "VerificaSOD - CSCA verification successful, DappKeyVerified set to true"));
 
 	// ora verifico gli hash dei DG
 	//log.Info("Verifica hash DG");

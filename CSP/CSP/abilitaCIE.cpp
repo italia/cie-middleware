@@ -219,10 +219,22 @@ extern "C" {
 				ias->token.Reset();
 				ias->SelectAID_IAS();
 				ias->ReadPAN();
-
-				ByteDynArray IntAuth;
 				ias->SelectAID_CIE();
-				ias->ReadDappPubKey(IntAuth);
+				
+				// Verifica completa DAPP key con SOD e CSCA PRIMA di usarla per firma
+				LOG_INFO("firmaConCIE - Verifying DAPP key with CSCA chain");
+				try {
+					ias->VerifyAndAuthenticateDappKey();
+				}
+				catch (std::exception &ex) {
+					LOG_ERROR("firmaConCIE - DAPP key verification failed: %s", ex.what());
+					free(ias);
+					free(ATR);
+					free(readers);
+					return CKR_FUNCTION_FAILED;
+				}
+				LOG_INFO("firmaConCIE - DAPP key verified, proceeding with signature");
+				
 				ias->SelectAID_CIE();
 				ias->InitEncKey();
 
@@ -407,10 +419,7 @@ extern "C" {
 				ias.SelectAID_IAS();
 				ias.ReadPAN();
 				
-				ByteDynArray IntAuth;
 				ias.SelectAID_CIE();
-				ias.ReadDappPubKey(IntAuth);
-				//ias.SelectAID_CIE();
 				ias.InitEncKey();
 
 				ByteDynArray IdServizi;
@@ -431,8 +440,6 @@ extern "C" {
 				
 				uint8_t digest = ias.GetSODDigestAlg(SOD);
 
-				ByteArray intAuthData(IntAuth.left(GetASN1DataLenght(IntAuth)));
-
 				ByteDynArray IntAuthServizi;
 				ias.ReadServiziPubKey(IntAuthServizi);
 				ByteArray intAuthServiziData(IntAuthServizi.left(GetASN1DataLenght(IntAuthServizi)));
@@ -449,7 +456,6 @@ extern "C" {
 
 				progressCallBack(20, "Autenticazione...");
 
-				//Scambio di chiavi, lettura certificato (DAPP da verificare meglio) e verify pin
 				LOG_INFO("AbbinaCIE - Verifying PIN and performing authentication...");
 				DWORD rs = CardAuthenticateEx(&ias, ROLE_USER, FULL_PIN, (BYTE*)szPIN, (DWORD)strnlen(szPIN, 8), nullptr, 0, attempts);
 				if (rs == SCARD_W_WRONG_CHV)
@@ -475,63 +481,75 @@ extern "C" {
 				}
 				
 				progressCallBack(45, "Lettura seriale");
-
 				ByteDynArray Serial;
 				ias.ReadSerialeCIE(Serial);
 				ByteArray serialData = Serial.left(9);
-
 				std::string seriale((char*)Serial.data(), Serial.size());
 
 				progressCallBack(55, "Lettura certificato");
 				LOG_INFO("AbbinaCIE - Reading certificate...");
-
 				ByteDynArray CertCIE;
 				ias.ReadCertCIE(CertCIE);
-
 				ByteArray certCIEData = CertCIE.left(GetASN1DataLenght(CertCIE));
+
 				progressCallBack(70, "Verifica del SOD");
+
+				LOG_INFO("AbbinaCIE - Verifying SOD BEFORE authentication, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
 				
-				/* VERIFICA DELLA CHIAVE DAPP
-				La chiave DAPP (letta precedentemente in ReadDappPubKey) viene implicitamente
-				verificata attraverso la validazione della catena CSCA del certificato SOD.
-				Se VerificaSOD() non lancia un'eccezione, significa che:
-					1. Il SOD è firmato da un certificato valido
-					2. La catena CSCA è corretta fino al Root
-					3. Quindi la carta (e di conseguenza la chiave DAPP) è autentica */
+				ByteDynArray intAuthRaw = ias.DappPubKeyRaw;
+				ByteArray intAuthData(intAuthRaw.left(GetASN1DataLenght(intAuthRaw)));
 
-				LOG_INFO("AbbinaCIE - Verifying SOD, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
+				LOG_DEBUG("AbbinaCIE - IntAuth RAW from DappPubKeyRaw (EF.1004) length: %zu", intAuthRaw.size());
+				LOG_DEBUG("AbbinaCIE - IntAuth data length after GetASN1DataLenght: %zu", intAuthData.size());
+				LOG_DEBUG("AbbinaCIE - IntAuth RAW (first 64 bytes):");
+				LOG_BUFFER(intAuthRaw.data(), min(64, intAuthRaw.size()));
+				LOG_DEBUG("AbbinaCIE - IntAuth parsed data (first 64 bytes):");
+				LOG_BUFFER(intAuthData.data(), min(64, intAuthData.size()));
 
+				if (intAuthData.size() != intAuthRaw.size()) {
+					LOG_DEBUG("AbbinaCIE - IntAuth size differs: parsed=%zu, raw=%zu", intAuthData.size(), intAuthRaw.size());
+				}
+				
 				try 
 				{
-					if (digest == 1)
-					{
-						CSHA256 sha256;
-						hashSet[0xa1] = sha256.Digest(serviziData);
-						hashSet[0xa4] = sha256.Digest(intAuthData);
-						hashSet[0xa5] = sha256.Digest(intAuthServiziData);
-						hashSet[0x1b] = sha256.Digest(dhData);
-						hashSet[0xa2] = sha256.Digest(serialData);
-						hashSet[0xa3] = sha256.Digest(certCIEData);
-						verified = ias.VerificaSOD(SOD, hashSet);
+					CSHA256 sha256;
+					CSHA512 sha512;
+					hashSet[0xa1] = (digest == 1) ? sha256.Digest(serviziData) : sha512.Digest(serviziData);
+						
+					ByteDynArray hashA4Parsed = (digest == 1) ? sha256.Digest(intAuthData) : sha512.Digest(intAuthData);
+					ByteDynArray hashA4Raw = (digest == 1) ? sha256.Digest(intAuthRaw) : sha512.Digest(intAuthRaw);
+						
+					if (hashA4Parsed != hashA4Raw) {
+						LOG_DEBUG("AbbinaCIE - Hash A4 differs: parsed vs raw!");
+						LOG_DEBUG("AbbinaCIE - Hash A4 %s from PARSED data, length: %zu", (digest == 1) ? "SHA256" : "SHA512", hashA4Parsed.size());
+						LOG_BUFFER(hashA4Parsed.data(), hashA4Parsed.size());
+						LOG_DEBUG("AbbinaCIE - Hash A4 %s from RAW file, length: %zu", (digest == 1) ? "SHA256" : "SHA512", hashA4Raw.size());
+						LOG_BUFFER(hashA4Raw.data(), hashA4Raw.size());
 					}
-					else
-					{
-						CSHA512 sha512;
-						hashSet[0xa1] = sha512.Digest(serviziData);
-						hashSet[0xa4] = sha512.Digest(intAuthData);
-						hashSet[0xa5] = sha512.Digest(intAuthServiziData);
-						hashSet[0x1b] = sha512.Digest(dhData);
-						hashSet[0xa2] = sha512.Digest(serialData);
-						hashSet[0xa3] = sha512.Digest(certCIEData);
-						verified = ias.VerificaSODPSS(SOD, hashSet);
-					}
+						
+					hashSet[0xa4] = hashA4Raw;
+					hashSet[0xa5] = (digest == 1) ? sha256.Digest(intAuthServiziData) : sha512.Digest(intAuthServiziData);
+					hashSet[0x1b] = (digest == 1) ? sha256.Digest(dhData) : sha512.Digest(dhData);
+					hashSet[0xa2] = (digest == 1) ? sha256.Digest(serialData) : sha512.Digest(serialData);
+					hashSet[0xa3] = (digest == 1) ? sha256.Digest(certCIEData) : sha512.Digest(certCIEData);
+						
+					verified = (digest == 1) ? ias.VerificaSOD(SOD, hashSet) : ias.VerificaSODPSS(SOD, hashSet);
 				}
 				catch (std::exception &ex) {
 					LOG_ERROR("AbbinaCIE - SOD verification exception: %s", ex.what());
 					free(ATR);
 					free(readers);
+					return CKR_GENERAL_ERROR;
+				}
+
+				if (!verified) {
+					LOG_ERROR("AbbinaCIE - DAPP key not verified by CSCA chain");
+					free(ATR);
+					free(readers);
 					return CARD_CSCA_VERIFY_FAILED;
 				}
+
+				LOG_INFO("AbbinaCIE - SOD verified successfully, DAPP key retroactively authenticated");
 
 				ByteArray pinBa((uint8_t*)szPIN, 4);
 
@@ -618,13 +636,28 @@ DWORD CardAuthenticateEx(IAS*       ias,
 	ias->SelectAID_IAS();
 	ias->SelectAID_CIE();
 
-
 	// leggo i parametri di dominio DH e della chiave di extauth
 	LOG_INFO("CardAuthenticateEx - Reading DH parameters");
 	ias->InitDHParam();
 
-	ByteDynArray dappData;
-	ias->ReadDappPubKey(dappData);
+	LOG_INFO("CardAuthenticateEx - Reading SOD and DAPP key for verification");
+	ByteDynArray SOD;
+	ias->ReadSOD(SOD);
+	
+	uint8_t digest = ias->GetSODDigestAlg(SOD);
+
+	LOG_INFO("CardAuthenticateEx - Verifying DAPP key (0xA4) against SOD, digest: %s", 
+		(digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
+	
+	try {
+		ias->VerifyAndAuthenticateDappKey();
+	}
+	catch (std::exception &ex) {
+		LOG_ERROR("CardAuthenticateEx - DAPP key verification failed: %s", ex.what());
+		throw logged_error(stdPrintf("CardAuthenticateEx - DAPP key verification failed: %s", ex.what()));
+	}
+
+	LOG_INFO("CardAuthenticateEx - DAPP key verified and authenticated, proceeding with protocol");
 
 	ias->InitExtAuthKeyParam();
 
@@ -979,7 +1012,7 @@ DWORD WINAPI _abilitaCIE(
 
 							CMessage msg(MB_OK,
 								"Abilitazione CIE",
-								"La CIE � abilitata all'uso");
+								"La CIE è abilitata all'uso");
 							msg.DoModal();
 						}
 						catch (std::exception &ex) {
@@ -988,8 +1021,8 @@ DWORD WINAPI _abilitaCIE(
 							OutputDebugString(ex.what());
 							CMessage msg(MB_OK,
 								"Abilitazione CIE",
-								"Si � verificato un errore nella verifica di",
-								"autenticit� del documento");
+								"Si è verificato un errore nella verifica di",
+								"autenticità del documento");
 
 							msg.DoModal();
 							break;
@@ -1016,7 +1049,7 @@ DWORD WINAPI _abilitaCIE(
 		LOG_ERROR("_abilitaCIE - error EXCLOG %s", ex.what());
 
 		OutputDebugString(ex.what());
-		MessageBox(nullptr, "Si � verificato un errore nella verifica di autenticit� del documento", "CIE", MB_OK);
+		MessageBox(nullptr, "Si è verificato un errore nella verifica di autenticità del documento", "CIE", MB_OK);
 	}
 
 	return SCARD_S_SUCCESS;
@@ -1093,7 +1126,7 @@ extern "C" int CALLBACK AbilitaCIE(
 	RegisterClass(&wndClass);
 
 	
-	CSystemTray tray(wndClass.hInstance, nullptr, WM_APP, "La CIE non � abilitata. Premere per abilitarla ora",
+	CSystemTray tray(wndClass.hInstance, nullptr, WM_APP, "La CIE non è abilitata. Premere per abilitarla ora",
 		LoadIcon(wndClass.hInstance, MAKEINTRESOURCE(IDI_CIE)), 1);
 	tray.ShowBalloon("Premere per abilitare la CIE", "CIE", NIIF_INFO);
 	tray.ShowIcon();
@@ -1120,27 +1153,3 @@ extern "C" int CALLBACK AbilitaCIE(
 
 	return 0;
 }
-
-
-	//if (_AtlWinModule.cbSize != sizeof(_ATL_WIN_MODULE)) {
-	//	_AtlWinModule.cbSize = sizeof(_ATL_WIN_MODULE);
-	//	AtlWinModuleInit(&_AtlWinModule);
-	//}
-	//WNDCLASS wndClass;
-	//GetClassInfo(NULL, WC_DIALOG, &wndClass);
-	//wndClass.hInstance = (HINSTANCE)moduleInfo.getModule();
-	//wndClass.style |= CS_DROPSHADOW;
-	//wndClass.lpszClassName = "CIEDialog";
-	//RegisterClass(&wndClass);
-
-	//ODS("Start AbilitaCIE");
-	//if (!CheckOneInstance("CIEAbilitaOnce")) {
-	//	ODS("Already running AbilitaCIE");
-	//	return 0;
-	//}
-	////std::thread thread(_abilitaCIE, lpCmdLine);
-	////thread.join();
-	//_abilitaCIE(lpCmdLine);
-	//ODS("End AbilitaCIE");
-//	return 0;
-//}

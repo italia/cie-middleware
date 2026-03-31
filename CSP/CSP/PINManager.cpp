@@ -2,7 +2,6 @@
 //  PINManager.cpp
 //  cie-pkcs11
 //
-//  Created by ugo chirico on 06/10/18.
 //  Copyright © 2018 IPZS. All rights reserved.
 //
 
@@ -113,10 +112,20 @@ CK_RV CK_ENTRY __stdcall ChangePIN(const char*  szCurrentPIN, const char*  szNew
             ByteDynArray resp;
             ias.SelectAID_CIE();
             
-            ias.InitEncKey();
-            ias.ReadDappPubKey(resp);
-            
+            ias.InitEncKey();            
             foundCIE = true;
+            
+            LOG_INFO("PINManager::ChangePIN - Verifying DAPP key with CSCA chain");
+            try {
+                ias.VerifyAndAuthenticateDappKey();
+            }
+            catch (std::exception &ex) {
+                LOG_ERROR("PINManager::ChangePIN - DAPP key verification failed: %s", ex.what());
+                free(readers);
+                free(ATR);
+                return CKR_FUNCTION_FAILED;
+            }
+            LOG_INFO("PINManager::ChangePIN - DAPP key verified, proceeding");
             
             // leggo i parametri di dominio DH e della chiave di extauth
             ias.InitDHParam();
@@ -127,7 +136,6 @@ CK_RV CK_ENTRY __stdcall ChangePIN(const char*  szCurrentPIN, const char*  szNew
             
             ias.DHKeyExchange();
             
-            // DAPP
             ias.DAPP();
             
             progressCallBack(80, "Cambio PIN...");
@@ -301,9 +309,21 @@ CK_RV CK_ENTRY __stdcall UnlockPIN(const char*  szPUK, const char*  szNewPIN, in
             ias.SelectAID_CIE();
         
             ias.InitEncKey();
-            ias.ReadDappPubKey(resp);
             
             foundCIE = true;
+    
+            // Verifica completa DAPP key con SOD e CSCA PRIMA di usarla
+            LOG_INFO("PINManager::UnlockPIN - Verifying DAPP key with CSCA chain");
+            try {
+                ias.VerifyAndAuthenticateDappKey();
+            }
+            catch (std::exception &ex) {
+                LOG_ERROR("PINManager::UnlockPIN - DAPP key verification failed: %s", ex.what());
+                free(readers);
+                free(ATR);
+                return CKR_FUNCTION_FAILED;
+            }
+            LOG_INFO("PINManager::UnlockPIN - DAPP key verified, proceeding");
     
             // leggo i parametri di dominio DH e della chiave di extauth
             ias.InitDHParam();
@@ -314,7 +334,6 @@ CK_RV CK_ENTRY __stdcall UnlockPIN(const char*  szPUK, const char*  szNewPIN, in
             
             ias.DHKeyExchange();
             
-            // DAPP
             ias.DAPP();
             
             progressCallBack(80, "Sblocco carta...");

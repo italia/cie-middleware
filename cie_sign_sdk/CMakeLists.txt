@@ -90,7 +90,6 @@ set(SRC_LIST
     ${SOURCE_DIR}/RSA/rsa.c
     ${SOURCE_DIR}/RSA/sha1.c
     ${SOURCE_DIR}/RSA/sha2.c
-    ${SOURCE_DIR}/CSP/IAS.cpp
     ${SOURCE_DIR}/CSP/ATR.cpp
     ${SOURCE_DIR}/CSP/ExtAuthKey.cpp
     ${SOURCE_DIR}/PCSC/APDU.cpp  

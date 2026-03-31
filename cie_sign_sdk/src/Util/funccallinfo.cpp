@@ -4,12 +4,13 @@
 
 static char *szCompiledFile=__FILE__;
 
-thread_local size_t tlsCallDepth = 0;
-thread_local std::unique_ptr<CFuncCallInfoList> callQueue = nullptr;
+// Static to avoid linking conflicts with main middleware
+static thread_local size_t tlsCallDepth = 0;
+static thread_local std::unique_ptr<CFuncCallInfoList> callQueue = nullptr;
 extern bool FunctionLog;
 extern unsigned int GlobalDepth;
 extern bool GlobalParam;
-char szEmpty[]={NULL};
+static char szEmpty[]={NULL};
 
 CFuncCallInfo::CFuncCallInfo(char *name, CLog &logInfo) : log(logInfo) {
 	sName = name;

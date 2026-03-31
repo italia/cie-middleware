@@ -1097,11 +1097,13 @@ CK_RV CK_ENTRY C_Sign(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG ul
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
 
-	LOG_DEBUG("[PKCS11] C_Sign - hSession: %d");
+	LOG_DEBUG("[PKCS11] C_Sign - hSession: %d", hSession);
 	LOG_DEBUG("[PKCS11] C_Sign - pData:");
 	LOG_BUFFER(pData, ulDataLen);
-	LOG_DEBUG("[PKCS11] C_Sign - pSignature (len: %d):", *pulSignatureLen);
-	LOG_BUFFER(pSignature, *pulSignatureLen);
+	LOG_DEBUG("[PKCS11] C_Sign - pSignature: %p (len: %d)", pSignature, *pulSignatureLen);
+	if (pSignature != NULL) {
+		LOG_BUFFER(pSignature, *pulSignatureLen);
+	}
 
 //	checkInBuffer(pData, ulDataLen)
 //		checkOutArray(pSignature, pulSignatureLen)

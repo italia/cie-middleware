@@ -129,9 +129,7 @@ void CIEtemplateInitSession(void *pTemplateData){
 			cie->ias.SelectAID_IAS();
 			cie->ias.ReadPAN();
 			
-			ByteDynArray resp;
 			cie->ias.SelectAID_CIE();
-			cie->ias.ReadDappPubKey(resp);
 			cie->ias.InitEncKey();
 
 			ByteDynArray SOD;
@@ -140,23 +138,13 @@ void CIEtemplateInitSession(void *pTemplateData){
 
 			LOG_INFO("CIEtemplateInitSession - Verifying SOD with DAPP only, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
 			std::map<uint8_t, ByteDynArray> hashSet;
-			
-			if (digest == 1)
-			{
-				CSHA256 sha256;
-				ByteArray intAuthData(resp.left(GetASN1DataLenght(resp)));
-				hashSet[0xa4] = sha256.Digest(intAuthData);
-				
-				cie->ias.VerificaSOD(SOD, hashSet);
-			}
-			else
-			{
-				CSHA512 sha512;
-				ByteArray intAuthData(resp.left(GetASN1DataLenght(resp)));
-				hashSet[0xa4] = sha512.Digest(intAuthData);
-				
-				cie->ias.VerificaSODPSS(SOD, hashSet);
-			}
+
+			CSHA256 sha256;
+			CSHA512 sha512;
+			ByteDynArray DAPPkey = cie->ias.DappPubKeyRaw;
+			ByteArray intAuthData(DAPPkey.left(GetASN1DataLenght(DAPPkey)));
+			hashSet[0xa4] = (digest == 1) ? sha256.Digest(intAuthData) : sha512.Digest(intAuthData);
+			(digest == 1) ? cie->ias.VerificaSOD(SOD, hashSet) : cie->ias.VerificaSODPSS(SOD, hashSet);
 		}
 
 		if (cie->ias.IsEnrolled()) {
@@ -311,32 +299,15 @@ void CIEtemplateLogin(void *pTemplateData, CK_USER_TYPE userType, ByteArray &Pin
 		cie->ias.SelectAID_CIE();
 		cie->ias.InitDHParam();
 
-		if (cie->ias.DappPubKey.isEmpty()) {
-			ByteDynArray DappKey;			
-			cie->ias.ReadDappPubKey(DappKey);
+		LOG_INFO("CIEtemplateLogin - Verifying DAPP key with CSCA chain");
+		try {
+			cie->ias.VerifyAndAuthenticateDappKey();
 		}
-
-		ByteDynArray IntAuth;
-		cie->ias.ReadDappPubKey(IntAuth);
-		ByteArray intAuthData(IntAuth.left(GetASN1DataLenght(IntAuth)));
-		
-		ByteDynArray SOD;
-		cie->ias.ReadSOD(SOD);
-		uint8_t digest = cie->ias.GetSODDigestAlg(SOD);
-		LOG_INFO("CIEtemplateLogin - Verifying SOD, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
-		std::map<uint8_t, ByteDynArray> hashSet;
-		if (digest == 1)
-		{
-			CSHA256 sha256;
-			hashSet[0xa4] = sha256.Digest(intAuthData);
-			cie->ias.VerificaSOD(SOD, hashSet);
+		catch (std::exception &ex) {
+			LOG_ERROR("CIEtemplateLogin - DAPP key verification failed: %s", ex.what());
+			throw p11_error(CKR_FUNCTION_FAILED);
 		}
-		else
-		{
-			CSHA512 sha512;
-			hashSet[0xa4] = sha512.Digest(intAuthData);
-			cie->ias.VerificaSODPSS(SOD, hashSet);
-		}
+		LOG_INFO("CIEtemplateLogin - DAPP key verified, proceeding");
 
 		cie->ias.InitExtAuthKeyParam();
 		// faccio lo scambio di chiavi DH	
@@ -407,6 +378,16 @@ void CIEtemplateSign(void *pCardTemplateData, CP11PrivateKey *pPrivKey, ByteArra
 			Pin = cie->aesKey.Decode(cie->SessionPIN);
 			cie->ias.SelectAID_IAS();
 			cie->ias.SelectAID_CIE();
+			
+			LOG_INFO("CIEtemplateSign - DAPP key not verified, verifying now");
+			try {
+				cie->ias.VerifyAndAuthenticateDappKey();
+			}
+			catch (std::exception &ex) {
+				LOG_ERROR("CIEtemplateSign - DAPP key verification failed: %s", ex.what());
+				throw p11_error(CKR_FUNCTION_FAILED);
+			}
+			
 			cie->ias.DHKeyExchange();
 			cie->ias.DAPP();
 
@@ -436,6 +417,15 @@ void CIEtemplateInitPIN(void *pCardTemplateData, ByteArray &baPin){
 			Pin = cie->aesKey.Decode(cie->SessionPIN);
 			cie->ias.SelectAID_IAS();
 			cie->ias.SelectAID_CIE();
+
+			LOG_INFO("CIEtemplateInitPIN - DAPP key not verified, verifying now");
+			try {
+				cie->ias.VerifyAndAuthenticateDappKey();
+			}
+			catch (std::exception &ex) {
+				LOG_ERROR("CIEtemplateInitPIN - DAPP key verification failed: %s", ex.what());
+				throw p11_error(CKR_FUNCTION_FAILED);
+			}
 
 			cie->ias.DHKeyExchange();
 			cie->ias.DAPP();
@@ -478,8 +468,15 @@ void CIEtemplateSetPIN(void *pCardTemplateData, ByteArray &baOldPin, ByteArray &
 
 			if (cie->userType != CKU_USER) {
 				cie->ias.ReadPAN();
-				ByteDynArray resp;
-				cie->ias.ReadDappPubKey(resp);
+			}
+
+			LOG_INFO("CIEtemplateSetPIN - DAPP key not verified, verifying now");
+			try {
+				cie->ias.VerifyAndAuthenticateDappKey();
+			}
+			catch (std::exception &ex) {
+				LOG_ERROR("CIEtemplateSetPIN - DAPP key verification failed: %s", ex.what());
+				throw p11_error(CKR_FUNCTION_FAILED);
 			}
 
 			cie->ias.DHKeyExchange();
