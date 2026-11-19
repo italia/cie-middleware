@@ -1,4 +1,4 @@
-#include "..\StdAfx.h"
+#include "../StdAfx.h"
 #include "p11object.h"
 #include "cardtemplate.h"
 
@@ -10,7 +10,8 @@ CP11Object::CP11Object(CK_OBJECT_CLASS objClass,void *TemplateData)
 {
 	ObjClass=objClass;
 	pTemplateData=TemplateData;
-	addAttribute(CKA_CLASS,ByteArray((BYTE*)&ObjClass,sizeof(CK_OBJECT_CLASS)));
+	ByteArray baObjClass((BYTE*)&ObjClass,sizeof(CK_OBJECT_CLASS));
+	addAttribute(CKA_CLASS,baObjClass);
 }
 
 void CP11Object::addAttribute(CK_ATTRIBUTE_TYPE type,ByteArray &data)
@@ -69,7 +70,8 @@ void CP11Object::SetAttributes(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 {
 	init_func
 	for (DWORD i=0;i<ulCount;i++) {
-		addAttribute(pTemplate[i].type,ByteArray((BYTE*)pTemplate[i].pValue,pTemplate[i].ulValueLen));
+		ByteArray baVal((BYTE*)pTemplate[i].pValue,pTemplate[i].ulValueLen);
+		addAttribute(pTemplate[i].type,baVal);
 	}
 }
 CP11Certificate::CP11Certificate(void *TemplateData) : CP11Object(CKO_CERTIFICATE,TemplateData)

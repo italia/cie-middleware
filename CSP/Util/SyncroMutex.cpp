@@ -4,6 +4,8 @@
 
 static char *szCompiledFile=__FILE__;
 
+#ifdef WIN32
+
 CSyncroMutex::CSyncroMutex(void)
 {
 	hMutex=NULL;
@@ -78,6 +80,39 @@ void CSyncroMutex::Unlock()
 	}
 	exit_func_internal
 }
+
+#else
+
+CSyncroMutex::CSyncroMutex(void) : created(false)
+{
+}
+
+void CSyncroMutex::Create(void)
+{
+	created = true;
+}
+
+void CSyncroMutex::Create(const char *szName)
+{
+	(void)szName;
+	created = true;
+}
+
+CSyncroMutex::~CSyncroMutex(void)
+{
+}
+
+void CSyncroMutex::Lock()
+{
+	mtx.lock();
+}
+
+void CSyncroMutex::Unlock()
+{
+	mtx.unlock();
+}
+
+#endif
 
 CSyncroLocker::CSyncroLocker(CSyncroMutex &mutex)
 {

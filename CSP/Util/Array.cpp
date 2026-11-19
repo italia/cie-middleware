@@ -1,7 +1,12 @@
+#include "../stdafx.h"
 #include "array.h"
 #include <fstream>
+#ifdef WIN32
 #include <windows.h>
 #include <bcrypt.h>
+#else
+#include <openssl/rand.h>
+#endif
 
 
 ByteArray::ByteArray() {
@@ -119,15 +124,6 @@ ByteArray &ByteArray::random() {
 	return *this;
 }
 #else
-class init_rnd {
-public:
-	initRand() {
-		SYSTEMTIME tm;
-		GetSystemTime(&tm);
-		RAND_seed(&tm, sizeof(SYSTEMTIME));
-	}
-} _initRand;
-
 ByteArray &ByteArray::random() {
 	RAND_bytes(_data, (int)_size);
 	return *this;
@@ -283,7 +279,7 @@ uint8_t* ByteDynArray::detach() {
 	_data = nullptr;
 	_size = 0;
 }
-bool ByteArray::indexOf(ByteArray &data,size_t &position) const {
+bool ByteArray::indexOf(const ByteArray &data,size_t &position) const {
 	if (data.size() == 0)
 		return 0;
 	if (_size < data.size())
@@ -305,7 +301,7 @@ bool ByteArray::indexOf(ByteArray &data,size_t &position) const {
 	return false;
 }
 
-ByteDynArray &ByteDynArray::setASN1Tag(unsigned int tag, ByteArray &content) {
+ByteDynArray &ByteDynArray::setASN1Tag(unsigned int tag, const ByteArray &content) {
 	size_t tl = ASN1TLength(tag);
 	size_t ll = ASN1LLength(content.size());
 	resize(tl + ll + content.size());

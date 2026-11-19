@@ -8,7 +8,7 @@
 #define AES_BLOCK_SIZE 16
 
 #else
-#include <openssl\aes.h>
+#include <openssl/aes.h>
 #endif
 #include "../util/util.h"
 #include "../util/utilexception.h"

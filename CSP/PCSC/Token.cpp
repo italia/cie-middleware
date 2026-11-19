@@ -24,7 +24,8 @@ void CToken::Reset(bool unpower) {
 
 	WORD reset = unpower ? 0xfffe : 0xffff;
 	StatusWord sw;
-	if ((sw = Transmit(VarToByteArray(reset), NULL)) != 0x9000)
+	ByteArray baReset = VarToByteArray(reset);
+	if ((sw = Transmit(baReset, NULL)) != 0x9000)
 		throw scard_error(sw);
 }
 
@@ -55,7 +56,7 @@ ByteDynArray CToken::BinaryRead(WORD start,BYTE size) {
 	return resp;
 }
 
-StatusWord CToken::Transmit(ByteArray &apdu, ByteDynArray *resp)
+StatusWord CToken::Transmit(const ByteArray &apdu, ByteDynArray *resp)
 {
 	init_func
 	BYTE pbtResp[3000];
@@ -63,7 +64,7 @@ StatusWord CToken::Transmit(ByteArray &apdu, ByteDynArray *resp)
 	HRESULT res = transmitCallback(transmitCallbackData, apdu.data(), apdu.size(), pbtResp, &dwResp);
 	ByteArray scResp(pbtResp, dwResp);
 
-	if (res != SCARD_S_SUCCESS) // la smart card è stata estratta durante l'operazione
+	if (res != SCARD_S_SUCCESS) // la smart card Ã¨ stata estratta durante l'operazione
 		throw windows_error(res);
 
 	if (scResp.size() < 2)
@@ -113,7 +114,7 @@ StatusWord CToken::Transmit(APDU &apdu, ByteDynArray *resp)
 	HRESULT res = transmitCallback(transmitCallbackData, pbtAPDU, iAPDUSize, pbtResp, &dwResp);
 	ByteArray scResp(pbtResp, dwResp);
 
-	if (res != SCARD_S_SUCCESS) // la smart card è stata estratta durante l'operazione
+	if (res != SCARD_S_SUCCESS) // la smart card Ã¨ stata estratta durante l'operazione
 		throw windows_error(res);
 
 	if (scResp.size() < 2)

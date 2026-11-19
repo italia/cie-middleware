@@ -1,6 +1,8 @@
 #pragma once
 #include "../PCSC/token.h"
+#if defined(WIN32) || defined(_WIN32)
 #include "../CSP/Cardmod.h"
+#endif
 
 #include "../CSP/ATR.h"
 #include <map>
@@ -19,8 +21,10 @@
 
 #define FULL_PIN 0x80000000
 
+#if defined(WIN32) || defined(_WIN32)
 extern bool switchDesktop;
 extern BOOL CheckOneInstance(char *nome);
+#endif
 extern ByteArray baExtAuth_PrivExp;
 
 
@@ -50,18 +54,18 @@ class IAS
 	ByteDynArray ATR;
 	ByteDynArray Certificate;
 	ByteDynArray CardEncKey, CardEncIv;
-	StatusWord SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
-	StatusWord SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
+	StatusWord SendAPDU(const ByteArray &head, const ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
+	StatusWord SendAPDU_SM(const ByteArray &head, const ByteArray &data, ByteDynArray &resp, uint8_t *le = NULL);
 	StatusWord getResp(ByteDynArray &Cardresp, StatusWord sw, ByteDynArray &resp);
-	StatusWord getResp_SM(ByteArray &Cardresp, StatusWord sw, ByteDynArray &resp);
+	StatusWord getResp_SM(const ByteArray &Cardresp, StatusWord sw, ByteDynArray &resp);
 
-	ByteDynArray SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &seq);
-	StatusWord respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &seq, ByteDynArray &elabResp);
+	ByteDynArray SM(const ByteArray &keyEnc, const ByteArray &keySig, const ByteArray &apdu, ByteArray &seq);
+	StatusWord respSM(const ByteArray &keyEnc, const ByteArray &keySig, const ByteArray &apdu, ByteArray &seq, ByteDynArray &elabResp);
 
 	void readfile_SM(uint16_t id, ByteDynArray &content);
 	void readfile(uint16_t id, ByteDynArray &content);
 
-	void increment(ByteArray &seq);
+	void increment(const ByteArray &seq);
 	void ReadCIEType();
 
 	bool IsImpersonationRunning();
@@ -94,16 +98,16 @@ public:
 	void InitExtAuthKeyParam();
 	void DHKeyExchange();
 	void DAPP();
-	StatusWord VerifyPIN(ByteArray &PIN);
-	StatusWord VerifyPUK(ByteArray &PUK);
+	StatusWord VerifyPIN(const ByteArray &PIN);
+	StatusWord VerifyPUK(const ByteArray &PUK);
 	StatusWord UnblockPIN();
-	StatusWord ChangePIN(ByteArray &oldPIN, ByteArray &newPIN);
-	StatusWord ChangePIN(ByteArray &newPIN);
-	void Sign(ByteArray &data, ByteDynArray &signedData);
+	StatusWord ChangePIN(const ByteArray &oldPIN, const ByteArray &newPIN);
+	StatusWord ChangePIN(const ByteArray &newPIN);
+	void Sign(const ByteArray &data, ByteDynArray &signedData);
 	void Deauthenticate();
 	void GetCertificate(ByteDynArray &certificate, bool askEnable = true);
 	void GetFirstPIN(ByteDynArray &PIN);
-	void SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN);
+	void SetCache(const char *PAN, const ByteArray &certificate, const ByteArray &FirstPIN);
 	bool IsEnrolled();
 	bool Unenroll();
 	static bool IsEnrolled(const char *szPAN);
@@ -111,9 +115,9 @@ public:
 	void IconaSbloccoPIN();
 	void IconaCertificatoScaduto(const char *seriale);
 
-	uint8_t GetSODDigestAlg(ByteArray &SOD);
-	void VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
-	void VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
+	uint8_t GetSODDigestAlg(const ByteArray &SOD);
+	void VerificaSOD(const ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
+	void VerificaSODPSS(const ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 
 	void(*Callback)(int progress, char *desc,void *data);
 	void* CallbackData;

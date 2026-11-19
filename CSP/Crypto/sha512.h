@@ -6,5 +6,5 @@
 class CSHA512
 {
 	public:
-		ByteDynArray Digest(ByteArray &data);
+		ByteDynArray Digest(const ByteArray &data);
 };

@@ -8,12 +8,19 @@
 #include "../crypto/SHA1.h"
 #include "../crypto/DES3.h"
 #include "../crypto/MAC.h"
+#if defined(WIN32) || defined(_WIN32)
 #include <shlwapi.h>
 #include <shlobj.h>
-#include "../util/ModuleInfo.h"
 #include "../res/resource.h"
 #include "../../cacheLib/cacheLib.h"
 #include <intsafe.h>
+#else
+#include <sys/stat.h>
+#include <fstream>
+#include <openssl/x509.h>
+#include <openssl/evp.h>
+#endif
+#include "../util/ModuleInfo.h"
 
 using namespace CieIDLogger;
 
@@ -25,7 +32,74 @@ using namespace CieIDLogger;
 
 extern CModuleInfo moduleInfo;
 extern ByteArray SkipZero(ByteArray &ba);
+#if defined(WIN32) || defined(_WIN32)
 extern DWORD WINAPI _abilitaCIE(LPVOID lpThreadParameter);
+#endif
+
+#if !defined(WIN32) && !defined(_WIN32)
+static inline HRESULT SizeTToWord(size_t s, WORD *pw) {
+	if (s > 0xFFFF) return (HRESULT)0x80070057L;
+	*pw = (WORD)s;
+	return S_OK;
+}
+static inline HRESULT WordAdd(WORD a, WORD b, WORD *pr) {
+	DWORD r = (DWORD)a + (DWORD)b;
+	if (r > 0xFFFF) return (HRESULT)0x80070057L;
+	*pr = (WORD)r;
+	return S_OK;
+}
+
+static std::string getCachePath() {
+	std::string base;
+	const char *home = getenv("HOME");
+	if (home) base = std::string(home) + "/Library/Application Support/CIEPKI/cache/";
+	else base = "/tmp/CIEPKI/cache/";
+	mkdir((std::string(home ? home : "/tmp") + "/Library/Application Support/CIEPKI").c_str(), 0700);
+	mkdir(base.c_str(), 0700);
+	return base;
+}
+
+static bool CacheExists(const char *PAN) {
+	std::string path = getCachePath() + PAN + ".cert";
+	struct stat st;
+	return stat(path.c_str(), &st) == 0;
+}
+
+static bool CacheRemove(const char *PAN) {
+	std::string base = getCachePath() + PAN;
+	unlink((base + ".cert").c_str());
+	unlink((base + ".pin").c_str());
+	return true;
+}
+
+static void CacheSetData(const char *PAN, uint8_t *certData, int certLen, uint8_t *pinData, int pinLen) {
+	std::string base = getCachePath() + PAN;
+	std::ofstream cf(base + ".cert", std::ios::binary);
+	cf.write((const char*)certData, certLen);
+	std::ofstream pf(base + ".pin", std::ios::binary);
+	pf.write((const char*)pinData, pinLen);
+}
+
+static void CacheGetCertificate(const char *PAN, std::vector<BYTE> &buf) {
+	std::string path = getCachePath() + PAN + ".cert";
+	std::ifstream f(path, std::ios::binary | std::ios::ate);
+	if (!f) throw logged_error("Cache certificate not found");
+	auto sz = f.tellg();
+	f.seekg(0);
+	buf.resize((size_t)sz);
+	f.read((char*)buf.data(), sz);
+}
+
+static void CacheGetPIN(const char *PAN, std::vector<BYTE> &buf) {
+	std::string path = getCachePath() + PAN + ".pin";
+	std::ifstream f(path, std::ios::binary | std::ios::ate);
+	if (!f) throw logged_error("Cache PIN not found");
+	auto sz = f.tellg();
+	f.seekg(0);
+	buf.resize((size_t)sz);
+	f.read((char*)buf.data(), sz);
+}
+#endif
 
 
 IAS::IAS(CToken::TokenTransmitCallback transmit,ByteArray ATR)
@@ -110,7 +184,7 @@ void IAS::ReadIdServizi(ByteDynArray &data) {
 	exit_func
 }
 
-void IAS::Sign(ByteArray &data, ByteDynArray &signedData) {
+void IAS::Sign(const ByteArray &data, ByteDynArray &signedData) {
 	init_func
 	ByteDynArray resp;
 	uint8_t SetKey[] = { 0x00, 0x22, 0x41, 0xA4 };
@@ -135,14 +209,14 @@ void IAS::Sign(ByteArray &data, ByteDynArray &signedData) {
 	}
 }
 
-StatusWord IAS::VerifyPUK(ByteArray &PIN) {
+StatusWord IAS::VerifyPUK(const ByteArray &PIN) {
 	init_func
 	ByteDynArray resp;
 	uint8_t verifyPIN[] = { 0x00, 0x20, 0x00, CIE_PUK_ID };
 	return SendAPDU_SM(VarToByteArray(verifyPIN), PIN, resp);
 }
 
-StatusWord IAS::VerifyPIN(ByteArray &PIN) {
+StatusWord IAS::VerifyPIN(const ByteArray &PIN) {
 	init_func
 	ByteDynArray resp;
 
@@ -164,7 +238,7 @@ StatusWord IAS::UnblockPIN() {
 	exit_func
 }
 
-StatusWord IAS::ChangePIN(ByteArray &oldPIN,ByteArray &newPIN) {
+StatusWord IAS::ChangePIN(const ByteArray &oldPIN, const ByteArray &newPIN) {
 	init_func
 	ByteDynArray resp;
 	ByteDynArray data=oldPIN;
@@ -177,7 +251,7 @@ StatusWord IAS::ChangePIN(ByteArray &oldPIN,ByteArray &newPIN) {
 	exit_func
 }
 
-StatusWord IAS::ChangePIN(ByteArray &newPIN) {
+StatusWord IAS::ChangePIN(const ByteArray &newPIN) {
 	init_func
 	ByteDynArray resp;
 
@@ -447,17 +521,17 @@ void IAS::DAPP() {
 	uint8_t snIFD[] = { 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
 	uint8_t CPI=0x8A;
 	uint8_t baseCHR[] = { 0x00, 0x00, 0x00, 0x00 };
-	CHR.set(&VarToByteArray(baseCHR), &VarToByteArray(snIFD));
+	CHR.set(VarToByteArray(baseCHR), VarToByteArray(snIFD));
 	CHA.set(&CA_AID,01);
 	uint8_t baseOID[] = { 0x2A, 0x81, 0x22, 0xF4, 0x2A, 0x02, 0x04, 0x01 };
-	OID.set(&VarToByteArray(baseOID), shaOID);
+	OID.set(VarToByteArray(baseOID), shaOID);
 
 	ByteDynArray endEntityCert;
 	endEntityCert.set(CPI, &CA_CAR, &CHR, &CHA, &OID, &module, &pubexp);
 
 	ByteDynArray certSign, toSign;
 	uint8_t ValBC = 0xBC;
-	toSign.set(0x6A, &(endEntityCert.left(CA_module.size() - shaSize - 2)), &(sha256.Digest(endEntityCert)), 0xbc);
+	toSign.set(0x6A, endEntityCert.left(CA_module.size() - shaSize - 2), sha256.Digest(endEntityCert), 0xbc);
 	CRSA caKey(CA_module, CA_privexp);
 	certSign = caKey.RSA_PURE(toSign);
 	ByteDynArray certVerif;
@@ -497,14 +571,14 @@ void IAS::DAPP() {
 	size_t padSize = module.size() - shaSize - 2;
 	ByteDynArray PRND(padSize);
 	PRND.random();
-	toHash.set(&PRND, &dh_pubKey, &VarToByteArray(snIFD), &challenge, &dh_ICCpubKey, &dh_g, &dh_p, &dh_q);
+	toHash.set(&PRND, &dh_pubKey, VarToByteArray(snIFD), &challenge, &dh_ICCpubKey, &dh_g, &dh_p, &dh_q);
 	
-	toSign.set(0x6a, &PRND, &(sha256.Digest(toHash)), 0xBC);
+	toSign.set(0x6a, &PRND, sha256.Digest(toHash), 0xBC);
 	
 	CRSA certKey(module, privexp);
 	ByteDynArray signResp = certKey.RSA_PURE(toSign);
 	ByteDynArray chResponse;
-	chResponse.set(&VarToByteArray(snIFD), &signResp);
+	chResponse.set(VarToByteArray(snIFD), &signResp);
 
 	uint8_t ExtAuth[] = { 0x00, 0x82, 0x00, 0x00 };
 	if ((sw = SendAPDU_SM(VarToByteArray(ExtAuth), chResponse, resp)) != 0x9000)
@@ -536,7 +610,7 @@ void IAS::DAPP() {
 	ER_ASSERT(calcHashIFD == hashICC, "DAPP - Errore nell'autenticazione del chip")
 	ER_ASSERT(intAuthResp.right(1)[0] == 0xbc, "DAPP - Errore nell'autenticazione del chip");
 
-	sessSSC.set(&(challenge.right(4)), &(rndIFD.right(4)));
+	sessSSC.set(challenge.right(4), rndIFD.right(4));
 	ActiveSM = true;
 	exit_func
 }
@@ -592,7 +666,7 @@ void IAS::DHKeyExchange() {
 	exit_func
 }
 
-void IAS::increment(ByteArray &seq) {
+void IAS::increment(const ByteArray &seq) {
 	for (size_t i = seq.size() - 1; i >= 0; i--) {
 		if (seq[i] < 255) {
 			seq[i]++;
@@ -604,7 +678,7 @@ void IAS::increment(ByteArray &seq) {
 }
 
 
-ByteDynArray IAS::SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, ByteArray &seq) {
+ByteDynArray IAS::SM(const ByteArray &keyEnc, const ByteArray &keySig, const ByteArray &apdu, ByteArray &seq) {
 	init_func
 
 	std::string dmp;
@@ -659,12 +733,12 @@ ByteDynArray IAS::SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, Byte
 	else {
 		auto len = datafield.size();
 		auto lenBA = VarToByteArray(len);
-		elabResp.set(&smHead, &(lenBA.reverse().right(3)), &datafield, (uint8_t)0x00, (uint8_t)0x00);
+		elabResp.set(&smHead, lenBA.reverse().right(3), &datafield, (uint8_t)0x00, (uint8_t)0x00);
 	}
 	return elabResp;
 }
 
-StatusWord IAS::respSM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &resp, ByteArray &seq, ByteDynArray &elabResp) {
+StatusWord IAS::respSM(const ByteArray &keyEnc, const ByteArray &keySig, const ByteArray &resp, ByteArray &seq, ByteDynArray &elabResp) {
 	init_func
 
 	increment(seq);
@@ -778,7 +852,7 @@ StatusWord IAS::getResp(ByteDynArray &resp, StatusWord sw,ByteDynArray &elabresp
 	exit_func
 }
 
-StatusWord IAS::getResp_SM(ByteArray &resp, StatusWord sw, ByteDynArray &elabresp) {
+StatusWord IAS::getResp_SM(const ByteArray &resp, StatusWord sw, ByteDynArray &elabresp) {
 	init_func
 
 	
@@ -817,13 +891,13 @@ StatusWord IAS::getResp_SM(ByteArray &resp, StatusWord sw, ByteDynArray &elabres
 }
 
 
-StatusWord IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le) {
+StatusWord IAS::SendAPDU_SM(const ByteArray &head, const ByteArray &data, ByteDynArray &resp, uint8_t *le) {
 	init_func
 	ByteDynArray smApdu;
 	ByteDynArray s, curresp;
 	StatusWord sw;
 	if (data.size() < 0xE7) {
-		smApdu.set(&head, (uint8_t)data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+		smApdu.set(&head, (uint8_t)data.size(), &data, le == nullptr ? ByteArray() : VarToByteArray(*le));
 
 		//ODS(std::string().append("Clear APDU:").append(dumpHexData(smApdu, std::string())).append("\n").c_str());
 		
@@ -852,9 +926,9 @@ StatusWord IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp
 			else
 				head[0] = cla;
 			if (s.size() != 0)
-				smApdu.set(&head, (BYTE)s.size(), &s, (le == nullptr || i < data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
+				smApdu.set(&head, (BYTE)s.size(), &s, (le == nullptr || i < data.size()) ? ByteArray() : VarToByteArray(*le));
 			else
-				smApdu.set(&head, (le == nullptr || i < data.size()) ? &(ByteArray()) : &(VarToByteArray(*le)));
+				smApdu.set(&head, (le == nullptr || i < data.size()) ? ByteArray() : VarToByteArray(*le));
 
 			//ODS(std::string("Clear APDU:").append(dumpHexData(smApdu, std::string())).append("\n").c_str());
 			smApdu = SM(sessENC, sessMAC, smApdu, sessSSC);
@@ -871,7 +945,7 @@ StatusWord IAS::SendAPDU_SM(ByteArray &head, ByteArray &data, ByteDynArray &resp
 }
 
 
-StatusWord IAS::SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, uint8_t *le) {
+StatusWord IAS::SendAPDU(const ByteArray &head, const ByteArray &data, ByteDynArray &resp, uint8_t *le) {
 	init_func
 
 	ByteDynArray apdu, curresp;
@@ -888,7 +962,7 @@ StatusWord IAS::SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, u
 			else
 				head[0] = cla;
 
-			apdu.set(&head, (BYTE)s.size(), &s, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+			apdu.set(&head, (BYTE)s.size(), &s, le == nullptr ? ByteArray() : VarToByteArray(*le));
 			
 			StatusWord sw=token.Transmit(apdu, &curresp);
 			if (i == data.size()) {
@@ -900,9 +974,9 @@ StatusWord IAS::SendAPDU(ByteArray &head, ByteArray &data, ByteDynArray &resp, u
 	}
 	else {
 		if (data.size()!=0)
-			apdu.set(&head, (BYTE)data.size(), &data, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+			apdu.set(&head, (BYTE)data.size(), &data, le == nullptr ? ByteArray() : VarToByteArray(*le));
 		else
-			apdu.set(&head, le == nullptr ? &(ByteArray()) : &(VarToByteArray(*le)));
+			apdu.set(&head, le == nullptr ? ByteArray() : VarToByteArray(*le));
 
 		StatusWord sw = token.Transmit(apdu, &curresp);
 		sw=getResp(curresp, sw, resp);
@@ -1035,7 +1109,7 @@ void IAS::InitEncKey() {
 	CardEncIv= cardSeed.mid(32).left(16);
 }
 
-void IAS::SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN) {
+void IAS::SetCache(const char *PAN, const ByteArray &certificate, const ByteArray &FirstPIN) {
 	init_func
 	ByteDynArray encCert, encPIN;
 	CAES enc(CardEncKey, CardEncIv);
@@ -1044,6 +1118,7 @@ void IAS::SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN)
 	CacheSetData(PAN, encCert.data(), (int)encCert.size(), encPIN.data(), (int)encPIN.size());
 }
 
+#if defined(WIN32) || defined(_WIN32)
 int integrity = 0;
 bool IsLowIntegrity()
 {
@@ -1094,7 +1169,7 @@ bool IsLowIntegrity()
 			CloseHandle(hToken);
 		}
 	}
-	return 
+	return
 		integrity == 1;
 }
 
@@ -1145,7 +1220,7 @@ void IAS::IconaCertificatoScaduto(const char *seriale) {
 			}
 		}
 }
-	
+
 
 void IAS::IconaSbloccoPIN() {
 	init_func
@@ -1180,6 +1255,13 @@ void IAS::IconaSbloccoPIN() {
 			}
 		}
 }
+#else
+static bool IsLowIntegrity() { return false; }
+static bool IsUserInteractive() { return true; }
+bool IAS::IsImpersonationRunning() { return false; }
+void IAS::IconaCertificatoScaduto(const char *) {}
+void IAS::IconaSbloccoPIN() {}
+#endif
 
 void IAS::GetFirstPIN(ByteDynArray &PIN) {
 	init_func
@@ -1233,6 +1315,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 		LOG_DEBUG("IsUserInteractive() %d", IsUserInteractive());
 		LOG_DEBUG("IsLowIntegrity() %d", IsLowIntegrity());
 
+#if defined(WIN32) || defined(_WIN32)
 		if (askEnable /*&& IsUserInteractive()*/ && !IsLowIntegrity()) {
 			PROCESS_INFORMATION pi;
 			STARTUPINFO si;
@@ -1250,7 +1333,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			HANDLE token = NULL;
 			OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
 
-			
+
 			if (token == NULL) {
 				char runDll32Path[MAX_PATH];
 				GetSystemDirectory(runDll32Path, MAX_PATH);
@@ -1261,7 +1344,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 
 				if (!CreateProcess(runDll32Path, (char*)std::string("rundll32.exe \"").append(moduleInfo.szModuleFullPath).append("\",AbilitaCIE ").append(dumpHexData(PAN.mid(5, 6), std::string(), false)).c_str(), NULL, NULL, FALSE, 0, nullptr, nullptr, &si, &pi))
 				{
-					
+
 					throw logged_error("GetCertificate - Can't create AbilitaCIE process");
 				}
 				else
@@ -1281,6 +1364,10 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 			certificate.clear();
 			return;
 		}
+#else
+		certificate.clear();
+		return;
+#endif
 	}
 	if (!CacheExists(PANStr.c_str()))
 		throw logged_error("GetCertificate - Cache does not exist");
@@ -1293,7 +1380,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 }
 
 
-uint8_t IAS::GetSODDigestAlg(ByteArray &SOD)
+uint8_t IAS::GetSODDigestAlg(const ByteArray &SOD)
 {
 	CASNParser parser;
 	uint8_t OID_SHA512[] = { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03 };
@@ -1325,7 +1412,7 @@ uint8_t IAS::GetSODDigestAlg(ByteArray &SOD)
 	else throw logged_error("GetSODDigestAlg - Digest algorithm not supported");;
 }
 
-void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet)
+void IAS::VerificaSODPSS(const ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet)
 {
 	init_func
 	CASNParser parser;
@@ -1404,6 +1491,7 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 	CASNTag &signature = temp3.Child(5, 04);
 
 	ByteArray certRaw = SOD.mid((int)signerCert.startPos, (int)(signerCert.endPos - signerCert.startPos));
+#if defined(WIN32) || defined(_WIN32)
 	PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
 	if (certDS == nullptr)
 		throw logged_error("VerificaSODPSS - DS Certificate not valid");
@@ -1411,6 +1499,17 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 	auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
 
 	ByteArray pubKeyData(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData);
+#else
+	const unsigned char *certDerPtr = certRaw.data();
+	X509 *x509cert = d2i_X509(nullptr, &certDerPtr, (long)certRaw.size());
+	if (!x509cert)
+		throw logged_error("VerificaSODPSS - DS Certificate not valid");
+	auto _1 = scopeExit([&]() noexcept { X509_free(x509cert); });
+	const ASN1_BIT_STRING *pkBits = X509_get0_pubkey_bitstr(x509cert);
+	if (!pkBits)
+		throw logged_error("VerificaSODPSS - Public key not found");
+	ByteArray pubKeyData(pkBits->data, pkBits->length);
+#endif
 	CASNParser pubKeyParser;
 	pubKeyParser.Parse(pubKeyData);
 	CASNTag &pubKey = *pubKeyParser.tags[0];
@@ -1428,7 +1527,7 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 	CRSA rsa(mod, exp);
 
 	ByteArray toSign = SOD.mid((int)signerInfo.tags[0]->startPos, (int)(signerInfo.tags[signerInfo.tags.size() - 1]->endPos - signerInfo.tags[0]->startPos));
-	
+
 	bool result = rsa.RSA_PSS(signatureData, toSign.getASN1Tag(0x31));
 
 	if (!result)
@@ -1438,7 +1537,18 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 
 	issuerName.Reparse();
 	CASNParser issuerParser;
+#if defined(WIN32) || defined(_WIN32)
 	issuerParser.Parse(ByteArray(certDS->pCertInfo->Issuer.pbData, certDS->pCertInfo->Issuer.cbData));
+#else
+	{
+		unsigned char *issuerDerBuf = nullptr;
+		int issuerDerLen = i2d_X509_NAME(X509_get_issuer_name(x509cert), &issuerDerBuf);
+		if (issuerDerLen > 0 && issuerDerBuf) {
+			issuerParser.Parse(ByteArray(issuerDerBuf, issuerDerLen));
+			OPENSSL_free(issuerDerBuf);
+		}
+	}
+#endif
 	CASNTag &CertIssuer = *issuerParser.tags[0];
 	if (issuerName.tags.size() != CertIssuer.tags.size())
 		throw logged_error("VerificaSODPSS - wrong Issuer name");
@@ -1449,9 +1559,19 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 		certElem.tags[1]->Verify(SODElem.tags[1]->content);
 	}
 
+#if defined(WIN32) || defined(_WIN32)
 	ByteDynArray certSerial = ByteArray(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData);
 	if (certSerial.reverse() != signerCertSerialNumber.content)
 		throw logged_error("VerificaSODPSS - Certificate Serial Number does not match");
+#else
+	{
+		const ASN1_INTEGER *serialAsn = X509_get0_serialNumber(x509cert);
+		ByteDynArray certSerial(serialAsn->length);
+		memcpy(certSerial.data(), serialAsn->data, serialAsn->length);
+		if (certSerial != signerCertSerialNumber.content)
+			throw logged_error("VerificaSODPSS - Certificate Serial Number does not match");
+	}
+#endif
 
 	uint8_t val = 1;
 	signedData.Child(0, 02).Verify(VarToByteArray(val));
@@ -1474,7 +1594,7 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 	exit_func
 }
 
-void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
+void IAS::VerificaSOD(const ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	init_func
 		CASNParser parser;
 	parser.Parse(SOD);
@@ -1550,6 +1670,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 		throw logged_error("VerificaSOD - SOD digest does not match with data");
 
 	ByteArray certRaw = SOD.mid((int)signerCert.startPos, (int)(signerCert.endPos - signerCert.startPos));
+#if defined(WIN32) || defined(_WIN32)
 	PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
 	if (certDS == nullptr)
 		throw logged_error("VerificaSOD - DS certificate not valid");
@@ -1557,6 +1678,17 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
 
 	ByteArray pubKeyData(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData);
+#else
+	const unsigned char *certDerPtr2 = certRaw.data();
+	X509 *x509cert = d2i_X509(nullptr, &certDerPtr2, (long)certRaw.size());
+	if (!x509cert)
+		throw logged_error("VerificaSOD - DS certificate not valid");
+	auto _1 = scopeExit([&]() noexcept { X509_free(x509cert); });
+	const ASN1_BIT_STRING *pkBits = X509_get0_pubkey_bitstr(x509cert);
+	if (!pkBits)
+		throw logged_error("VerificaSOD - Public key not found");
+	ByteArray pubKeyData(pkBits->data, pkBits->length);
+#endif
 	CASNParser pubKeyParser;
 	pubKeyParser.Parse(pubKeyData);
 	CASNTag &pubKey = *pubKeyParser.tags[0];
@@ -1590,11 +1722,20 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	if (digestSignature != decryptedSignature)
 		throw logged_error("VerificaSOD - SOD sign not valid");
 
-	//log.Info("Verifica issuer");
-
 	issuerName.Reparse();
 	CASNParser issuerParser;
+#if defined(WIN32) || defined(_WIN32)
 	issuerParser.Parse(ByteArray(certDS->pCertInfo->Issuer.pbData, certDS->pCertInfo->Issuer.cbData));
+#else
+	{
+		unsigned char *issuerDerBuf = nullptr;
+		int issuerDerLen = i2d_X509_NAME(X509_get_issuer_name(x509cert), &issuerDerBuf);
+		if (issuerDerLen > 0 && issuerDerBuf) {
+			issuerParser.Parse(ByteArray(issuerDerBuf, issuerDerLen));
+			OPENSSL_free(issuerDerBuf);
+		}
+	}
+#endif
 	CASNTag &CertIssuer = *issuerParser.tags[0];
 	if (issuerName.tags.size() != CertIssuer.tags.size())
 		throw logged_error("VerificaSOD - Issuer name does not match");
@@ -1605,9 +1746,19 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 		certElem.tags[1]->Verify(SODElem.tags[1]->content);
 	}
 
+#if defined(WIN32) || defined(_WIN32)
 	ByteDynArray certSerial = ByteArray(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData);
 	if (certSerial.reverse() != signerCertSerialNumber.content)
 		throw logged_error("VerificaSOD - Serial Number certificat does not match");
+#else
+	{
+		const ASN1_INTEGER *serialAsn = X509_get0_serialNumber(x509cert);
+		ByteDynArray certSerial(serialAsn->length);
+		memcpy(certSerial.data(), serialAsn->data, serialAsn->length);
+		if (certSerial != signerCertSerialNumber.content)
+			throw logged_error("VerificaSOD - Serial Number certificat does not match");
+	}
+#endif
 
 	// ora verifico gli hash dei DG
 	//log.Info("Verifica hash DG");
@@ -1644,6 +1795,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	exit_func
 }
 
+#if defined(WIN32) || defined(_WIN32)
 #define DWL_MSGRESULT 0
 
 BOOL CheckOneInstance(char *nome)
@@ -1656,3 +1808,4 @@ BOOL CheckOneInstance(char *nome)
 	}
 	return TRUE;
 }
+#endif

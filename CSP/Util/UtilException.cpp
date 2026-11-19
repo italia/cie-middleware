@@ -1,7 +1,9 @@
 #include "../stdafx.h"
+#ifdef WIN32
 #include <windows.h>
-#include "utilexception.h"
 #include <imagehlp.h>
+#endif
+#include "utilexception.h"
 #include <stdio.h>
 #include "../LOGGER/Logger.h"
 
@@ -20,4 +22,8 @@ logged_error::logged_error(const char *message) : std::runtime_error(message) {
 
 scard_error::scard_error(StatusWord sw) : logged_error(stdPrintf("Errore smart card:%04x", sw)) { }
 
+#ifdef WIN32
 windows_error::windows_error(long ris) : logged_error(stdPrintf("Errore windows:%s (%08x) ", WinErr(ris), ris)) {}
+#else
+windows_error::windows_error(long ris) : logged_error(stdPrintf("Errore sistema:%ld (%08lx) ", ris, ris)) {}
+#endif

@@ -1,6 +1,6 @@
 #include "../StdAfx.h"
-#include ".\mechanism.h"
-#include "..\crypto\rsa.h"
+#include "./mechanism.h"
+#include "../crypto/rsa.h"
 #include "p11object.h"
 #include "../util/util.h"
 
@@ -857,7 +857,8 @@ namespace p11 {
 
 		ByteArray baDigestInfo = pDigest->DigestInfo();
 
-		pDigest->DigestFinal(baExpectedResult.right(ulDigestLen));
+		ByteArray baDigRight = baExpectedResult.right(ulDigestLen);
+		pDigest->DigestFinal(baDigRight);
 		baExpectedResult.rightcopy(baDigestInfo, ulDigestLen);
 		PutPaddingBT1(baExpectedResult, ulDigestLen + baDigestInfo.size());
 

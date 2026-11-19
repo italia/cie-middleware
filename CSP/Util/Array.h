@@ -19,8 +19,8 @@ class ByteArray;
 class ByteDynArray;
 
 std::string stdPrintf(const char *format, ...); 
-void putASN1Tag(unsigned int tag, ByteArray &data);
-void putASN1Length(size_t len, ByteArray &data);
+void putASN1Tag(unsigned int tag, const ByteArray &data);
+void putASN1Length(size_t len, const ByteArray &data);
 size_t ASN1TLength(unsigned int tag);
 size_t ASN1LLength(size_t len);
 
@@ -73,7 +73,7 @@ public:
 	ByteArray mid(size_t start, size_t size) const;
 	ByteArray revmid(size_t toend) const;
 	ByteArray revmid(size_t toend, size_t size) const;
-	bool indexOf(ByteArray &data, size_t &position) const;
+	bool indexOf(const ByteArray &data, size_t &position) const;
 
 	int atoi() const;
 	ByteDynArray getASN1Tag(unsigned int tag) const;
@@ -120,6 +120,12 @@ private:
 		return data->size();
 	}
 
+	size_t internalSet(ByteArray* ba, const ByteArray &data) {
+		if (ba != nullptr)
+			ba->copy(data);
+		return data.size();
+	}
+
 	size_t internalSet(ByteArray* ba, const std::string &data) {
 		if (ba != nullptr)
 			return setHexData(data, ba->data());
@@ -147,7 +153,7 @@ public:
 		return *this;
 	}
 
-	ByteDynArray &setASN1Tag(unsigned int tag, ByteArray &content);
+	ByteDynArray &setASN1Tag(unsigned int tag, const ByteArray &content);
 	void load(const char *fname);
 };
 

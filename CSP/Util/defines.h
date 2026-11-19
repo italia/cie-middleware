@@ -60,7 +60,10 @@ using namespace CieIDLogger;
   	//CFuncCallInfo info(__FUNCTION__,Log);
 
 
-#define exit_func 
+#define exit_func
+
+#define init_func_internal
+#define exit_func_internal
 	
 #define ER_ASSERT(a,b) \
 	if (!(a)) \

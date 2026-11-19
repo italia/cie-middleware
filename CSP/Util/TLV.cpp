@@ -3,7 +3,7 @@
 
 static char *szCompiledFile=__FILE__;
 
-CTLV::CTLV(ByteArray &data)
+CTLV::CTLV(const ByteArray &data)
 {
 	init_func
 	uint32_t dwPtr=0;
@@ -79,7 +79,7 @@ ByteDynArray * CTLVCreate::addValue(uint8_t Tag)
 	return &map[Tag];
 }
 
-void CTLVCreate::setValue(uint8_t Tag,ByteArray &Value)
+void CTLVCreate::setValue(uint8_t Tag, const ByteArray &Value)
 {
 	init_func
 	map[Tag] = Value;

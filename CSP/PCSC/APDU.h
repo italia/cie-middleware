@@ -17,8 +17,8 @@ public:
 	uint8_t btP1;	//P1 dell'APDU
 	uint8_t btP2;	//P2 dell'APDU
 	uint8_t btLC;	//LC dell'APDU
-	bool bLC;	//flag: il campo dati è da includere? (caso 1 e 3)
+	bool bLC;	//flag: il campo dati Ã¨ da includere? (caso 1 e 3)
 	uint8_t *pbtData;	//campo dati dell'APDU
-	uint8_t btLE;	//flag: LE è da includere? (caso 2 e 4)
+	uint8_t btLE;	//flag: LE Ã¨ da includere? (caso 2 e 4)
 	bool bLE;	//LE dell'APDU
 };

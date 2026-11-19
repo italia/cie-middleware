@@ -9,7 +9,7 @@ class  CTLV
 {
 	tlvMap map;
 public:
-	CTLV(ByteArray &data);
+	CTLV(const ByteArray &data);
 	~CTLV(void);
 	ByteArray getValue(uint8_t Tag);
 	ByteArray *getTAG(uint8_t Tag);
@@ -24,6 +24,6 @@ public:
 	~CTLVCreate(void);
 	ByteDynArray* addValue(uint8_t Tag);
 	ByteDynArray* getValue(uint8_t Tag);
-	void setValue(uint8_t Tag, ByteArray &Value);
+	void setValue(uint8_t Tag, const ByteArray &Value);
 	ByteDynArray getBuffer();
 };

@@ -6,12 +6,21 @@
 //#include "pkcs11.h"
 //#pragma pack()
 
+#if defined(WIN32) || defined(_WIN32)
 #include <winscard.h>
+#else
+#include <PCSC/wintypes.h>
+#include <PCSC/winscard.h>
+#endif
 
 #define MAXVAL 0xffffff
 #define MAXSESSIONS MAXVAL
 
+#if defined(WIN32) || defined(_WIN32)
 #define CK_ENTRY __declspec(dllexport)
+#else
+#define CK_ENTRY __attribute__((visibility("default")))
+#endif
 #define LIBRARY_VERSION_MAJOR 2
 #define LIBRARY_VERSION_MINOR 0
 

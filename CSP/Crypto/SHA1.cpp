@@ -26,7 +26,7 @@ CSHA1::~CSHA1() {
 }
 void CSHA1::Init() {
 	/*if (hash != nullptr)
-		throw logged_error("Un'operazione di hash Ë gi‡ in corso");*/
+		throw logged_error("Un'operazione di hash √® gi√† in corso");*/
 	if (BCryptCreateHash(algo_sha1.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
 		throw logged_error("Errore nella creazione dell'hash SHA1");
 }
@@ -59,7 +59,7 @@ CSHA1::~CSHA1() {
 
 void CSHA1::Init() {
 	if (isInit)
-		throw logged_error("Un'operazione di hash Ë gi‡ in corso");
+		throw logged_error("Un'operazione di hash √® gi√† in corso");
 	SHA1_Init(&ctx);
 	isInit = true;
 }
@@ -68,14 +68,14 @@ void CSHA1::Update(ByteArray data) {
 		throw logged_error("Hash non inizializzato");
 	SHA1_Update(&ctx, data.data(), data.size());
 }
-ByteDynArray CSHA1::Final() {
+void CSHA1::Final(ByteArray& digest) {
 	if (!isInit)
 		throw logged_error("Hash non inizializzato");
 	ByteDynArray resp(SHA_DIGEST_LENGTH);
 	SHA1_Final(resp.data(), &ctx);
 	isInit = false;
 
-	return resp;
+	digest.copy(resp);
 }
 #endif
 
