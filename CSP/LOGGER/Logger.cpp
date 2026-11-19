@@ -2,13 +2,19 @@
 #include <cstdlib>
 #include <ctime>
 #include <iomanip>
-#include <Windows.h>
 #include <sys/stat.h>
+#include <cstdarg>
 
 #ifdef WIN32
+#include <Windows.h>
 #include <Shlwapi.h>
-
 #define stat _stat
+#else
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <time.h>
+#include <pwd.h>
 #endif
 
 
@@ -35,21 +41,30 @@ static const char* level_strings[] = {
 
 Logger::Logger()
 {
-	//char pbLog[MAX_PATH];
-	//char pbConfig[MAX_PATH];
 	char pProcessInfo[MAX_PATH];
+	string sConfig;
+
+#ifdef WIN32
 	char szModulePath[MAX_PATH];
 	SYSTEMTIME  stTime;
-	string sConfig;	
 	char* buf = nullptr;
 	size_t sz = 0, l = 0;
 
 	GetLocalTime(&stTime);
 	_dupenv_s(&buf, &sz, "PROGRAMDATA");
 	sprintf_s(pbLog, sizeof(pbLog), "%s/CIEPKI/CIEPKI_%04d-%02d-%02d.log", buf, stTime.wYear, stTime.wMonth, stTime.wDay);
+#else
+	time_t now = time(NULL);
+	struct tm tm_now;
+	localtime_r(&now, &tm_now);
+	const char *home = getenv("HOME");
+	if (!home) home = "/tmp";
+	snprintf(pbLog, sizeof(pbLog), "%s/Library/Logs/CIEPKI/CIEPKI_%04d-%02d-%02d.log",
+		home, tm_now.tm_year + 1900, tm_now.tm_mon + 1, tm_now.tm_mday);
+#endif
 
 	int log_level = getLogConfig();
-	
+
 	if (log_level == LOG_STATUS_DISABLED) {
 		disableLog();
 	}
@@ -61,24 +76,31 @@ Logger::Logger()
 		m_LogLevel = static_cast<LogLevel>(log_level);
 		m_LogStatus = LOG_STATUS_ENABLED;
 
+#ifdef WIN32
 		l = GetModuleFileNameA(NULL, szModulePath, sizeof(szModulePath) - 1);
 		szModulePath[l] = 0;
-
 		sprintf_s(pProcessInfo, sizeof(pProcessInfo), "Process: '%s'", szModulePath);
+#else
+		snprintf(pProcessInfo, sizeof(pProcessInfo), "Process: pid %d", getpid());
+#endif
 		m_File << pProcessInfo << endl;
 		m_File.flush();
 		m_File.close();
 	}
-	
+
 	m_LogType = FILE_LOG;
 
-
-	// Initialize mutex
 #ifdef WIN32
 	InitializeCriticalSection(&m_Mutex);
 #else
 	int ret = 0;
-	ret = pthread_mutexattr_settype(&m_Attr, PTHREAD_MUTEX_ERRORCHECK_NP);
+	ret = pthread_mutexattr_init(&m_Attr);
+	if (ret != 0)
+	{
+		printf("Logger::Logger() -- Mutex attr init failed!!\n");
+		exit(0);
+	}
+	ret = pthread_mutexattr_settype(&m_Attr, PTHREAD_MUTEX_ERRORCHECK);
 	if (ret != 0)
 	{
 		printf("Logger::Logger() -- Mutex attribute not initialize!!\n");
@@ -106,15 +128,10 @@ Logger::~Logger()
 
 Logger* Logger::getInstance() throw ()
 {
-	char* buf = nullptr;
-	size_t sz = 0;
-
 	if (m_Instance == 0)
 	{
 		m_Instance = new Logger();
 	}
-	_dupenv_s(&buf, &sz, "PROGRAMDATA");
-
 
 	int log_level = m_Instance->getLogConfig();
 
@@ -131,12 +148,13 @@ Logger* Logger::getInstance() throw ()
 }
 
 
-void Logger::writeConfigFile(string& filePath, string& sConfig) {
+void Logger::writeConfigFile(string& filePath, string& sConfig) throw() {
 	m_ConfigFile.open(filePath, ios::out);
 	m_ConfigFile << sConfig;
 	m_ConfigFile.close();
 }
 
+#ifdef WIN32
 BOOL IsElevated() {
 	BOOL fRet = FALSE;
 	HANDLE hToken = NULL;
@@ -152,34 +170,54 @@ BOOL IsElevated() {
 	}
 	return fRet;
 }
+#else
+static bool IsElevated() {
+	return getuid() == 0;
+}
+#endif
 
 
-int Logger::getLogConfig() {
+int Logger::getLogConfig() throw() {
 	char pbConfig[MAX_PATH];
-	char* buf = nullptr;
-	size_t sz = 0;
 	string sConfig;
 	int log_level;
 	struct stat result;
 	char pbPathConfig[MAX_PATH];
-	
+
+#ifdef WIN32
+	char* buf = nullptr;
+	size_t sz = 0;
 	_dupenv_s(&buf, &sz, "PROGRAMDATA");
-
-	sprintf_s(pbPathConfig, sizeof(pbPathConfig), "%s/CIEPKI", buf);
-	sprintf_s(pbConfig, sizeof(pbConfig), "%s/config", pbPathConfig);
-
+	snprintf(pbPathConfig, sizeof(pbPathConfig), "%s/CIEPKI", buf);
+	snprintf(pbConfig, sizeof(pbConfig), "%s/config", pbPathConfig);
+#else
+	const char *home = getenv("HOME");
+	if (!home) home = "/tmp";
+	snprintf(pbPathConfig, sizeof(pbPathConfig), "%s/Library/Application Support/CIEPKI", home);
+	snprintf(pbConfig, sizeof(pbConfig), "%s/config", pbPathConfig);
+#endif
 
 	if (IsElevated()) {
 		return LOG_STATUS_DISABLED;
 	}
 
+#ifdef WIN32
 	if (!PathFileExists(pbPathConfig)) {
 		CreateDirectory(pbPathConfig, nullptr);
 	}
+#else
+	struct stat st;
+	if (stat(pbPathConfig, &st) != 0) {
+		string logDir = string(home) + "/Library/Logs/CIEPKI";
+		mkdir(logDir.c_str(), 0755);
+		mkdir(pbPathConfig, 0755);
+	}
+#endif
 
 	if (!config_exists(pbConfig)) {
 		sConfig = "LIB_LOG_LEVEL=2";
-		writeConfigFile(string(pbConfig), sConfig);
+		string configPath(pbConfig);
+		writeConfigFile(configPath, sConfig);
 		t64configTime = 0;
 	}
 	
@@ -197,7 +235,8 @@ int Logger::getLogConfig() {
 			if (log_level < 0 && log_level > 5) {
 				log_level = 0;
 				sConfig = "LIB_LOG_LEVEL=2";
-				writeConfigFile(string(pbConfig), sConfig);
+				string configPath2(pbConfig);
+				writeConfigFile(configPath2, sConfig);
 			}
 
 			m_LogLevel = static_cast<LogLevel>(log_level);
@@ -240,16 +279,24 @@ void Logger::logOnConsole(string& data)
 string Logger::getCurrentTime()
 {
 	char pbtDate[0x1000];
+#ifdef WIN32
 	SYSTEMTIME  stTime;
 	GetLocalTime(&stTime);
-
 	sprintf_s(pbtDate, sizeof(pbtDate), "%04d-%02d-%02d %02d:%02d:%02d:%03d", stTime.wYear, stTime.wMonth, stTime.wDay, stTime.wHour, stTime.wMinute, stTime.wSecond, stTime.wMilliseconds);
-
+#else
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	struct tm tm_now;
+	localtime_r(&tv.tv_sec, &tm_now);
+	snprintf(pbtDate, sizeof(pbtDate), "%04d-%02d-%02d %02d:%02d:%02d:%03d",
+		tm_now.tm_year + 1900, tm_now.tm_mon + 1, tm_now.tm_mday,
+		tm_now.tm_hour, tm_now.tm_min, tm_now.tm_sec, (int)(tv.tv_usec / 1000));
+#endif
 	return pbtDate;
 }
 
 
-void Logger::log_log(ostream& out, LogLevel level, const char* text) {
+void Logger::log_log(ostream& out, LogLevel level, const char* text) throw() {
 	if (m_LogStatus == LOG_STATUS_ENABLED) {
 
 		if (level < m_LogLevel) {

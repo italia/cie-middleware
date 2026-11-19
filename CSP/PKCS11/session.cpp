@@ -2,7 +2,7 @@
 #include "session.h"
 #include "cardtemplate.h"
 #include "../util/util.h"
-#include "../crypto\rsa.h"
+#include "../crypto/rsa.h"
 #include "../util/tlv.h"
 
 static char *szCompiledFile = __FILE__;
@@ -1364,11 +1364,14 @@ namespace p11 {
 		init_func
 
 			CTLVCreate Tlv;
-		Tlv.setValue(OS_Flags, ByteArray((BYTE*)&flags, sizeof(flags)));
-		Tlv.setValue(OS_User, ByteArray((BYTE*)&pSlot->User, sizeof(pSlot->User)));
+		ByteArray baFlags((BYTE*)&flags, sizeof(flags));
+		Tlv.setValue(OS_Flags, baFlags);
+		ByteArray baUser((BYTE*)&pSlot->User, sizeof(pSlot->User));
+		Tlv.setValue(OS_User, baUser);
 		if (pSignMechanism) {
 			CTLVCreate SignTlv;
-			SignTlv.setValue(OS_Algo, ByteArray((BYTE*)&pSignMechanism->mtType, sizeof(pSignMechanism->mtType)));
+			ByteArray baSignAlgo((BYTE*)&pSignMechanism->mtType, sizeof(pSignMechanism->mtType));
+			SignTlv.setValue(OS_Algo, baSignAlgo);
 			ByteDynArray SignData = pSignMechanism->SignGetOperationState();
 			if (!SignData.isEmpty())
 				SignTlv.setValue(OS_Data, SignData);
@@ -1384,7 +1387,8 @@ namespace p11 {
 		}
 		if (pVerifyMechanism) {
 			CTLVCreate VerifyTlv;
-			VerifyTlv.setValue(OS_Algo, ByteArray((BYTE*)&pVerifyMechanism->mtType, sizeof(pVerifyMechanism->mtType)));
+			ByteArray baVerAlgo((BYTE*)&pVerifyMechanism->mtType, sizeof(pVerifyMechanism->mtType));
+			VerifyTlv.setValue(OS_Algo, baVerAlgo);
 			ByteDynArray verifyData = pVerifyMechanism->VerifyGetOperationState();
 			if (!verifyData.isEmpty())
 				VerifyTlv.setValue(OS_Data, verifyData);
@@ -1401,7 +1405,8 @@ namespace p11 {
 		}
 		if (pDigestMechanism) {
 			CTLVCreate DigestTlv;
-			DigestTlv.setValue(OS_Algo, ByteArray((BYTE*)&pDigestMechanism->mtType, sizeof(pDigestMechanism->mtType)));
+			ByteArray baDigAlgo((BYTE*)&pDigestMechanism->mtType, sizeof(pDigestMechanism->mtType));
+			DigestTlv.setValue(OS_Algo, baDigAlgo);
 			ByteDynArray DigestData = pDigestMechanism->DigestGetOperationState();
 			if (!DigestData.isEmpty())
 				DigestTlv.setValue(OS_Data, DigestData);

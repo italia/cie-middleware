@@ -8,7 +8,12 @@
 #include "mechanism.h"
 #include "slot.h"
 #include "../PCSC/token.h"
+#if defined(WIN32) || defined(_WIN32)
 #include <winscard.h>
+#else
+#include <PCSC/wintypes.h>
+#include <PCSC/winscard.h>
+#endif
 #include "p11object.h"
 #include <memory>
 

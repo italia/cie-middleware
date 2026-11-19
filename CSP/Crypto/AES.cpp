@@ -1,5 +1,5 @@
-#include "..\stdafx.h"
-#include ".\aes.h"
+#include "../stdafx.h"
+#include "./aes.h"
 
 static char *szCompiledFile=__FILE__;
 

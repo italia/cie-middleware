@@ -1,5 +1,5 @@
-#include "..\stdafx.h"
-#include ".\sha256.h"
+#include "../stdafx.h"
+#include "./sha256.h"
 
 static char *szCompiledFile=__FILE__;
 
@@ -17,7 +17,7 @@ public:
 	}
 } algo_sha256;
 
-ByteDynArray CSHA256::Digest(ByteArray &data)
+ByteDynArray CSHA256::Digest(const ByteArray &data)
 {
 	BCRYPT_HASH_HANDLE hash;
 	if (BCryptCreateHash(algo_sha256.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
@@ -32,7 +32,7 @@ ByteDynArray CSHA256::Digest(ByteArray &data)
 	return resp;
 }
 
-void CSHA256::Digest(ByteArray &dataIn, ByteArray &dataOut)
+void CSHA256::Digest(const ByteArray &dataIn, ByteArray &dataOut)
 {
 	BCRYPT_HASH_HANDLE hash;
 	if (BCryptCreateHash(algo_sha256.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
@@ -46,12 +46,19 @@ void CSHA256::Digest(ByteArray &dataIn, ByteArray &dataOut)
 }
 
 #else
-	
-ByteDynArray CSHA256::Digest(ByteArray &data)
+
+#include <openssl/sha.h>
+
+ByteDynArray CSHA256::Digest(const ByteArray &data)
 {
 	ByteDynArray resp(SHA256_DIGEST_LENGTH);
 	ER_ASSERT(SHA256(data.data(), data.size(), resp.data()) != NULL, "Errore nel calcolo dello SHA256")
 
 	return resp;
+}
+
+void CSHA256::Digest(const ByteArray &dataIn, ByteArray &dataOut)
+{
+	ER_ASSERT(SHA256(dataIn.data(), dataIn.size(), dataOut.data()) != NULL, "Errore nel calcolo dello SHA256")
 }
 #endif

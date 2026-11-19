@@ -1,17 +1,22 @@
 #pragma once
 
+#if defined(WIN32) || defined(_WIN32)
 #include <windows.h>
 #include <atlbase.h>
 #include <atlhost.h>
 #include <atlstr.h>
-#include <stdint.h> 
+#else
+#include "platform.h"
+#endif
+
+#include <stdint.h>
 #include "util/defines.h"
 #include "util/array.h"
 #include "util/log.h"
 #include "util/funccallinfo.h"
 #include "util/util.h"
 #include "util/utilexception.h"
-#include "../LOGGER/Logger.h"
+#include "LOGGER/Logger.h"
 
 #ifdef _DEBUG
 #define ODS(s) OutputDebugString(s);Log.writePure(s)

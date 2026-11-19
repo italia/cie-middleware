@@ -1,9 +1,9 @@
-#include "..\stdafx.h"
+#include "../stdafx.h"
 #include "ASNParser.h"
 
 #define BitValue(a,b) ((a>>b) & 1)
 
-size_t GetASN1DataLenght(ByteArray &data) {
+size_t GetASN1DataLenght(const ByteArray &data) {
 	size_t  l = 1;
 	uint8_t *cur = data.data();
 
@@ -110,7 +110,8 @@ void CASNTag::Encode(ByteArray &data, size_t &len) {
 		size_t  ptrPos = tlen+llen;
 		for (CASNTagArray::iterator i = tags.begin(); i != tags.end(); i++) {
 			size_t taglen;
-			(*i)->Encode(data.mid(ptrPos), taglen);
+			ByteArray sub = data.mid(ptrPos);
+			(*i)->Encode(sub, taglen);
 			ptrPos += taglen;
 		}
 		len = ptrPos;
@@ -130,7 +131,7 @@ CASNTag &CASNTag::CheckTag(uint8_t checkTag) {
 		throw logged_error("Errore nella verifica del tag ASN1");
 	return *this;
 }
-void CASNTag::Verify(ByteArray &checkContent) {
+void CASNTag::Verify(const ByteArray &checkContent) {
 	if (content!=checkContent)
 		throw logged_error("Errore nella verifica del tag ASN1");
 }
@@ -156,7 +157,8 @@ void CASNParser::Encode(ByteArray &data, CASNTagArray &tags) {
 	size_t ptrPos = 0;
 	for (CASNTagArray::iterator i = tags.begin(); i != tags.end(); i++) {
 		size_t  len;
-		(*i)->Encode(data.mid(ptrPos), len);
+		ByteArray sub = data.mid(ptrPos);
+		(*i)->Encode(sub, len);
 		ptrPos += len;
 	}
 }
@@ -167,13 +169,13 @@ void CASNParser::Encode(ByteDynArray &data) {
 	Encode(data, tags);
 }
 
-void CASNParser::Parse(ByteArray &data) {
+void CASNParser::Parse(const ByteArray &data) {
 	init_func
 	tags.clear();
 	Parse(data,tags,0);
 }
 
-void CASNParser::Parse(ByteArray &data, CASNTagArray &tags, size_t  startseq)
+void CASNParser::Parse(const ByteArray &data, CASNTagArray &tags, size_t  startseq)
 {
 	init_func
 	size_t l=0;

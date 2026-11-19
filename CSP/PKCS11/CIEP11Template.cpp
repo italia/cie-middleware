@@ -1,4 +1,4 @@
-#include "..\StdAfx.h"
+#include "../StdAfx.h"
 #include "CIEP11Template.h"
 #include "../CSP/IAS.h"
 #include "../PCSC/CardLocker.h"
@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include "../crypto/AES.h"
 #include "../PCSC/PCSC.h"
+#if !defined(WIN32) && !defined(_WIN32)
+#include <openssl/x509.h>
+#include <openssl/evp.h>
+#endif
 
 int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, DWORD *respSize) {
 	if (apduSize == 2) {
@@ -137,6 +141,7 @@ void CIEtemplateInitSession(void *pTemplateData){
 		CK_BBOOL vtrue = TRUE;
 		CK_BBOOL vfalse = FALSE;
 
+#if defined(WIN32) || defined(_WIN32)
 		PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
 		if (certDS != nullptr) {
 			auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
@@ -205,6 +210,120 @@ void CIEtemplateInitSession(void *pTemplateData){
 
 			cie->slot.AddP11Object(cie->cert);
 		}
+#else
+		{
+			const unsigned char *certDerPtr = certRaw.data();
+			X509 *x509cert = d2i_X509(nullptr, &certDerPtr, (long)certRaw.size());
+			if (x509cert != nullptr) {
+				auto _1 = scopeExit([&]() noexcept { X509_free(x509cert); });
+
+				cie->pubKey = std::make_shared<CP11PublicKey>(cie);
+				cie->privKey = std::make_shared<CP11PrivateKey>(cie);
+				cie->cert = std::make_shared<CP11Certificate>(cie);
+
+				const ASN1_BIT_STRING *pkBits = X509_get0_pubkey_bitstr(x509cert);
+				ByteArray baPubKeyData(pkBits->data, pkBits->length);
+				CASNParser keyParser;
+				keyParser.Parse(baPubKeyData);
+				auto Module = SkipZero(keyParser.tags[0]->tags[0]->content);
+				auto Exponent = SkipZero(keyParser.tags[0]->tags[1]->content);
+				CK_LONG keySizeBits = (CK_LONG)Module.size() * 8;
+
+				ByteArray baLabel = VarToByteArray(label);
+				ByteArray baTrue = VarToByteArray(vtrue);
+				ByteArray baFalse = VarToByteArray(vfalse);
+				ByteArray baKeySizeBits = VarToByteArray(keySizeBits);
+				CK_KEY_TYPE keyrsa = CKK_RSA;
+				ByteArray baKeyRsa = VarToByteArray(keyrsa);
+
+				cie->pubKey->addAttribute(CKA_LABEL, baLabel);
+				cie->pubKey->addAttribute(CKA_ID, baLabel);
+				cie->pubKey->addAttribute(CKA_PRIVATE, baFalse);
+				cie->pubKey->addAttribute(CKA_TOKEN, baTrue);
+				cie->pubKey->addAttribute(CKA_MODULUS, Module);
+				cie->pubKey->addAttribute(CKA_PUBLIC_EXPONENT, Exponent);
+				cie->pubKey->addAttribute(CKA_MODULUS_BITS, baKeySizeBits);
+				cie->pubKey->addAttribute(CKA_VERIFY, baTrue);
+				cie->pubKey->addAttribute(CKA_KEY_TYPE, baKeyRsa);
+				cie->slot.AddP11Object(cie->pubKey);
+
+				cie->privKey->addAttribute(CKA_LABEL, baLabel);
+				cie->privKey->addAttribute(CKA_ID, baLabel);
+				cie->privKey->addAttribute(CKA_PRIVATE, baTrue);
+				cie->privKey->addAttribute(CKA_TOKEN, baTrue);
+				cie->privKey->addAttribute(CKA_KEY_TYPE, baKeyRsa);
+				cie->privKey->addAttribute(CKA_MODULUS, Module);
+				cie->privKey->addAttribute(CKA_PUBLIC_EXPONENT, Exponent);
+				cie->privKey->addAttribute(CKA_SENSITIVE, baFalse);
+				cie->privKey->addAttribute(CKA_DECRYPT, baFalse);
+				cie->privKey->addAttribute(CKA_ENCRYPT, baFalse);
+				cie->privKey->addAttribute(CKA_EXTRACTABLE, baFalse);
+				cie->privKey->addAttribute(CKA_SIGN, baTrue);
+				cie->slot.AddP11Object(cie->privKey);
+
+				ByteArray baCertVal(certRaw.data(), certRaw.size());
+				cie->cert->addAttribute(CKA_LABEL, baLabel);
+				cie->cert->addAttribute(CKA_ID, baLabel);
+				cie->cert->addAttribute(CKA_PRIVATE, baFalse);
+				cie->cert->addAttribute(CKA_TOKEN, baTrue);
+				cie->cert->addAttribute(CKA_VALUE, baCertVal);
+
+				unsigned char *issuerBuf = nullptr;
+				int issuerLen = i2d_X509_NAME(X509_get_issuer_name(x509cert), &issuerBuf);
+				ByteDynArray baIssuer;
+				if (issuerLen > 0 && issuerBuf) {
+					baIssuer = ByteArray(issuerBuf, issuerLen);
+					OPENSSL_free(issuerBuf);
+				}
+				cie->cert->addAttribute(CKA_ISSUER, baIssuer);
+
+				const ASN1_INTEGER *serial = X509_get0_serialNumber(x509cert);
+				ByteArray baSerial(serial->data, serial->length);
+				cie->cert->addAttribute(CKA_SERIAL_NUMBER, baSerial);
+
+				cie->cert->addAttribute(CKA_TRUSTED, baFalse);
+
+				unsigned char *subjBuf = nullptr;
+				int subjLen = i2d_X509_NAME(X509_get_subject_name(x509cert), &subjBuf);
+				ByteDynArray baSubject;
+				if (subjLen > 0 && subjBuf) {
+					baSubject = ByteArray(subjBuf, subjLen);
+					OPENSSL_free(subjBuf);
+				}
+				cie->cert->addAttribute(CKA_SUBJECT, baSubject);
+
+				CK_CERTIFICATE_TYPE certx509 = CKC_X_509;
+				ByteArray baCertType = VarToByteArray(certx509);
+				cie->cert->addAttribute(CKA_CERTIFICATE_TYPE, baCertType);
+
+				CK_DATE start, end;
+				char temp[10];
+				const ASN1_TIME *notBefore = X509_get0_notBefore(x509cert);
+				const ASN1_TIME *notAfter = X509_get0_notAfter(x509cert);
+				struct tm tmFrom = {}, tmTo = {};
+				ASN1_TIME_to_tm(notBefore, &tmFrom);
+				ASN1_TIME_to_tm(notAfter, &tmTo);
+				snprintf(temp, sizeof(temp), "%04d", tmFrom.tm_year + 1900);
+				memcpy(start.year, temp, 4);
+				snprintf(temp, sizeof(temp), "%02d", tmFrom.tm_mon + 1);
+				memcpy(start.month, temp, 2);
+				snprintf(temp, sizeof(temp), "%02d", tmFrom.tm_mday);
+				memcpy(start.day, temp, 2);
+				snprintf(temp, sizeof(temp), "%04d", tmTo.tm_year + 1900);
+				memcpy(end.year, temp, 4);
+				snprintf(temp, sizeof(temp), "%02d", tmTo.tm_mon + 1);
+				memcpy(end.month, temp, 2);
+				snprintf(temp, sizeof(temp), "%02d", tmTo.tm_mday);
+				memcpy(end.day, temp, 2);
+				ByteArray baStart = VarToByteArray(start);
+				ByteArray baEnd = VarToByteArray(end);
+				cie->cert->addAttribute(CKA_START_DATE, baStart);
+				cie->cert->addAttribute(CKA_END_DATE, baEnd);
+
+				cie->slot.AddP11Object(cie->cert);
+			}
+		}
+#endif
 		cie->init = true;
 	}
 }
@@ -248,14 +367,15 @@ ByteDynArray  CIEtemplateGetSerial(CSlot &pSlot) {
 		ias.SelectAID_IAS();
 		ias.ReadPAN();
 		std::string numSerial;
-		dumpHexData(ias.PAN.mid(5, 6), numSerial, false);
+		ByteArray baPanMid = ias.PAN.mid(5, 6);
+		dumpHexData(baPanMid, numSerial, false);
 		return ByteArray((BYTE*)numSerial.c_str(),numSerial.length());
 	}
 }
 void CIEtemplateGetModel(CSlot &pSlot, std::string &szModel){ 
 	szModel = ""; 
 }
-void CIEtemplateGetTokenFlags(CSlot &pSlot, DWORD &dwFlags){
+void CIEtemplateGetTokenFlags(CSlot &pSlot, CK_FLAGS &dwFlags){
 	dwFlags = CKF_LOGIN_REQUIRED | CKF_USER_PIN_INITIALIZED | CKF_TOKEN_INITIALIZED | CKF_REMOVABLE_DEVICE;
 }
 

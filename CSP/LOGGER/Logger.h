@@ -12,9 +12,13 @@
 #include <Windows.h>
 #include <process.h>
 #else
-// POSIX Socket Header File(s)
+// POSIX Header File(s)
 #include <errno.h>
 #include <pthread.h>
+#include <limits.h>
+#ifndef MAX_PATH
+#define MAX_PATH PATH_MAX
+#endif
 #endif
 
 
@@ -112,7 +116,11 @@ namespace CieIDLogger
 		std::fstream m_ConfigFile;
 		char pbLog[MAX_PATH];
 		char pbConfig[MAX_PATH];
+#ifdef WIN32
 		__time64_t t64configTime;
+#else
+		time_t t64configTime;
+#endif
 
 #ifdef	WIN32
 		CRITICAL_SECTION        m_Mutex;

@@ -26,7 +26,7 @@ CMD5::~CMD5() {
 }
 void CMD5::Init() {
 	/*if (hash != nullptr)
-		throw logged_error("Un'operazione di hash Ë gi‡ in corso");*/
+		throw logged_error("Un'operazione di hash √® gi√† in corso");*/
 	if (BCryptCreateHash(algo_md5.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
 		throw logged_error("Errore nella creazione dell'hash SHA1");
 }
@@ -69,7 +69,7 @@ CMD5::~CMD5() {
 
 void CMD5::Init() {
 	if (isInit)
-		throw logged_error("Un'operazione di hash Ë gi‡ in corso");
+		throw logged_error("Un'operazione di hash √® gi√† in corso");
 	MD5_Init(&ctx);
 	isInit = true;
 }
@@ -86,6 +86,16 @@ ByteDynArray CMD5::Final() {
 	isInit = false;
 
 	return resp;
+}
+
+void CMD5::Final(ByteArray& digest) {
+	if (!isInit)
+		throw logged_error("Hash non inizializzato");
+	ByteDynArray resp(MD5_DIGEST_LENGTH);
+	MD5_Final(resp.data(), &ctx);
+	isInit = false;
+
+	digest.copy(resp);
 }
 #endif
 

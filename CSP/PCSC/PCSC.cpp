@@ -1,3 +1,4 @@
+#include "../StdAfx.h"
 #include "PCSC.h"
 #include "../util/UtilException.h"
 #include <thread>
@@ -83,53 +84,67 @@ readerMonitor::~readerMonitor() {
 
 readerMonitor::readerMonitor(void(*eventHandler)(std::string &reader, bool insert, void *appData), void *appData) : appData(appData) {
 	LONG _call_ris;
-	if ((_call_ris = (SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &hContext))) != S_OK) {
+	if ((_call_ris = (SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &hContext))) != SCARD_S_SUCCESS) {
 		throw windows_error(_call_ris);
 	}
 	stopMonitor = false;
 	readerEvent = eventHandler;
 	DWORD tid = 0;
-	
+
 	Thread = std::thread([](readerMonitor *rm) -> DWORD {
 		std::vector<std::string> readerList;
 		std::vector<SCARD_READERSTATE> states;
 
 		auto loadReaderList = [&]() -> void {
-			char *readers = nullptr;
-			DWORD len = SCARD_AUTOALLOCATE;
-			if (SCardListReaders(rm->hContext, nullptr, (char*)&readers, &len) != SCARD_S_SUCCESS || readers == nullptr) {
+			DWORD len = 0;
+			if (SCardListReaders(rm->hContext, nullptr, nullptr, &len) != SCARD_S_SUCCESS || len == 0) {
 				throw logged_error("Nessun lettore installato");
 			}
-			char *curReader = readers;
+			std::vector<char> readersBuf(len);
+			if (SCardListReaders(rm->hContext, nullptr, readersBuf.data(), &len) != SCARD_S_SUCCESS) {
+				throw logged_error("Nessun lettore installato");
+			}
+			char *curReader = readersBuf.data();
 			readerList.clear();
 			for (; curReader[0] != 0; curReader += strnlen(curReader, len) + 1)
 				readerList.push_back(std::string(curReader));
 
-			SCardFreeMemory(rm->hContext, readers);
-			states.resize((DWORD)readerList.size() + 1);
+			states.resize(readerList.size());
 			for (DWORD i = 0; i < readerList.size(); i++) {
+				memset(&states[i], 0, sizeof(SCARD_READERSTATE));
 				states[i].szReader = readerList[i].c_str();
 			}
-			auto &PnP = states[(DWORD)readerList.size()];
+#if defined(WIN32) || defined(_WIN32)
+			states.resize(readerList.size() + 1);
+			auto &PnP = states[readerList.size()];
+			memset(&PnP, 0, sizeof(SCARD_READERSTATE));
 			PnP.szReader = "\\\\?PnP?\\Notification";
 			PnP.pvUserData = (void*)PnP.szReader;
+#endif
 
-			SCardGetStatusChange(rm->hContext, 0, states.data(), states.size());
+			SCardGetStatusChange(rm->hContext, 0, states.data(), (DWORD)states.size());
 			for (DWORD i = 0; i < states.size(); i++)
 				states[i].dwCurrentState = states[i].dwEventState;
 		};
 		loadReaderList();
 
 		while (!rm->stopMonitor) {
-			if (SCardGetStatusChange(rm->hContext, INFINITE, states.data(), states.size()) == SCARD_E_CANCELLED)
+			DWORD ris = SCardGetStatusChange(rm->hContext, 1000, states.data(), (DWORD)states.size());
+			if (ris == SCARD_E_CANCELLED)
+				break;
+			if (ris == (DWORD)SCARD_E_TIMEOUT)
+				continue;
+			if (ris != SCARD_S_SUCCESS)
 				break;
 			for (DWORD i = 0; i < states.size(); i++) {
 				auto &state = states[i];
+#if defined(WIN32) || defined(_WIN32)
 				if (state.pvUserData != nullptr && (state.dwEventState & SCARD_STATE_CHANGED) == SCARD_STATE_CHANGED)
 				{
 					loadReaderList();
 					break;
 				}
+#endif
 				if (((state.dwCurrentState & SCARD_STATE_PRESENT) == SCARD_STATE_PRESENT) &&
 					((state.dwEventState & SCARD_STATE_PRESENT) == 0))
 					rm->readerEvent(readerList[i], false, rm->appData);

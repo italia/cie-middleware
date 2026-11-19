@@ -2,9 +2,11 @@
 #include "IniSettings.h"
 #include "../crypto/base64.h"
 #include <sstream>
+#include <fstream>
 
 std::vector<IniSettings*> _iniSettings;
 
+#if defined(WIN32) || defined(_WIN32)
 void GetIniString(const char *fileName, const char* section, const char* name, std::string &buf) {
 	buf.resize(100);
 	while (true) {
@@ -14,8 +16,48 @@ void GetIniString(const char *fileName, const char* section, const char* name, s
 			return;
 		}
 		buf.resize(buf.size()*2);
-	}	
+	}
 }
+#else
+static std::string trim(const std::string &s) {
+	size_t start = s.find_first_not_of(" \t\r\n");
+	if (start == std::string::npos) return "";
+	size_t end = s.find_last_not_of(" \t\r\n");
+	return s.substr(start, end - start + 1);
+}
+
+void GetIniString(const char *fileName, const char* section, const char* name, std::string &buf) {
+	buf = "";
+	std::ifstream f(fileName);
+	if (!f) return;
+	std::string targetSection = std::string("[") + section + "]";
+	bool inSection = false;
+	std::string line;
+	while (std::getline(f, line)) {
+		line = trim(line);
+		if (line.empty() || line[0] == ';' || line[0] == '#') continue;
+		if (line[0] == '[') {
+			inSection = (line == targetSection);
+			continue;
+		}
+		if (!inSection) continue;
+		auto eq = line.find('=');
+		if (eq == std::string::npos) continue;
+		std::string key = trim(line.substr(0, eq));
+		if (key == name) {
+			buf = trim(line.substr(eq + 1));
+			return;
+		}
+	}
+}
+
+static int GetPrivateProfileInt(const char *section, const char *name, int def, const char *fileName) {
+	std::string val;
+	GetIniString(fileName, section, name, val);
+	if (val.empty()) return def;
+	try { return std::stoi(val); } catch (...) { return def; }
+}
+#endif
 
 IniSettings::IniSettings(int typeIdconst, const char* section, const char* name, const char *description) {
 	_iniSettings.push_back(this);

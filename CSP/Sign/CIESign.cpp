@@ -5,10 +5,14 @@
 
 CIESign::CIESign(IAS *ias){
 	this->ias = ias;
+
 }
+
+
 
 uint16_t CIESign::sign(const char* inFilePath, const char* type, const char* pin, int page, float x, float y, float w, float h, const char* imagePathFile,const char* outFilePath)
 {
+
 	uint16_t response;
 
 	DISIGON_CTX ctx = NULL;
@@ -18,13 +22,15 @@ uint16_t CIESign::sign(const char* inFilePath, const char* type, const char* pin
 	{
 		ctx = disigon_sign_init();
 
-#if 0
+        /*
+		ret = disigon_set(DISIGON_OPT_LOG_FILE, (void*)"F:\\Projects\\IPZS\\TestFirmaCIE\\log.txt");
+
 		ret = disigon_set(DISIGON_OPT_LOG_LEVEL, (void*)LOG_TYPE_DEBUG);
 		if (ret != 0)
 		{
 			throw ret;
 		}
-#endif
+*/
 		ret = disigon_sign_set(ctx, DISIGON_OPT_IAS_INSTANCE, (IAS*)(this->ias));
 		if (ret != 0)
 		{
@@ -91,14 +97,14 @@ uint16_t CIESign::sign(const char* inFilePath, const char* type, const char* pin
 				throw ret;
 			}
 
-			if (imagePathFile)
-			{
-				ret = disigon_sign_set(ctx, DISIGON_OPT_PDF_IMAGEPATH, (void*)imagePathFile);
-				if (ret != 0)
-				{
-					throw ret;
-				}
-			}
+            if (imagePathFile)
+            {
+                ret = disigon_sign_set(ctx, DISIGON_OPT_PDF_IMAGEPATH, (void*)imagePathFile);
+                if (ret != 0)
+                {
+                    throw ret;
+                }
+            }
 
 			ret = disigon_sign_set(ctx, DISIGON_OPT_INPUTFILE_TYPE, (void*)DISIGON_FILETYPE_PDF);
 			if (ret != 0)
@@ -108,12 +114,11 @@ uint16_t CIESign::sign(const char* inFilePath, const char* type, const char* pin
 		}
 		else {
 
-			//TODO renderlo case insensitive
 			if ((strstr(inFilePath, "p7m") != NULL) || (strstr(inFilePath, "p7s") != NULL))
 				ret = disigon_sign_set(ctx, DISIGON_OPT_INPUTFILE_TYPE, (void*)DISIGON_FILETYPE_P7M);
-			else
-				ret = disigon_sign_set(ctx, DISIGON_OPT_INPUTFILE_TYPE, (void*)DISIGON_FILETYPE_PLAINTEXT);
-
+            else
+                ret = disigon_sign_set(ctx, DISIGON_OPT_INPUTFILE_TYPE, (void*)DISIGON_FILETYPE_PLAINTEXT);
+            
 			if (ret != 0)
 			{
 				throw ret;
@@ -140,11 +145,7 @@ uint16_t CIESign::sign(const char* inFilePath, const char* type, const char* pin
 		}
 	}
 	catch (long err) {
-		LOG_ERROR("CIESign::sign - Error %d", err);;
-	}
-	catch (...)
-	{
-		return 1000;
+		printf("CIESign::sign error %ld\n", err);
 	}
 
 	if (ctx)

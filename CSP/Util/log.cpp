@@ -5,13 +5,19 @@
 #include <sstream>
 #include <iomanip>
 #include "log.h"
+#if defined(WIN32) || defined(_WIN32)
 #include "DbgHelp.h"
+#endif
 #include "UtilException.h"
 #include "thread.h"
 #include "IniSettings.h"
 #include <thread>
+#if defined(WIN32) || defined(_WIN32)
 #include "Aclapi.h"
+#endif
+#if defined(WIN32) || defined(_WIN32)
 #include <VersionHelpers.h>
+#endif
 
 #if 0
 static char *szCompiledFile=__FILE__;

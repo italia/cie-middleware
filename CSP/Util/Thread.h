@@ -8,8 +8,11 @@ class CThread
 //public:
 	CThread(void);
 	~CThread(void);
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 	HANDLE hThread;
+	DWORD dwThreadID;
+#else
+	pthread_t hThread;
 	DWORD dwThreadID;
 #endif
 	void createThread(void *threadFunc,void *threadData);
@@ -17,5 +20,5 @@ class CThread
 	void terminateThread();
 	void exitThread(DWORD dwCode);
 	void close();
-	inline static DWORD getID() {return GetCurrentThreadId();}
+	inline static DWORD getID() {return (DWORD)GetCurrentThreadId();}
 };

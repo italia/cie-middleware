@@ -1,7 +1,9 @@
 #include "../stdafx.h"
+#ifdef WIN32
 #include <conio.h>
-#include <vector>
 #include <dbghelp.h>
+#endif
+#include <vector>
 #include <iomanip>
 #include <sstream>
 
@@ -146,13 +148,13 @@ std::string HexByte(uint8_t data, bool uppercase) {
 	return dmp.str();
 }
 
-std::string &dumpHexData(ByteArray &data, std::string &dump)
+std::string &dumpHexData(const ByteArray &data, std::string &dump)
 {
 	dumpHexData(data,dump,true,true);
 	return dump;
 }
 
-std::string &dumpHexData(ByteArray &data, std::string &dump, bool withSpace, bool uppercase)
+std::string &dumpHexData(const ByteArray &data, std::string &dump, bool withSpace, bool uppercase)
 {
 	std::stringstream dmp;
 	dmp << std::hex << std::setfill('0');
@@ -173,7 +175,7 @@ void Debug(ByteArray ba) {
 	OutputDebugString("\n");
 }
 
-std::string &dumpHexDataLowerCase(ByteArray &data, std::string &dump)
+std::string &dumpHexDataLowerCase(const ByteArray &data, std::string &dump)
 {
 	return dumpHexData(data, dump, false, false);
 }
@@ -351,11 +353,19 @@ long ByteArrayToInt(ByteArray &ba)
 }
 
 
+#ifdef WIN32
 std::string WinErr(HRESULT err) {
 	char szWinErrBuffer[300];
 	FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), szWinErrBuffer, 300, NULL);
 	return std::string(szWinErrBuffer);
 }
+#else
+std::string WinErr(HRESULT err) {
+	char buf[64];
+	snprintf(buf, sizeof(buf), "Error %ld (0x%08lx)", (long)err, (long)err);
+	return std::string(buf);
+}
+#endif
 
 char *  CardErr(DWORD dwSW) {
 	char *msg;
@@ -413,6 +423,7 @@ char *  CardErr(DWORD dwSW) {
 }
 
 
+#ifdef WIN32
 char *SystemErr(DWORD dwExcept){
 	switch (dwExcept){
 		case EXCEPTION_ACCESS_VIOLATION: return "Access Violation"; break;
@@ -440,8 +451,14 @@ char *SystemErr(DWORD dwExcept){
 		default: return ""; break;
 	}
 }
+#else
+char *SystemErr(DWORD dwExcept){
+	(void)dwExcept;
+	return (char*)"";
+}
+#endif
 
-ByteDynArray ASN1Tag(DWORD tag,ByteArray &content) {
+ByteDynArray ASN1Tag(DWORD tag, const ByteArray &content) {
 	ByteDynArray result = content.getASN1Tag(tag);
 	return result;
 }
@@ -454,7 +471,7 @@ size_t ASN1TLength(unsigned int tag) {
 	}
 	return tLen;
 }
-void putASN1Tag(unsigned int tag, ByteArray &data) {
+void putASN1Tag(unsigned int tag, const ByteArray &data) {
 	int tPos=0;
 	while (tag!=0) {
 		uint8_t b = tag >> 24;
@@ -483,7 +500,7 @@ size_t ASN1LLength(size_t len) {
 	throw logged_error("Lunghezza ASN1 non valida");
 }
 
-void putASN1Length(size_t len, ByteArray &data) {
+void putASN1Length(size_t len, const ByteArray &data) {
 	if (len < 0x80) {
 		data[0] = (uint8_t)len;
 	}
@@ -517,9 +534,18 @@ std::string stdPrintf(const char *format, ...) {
 	std::string result;
 	va_list args;
 	va_start(args, format);
+#ifdef WIN32
 	int size = _vscprintf(format, args) + 1;
 	result.resize(size);
 	vsprintf_s(&result[0], size, format, args);
+#else
+	va_list args_copy;
+	va_copy(args_copy, args);
+	int size = vsnprintf(NULL, 0, format, args_copy) + 1;
+	va_end(args_copy);
+	result.resize(size);
+	vsnprintf(&result[0], size, format, args);
+#endif
 	va_end(args);
 	return result;
 }

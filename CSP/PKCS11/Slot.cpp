@@ -68,7 +68,7 @@ namespace p11 {
 
 					state[i].szReader = it->second->szName.c_str();
 					slot[i] = it->second;
-					if (ris = SCardGetStatusChange(Context, 0, &state[i], 1) != S_OK) {
+					if (ris = SCardGetStatusChange(Context, 0, &state[i], 1) != SCARD_S_SUCCESS) {
 						if (ris != SCARD_E_TIMEOUT) {
 							LOG_ERROR("[PKCS11] slotMonitor - Errore nella SCardGetStatusChange - %08X", ris);
 							// non uso la ExitThread!!!
@@ -84,7 +84,7 @@ namespace p11 {
 			while (true) {
 				Context.validate();
 				ris = SCardGetStatusChange(Context, 1000, state.data(), (DWORD)dwSlotNum);
-				if (ris != S_OK) {
+				if (ris != SCARD_S_SUCCESS) {
 					if (CSlot::bMonitorUpdate || ris == SCARD_E_SYSTEM_CANCELLED || ris == SCARD_E_SERVICE_STOPPED || ris == SCARD_E_INVALID_HANDLE || ris == ERROR_INVALID_HANDLE) {
 						LOG_INFO("[PKCS11] slotMonitor - Monitor Update");
 						break;
@@ -239,7 +239,7 @@ namespace p11 {
 			return;
 
 		auto ris = SCardListReaders(Context, NULL, NULL, &readersLen);
-		if (ris != S_OK) {
+		if (ris != SCARD_S_SUCCESS) {
 			if (ris == SCARD_E_NO_READERS_AVAILABLE)
 				return;
 			throw windows_error(ris);
@@ -263,8 +263,9 @@ namespace p11 {
 				{
 					SCARDHANDLE tempCard = 0;
 					DWORD proto = 0;
-					SCardConnect(Context, szReaderName, SCARD_SHARE_DIRECT, SCARD_PROTOCOL_UNDEFINED, &tempCard, &proto);
+					SCardConnect(Context, szReaderName, SCARD_SHARE_DIRECT, 0, &tempCard, &proto);
 					safeConnection safeConn(tempCard);
+#if defined(WIN32) || defined(_WIN32)
 					DWORD len = 0;
 					if (SCardGetAttrib(tempCard, SCARD_ATTR_VENDOR_NAME, NULL, &len) == 0) {
 						len++;
@@ -274,6 +275,7 @@ namespace p11 {
 						SCardDisconnect(tempCard, SCARD_LEAVE_CARD);
 						VendorName=(char*)vendor.data();
 					}
+#endif
 				}
 				auto pSlot = std::make_shared<CSlot>(szReaderName, VendorName.c_str());
 				CK_SLOT_ID hSlotID = AddSlot(pSlot);
@@ -327,7 +329,7 @@ namespace p11 {
 		bool retry = false;
 		while (true) {
 			DWORD ris = SCardGetStatusChange(Context, 0, &state, 1);
-			if (ris == S_OK) {
+			if (ris == SCARD_S_SUCCESS) {
 				if ((state.dwEventState & SCARD_STATE_UNAVAILABLE) == SCARD_STATE_UNAVAILABLE)
 					throw p11_error(CKR_DEVICE_REMOVED);
 				if ((state.dwEventState & SCARD_STATE_PRESENT) == SCARD_STATE_PRESENT)
@@ -678,7 +680,7 @@ namespace p11 {
 		Context.validate();
 		bool retry = false;
 		while (true) {
-			LOG_DEBUG("[PKCS11] Connect - Slot scelto: %s", szName);
+			LOG_DEBUG("[PKCS11] Connect - Slot scelto: %s", szName.c_str());
 			DWORD ris = SCardConnect(Context, szName.c_str(), SCARD_SHARE_SHARED, SCARD_PROTOCOL_T1, &hCard, &dwProtocol);
 			if (ris == SCARD_S_SUCCESS) {
 				return;
@@ -705,9 +707,9 @@ namespace p11 {
 		init_func
 		LPSCARD_READERSTATE state = new SCARD_READERSTATE[1];
 
+		memset(state, 0, sizeof(SCARD_READERSTATE));
 		state[0].szReader = this->szName.data();
 		state[0].dwCurrentState = SCARD_STATE_UNAWARE;
-			DWORD cch = SCARD_AUTOALLOCATE;
 		state[0].cbAtr = 0;
 
 		CK_RV res = SCardGetStatusChange(CSlot::Context, 0, state, 1);

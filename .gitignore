@@ -71,3 +71,15 @@ lfs
 Newtonsoft.Json.12.0.3/
 TODO.txt
 Setup/Debug/setup.vcxprojAssemblyReference.cache
+
+# macOS build artifacts
+*.o
+*.o.tmp
+*.dylib
+*.a
+!third_party/prefix/lib/libpodofo.a
+CIEID-mac/CIEID.app/
+cie_sign_sdk_macos/build/
+third_party/src/
+CSP/UI/.!*
+.DS_Store

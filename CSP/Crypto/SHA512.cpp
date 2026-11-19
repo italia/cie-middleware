@@ -1,5 +1,5 @@
-#include "..\stdafx.h"
-#include ".\sha512.h"
+#include "../stdafx.h"
+#include "./sha512.h"
 static char *szCompiledFile=__FILE__;
 
 #ifdef WIN32
@@ -16,7 +16,7 @@ public:
 	}
 } algo_sha512;
 
-ByteDynArray CSHA512::Digest(ByteArray &data)
+ByteDynArray CSHA512::Digest(const ByteArray &data)
 {
 	BCRYPT_HASH_HANDLE hash;
 	if (BCryptCreateHash(algo_sha512.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
@@ -32,8 +32,10 @@ ByteDynArray CSHA512::Digest(ByteArray &data)
 }
 
 #else
-	
-ByteDynArray CSHA512::Digest(ByteArray &data)
+
+#include <openssl/sha.h>
+
+ByteDynArray CSHA512::Digest(const ByteArray &data)
 {
 	ByteDynArray resp(SHA512_DIGEST_LENGTH);
 	ER_ASSERT(SHA512(data.data(), data.size(), resp.data()) != NULL, "Errore nel calcolo dello SHA512")

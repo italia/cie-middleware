@@ -1,10 +1,12 @@
-#include "..\stdafx.h"
-#include ".\rsa.h"
-#include "..\cryptopp\sha.h"
-#include "..\cryptopp\rsa.h"
-#include "..\cryptopp\secblock.h"
-#include "..\cryptopp\pssr.h"
-#include "..\cryptopp\cryptlib.h"
+#include "../stdafx.h"
+#include "./rsa.h"
+
+#ifdef WIN32
+#include "../cryptopp/sha.h"
+#include "../cryptopp/rsa.h"
+#include "../cryptopp/secblock.h"
+#include "../cryptopp/pssr.h"
+#include "../cryptopp/cryptlib.h"
 
 using CryptoPP::InvertibleRSAFunction;
 using CryptoPP::RSASS;
@@ -13,6 +15,7 @@ using CryptoPP::SHA512;
 using CryptoPP::SecByteBlock;
 using CryptoPP::PSS;
 using CryptoPP::DecodingResult;
+#endif
 
 static char *szCompiledFile=__FILE__;
 
@@ -30,7 +33,7 @@ public:
 	}
 } algo_rsa;
 
-CRSA::CRSA(ByteArray &mod, ByteArray &exp)
+CRSA::CRSA(const ByteArray &mod, const ByteArray &exp)
 {
 	CryptoPP::Integer n(mod.data(), mod.size()), e(exp.data(), exp.size());	
 	pubKey.Initialize(n, e);
@@ -72,7 +75,7 @@ CRSA::~CRSA(void)
 		BCryptDestroyKey(key);*/
 }
 
-ByteDynArray CRSA::RSA_PURE(ByteArray &data)
+ByteDynArray CRSA::RSA_PURE(const ByteArray &data)
 {
 	CryptoPP::Integer m((const byte *)data.data(), data.size());
 
@@ -102,7 +105,7 @@ ByteDynArray CRSA::RSA_PURE(ByteArray &data)
 	return resp;
 }
 
-bool CRSA::RSA_PSS(ByteArray &signatureData, ByteArray &toSign)
+bool CRSA::RSA_PSS(const ByteArray &signatureData, const ByteArray &toSign)
 {
 	RSASS<PSS, SHA512>::Verifier verifier(pubKey);
 	SecByteBlock signatureBlock((const byte*)signatureData.data(), signatureData.size());
@@ -112,46 +115,76 @@ bool CRSA::RSA_PSS(ByteArray &signatureData, ByteArray &toSign)
 
 #else
 
-DWORD CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, ByteDynArray &privexp) 
-{
-	init_func
-	keyPriv = RSA_new();
-	auto BNpubexp = BN_secure_new();
-	BN_set_word(BNpubexp, 65537);
-	RSA_generate_key_ex(keyPriv, size, BNpubexp, nullptr);
-	module.resize(BN_num_bytes(keyPriv->n));
-	BN_bn2bin(keyPriv->n, module.data());
-	privexp.resize(BN_num_bytes(keyPriv->d));
-	BN_bn2bin(keyPriv->d, privexp.data());
-	pubexp.resize(BN_num_bytes(keyPriv->e));
-	BN_bn2bin(keyPriv->e, pubexp.data());
-	BN_clear_free(BNpubexp);
+#include <openssl/bn.h>
+#include <openssl/core_names.h>
+#include <openssl/param_build.h>
 
-	_return(OK)
-	exit_func
-	_return(FAIL)
-}
-CRSA::CRSA(ByteArray &mod,ByteArray &exp)
+CRSA::CRSA(const ByteArray &mod, const ByteArray &exp)
 {
 	KeySize = mod.size();
-	keyPriv = RSA_new();
-	keyPriv->n = BN_bin2bn(mod.data(), (int)mod.size(), keyPriv->n);
-	keyPriv->d = BN_secure_new(); 
-	keyPriv->e = BN_bin2bn(exp.data(), (int)exp.size(), keyPriv->e);
+	pkey = nullptr;
+	BIGNUM *n = BN_bin2bn(mod.data(), (int)mod.size(), NULL);
+	BIGNUM *e = BN_bin2bn(exp.data(), (int)exp.size(), NULL);
+
+	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
+	OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_N, n);
+	OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_E, e);
+	OSSL_PARAM *params = OSSL_PARAM_BLD_to_param(bld);
+
+	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_name(NULL, "RSA", NULL);
+	EVP_PKEY_fromdata_init(ctx);
+	EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_PUBLIC_KEY, params);
+
+	EVP_PKEY_CTX_free(ctx);
+	OSSL_PARAM_BLD_free(bld);
+	OSSL_PARAM_free(params);
+	BN_free(n);
+	BN_free(e);
+}
+
+void CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, ByteDynArray &privexp)
+{
+	throw logged_error("Non supportato");
 }
 
 CRSA::~CRSA(void)
 {
-	if (keyPriv!=nullptr)
-		RSA_free(keyPriv);
+	if (pkey != nullptr)
+		EVP_PKEY_free(pkey);
 }
 
-ByteDynArray CRSA::RSA_PURE(ByteArray &data )
+ByteDynArray CRSA::RSA_PURE(const ByteArray &data)
 {
-	ByteDynArray resp(RSA_size(keyPriv));	
-	int SignSize = RSA_public_encrypt((int)data.size(), data.data(), resp.data(), keyPriv, RSA_NO_PADDING);
+	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(pkey, NULL);
+	EVP_PKEY_encrypt_init(ctx);
+	EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_NO_PADDING);
 
-	ER_ASSERT(SignSize == KeySize, "Errore nella lunghezza dei dati per operazione RSA")
+	size_t outlen = 0;
+	EVP_PKEY_encrypt(ctx, NULL, &outlen, data.data(), data.size());
+	ByteDynArray resp(outlen);
+	EVP_PKEY_encrypt(ctx, resp.data(), &outlen, data.data(), data.size());
+	EVP_PKEY_CTX_free(ctx);
+
+	ER_ASSERT(outlen == KeySize, "Errore nella lunghezza dei dati per operazione RSA")
 	return resp;
 }
+
+bool CRSA::RSA_PSS(const ByteArray &signatureData, const ByteArray &toSign)
+{
+	EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+	EVP_PKEY_CTX *pctx = NULL;
+
+	if (EVP_DigestVerifyInit(mdctx, &pctx, EVP_sha512(), NULL, pkey) <= 0) {
+		EVP_MD_CTX_free(mdctx);
+		return false;
+	}
+	EVP_PKEY_CTX_set_rsa_padding(pctx, RSA_PKCS1_PSS_PADDING);
+	EVP_PKEY_CTX_set_rsa_pss_saltlen(pctx, RSA_PSS_SALTLEN_AUTO);
+
+	int rc = EVP_DigestVerify(mdctx, signatureData.data(), signatureData.size(),
+	                          toSign.data(), toSign.size());
+	EVP_MD_CTX_free(mdctx);
+	return rc == 1;
+}
+
 #endif

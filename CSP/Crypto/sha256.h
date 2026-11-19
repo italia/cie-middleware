@@ -6,7 +6,7 @@
 class CSHA256
 {
 public:
-	ByteDynArray Digest(ByteArray &data);
+	ByteDynArray Digest(const ByteArray &data);
 
-	void Digest(ByteArray &dataIn, ByteArray &dataOut);
+	void Digest(const ByteArray &dataIn, ByteArray &dataOut);
 };

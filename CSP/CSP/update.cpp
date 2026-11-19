@@ -1,11 +1,11 @@
-#include "..\StdAfx.h"
+#include "../StdAfx.h"
 #include <Winhttp.h>
-#include "..\util/ModuleInfo.h"
-#include "..\util/IniSettings.h"
-#include "..\UI\SystemTray.h"
+#include "../util/ModuleInfo.h"
+#include "../util/IniSettings.h"
+#include "../UI/SystemTray.h"
 #include <vector>
 #include <fstream>
-#include "..\res\resource.h"
+#include "../res/resource.h"
 #include "CSP.h"
 #include <VersionHelpers.h>
 

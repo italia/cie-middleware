@@ -25,7 +25,34 @@ extern "C" {
     CK_RV CK_ENTRY __stdcall UnlockPIN(const char*  szPUK, const char*  szNuovoPIN, int* pAttempts, PROGRESS_CALLBACK progressCallBack);
 }
 
-int TokenTransmitCallback(safeConnection *data, uint8_t *apdu, DWORD apduSize, uint8_t *resp, DWORD *respSize);
+int TokenTransmitCallback(safeConnection *data, uint8_t *apdu, DWORD apduSize, uint8_t *resp, DWORD *respSize)
+{
+    if (apduSize == 2) {
+        WORD code = *(WORD*)apdu;
+        if (code == 0xfffd) {
+            *respSize = sizeof(data->hCard) + 2;
+            memcpy(resp, &data->hCard, sizeof(data->hCard));
+            resp[sizeof(data->hCard)] = 0;
+            resp[sizeof(data->hCard) + 1] = 0;
+            return SCARD_S_SUCCESS;
+        }
+        if (code == 0xfffe) {
+            DWORD protocol = 0;
+            auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
+            if (sw == SCARD_S_SUCCESS)
+                SCardBeginTransaction(data->hCard);
+            return 0x9000;
+        }
+        else if (code == 0xffff) {
+            DWORD protocol = 0;
+            auto sw = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
+            if (sw == SCARD_S_SUCCESS)
+                SCardBeginTransaction(data->hCard);
+            return 0x9000;
+        }
+    }
+    return SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
+}
 
 
 CK_RV CK_ENTRY __stdcall ChangePIN(const char*  szCurrentPIN, const char*  szNewPIN, int* pAttempts, PROGRESS_CALLBACK progressCallBack)

@@ -85,35 +85,35 @@ ByteDynArray CMAC::Mac(const ByteArray &data)
 }
 #else
 
-void CMAC::Init(ByteArray &key)
+void CMAC::Init(const ByteArray &key, const ByteArray &iv)
 {
 	init_func
 	size_t KeySize = key.size();
 	ER_ASSERT((KeySize % 8) == 0, "Errore nella lunghezza della chiave MAC (non divisibile per 8)")
 	ER_ASSERT(iv.size() == 8, "Errore nella lunghezza dell'Initial Vector")
-
 	ER_ASSERT(KeySize >= 8 && KeySize <= 24, "Errore nella lunghezza della chiave MAC (<8 o >24)")
-	des_cblock *keyVal1 = nullptr, *keyVal2 = nullptr, *keyVal3 = nullptr;
-	memcpy_s(initVec, sizeof(des_cblock), iv.data(), 8);
+
+	DES_cblock *keyVal1 = nullptr, *keyVal2 = nullptr, *keyVal3 = nullptr;
+	memcpy(initVec, iv.data(), 8);
 
 	switch (KeySize) {
 	case 8:
-		keyVal1 = keyVal2 = keyVal3 = (des_cblock *)key.data();
+		keyVal1 = keyVal2 = keyVal3 = (DES_cblock *)key.data();
 		break;
 	case 16:
-		keyVal1 = keyVal3 = (des_cblock *)key.data();
-		keyVal2 = (des_cblock *)key.mid(8).data();
+		keyVal1 = keyVal3 = (DES_cblock *)key.data();
+		keyVal2 = (DES_cblock *)key.mid(8).data();
 		break;
 	case 24:
-		keyVal1 = (des_cblock *)key.data();
-		keyVal2 = (des_cblock *)key.mid(8).data();
-		keyVal3 = (des_cblock *)key.mid(16).data();
+		keyVal1 = (DES_cblock *)key.data();
+		keyVal2 = (DES_cblock *)key.mid(8).data();
+		keyVal3 = (DES_cblock *)key.mid(16).data();
 		break;
 	}
 
-	des_set_key(keyVal1, k1);
-	des_set_key(keyVal2, k2);
-	des_set_key(keyVal3, k3);
+	DES_set_key(keyVal1, &k1);
+	DES_set_key(keyVal2, &k2);
+	DES_set_key(keyVal3, &k3);
 
 	exit_func
 }
@@ -121,28 +121,26 @@ void CMAC::Init(ByteArray &key)
 CMAC::~CMAC(void)
 {
 }
-DWORD CMAC::Mac(const ByteArray &data, ByteDynArray &resp)
+
+CMAC::CMAC() {
+}
+
+ByteDynArray CMAC::Mac(const ByteArray &data)
 {
 	init_func
 
-	des_cblock iv;
-	memcpy_s(iv, sizeof(des_cblock), initVec, sizeof(initVec));
+	DES_cblock iv;
+	memcpy(iv, initVec, sizeof(initVec));
 
 	size_t ANSILen = ANSIPadLen(data.size());
 	if (data.size()>8) {
 		ByteDynArray baOutTmp(ANSILen - 8);
-		des_ncbc_encrypt(data.data(), baOutTmp.data(), (long)ANSILen - 8, k1, &iv, DES_ENCRYPT);
+		DES_ncbc_encrypt(data.data(), baOutTmp.data(), (long)ANSILen - 8, &k1, &iv, DES_ENCRYPT);
 	}
 	uint8_t dest[8];
-	des_ede3_cbc_encrypt(data.mid(ANSILen - 8).data(), dest, (long)(data.size() - ANSILen) + 8, k1, k2, k3, &iv, DES_ENCRYPT);
-	resp = ByteArray(dest, 8);
+	DES_ede3_cbc_encrypt(data.mid(ANSILen - 8).data(), dest, (long)(data.size() - ANSILen) + 8, &k1, &k2, &k3, &iv, DES_ENCRYPT);
 
-	_return(OK)
-	exit_func
-	_return(FAIL)
-}
-
-CMAC::CMAC() {
+	return ByteArray(dest, 8);
 }
 #endif
 

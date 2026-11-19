@@ -1,6 +1,11 @@
 #pragma once
 
+#if defined(WIN32) || defined(_WIN32)
 #include <winscard.h>
+#else
+#include <PCSC/wintypes.h>
+#include <PCSC/winscard.h>
+#endif
 #include "apdu.h"
 #include "../util/syncromutex.h"
 
@@ -33,5 +38,5 @@ public:
 	void setTransmitCallbackData(void *data);
 	void* getTransmitCallbackData();
 	StatusWord Transmit(APDU &apdu, ByteDynArray *resp);
-	StatusWord Transmit(ByteArray &apdu, ByteDynArray *resp);
+	StatusWord Transmit(const ByteArray &apdu, ByteDynArray *resp);
 };

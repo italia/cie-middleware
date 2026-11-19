@@ -33,7 +33,7 @@
 #define ERR_SO_RW_SESSION "Errore nella verifica delle sessioni SO R/W"
 #define ERR_GET_OBJECT_HANDLE "Errore nella determinazione dell'handle oggetto di sessione"
 #define ERR_GET_NEW_OBJECT "Errore nel nuovo ID di oggetto"
-#define ERR_GET_PRIVATE "Impossibile determinare se un oggetto è privato"
+#define ERR_GET_PRIVATE "Impossibile determinare se un oggetto Ã¨ privato"
 #define ERR_CHECK_MECHANISM_PARAM "Errore nella verifica dei parametri del mechanism"
 #define ERR_CANT_GET_PUBKEY_EXPONENT "Impossibile leggere l'esponente della chiave pubblica"
 #define ERR_CANT_GET_PUBKEY_LENGTH "Impossibile leggere la lunghezza chiave pubblica"
@@ -149,7 +149,7 @@ extern DWORD ERR_OBJECT_HASNT_ATTRIBUTE;
 #define ERR_CHANGE_PIN "Errore nel cambio del PIN"
 #define ERR_PIN_MINLEN "Impossibile trovare la lunghezza minimadel PIN"
 #define ERR_OBJECT_SIZE "Impossibile trovare la dimensione di un oggetto"
-#define ERR_KEY_NOT_SECAUTH "La chiave non è protetta con secondary authentication"
+#define ERR_KEY_NOT_SECAUTH "La chiave non Ã¨ protetta con secondary authentication"
 #define ERR_CHANGE_SECAUTH_PIN "Errore nel cambio del PIN di secondary authentication"
 #define ERR_GET_SECAUTH_PIN "Impossibile restutuire il PIN di secondary authentication"
 #define ERR_SET_SECAUTH_PIN "Impossibile impostare il PIN di secondary authentication"
@@ -207,9 +207,9 @@ extern DWORD ERR_OBJECT_HASNT_ATTRIBUTE;
 uint8_t hex2byte(char h);
 void readHexData(const std::string &data,ByteDynArray &ba);
 std::string HexByte(uint8_t data, bool uppercase = true);
-std::string &dumpHexData(ByteArray &data, std::string &dump);
-std::string &dumpHexData(ByteArray &data, std::string &dump, bool withSpace, bool uppercase = true);
-std::string &dumpHexDataLowerCase(ByteArray &data, std::string &dump);
+std::string &dumpHexData(const ByteArray &data, std::string &dump);
+std::string &dumpHexData(const ByteArray &data, std::string &dump, bool withSpace, bool uppercase = true);
+std::string &dumpHexDataLowerCase(const ByteArray &data, std::string &dump);
 
 void PutPaddingBT0(ByteArray &ba, size_t dwLen);
 void PutPaddingBT1(ByteArray &ba, size_t dwLen);
@@ -234,7 +234,7 @@ const ByteDynArray ISOPad16(const ByteArray &data);
  char * SystemErr(DWORD dwExcept);
  
  void Debug(ByteArray ba);
- ByteDynArray ASN1Tag(DWORD tag,ByteArray &content);
+ ByteDynArray ASN1Tag(DWORD tag, const ByteArray &content);
 
  std::string stdPrintf(const char *format, ...);
 
